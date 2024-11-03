@@ -20,31 +20,39 @@ limitations under the License.
 
 from setuptools import setup, find_packages
 
-import flowing
+from flowing.config import VERSION
 
 """
->>> python flowing_setup.py sdist bdist_wheel
+how to use this?
+>>> python flowing_setup.py bdist_wheel
 """
 
 setup(
     name="flowing",
-    version=flowing.__version__,
+    version=VERSION,
     author="0x4c48",
     author_email="lohhhha@qq.com",
     description="PMoS-flowing",
-    packages=["flowing"],
+    packages=[f"flowing.{package}" for package in find_packages("flowing")],
     install_requires=[
         'torch',
         'opencv-python',
         'matplotlib',
         'tqdm',
-        'numpy'
+        'numpy',
+        'fastapi',
+        'uvicorn',
     ],
     include_package_data=True,
     package_data={
-        '': [
-            '*.tmpl',  # net template
-            '*.md'
+        "": [
+            "*.md",
+        ],
+        "flowing.net.template": [
+            "*.tmpl",  # net template
+        ],
+        "flowing.server": [
+            "public/**/*",  # frontend
         ]
     },
 )

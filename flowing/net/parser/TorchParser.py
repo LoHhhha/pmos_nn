@@ -5,7 +5,7 @@ from datetime import datetime
 from collections import deque
 from typing import List, Tuple, Any
 
-import flowing
+from flowing.config import VERSION
 from flowing.shower import Logger
 from flowing.net.template import Mate
 from flowing.net.parser import Parser
@@ -36,8 +36,11 @@ class TorchParser(Parser):
             input_nodes: List[InputNode] | Tuple[InputNode, ...],
             net_nodes: List[LayerNode] | Tuple[LayerNode, ...],
             output_nodes: List[OutputNode] | Tuple[OutputNode, ...],
-            network_name: str = f"AutoTorchNet{int(time.time() * 1000)}",
+            network_name: str = None,
     ):
+        if network_name is None:
+            network_name = f"AutoTorchNet{int(time.time() * 1000)}"
+
         super().__init__(
             input_nodes=input_nodes,
             net_nodes=net_nodes,
@@ -70,7 +73,7 @@ class TorchParser(Parser):
         self._init_code_result_list = \
             [self.net_nodes[idx].layer_object.init_code() for idx in self._parse_sequence_index_list]
 
-        # some op doesn't need init, so it is ok when some is Node.
+        # some op doesn't need init, so it is ok when some is None.
         # for idx in range(self.net_nodes_size):
         #     if self._init_code_result_list[idx] is None:
         #         Logger.fault(f"Network({self.network_name}) parse fail.")
@@ -110,7 +113,7 @@ class TorchParser(Parser):
 
         class_str = class_tmpl.format(
             time=datetime.now(),
-            version=flowing.__version__,
+            version=VERSION,
             more_information="",
             other_import="",
             net_name=self.network_name,
@@ -122,6 +125,7 @@ class TorchParser(Parser):
         )
 
         try:
+            Logger.debug(class_str)
             exec(class_str, globals())
         except Exception as e:
             Logger.fault(f"Network({self.network_name}) class execute fail.")
@@ -150,6 +154,8 @@ class TorchParser(Parser):
         for idx in range(self.net_nodes_size):
             node = self.net_nodes[idx]
             for data in node.from_data:
+                if data is None:
+                    continue
                 if data.net_node_idx >= self.net_nodes_size:
                     Logger.fault(f"Network({self.network_name}) sequence parse fail.")
                     raise IndexError(
@@ -160,6 +166,7 @@ class TorchParser(Parser):
                 next_idx_list[data.net_node_idx].append(idx)
 
         dq = deque()
+        start_node_set = set()
         for idx in range(len(self.input_nodes)):
             node = self.input_nodes[idx]
             for data in node.to_data:
@@ -170,17 +177,15 @@ class TorchParser(Parser):
                         f"which net_node_idx bigger than the biggest index of net_nodes({self.net_nodes_size - 1})."
                     )
 
-                if to_deg[data.net_node_idx] != 0:
-                    Logger.fault(f"Network({self.network_name}) sequence parse fail.")
-                    raise KeyError(
-                        f"from input_nodes[{idx}].to_net_idx get an error data as {data}, "
-                        f"which net_node_idx's node can not be a start node of this network."
-                    )
-                dq.append(idx)
+                if to_deg[data.net_node_idx] == 0:
+                    start_node_set.add(data.net_node_idx)
+
+        for idx in start_node_set:
+            dq.append(idx)
 
         dead_nodes = []
         for idx in range(self.net_nodes_size):
-            if to_deg[idx] == 0 and idx not in dq:
+            if to_deg[idx] == 0 and idx not in start_node_set:
                 dead_nodes.append(idx)
         if len(dead_nodes) != 0:
             Logger.fault(f"Network({self.network_name}) sequence parse fail.")
@@ -202,6 +207,8 @@ class TorchParser(Parser):
         parse_sequence_index_set = set(parse_sequence_index_list)
         for idx in range(len(self.output_nodes)):
             node = self.output_nodes[idx]
+            if node.from_data is None:
+                continue
             if node.from_data.net_node_idx >= self.net_nodes_size:
                 Logger.fault(f"Network({self.network_name}) sequence parse fail.")
                 raise IndexError(
@@ -266,6 +273,15 @@ class TorchParser(Parser):
             node.layer_object.output_name = LAYER_OUTPUT_NAME_FMT.format(idx=idx)
             for data_ptr in range(len(node.from_data)):
                 data = node.from_data[data_ptr]
+                # if it was None, it came from input.
+                if data is None:
+                    if node.layer_object.data_names[data_ptr] is None:
+                        Logger.fault(f"Network({self.network_name}) push names fail.")
+                        raise IndexError(
+                            f"net_nodes[{idx}]'s data_names[{data_ptr}] is None, means that it have not "
+                            f"been assigned before."
+                        )
+                    continue
 
                 # not need to check idx < self.net_nodes_size
 

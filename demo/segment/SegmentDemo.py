@@ -2,7 +2,6 @@
 
 import numpy as np
 import torch
-from torch.utils.data import DataLoader
 
 from flowing.checker import Classification
 from flowing.shower import Image as ImageShower

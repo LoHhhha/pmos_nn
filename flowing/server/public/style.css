@@ -1,0 +1,72 @@
+* {
+    font-family: "Microsoft YaHei", serif;
+    box-sizing: border-box;
+}
+
+html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    scrollbar-color: gray transparent;
+    scrollbar-width: thin;
+}
+
+:root {
+    --lucency-white: rgba(255, 255, 255, 0.8);
+    --lucency-gray: rgba(238, 238, 238, 0.5);
+    --lucency-dull-gray: rgba(165, 165, 165, 0.5);
+    --lucency-dark-gray: rgba(128, 128, 128, 0.5);
+    --lucency-black: rgba(0, 0, 0, 0.5);
+    --lucency-light-black: rgba(32, 32, 32, 0.05);
+    --lucency-red: rgba(176, 0, 0, 0.9);
+    --lucency-green: rgba(0, 176, 0, 0.9);
+
+    --radius: 5px;
+    --margin: 5px;
+
+    --blur: blur(10px);
+
+    --border-width: 1px;
+
+    --label-font-size: xx-small;
+
+    --node-width: 150px;
+    --node-height: 30px;
+}
+
+:root {
+    --copyright-color: var(--lucency-dark-gray);
+}
+
+#viewport {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    overflow: hidden;
+    touch-action: none;
+}
+
+#canvas {
+    position: absolute;
+}
+
+#copyright {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    user-select: none;
+    pointer-events: none;
+    color: var(--copyright-color);
+}

@@ -18,14 +18,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import flowing.config
 import flowing.dataset
 import flowing.builder
 import flowing.helper
 import flowing.checker
 import flowing.shower
 import flowing.net
-
-__version__ = '0.0.alpha202408'
-__build_time__ = '2024-8-17'
-__module__ = 'PMoS.nn.flowing'
-__owner__ = 'PMoS'

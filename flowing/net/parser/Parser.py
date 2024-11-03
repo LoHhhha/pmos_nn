@@ -69,5 +69,5 @@ class Parser(ABC):
     @staticmethod
     def _code_list_to_code_segment(code_list: List[str] | None, retract_amount: int = 0) -> str:
         if code_list is None or len(code_list) == 0:
-            return " " * retract_amount + "pass"
+            return "pass"
         return ("\n" + " " * retract_amount).join(code_list)

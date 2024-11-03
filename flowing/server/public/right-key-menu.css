@@ -1,0 +1,37 @@
+:root{
+    --right-key-menu-background-color: var(--lucency-gray);
+    --right-key-menu-outline-color: var(--lucency-dark-gray);
+    --right-key-menu-max-width: 300px;
+
+    --right-key-menu-item-min-width: 100px;
+    --right-key-menu-item-select-background-color: var(--lucency-dull-gray);
+    --right-key-menu-item-select-outline-color: var(--lucency-dark-gray);
+}
+
+.right-key-menu {
+    position: absolute;
+    max-width: var(--right-key-menu-max-width);
+    width: fit-content;
+    height: 0;
+    transition: height 0.5s ease 0s;
+    display: none;
+    background-color: var(--right-key-menu-background-color);
+    border-radius: var(--radius);
+    outline: var(--border-width) solid var(--right-key-menu-outline-color);
+    backdrop-filter: var(--blur);
+}
+
+.right-key-menu-item {
+    text-align: left;
+    min-width: var(--right-key-menu-item-min-width);
+    user-select: none;
+    border-radius: var(--radius);
+    padding: 5%;
+    width: auto;
+    font-size:medium;
+}
+
+.right-key-menu-item:hover {
+    background-color: var(--right-key-menu-item-select-background-color);
+    outline: var(--border-width) solid var(--right-key-menu-item-select-outline-color);
+}

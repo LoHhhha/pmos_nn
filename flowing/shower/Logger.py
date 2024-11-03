@@ -4,17 +4,25 @@ import os
 import inspect
 from datetime import datetime
 
-INFO_MSG = 0
-WARNING_MSG = 1
-ERROR_MSG = 2
-FAULT_MSG = 3
+DEBUG_MSG = 0
+INFO_MSG = 1
+WARNING_MSG = 2
+ERROR_MSG = 3
+FAULT_MSG = 4
+
+LOGGER_LEVER = INFO_MSG
 
 MSG_TYPES_STR = [
+    "\033[1m\033[36mDebug\033[0m",
     "\033[1m\033[32mInfo\033[0m",
     "\033[1m\033[33mWarning\033[0m",
     "\033[1m\033[35mError\033[0m",
     "\033[1m\033[31mFault\033[0m",
 ]
+
+
+def debug(*msg):
+    __print_out(DEBUG_MSG, *msg)
 
 
 def info(*msg):
@@ -34,6 +42,9 @@ def fault(*msg):
 
 
 def __print_out(msg_type: int, *msg) -> None:
+    if msg_type < LOGGER_LEVER:
+        return
+
     # inspect.stack()[1] is info/warning/error
     caller_frame = inspect.stack()[2]
     try:
@@ -49,6 +60,7 @@ def __print_out(msg_type: int, *msg) -> None:
 
 
 if __name__ == '__main__':
+    debug("debug msg")
     info("info msg")
     warning("warning msg")
     error("error msg")

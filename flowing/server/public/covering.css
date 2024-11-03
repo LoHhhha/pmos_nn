@@ -1,0 +1,52 @@
+:root {
+    --covering-background-color: var(--lucency-gray);
+    --covering-container-background-color: var(--lucency-dull-gray);
+    --covering-container-outline-color: var(--lucency-dark-gray);
+
+    --covering-button-selected-size: 45px;
+    --covering-button-size: 30px;
+}
+
+.covering {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 0;
+    backdrop-filter: var(--blur);
+    background-color: var(--covering-background-color);
+    transition: height 0.5s ease 0s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.covering-container {
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius);
+    padding: 5%;
+    justify-content: center;
+    overflow: auto;
+}
+
+.covering-button-bar {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    height: var(--covering-button-selected-size);
+}
+
+.covering-button {
+    margin: 5%;
+    display: inline-block;
+    width: var(--covering-button-size);
+    height: var(--covering-button-size);
+    align-self: center;
+}
+
+.covering-button:hover {
+    width: var(--covering-button-selected-size);
+    height: var(--covering-button-selected-size);
+}

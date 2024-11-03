@@ -45,7 +45,7 @@ def e2e_net():
         ),
     ]
 
-    inputs_nodes = [
+    input_nodes = [
         InputNode(
             shape=(1, 3, 128, 256),
             to_data=(NodeDataPair(net_node_idx=0),),
@@ -58,7 +58,7 @@ def e2e_net():
         ),
     ]
 
-    parser = TorchParser(input_nodes=inputs_nodes, net_nodes=net_nodes, output_nodes=output_nodes, network_name="DNet")
+    parser = TorchParser(input_nodes=input_nodes, net_nodes=net_nodes, output_nodes=output_nodes, network_name="DNet")
 
     net = parser.network_class(save_path="./E2ENet.py")()
 
@@ -115,7 +115,7 @@ def m2m_net():
         ),
     ]
 
-    inputs_nodes = [
+    input_nodes = [
         InputNode(
             shape=(1, 3, 128, 256),
             to_data=(NodeDataPair(net_node_idx=0),),
@@ -135,7 +135,7 @@ def m2m_net():
         ),
     ]
 
-    parser = TorchParser(input_nodes=inputs_nodes, net_nodes=net_nodes, output_nodes=output_nodes, network_name="MNet")
+    parser = TorchParser(input_nodes=input_nodes, net_nodes=net_nodes, output_nodes=output_nodes, network_name="MNet")
 
     net = parser.network_class(save_path="./M2MNet.py")()
 
