@@ -1,6 +1,7 @@
 # Copyright © 2024 PMoS. All rights reserved.
 import os
 import time
+import autopep8
 from datetime import datetime
 from collections import deque
 from typing import List, Tuple, Any
@@ -123,6 +124,12 @@ class TorchParser(Parser):
             forward_code=self._code_list_to_code_segment(self._forward_code_list(), retract_amount=8),
             outputs=self._name_list_to_args([node.name for node in self.output_nodes], with_self=False)
         )
+
+        try:
+            class_str = autopep8.fix_code(class_str)
+        except Exception as e:
+            Logger.fault(f"Network({self.network_name}) class format as pep8 fail.")
+            raise e
 
         try:
             Logger.debug(class_str)

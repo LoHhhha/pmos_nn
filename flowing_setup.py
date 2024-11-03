@@ -42,6 +42,7 @@ setup(
         'numpy',
         'fastapi',
         'uvicorn',
+        'autopep8'
     ],
     include_package_data=True,
     package_data={
