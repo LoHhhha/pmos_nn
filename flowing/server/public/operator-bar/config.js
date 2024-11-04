@@ -11,7 +11,7 @@ operatorBarNamespace.outputEndpointDefaultStyle = {
     connectorOverlays: [
         {
             type: "Arrow",
-            options: {width: 15, length: 15, location: 1},
+            options: { width: 15, length: 15, location: 1 },
         },
     ],
     connector: "Bezier",
@@ -149,7 +149,7 @@ operatorBarNamespace.operators = [
         typeCode: operatorBarNamespace.typeCode.IO,
         inputEnd: [],
         outputEnd: ["data"],
-        outlines: [{name: "name", short: "N"}],
+        outlines: [{ name: "name", short: "N" }],
         args: [
             {
                 name: "name",
@@ -171,7 +171,7 @@ operatorBarNamespace.operators = [
         typeCode: operatorBarNamespace.typeCode.IO,
         inputEnd: ["data"],
         outputEnd: [],
-        outlines: [{name: "name", short: "N"}],
+        outlines: [{ name: "name", short: "N" }],
         args: [
             {
                 name: "name",
@@ -321,7 +321,7 @@ operatorBarNamespace.operators = [
         typeCode: operatorBarNamespace.typeCode.activation,
         inputEnd: ["input"],
         outputEnd: ["output"],
-        outlines: [{name: "dim", short: "D"}],
+        outlines: [{ name: "dim", short: "D" }],
         args: [
             {
                 name: "dim",
@@ -339,10 +339,10 @@ operatorBarNamespace.operators = [
         inputEnd: ["input"],
         outputEnd: ["output"],
         outlines: [
-            {name: "in_channels", short: "I"},
-            {name: "out_channels", short: "O"},
-            {name: "kernel_size", short: "K"},
-            {name: "stride", short: "S"},
+            { name: "in_channels", short: "I" },
+            { name: "out_channels", short: "O" },
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
         ],
         args: [
             {
@@ -401,10 +401,10 @@ operatorBarNamespace.operators = [
         inputEnd: ["input"],
         outputEnd: ["output"],
         outlines: [
-            {name: "in_channels", short: "I"},
-            {name: "out_channels", short: "O"},
-            {name: "kernel_size", short: "K"},
-            {name: "stride", short: "S"},
+            { name: "in_channels", short: "I" },
+            { name: "out_channels", short: "O" },
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
         ],
         args: [
             {
@@ -463,10 +463,10 @@ operatorBarNamespace.operators = [
         inputEnd: ["input"],
         outputEnd: ["output"],
         outlines: [
-            {name: "in_channels", short: "I"},
-            {name: "out_channels", short: "O"},
-            {name: "kernel_size", short: "K"},
-            {name: "stride", short: "S"},
+            { name: "in_channels", short: "I" },
+            { name: "out_channels", short: "O" },
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
         ],
         args: [
             {
@@ -525,10 +525,10 @@ operatorBarNamespace.operators = [
         inputEnd: ["input"],
         outputEnd: ["output"],
         outlines: [
-            {name: "in_channels", short: "I"},
-            {name: "out_channels", short: "O"},
-            {name: "kernel_size", short: "K"},
-            {name: "stride", short: "S"},
+            { name: "in_channels", short: "I" },
+            { name: "out_channels", short: "O" },
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
         ],
         args: [
             {
@@ -587,10 +587,10 @@ operatorBarNamespace.operators = [
         inputEnd: ["input"],
         outputEnd: ["output"],
         outlines: [
-            {name: "in_channels", short: "I"},
-            {name: "out_channels", short: "O"},
-            {name: "kernel_size", short: "K"},
-            {name: "stride", short: "S"},
+            { name: "in_channels", short: "I" },
+            { name: "out_channels", short: "O" },
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
         ],
         args: [
             {
@@ -649,10 +649,10 @@ operatorBarNamespace.operators = [
         inputEnd: ["input"],
         outputEnd: ["output"],
         outlines: [
-            {name: "in_channels", short: "I"},
-            {name: "out_channels", short: "O"},
-            {name: "kernel_size", short: "K"},
-            {name: "stride", short: "S"},
+            { name: "in_channels", short: "I" },
+            { name: "out_channels", short: "O" },
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
         ],
         args: [
             {
@@ -704,13 +704,315 @@ operatorBarNamespace.operators = [
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.ConvTranspose3d.html#torch.nn.ConvTranspose3d",
     },
+    {
+        apiName: "MaxPool1d",
+        extendCssClass: ["MaxPool1d"],
+        typeCode: operatorBarNamespace.typeCode.operator,
+        inputEnd: ["input"],
+        outputEnd: ["output", "indices"],
+        outlines: [
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
+            { name: "return_indices", short: "I" },
+        ],
+        args: [
+            {
+                name: "kernel_size",
+                type: operatorBarNamespace.argsType.strIntOrTuple,
+                default: "2",
+            },
+            {
+                name: "stride",
+                type: operatorBarNamespace.argsType.strIntOrTupleOrNone,
+                default: "None",
+            },
+            {
+                name: "padding",
+                type: operatorBarNamespace.argsType.strIntOrTuple,
+                default: "0",
+            },
+            {
+                name: "dilation",
+                type: operatorBarNamespace.argsType.strIntOrTuple,
+                default: "1",
+            },
+            {
+                name: "return_indices",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+            {
+                name: "ceil_mode",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.MaxPool1d.html#torch.nn.MaxPool1d",
+        changeCallBack: (node) => {
+            if (
+                !operatorBarNamespace.argsType.bool.getValue(
+                    node.content["return_indices"]
+                )
+            ) {
+                const indicesEndpoint = node.outputEndpoint[1];
+                const connections = indicesEndpoint.connections;
+                for (let ptr = connections.length - 1; ptr >= 0; ptr--) {
+                    node.jsPlumbInstance.deleteConnection(connections[ptr]);
+                }
+            }
+        },
+    },
+    {
+        apiName: "MaxPool2d",
+        extendCssClass: ["MaxPool2d"],
+        typeCode: operatorBarNamespace.typeCode.operator,
+        inputEnd: ["input"],
+        outputEnd: ["output", "indices"],
+        outlines: [
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
+            { name: "return_indices", short: "I" },
+        ],
+        args: [
+            {
+                name: "kernel_size",
+                type: operatorBarNamespace.argsType.strIntOrTuple,
+                default: "2",
+            },
+            {
+                name: "stride",
+                type: operatorBarNamespace.argsType.strIntOrTupleOrNone,
+                default: "None",
+            },
+            {
+                name: "padding",
+                type: operatorBarNamespace.argsType.strIntOrTuple,
+                default: "0",
+            },
+            {
+                name: "dilation",
+                type: operatorBarNamespace.argsType.strIntOrTuple,
+                default: "1",
+            },
+            {
+                name: "return_indices",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+            {
+                name: "ceil_mode",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.MaxPool2d.html#torch.nn.MaxPool2d",
+        changeCallBack: (node) => {
+            if (
+                !operatorBarNamespace.argsType.bool.getValue(
+                    node.content["return_indices"]
+                )
+            ) {
+                const indicesEndpoint = node.outputEndpoint[1];
+                const connections = indicesEndpoint.connections;
+                for (let ptr = connections.length - 1; ptr >= 0; ptr--) {
+                    node.jsPlumbInstance.deleteConnection(connections[ptr]);
+                }
+            }
+        },
+    },
+    {
+        apiName: "MaxPool3d",
+        extendCssClass: ["MaxPool3d"],
+        typeCode: operatorBarNamespace.typeCode.operator,
+        inputEnd: ["input"],
+        outputEnd: ["output", "indices"],
+        outlines: [
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
+            { name: "return_indices", short: "I" },
+        ],
+        args: [
+            {
+                name: "kernel_size",
+                type: operatorBarNamespace.argsType.strIntOrTuple,
+                default: "2",
+            },
+            {
+                name: "stride",
+                type: operatorBarNamespace.argsType.strIntOrTupleOrNone,
+                default: "None",
+            },
+            {
+                name: "padding",
+                type: operatorBarNamespace.argsType.strIntOrTuple,
+                default: "0",
+            },
+            {
+                name: "dilation",
+                type: operatorBarNamespace.argsType.strIntOrTuple,
+                default: "1",
+            },
+            {
+                name: "return_indices",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+            {
+                name: "ceil_mode",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.MaxPool3d.html#torch.nn.MaxPool3d",
+        changeCallBack: (node) => {
+            if (
+                !operatorBarNamespace.argsType.bool.getValue(
+                    node.content["return_indices"]
+                )
+            ) {
+                const indicesEndpoint = node.outputEndpoint[1];
+                const connections = indicesEndpoint.connections;
+                for (let ptr = connections.length - 1; ptr >= 0; ptr--) {
+                    node.jsPlumbInstance.deleteConnection(connections[ptr]);
+                }
+            }
+        },
+    },
+    {
+        apiName: "MaxUnpool1d",
+        extendCssClass: ["MaxUnpool1d"],
+        typeCode: operatorBarNamespace.typeCode.operator,
+        inputEnd: ["input", "indices"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
+            { name: "padding", short: "P" },
+        ],
+        args: [
+            {
+                name: "kernel_size",
+                type: operatorBarNamespace.argsType.strIntOrTuple,
+                default: "2",
+            },
+            {
+                name: "stride",
+                type: operatorBarNamespace.argsType.strIntOrTupleOrNone,
+                default: "None",
+            },
+            {
+                name: "padding",
+                type: operatorBarNamespace.argsType.strIntOrTuple,
+                default: "0",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.MaxUnpool1d.html#torch.nn.MaxUnpool1d",
+    },
+    {
+        apiName: "MaxUnpool2d",
+        extendCssClass: ["MaxUnpool2d"],
+        typeCode: operatorBarNamespace.typeCode.operator,
+        inputEnd: ["input", "indices"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
+            { name: "padding", short: "P" },
+        ],
+        args: [
+            {
+                name: "kernel_size",
+                type: operatorBarNamespace.argsType.strIntOrTuple,
+                default: "2",
+            },
+            {
+                name: "stride",
+                type: operatorBarNamespace.argsType.strIntOrTupleOrNone,
+                default: "None",
+            },
+            {
+                name: "padding",
+                type: operatorBarNamespace.argsType.strIntOrTuple,
+                default: "0",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.MaxUnpool2d.html#torch.nn.MaxUnpool2d",
+    },
+    {
+        apiName: "MaxUnpool3d",
+        extendCssClass: ["MaxUnpool3d"],
+        typeCode: operatorBarNamespace.typeCode.operator,
+        inputEnd: ["input", "indices"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
+            { name: "padding", short: "P" },
+        ],
+        args: [
+            {
+                name: "kernel_size",
+                type: operatorBarNamespace.argsType.strIntOrTuple,
+                default: "2",
+            },
+            {
+                name: "stride",
+                type: operatorBarNamespace.argsType.strIntOrTupleOrNone,
+                default: "None",
+            },
+            {
+                name: "padding",
+                type: operatorBarNamespace.argsType.strIntOrTuple,
+                default: "0",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.MaxUnpool3d.html#torch.nn.MaxUnpool3d",
+    },
 ];
 operatorBarNamespace.operators.sort(function (a, b) {
     if (a.framework !== b.framework)
         return operatorBarNamespace.frameworkOrder[a.framework] <
-        operatorBarNamespace.frameworkOrder[b.framework]
+            operatorBarNamespace.frameworkOrder[b.framework]
             ? -1
             : 1;
     if (a.typeCode === b.typeCode) return 0;
     return a.typeCode < b.typeCode ? -1 : 1;
 });
+operatorBarNamespace.connectionRule = [
+    {
+        name: "SelfNotSelf",
+        tip: "Do not connect node to itself!",
+        check: (srcNode, tarNode) => {
+            return srcNode.id === tarNode.id;
+        },
+    },
+    {
+        name: "InputNotOutput",
+        tip: "Do not connect input to output!",
+        check: (srcNode, tarNode) => {
+            return (
+                srcNode.config.apiName === "Input" &&
+                tarNode.config.apiName === "Output"
+            );
+        },
+    },
+    {
+        name: "MaxPoolIndices",
+        tip: "This MaxPool node not return indices, don't use it's indices!",
+        check: (srcNode, tarNode, srcEndpointIdx, tarEndpointIdx) => {
+            return (
+                srcNode.config.apiName.includes("MaxPool") &&
+                srcEndpointIdx === 1 &&
+                !operatorBarNamespace.argsType.bool.getValue(
+                    srcNode.content.return_indices
+                )
+            );
+        },
+    },
+];

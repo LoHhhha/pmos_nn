@@ -228,3 +228,27 @@
 .ConvTranspose3d {
     background-color: rgb(0, 128, 208);
 }
+
+.MaxPool1d {
+    background-color: rgb(64, 128, 128);
+}
+
+.MaxPool2d {
+    background-color: rgb(64, 128, 144);
+}
+
+.MaxPool3d {
+    background-color: rgb(64, 128, 160);
+}
+
+.MaxUnpool1d {
+    background-color: rgb(64, 128, 176);
+}
+
+.MaxUnpool2d {
+    background-color: rgb(64, 128, 192);
+}
+
+.MaxUnpool3d {
+    background-color: rgb(64, 128, 208);
+}

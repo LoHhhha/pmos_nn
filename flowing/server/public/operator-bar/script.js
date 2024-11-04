@@ -3,8 +3,8 @@
  *      .id:                (str) node's id
  *      .config:            (map) operatorBarNamespace.operators[x]
  *      .content:           (map) operatorBarNamespace.operators[x].args -> val
- *      .outputEndpointId:  (array) output endpoint id for each place
- *      .inputEndpointId:   (array) input endpoint id for each place
+ *      .outputEndpoint:    (array) output endpoint for each place
+ *      .inputEndpoint:     (array) input endpoint for each place
  *      .inputEndpointPrev: (array) input endpoint connect node and endpoint, using in other module
  *      .outline:           (DOM-div) to show some important args
  *      .outlineUpdate:     (func) to update outline
@@ -256,8 +256,8 @@
             node.jsPlumbInstance = jsPlumbNavigator.jsPlumbInstance;
             node.content = {};
             node.content.default = {};
-            node.outputEndpointId = Array(nodeConfig.outputEnd.length);
-            node.inputEndpointId = Array(nodeConfig.inputEnd.length);
+            node.outputEndpoint = Array(nodeConfig.outputEnd.length);
+            node.inputEndpoint = Array(nodeConfig.inputEnd.length);
             node.inputEndpointPrev = Array(nodeConfig.inputEnd.length);
 
             const canvasBounds = jsPlumbNavigator.getCanvasBounds();
@@ -287,16 +287,15 @@
             // set endpoint
             for (var ptr = 0; ptr < nodeConfig.outputEnd.length; ptr++) {
                 const endpointId = getEndpointId();
-                node.outputEndpointId[ptr] = endpointId;
-
                 const placeRate = (ptr + 1) / (nodeConfig.outputEnd.length + 1);
 
                 // endpoint
-                jsPlumbNavigator.jsPlumbInstance.addEndpoint(node, {
-                    uuid: endpointId,
-                    anchors: [placeRate, 1, 0, 1],
-                    ...operatorBarNamespace.outputEndpointDefaultStyle,
-                });
+                node.outputEndpoint[ptr] =
+                    jsPlumbNavigator.jsPlumbInstance.addEndpoint(node, {
+                        uuid: endpointId,
+                        anchors: [placeRate, 1, 0, 1],
+                        ...operatorBarNamespace.outputEndpointDefaultStyle,
+                    });
 
                 // endpoint label
                 const endpointLabel = document.createElement("div");
@@ -310,15 +309,14 @@
             }
             for (var ptr = 0; ptr < nodeConfig.inputEnd.length; ptr++) {
                 const endpointId = getEndpointId();
-                node.inputEndpointId[ptr] = endpointId;
-
                 const placeRate = (ptr + 1) / (nodeConfig.inputEnd.length + 1);
 
-                jsPlumbNavigator.jsPlumbInstance.addEndpoint(node, {
-                    uuid: endpointId,
-                    anchors: [placeRate, 0, 0, -1],
-                    ...operatorBarNamespace.inputEndpointDefaultStyle,
-                });
+                node.inputEndpoint[ptr] =
+                    jsPlumbNavigator.jsPlumbInstance.addEndpoint(node, {
+                        uuid: endpointId,
+                        anchors: [placeRate, 0, 0, -1],
+                        ...operatorBarNamespace.inputEndpointDefaultStyle,
+                    });
 
                 // endpoint label
                 const endpointLabel = document.createElement("div");
@@ -346,13 +344,16 @@
 
             node.updateOutline = () => {
                 var outlineText = "";
-                for (const {name, short} of node.config.outlines) {
+                for (const { name, short } of node.config.outlines) {
                     if (outlineText !== "") {
                         outlineText += " ";
                     }
                     outlineText += `${short}:${String(node.content[name])}`;
                 }
                 node.outline.textContent = outlineText;
+                if (node.config.changeCallBack instanceof Function) {
+                    node.config.changeCallBack(node);
+                }
             };
             node.updateOutline();
 
@@ -368,7 +369,7 @@
                         {
                             title: "Edit",
                             callback: () => {
-                                nodeOverview({target: node});
+                                nodeOverview({ target: node });
                             },
                         },
                         {
@@ -399,7 +400,7 @@
         }
 
         createBarEle() {
-            const {barWidth, barPosition} = this.options;
+            const { barWidth, barPosition } = this.options;
             const ele = document.createElement("div");
             ele.className = "operator-bar";
             ele.style.width = `${barWidth}px`;
@@ -453,6 +454,53 @@
             barWidth: null,
             barPosition: "left",
         };
+
+        jsPlumbNavigator.jsPlumbInstance.bind("beforeDrop", function (info) {
+            const sourceNode = info.connection.source;
+            const targetNode = info.connection.target;
+            const sourceEndpoint = info.connection.endpoints[0];
+            const targetEndpoint = info.dropEndpoint;
+
+            const srcEndpointIdx = sourceNode.outputEndpoint.findIndex(
+                (endpoint) => {
+                    return endpoint.uuid === sourceEndpoint.uuid;
+                }
+            );
+            if (srcEndpointIdx === -1) {
+                console.warn("[CheckConnect]", info);
+                return false;
+            }
+
+            const tarEndpointIdx = targetNode.inputEndpoint.findIndex(
+                (endpoint) => {
+                    return endpoint.uuid === targetEndpoint.uuid;
+                }
+            );
+            if (tarEndpointIdx === -1) {
+                console.warn("[CheckConnect]", info, sourceNode);
+                return false;
+            }
+
+            for (const rule of operatorBarNamespace.connectionRule) {
+                if (
+                    rule.check(
+                        sourceNode,
+                        targetNode,
+                        srcEndpointIdx,
+                        tarEndpointIdx
+                    )
+                ) {
+                    MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
+                        title: "Error",
+                        text: rule.tip,
+                        buttonMode: COVERING_BUTTON_MODE.CloseButton,
+                    });
+                    console.warn("[Connection]", rule.name);
+                    return false;
+                }
+            }
+            return true;
+        });
 
         MESSAGE_HANDLER(MESSAGE_TYPE.ClearNode, () => {
             const canvasEle = document.getElementById("canvas");

@@ -7,6 +7,11 @@ const MESSAGE_TYPE = {
     CoveringShowCustom: "covering-show-custom",
     CoveringClose: "covering-close",
 
+    NavigatorZoomIn: "navigator-zoom-in",
+    NavigatorZoomOut: "navigator-zoom-out",
+    NavigatorZoomTo100: "navigator-zoom-to-100",
+    NavigatorViewAllFit: "navigator-view-all-fit",
+
     RightKeyMenuShow: "right-key-menu-show",
     RightKeyMenuClose: "right-key-menu-close",
 };

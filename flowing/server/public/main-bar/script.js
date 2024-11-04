@@ -264,40 +264,31 @@
         viewAllFitSvg = `<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#666"><path d="M326 664H104c-8.8 0-16 7.2-16 16v48c0 8.8 7.2 16 16 16h174v176c0 8.8 7.2 16 16 16h48c8.8 0 16-7.2 16-16V696c0-17.7-14.3-32-32-32zM342 88h-48c-8.8 0-16 7.2-16 16v176H104c-8.8 0-16 7.2-16 16v48c0 8.8 7.2 16 16 16h222c17.7 0 32-14.3 32-32V104c0-8.8-7.2-16-16-16zM920 664H698c-17.7 0-32 14.3-32 32v224c0 8.8 7.2 16 16 16h48c8.8 0 16-7.2 16-16V744h174c8.8 0 16-7.2 16-16v-48c0-8.8-7.2-16-16-16zM920 280H746V104c0-8.8-7.2-16-16-16h-48c-8.8 0-16 7.2-16 16v224c0 17.7 14.3 32 32 32h222c8.8 0 16-7.2 16-16v-48c0-8.8-7.2-16-16-16z" p-id="9363"></path></svg>`;
         helpSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="#666" d="M11 18h2v-2h-2zm1-16A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8m0-14a4 4 0 0 0-4 4h2a2 2 0 0 1 2-2a2 2 0 0 1 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5a4 4 0 0 0-4-4"/></svg>`;
 
-        constructor(navigator, operatorBar) {
-            this.navigator = navigator;
+        constructor(operatorBar) {
             this.operatorBar = operatorBar;
 
             this.toolbarEle = document.createElement("div");
             this.toolbarEle.className = "toolbar";
 
             this.toolbarEle.appendChild(
-                this.createTool(
-                    "Zoom In",
-                    this.zoomInSvg,
-                    this.navigator.zoomIn.bind(this.navigator)
-                )
+                this.createTool("Zoom In", this.zoomInSvg, () => {
+                    MESSAGE_PUSH(MESSAGE_TYPE.NavigatorZoomIn);
+                })
             );
             this.toolbarEle.appendChild(
-                this.createTool(
-                    "Zoom Out",
-                    this.zoomOutSvg,
-                    this.navigator.zoomOut.bind(this.navigator)
-                )
+                this.createTool("Zoom Out", this.zoomOutSvg, () => {
+                    MESSAGE_PUSH(MESSAGE_TYPE.NavigatorZoomOut);
+                })
             );
             this.toolbarEle.appendChild(
-                this.createTool(
-                    "Zoom to 100%",
-                    this.zoomTo100Svg,
-                    this.navigator.zoomTo100.bind(this.navigator)
-                )
+                this.createTool("Zoom to 100%", this.zoomTo100Svg, () => {
+                    MESSAGE_PUSH(MESSAGE_TYPE.NavigatorZoomTo100);
+                })
             );
             this.toolbarEle.appendChild(
-                this.createTool(
-                    "View All",
-                    this.viewAllFitSvg,
-                    this.navigator.viewAllFit.bind(this.navigator)
-                )
+                this.createTool("View All", this.viewAllFitSvg, () => {
+                    MESSAGE_PUSH(MESSAGE_TYPE.NavigatorViewAllFit);
+                })
             );
             this.toolbarEle.appendChild(
                 this.createTool("Help", this.helpSvg, () => {
@@ -339,7 +330,7 @@
         const mapBarEle = document.createElement("div");
         mapBarEle.id = "map-bar";
         mapBarEle.className = "row-bar";
-        const toolbar = new Toolbar(jsPlumbNavigator);
+        const toolbar = new Toolbar();
         const miniMap = new MiniMap(jsPlumbNavigator, canvasEle);
         switch (options.toolbarPosition) {
             case "left":

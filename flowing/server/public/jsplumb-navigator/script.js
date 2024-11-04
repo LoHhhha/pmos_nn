@@ -340,6 +340,19 @@
     }
 
     window.createJsPlumbNavigator = (jsPlumbInstance, viewportEle) => {
-        return new Navigator(jsPlumbInstance, viewportEle);
+        const navigator = new Navigator(jsPlumbInstance, viewportEle);
+        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorZoomIn, ()=>{
+            navigator.zoomIn();
+        });
+        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorZoomOut, ()=>{
+            navigator.zoomOut();
+        });
+        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorZoomTo100, ()=>{
+            navigator.zoomTo100();
+        });
+        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorViewAllFit, ()=>{
+            navigator.viewAllFit();
+        });
+        return navigator;
     };
 })();

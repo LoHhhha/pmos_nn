@@ -209,42 +209,26 @@
     }
 
     window.createJsPlumbConnectionListener = (jsPlumbInstance) => {
-        jsPlumbInstance.bind("beforeDrop", function (info) {
-            const sourceNode = info.connection.source;
-            const targetNode = info.connection.target;
-
-            // cannot connect to self
-            if (sourceNode.id === targetNode.id) {
-                return false;
-            }
-
-            // input cannot connect to output
-            if (
-                sourceNode.config.apiName === "Input" &&
-                targetNode.config.apiName === "Output"
-            ) {
-                return false;
-            }
-
-            return true;
-        });
-
         jsPlumbInstance.bind("connection", (info) => {
             const sourceNode = info.source;
             const targetNode = info.target;
             const sourceEndpoint = info.sourceEndpoint;
             const targetEndpoint = info.targetEndpoint;
 
-            const srcEndpointIdx = sourceNode.outputEndpointId.indexOf(
-                sourceEndpoint.uuid
+            const srcEndpointIdx = sourceNode.outputEndpoint.findIndex(
+                (endpoint) => {
+                    return endpoint.uuid === sourceEndpoint.uuid;
+                }
             );
             if (srcEndpointIdx === -1) {
                 console.warn("[Connection]", info);
                 return;
             }
 
-            const tarEndpointIdx = targetNode.inputEndpointId.indexOf(
-                targetEndpoint.uuid
+            const tarEndpointIdx = targetNode.inputEndpoint.findIndex(
+                (endpoint) => {
+                    return endpoint.uuid === targetEndpoint.uuid;
+                }
             );
             if (tarEndpointIdx === -1) {
                 console.warn("[Connection]", info);
@@ -266,16 +250,20 @@
             const sourceEndpoint = info.sourceEndpoint;
             const targetEndpoint = info.targetEndpoint;
 
-            const srcEndpointIdx = sourceNode.outputEndpointId.indexOf(
-                sourceEndpoint.uuid
+            const srcEndpointIdx = sourceNode.outputEndpoint.findIndex(
+                (endpoint) => {
+                    return endpoint.uuid === sourceEndpoint.uuid;
+                }
             );
             if (srcEndpointIdx === -1) {
                 console.warn("[ConnectionDetach]", info);
                 return;
             }
 
-            const tarEndpointIdx = targetNode.inputEndpointId.indexOf(
-                targetEndpoint.uuid
+            const tarEndpointIdx = targetNode.inputEndpoint.findIndex(
+                (endpoint) => {
+                    return endpoint.uuid === targetEndpoint.uuid;
+                }
             );
             if (tarEndpointIdx === -1) {
                 console.warn("[ConnectionDetach]", info);
@@ -283,6 +271,9 @@
             }
 
             targetNode.inputEndpointPrev[tarEndpointIdx] = null;
+            console.log(
+                `[Connection] node${sourceNode.id}@out${srcEndpointIdx} -X-> node${targetNode.id}@in${tarEndpointIdx}`
+            );
         });
 
         MESSAGE_HANDLER(MESSAGE_TYPE.CalculateGraph, () => {
@@ -321,7 +312,6 @@
             xhr.open("POST", "/model/calculate/pytorch", true);
             xhr.setRequestHeader("Content-Type", "application/json");
             xhr.onreadystatechange = () => {
-                console.log(xhr);
                 if (xhr.readyState !== XMLHttpRequest.DONE) {
                     return;
                 }
