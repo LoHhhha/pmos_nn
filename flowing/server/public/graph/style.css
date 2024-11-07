@@ -1,0 +1,10 @@
+.logger-div {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+}
+
+.log-text {
+    white-space: pre-line;
+    word-break: break-word;
+}

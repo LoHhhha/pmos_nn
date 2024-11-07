@@ -12,6 +12,8 @@
                 this.handleViewportPointerDown.bind(this);
             this.viewportEle.onpointerup =
                 this.handleViewportPointerUp.bind(this);
+            this.viewportEle.oncontextmenu =
+                this.handleViewportRightKeyMenu.bind(this);
             this.startAnimationFrame();
             this.viewAllFit();
         }
@@ -87,6 +89,36 @@
             this.viewportEle.onpointermove = null;
             this.viewportEle.releasePointerCapture(e.pointerId);
             this.viewportEle.style.cursor = null;
+        }
+
+        handleViewportRightKeyMenu(e) {
+            if(e.target !== this.viewportEle)return true;
+            MESSAGE_PUSH(MESSAGE_TYPE.RightKeyMenuShow, {
+                showLeft: e.clientX,
+                showTop: e.clientY,
+                items: [
+                    {
+                        title: "Paste",
+                    },
+                    {
+                        title: "Zoom In",
+                        callback:this.zoomIn.bind(this),
+                    },
+                    {
+                        title: "Zoom Out",
+                        callback: this.zoomOut.bind(this),
+                    },
+                    {
+                        title: "zoom to 100%",
+                        callback: this.zoomTo100.bind(this),
+                    },
+                    {
+                        title: "View All",
+                        callback: this.viewAllFit.bind(this),
+                    },
+                ],
+            });
+            return false;
         }
 
         setCanvasTransform() {
@@ -341,16 +373,16 @@
 
     window.createJsPlumbNavigator = (jsPlumbInstance, viewportEle) => {
         const navigator = new Navigator(jsPlumbInstance, viewportEle);
-        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorZoomIn, ()=>{
+        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorZoomIn, () => {
             navigator.zoomIn();
         });
-        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorZoomOut, ()=>{
+        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorZoomOut, () => {
             navigator.zoomOut();
         });
-        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorZoomTo100, ()=>{
+        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorZoomTo100, () => {
             navigator.zoomTo100();
         });
-        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorViewAllFit, ()=>{
+        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorViewAllFit, () => {
             navigator.viewAllFit();
         });
         return navigator;

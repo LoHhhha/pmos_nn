@@ -1,0 +1,4 @@
+:root{
+    --jsplumb-connection-color: var(--content-outline-color);
+    --jsplumb-endpoint-color: var(--content-outline-color);
+}

@@ -2,21 +2,25 @@
     --main-bar-width: 250px;
     --main-bar-margin: var(--margin);
 
-    --toolbar-background-color: var(--lucency-gray);
-    --toolbar-button-free-background-color: var(--lucency-gray);
-    --toolbar-button-selected-background-color: var(--lucency-dark-gray);
+    --toolbar-outline-color: var(--container-outline-color);
+    --toolbar-background-color: var(--container-background-color);
+    --toolbar-button-free-background-color: var(--container-background-color);
+    --toolbar-button-selected-background-color: var(--container-outline-color);
     --toolbar-button-size: 18px;
-    --toolbar-outline-color: var(--lucency-dark-gray);
+    --toolbar-button-svg-color: var(--default-color);
 
-    --minimap-background-color: var(--lucency-gray);
-    --minimap-outline-color: var(--lucency-dark-gray);
-    --minimap-viewport-background-color: var(--lucency-white);
-    --minimap-viewport-outline-color: var(--lucency-dark-gray);
+    --minimap-background-color: var(--container-background-color);
+    --minimap-outline-color: var(--container-outline-color);
+    --minimap-viewport-background-color: var(--sub-content-background-color);
+    --minimap-viewport-outline-color: var(--sub-content-outline-color);
+    --minimap-node-outline-background-color: var(--sub-content-outline-color);
 
     --bar-button-height: var(--node-height);
-    --bar-button-outline-color: var(--lucency-dark-gray);
-    --bar-button-background-color: var(--lucency-gray);
-    --bar-button-background-hover-color: var(--lucency-dull-gray);
+    --bar-button-outline-color: var(--container-outline-color);
+    --bar-button-background-color: var(--container-background-color);
+    --bar-button-background-hover-color: var(
+        --container-outline-color
+    );
 
     --clear-button-color: var(--lucency-red);
 }
@@ -44,7 +48,6 @@
     backdrop-filter: var(--blur);
     background-color: var(--toolbar-background-color);
     border-radius: var(--radius);
-    box-shadow: 0 0 2px 1px rgba(0, 0, 0, 0.08);
     outline: var(--border-width) solid var(--toolbar-outline-color);
 }
 
@@ -67,6 +70,10 @@
     background-color: var(--toolbar-button-selected-background-color);
 }
 
+.toolbar-button-svg * {
+    fill: var(--toolbar-button-svg-color);
+}
+
 .minimap {
     flex: 1;
     overflow: hidden;
@@ -82,6 +89,16 @@
     background-color: var(--minimap-viewport-background-color);
     outline: var(--border-width) solid var(--minimap-viewport-outline-color);
     border-radius: var(--radius);
+}
+
+.minimap-canvas {
+    position: absolute;
+    transform-origin: left top;
+}
+
+.minimap-node-outline {
+    background-color:var(--minimap-node-outline-background-color);
+    position:absolute;
 }
 
 .bar-button {

@@ -1,16 +1,18 @@
-:root{
-    --right-key-menu-background-color: var(--lucency-gray);
-    --right-key-menu-outline-color: var(--lucency-dark-gray);
+:root {
+    --right-key-menu-background-color: var(--container-background-color);
+    --right-key-menu-outline-color: var(--container-outline-color);
     --right-key-menu-max-width: 300px;
+    --right-key-menu-min-width: 100px;
 
-    --right-key-menu-item-min-width: 100px;
-    --right-key-menu-item-select-background-color: var(--lucency-dull-gray);
-    --right-key-menu-item-select-outline-color: var(--lucency-dark-gray);
+    --right-key-menu-item-select-background-color: var(
+        --sub-content-background-color
+    );
 }
 
 .right-key-menu {
     position: absolute;
     max-width: var(--right-key-menu-max-width);
+    min-width: var(--right-key-menu-min-width);
     width: fit-content;
     height: 0;
     transition: height 0.5s ease 0s;
@@ -23,15 +25,20 @@
 
 .right-key-menu-item {
     text-align: left;
-    min-width: var(--right-key-menu-item-min-width);
+    width: 100%;
     user-select: none;
     border-radius: var(--radius);
-    padding: 5%;
+    padding: 0 5px 0 5px;
     width: auto;
-    font-size:medium;
+    font-size: medium;
+    margin: 4px;
 }
 
 .right-key-menu-item:hover {
     background-color: var(--right-key-menu-item-select-background-color);
-    outline: var(--border-width) solid var(--right-key-menu-item-select-outline-color);
+}
+
+.item-disabled {
+    pointer-events: none;
+    color: var(--disabled-color);
 }

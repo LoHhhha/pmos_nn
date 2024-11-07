@@ -227,6 +227,17 @@ operatorBarNamespace.operators = [
         link: null,
     },
     {
+        apiName: "Identity",
+        extendCssClass: ["Identity"],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.Identity.html#torch.nn.Identity",
+    },
+    {
         apiName: "ReLU",
         extendCssClass: ["ReLU"],
         typeCode: operatorBarNamespace.typeCode.activation,

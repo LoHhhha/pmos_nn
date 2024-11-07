@@ -1,91 +1,96 @@
 <!DOCTYPE html>
 <html lang="zh-hans">
-<head>
-    <meta charset="UTF-8"/>
-    <title>PMoS</title>
+    <head>
+        <meta charset="UTF-8" />
+        <title>PMoS</title>
 
-    <link rel="icon" href="./favicon.ico" type="image/x-icon"/>
+        <link rel="icon" href="./favicon.ico" type="image/x-icon" />
 
-    <!-- message-bar -->
-    <script src="./message-bus.js"></script>
-    <!-- message-bar -->
+        <!-- message-bar -->
+        <script src="./message-bus.js"></script>
+        <!-- message-bar -->
 
-    <!-- covering -->
-    <link rel="stylesheet" href="./covering.css"/>
-    <script src="./covering.js"></script>
-    <!-- covering -->
+        <!-- theme-helper -->
+        <script src="./theme-helper/config.js"></script>
+        <script src="./theme-helper/script.js"></script>
+        <!-- theme-helper -->
 
-    <!-- right-key-menu -->
-    <link rel="stylesheet" href="./right-key-menu.css"/>
-    <script src="./right-key-menu.js"></script>
-    <!-- right-key-menu -->
+        <!-- covering -->
+        <link rel="stylesheet" href="./covering.css" />
+        <script src="./covering.js"></script>
+        <!-- covering -->
 
-    <!-- gridding-background -->
-    <link rel="stylesheet" href="./gridding-background/style.css"/>
-    <script src="./gridding-background/script.js"></script>
-    <!-- gridding-background -->
+        <!-- right-key-menu -->
+        <link rel="stylesheet" href="./right-key-menu.css" />
+        <script src="./right-key-menu.js"></script>
+        <!-- right-key-menu -->
 
-    <!-- jsplumb -->
-    <link
-            rel="stylesheet"
-            href="./jsplumb/css/jsplumb.css"
-    />
-    <script src="./jsplumb/js/jsplumb.browser-ui.umd.js"></script>
-    <script src="./jsplumb/script.js"></script>
-    <!-- jsplumb -->
+        <!-- gridding-background -->
+        <link rel="stylesheet" href="./gridding-background/style.css" />
+        <script src="./gridding-background/script.js"></script>
+        <!-- gridding-background -->
 
-    <!-- jsplumb-navigator -->
-    <script src="./jsplumb-navigator/script.js"></script>
-    <!-- jsplumb-navigator -->
+        <!-- jsplumb -->
+        <link rel="stylesheet" href="./jsplumb/css/jsplumb.css" />
+        <script src="./jsplumb/js/jsplumb.browser-ui.umd.js"></script>
+        <link rel="stylesheet" href="./jsplumb/style.css" />
+        <script src="./jsplumb/script.js"></script>
+        <!-- jsplumb -->
 
-    <!-- operator-bar -->
-    <link rel="stylesheet" href="./operator-bar/style.css"/>
-    <script src="./operator-bar/config.js"></script>
-    <script src="./operator-bar/script.js"></script>
-    <!-- operator-bar -->
+        <!-- jsplumb-navigator -->
+        <script src="./jsplumb-navigator/script.js"></script>
+        <!-- jsplumb-navigator -->
 
-    <!-- main-bar -->
-    <link rel="stylesheet" href="./main-bar/style.css"/>
-    <script src="./main-bar/script.js"></script>
-    <!-- main-bar -->
+        <!-- operator-bar -->
+        <link rel="stylesheet" href="./operator-bar/style.css" />
+        <script src="./operator-bar/config.js"></script>
+        <script src="./operator-bar/script.js"></script>
+        <!-- operator-bar -->
 
-    <!-- graph -->
-    <script src="./graph/struct.js"></script>
-    <script src="./graph/script.js"></script>
-    <!-- graph -->
+        <!-- main-bar -->
+        <link rel="stylesheet" href="./main-bar/style.css" />
+        <script src="./main-bar/script.js"></script>
+        <!-- main-bar -->
 
-    <!-- total -->
-    <link rel="stylesheet" href="./style.css"/>
-    <script src="./script.js"></script>
-    <!-- total -->
-</head>
-<script>
-    window.hadHintTouchLimited = false;
-    document.addEventListener(
-        "touchstart",
-        () => {
-            if (!window.hadHintTouchLimited) {
-                MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
-                    title: "Warning",
-                    text: "Features will be limited in touch mode. Mouse and keyboard control is recommended.",
-                    buttonMode: COVERING_BUTTON_MODE.CloseButton,
-                });
-                window.hadHintTouchLimited = true;
-            }
-        },
-        false
-    );
-</script>
-<body>
-<div id="viewport">
-    <div id="canvas"></div>
-</div>
-<div id="copyright">
-    Powered by PMoS-nn
-    <br/>
-    Version: 0.0.SNAPSHOT20241103(2024TestA)
-    <br/>
-    Copyright © 2024 PMoS. All rights reserved.
-</div>
-</body>
+        <!-- graph -->
+        <script src="./graph/struct.js"></script>
+        <script src="./graph/script.js"></script>
+        <!-- graph -->
+
+        <!-- total -->
+        <link rel="stylesheet" href="./style.css" />
+        <script src="./script.js"></script>
+        <!-- total -->
+    </head>
+    <script>
+        window.hadHintTouchLimited = false;
+        document.addEventListener(
+            "touchstart",
+            () => {
+                if (!window.hadHintTouchLimited) {
+                    MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
+                        title: "Warning",
+                        text: "Features will be limited in touch mode. Mouse and keyboard control is recommended.",
+                        buttonMode: COVERING_BUTTON_MODE.CloseButton,
+                    });
+                    window.hadHintTouchLimited = true;
+                }
+            },
+            false
+        );
+    </script>
+    <body>
+        <div id="viewport">
+            <div id="canvas"></div>
+        </div>
+        <div id="copyright">
+            Powered by PMoS-nn
+            <br />
+            Version: 0.0.SNAPSHOT20241106(2024TB)
+            <br />
+            Copyright © 2024 PMoS. All rights reserved.
+            <br />
+            Not represent the ultimate quality of the PMoS.
+        </div>
+    </body>
 </html>

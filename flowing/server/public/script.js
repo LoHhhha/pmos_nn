@@ -1,6 +1,9 @@
 const PMoS_HREF = "https://github.com/LoHhhha/pmos_nn";
 
 jsPlumb.ready(() => {
+
+    window.addThemeHelper();
+
     const viewportEle = document.getElementById("viewport");
     const canvasEle = document.getElementById("canvas");
 

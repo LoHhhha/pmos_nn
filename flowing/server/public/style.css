@@ -1,6 +1,47 @@
+:root {
+    --container-outline-color: rgba(51, 51, 51, 0.5);
+    --content-outline-color: rgba(85, 85, 85, 0.5);
+    --sub-content-outline-color: rgba(119, 119, 119, 0.5);
+    --container-background-color: rgba(221, 221, 221, 0.5);
+    --content-background-color: rgba(187, 187, 187, 0.5);
+    --sub-content-background-color: rgba(170, 170, 170, 0.5);
+    --viewport-background-color: rgb(238, 238, 238);
+    --default-color: rgb(34, 34, 34);
+    --disabled-color: rgb(119, 119, 119);
+}
+
+:root {
+    --lucency-red: rgba(255, 0, 0, 0.8);
+
+    --radius: 5px;
+    --margin: 5px;
+
+    --blur: blur(15px);
+
+    --border-width: 1px;
+
+    --label-font-size: xx-small;
+
+    --node-width: 150px;
+    --node-height: 30px;
+
+    --copyright-color: var(--sub-content-outline-color);
+    --scrollbar-color: var(--content-outline-color);
+}
+
 * {
-    font-family: "Microsoft YaHei", serif;
+    font-family: "Microsoft YaHei", "sans serif";
     box-sizing: border-box;
+    color: var(--default-color);
+    transition: background-color 0.5s ease;
+}
+
+a {
+    color: inherit;
+}
+
+a:hover {
+    cursor: pointer;
 }
 
 html {
@@ -17,42 +58,16 @@ body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    scrollbar-color: gray transparent;
+    scrollbar-color: var(--scrollbar-color) transparent;
     scrollbar-width: thin;
-}
-
-:root {
-    --lucency-white: rgba(255, 255, 255, 0.8);
-    --lucency-gray: rgba(238, 238, 238, 0.5);
-    --lucency-dull-gray: rgba(165, 165, 165, 0.5);
-    --lucency-dark-gray: rgba(128, 128, 128, 0.5);
-    --lucency-black: rgba(0, 0, 0, 0.5);
-    --lucency-light-black: rgba(32, 32, 32, 0.05);
-    --lucency-red: rgba(176, 0, 0, 0.9);
-    --lucency-green: rgba(0, 176, 0, 0.9);
-
-    --radius: 5px;
-    --margin: 5px;
-
-    --blur: blur(10px);
-
-    --border-width: 1px;
-
-    --label-font-size: xx-small;
-
-    --node-width: 150px;
-    --node-height: 30px;
-}
-
-:root {
-    --copyright-color: var(--lucency-dark-gray);
+    scroll-behavior: smooth;
 }
 
 #viewport {
     position: relative;
     width: 100%;
     height: 100%;
-    background-color: white;
+    background-color: var(--viewport-background-color);
     overflow: hidden;
     touch-action: none;
 }

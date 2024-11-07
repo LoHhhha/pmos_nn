@@ -367,6 +367,9 @@
                     showTop: e.clientY,
                     items: [
                         {
+                            title: "Copy",
+                        },
+                        {
                             title: "Edit",
                             callback: () => {
                                 nodeOverview({ target: node });

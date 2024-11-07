@@ -1,11 +1,11 @@
 :root {
-    --operator-bar-background-color: var(--lucency-gray);
-    --operator-bar-outline-color: var(--lucency-dark-gray);
+    --operator-bar-background-color: var(--container-background-color);
+    --operator-bar-outline-color: var(--container-outline-color);
 
-    --node-outline-color: var(--lucency-black);
+    --node-outline-color: var(--container-outline-color);
     --node-outline-font-size: var(--label-font-size);
-    --node-text-color: var(--lucency-dark-gray);
-    --node-end-point-overlays-label-color: var(--lucency-black);
+    --node-selected-outline-color: var(--default-color);
+    --node-end-point-overlays-label-color: var(--container-outline-color);
     --node-end-point-label-display: "inline";
     --node-end-point-label-font-size: var(--label-font-size);
     --node-width: var(--node-width);
@@ -14,13 +14,20 @@
     --node-overview-min-width: 150px;
     --node-overview-max-width: 300px;
     --node-overview-container-max-height: 250px;
+    --node-overview-outline-color: var(--content-outline-color);
     --node-overview-item-input-width: var(--node-width);
-    --node-overview-item-input-outline-color: var(--lucency-dark-gray);
-    --node-overview-item-input-background-color: var(--lucency-gray);
-    --node-overview-outline-color: var(--lucency-dark-gray);
+    --node-overview-item-input-outline-color: var(--sub-content-outline-color);
+    --node-overview-item-input-background-color: var(
+        --sub-content-background-color
+    );
     --node-overview-button-color: var(--lucency-red);
-    --node-overview-button-outline-color: var(--lucency-dark-gray);
-    --node-overview-button-background-color: var(--lucency-gray);
+    --node-overview-button-outline-color: var(--sub-content-outline-color);
+    --node-overview-button-background-color: var(
+        --sub-content-background-color
+    );
+    --node-overview-button-hover-background-color: var(
+        --sub-content-outline-color
+    );
 }
 
 .operator-bar {
@@ -62,6 +69,11 @@
     overflow: visible;
 }
 
+.node:hover {
+    outline: calc(var(--border-width) * 2) solid
+        var(--node-selected-outline-color);
+}
+
 .node-outline {
     font-size: var(--node-outline-font-size);
     text-align: left;
@@ -73,12 +85,6 @@
     word-wrap: break-word;
     white-space: nowrap;
     color: var(--node-outline-color);
-}
-
-.node-endpoint {
-    width: 15px;
-    height: 20px;
-    border-radius: var(--radius);
 }
 
 .node-endpoint-label {
@@ -117,7 +123,7 @@
 .overview-title {
     text-align: center;
     margin: 5px 10px 5px 10px;
-    font-size: medium;
+    font-size: large;
     font-weight: bold;
     user-select: none;
 }
@@ -155,6 +161,11 @@
     border: none;
     outline: var(--border-width) solid var(--node-overview-button-outline-color);
     background-color: var(--node-overview-button-background-color);
+    cursor: pointer;
+}
+
+.overview-delete-button:hover {
+    background-color: var(--node-overview-button-hover-background-color);
 }
 
 .Input {
@@ -181,28 +192,32 @@
     background-color: rgb(96, 160, 176);
 }
 
-.ReLU {
+.Identity {
     background-color: rgb(96, 128, 128);
 }
 
-.LeakyReLU {
+.ReLU {
     background-color: rgb(96, 128, 144);
 }
 
-.SELU {
+.LeakyReLU {
     background-color: rgb(96, 128, 160);
 }
 
-.CELU {
+.SELU {
     background-color: rgb(96, 128, 176);
 }
 
-.Sigmoid {
+.CELU {
     background-color: rgb(96, 128, 192);
 }
 
-.Softmax {
+.Sigmoid {
     background-color: rgb(96, 128, 208);
+}
+
+.Softmax {
+    background-color: rgb(96, 128, 224);
 }
 
 .Conv1d {

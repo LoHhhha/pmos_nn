@@ -1,7 +1,5 @@
 :root {
-    --covering-background-color: var(--lucency-gray);
-    --covering-container-background-color: var(--lucency-dull-gray);
-    --covering-container-outline-color: var(--lucency-dark-gray);
+    --covering-background-color: var(--general-background-color);
 
     --covering-button-selected-size: 45px;
     --covering-button-size: 30px;

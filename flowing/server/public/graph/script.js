@@ -281,7 +281,7 @@
 
             const loggerEle = document.createElement("div");
             loggerEle.className = "logger-div";
-            
+
             const add2Logger = (msg) => {
                 const logEle = document.createElement("p");
                 logEle.className = "log-text";
@@ -296,7 +296,6 @@
                 elements: [loggerEle],
                 buttonMode: COVERING_BUTTON_MODE.CloseButton,
             });
-
 
             const graph = calculate(canvasEle);
             if (graph === null) {
@@ -333,16 +332,19 @@
 
                 const info = JSON.parse(xhr.responseText);
                 add2Logger(`Analysis finished: ${info.msg}.`);
-                
-                if(info.fn){
-                    const downloadLink =document.createElement("a");
-                    downloadLink.textContent = "Click here to download!";
-                    downloadLink.href = `/model/download/${info.fn}`;
-                    downloadLink.target = "_blank";
+
+                if (info.fn) {
+                    const downloadLink = document.createElement("a");
+                    downloadLink.text = "Click here to download!";
+                    downloadLink.onclick = () => {
+                        window.open(`/model/download/${info.fn}`);
+                        return false;
+                    };
                     loggerEle.appendChild(downloadLink);
-                }
-                else{
-                    add2Logger("No file return from server, please contact us.");
+                } else {
+                    add2Logger(
+                        "No file return from server, please contact us."
+                    );
                 }
             };
             add2Logger("Trying to analyze via server...");
