@@ -63,9 +63,11 @@
                 e.clientY > barMaxY ||
                 e.clientY < barMinY
             ) {
+                const scale =
+                    operatorNodeSelected.origin.jsPlumbNavigator.getCanvasScale();
                 operatorNodeSelected.origin.addNode(
-                    e.clientX - offsetX,
-                    e.clientY - offsetY
+                    e.clientX - offsetX * scale,
+                    e.clientY - offsetY * scale
                 );
             }
             operatorNodeSelected.style.zIndex = null;
@@ -248,6 +250,7 @@
         ele.prevLeft = ele.style.left;
         ele.prevTop = ele.style.top;
         ele.barEle = barEle;
+        ele.jsPlumbNavigator = jsPlumbNavigator;
         ele.addNode = (left, top) => {
             const node = getNode();
 

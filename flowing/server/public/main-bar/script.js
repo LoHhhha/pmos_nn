@@ -56,14 +56,18 @@
         }
 
         handlePointerMove(e) {
+            const rate =
+                window.devicePixelRatio !== undefined
+                    ? window.devicePixelRatio
+                    : 1;
             if (e.buttons !== 1) {
                 this.miniMapEle.onpointermove = null;
                 this.miniMapEle.releasePointerCapture(e.pointerId);
                 return;
             }
             this.navigator.pan(
-                -e.movementX / this.viewScale,
-                -e.movementY / this.viewScale
+                -e.movementX / (rate * this.viewScale),
+                -e.movementY / (rate * this.viewScale)
             );
             this.layout();
         }
