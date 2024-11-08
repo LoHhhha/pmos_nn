@@ -1,5 +1,7 @@
 :root {
-    --covering-background-color: var(--general-background-color);
+    --covering-background-color: var(--container-background-color);
+
+    --covering-button-svg-color: var(--default-color);
 
     --covering-button-selected-size: 45px;
     --covering-button-size: 30px;
@@ -47,4 +49,8 @@
 .covering-button:hover {
     width: var(--covering-button-selected-size);
     height: var(--covering-button-selected-size);
+}
+
+.covering-button-svg * {
+    fill: var(--covering-button-svg-color);
 }

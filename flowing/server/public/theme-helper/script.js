@@ -7,20 +7,34 @@ const THEME_STYLE = {
     dark: "dark",
 };
 
+const THEME_ELEMENT = document.createElement("div");
+THEME_ELEMENT.id = "theme-helper";
+
 (function () {
+    window.addEventListener("load", () => {
+        THEME_ELEMENT.style.display = "none";
+        document.body.appendChild(THEME_ELEMENT);
+    });
+
     const prefers =
         window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
+
     function changToTheme(themeStyle) {
+        // themeStyle is one of THEME_STYLE
+        THEME_ELEMENT.className = themeStyle;
+        const style = window.getComputedStyle(THEME_ELEMENT);
+
         for (const property in themeHelperNamespace.colorReplaceRule) {
             const needProperty =
                 themeHelperNamespace.colorReplaceRule[property];
             document.documentElement.style.setProperty(
                 property,
-                themeHelperNamespace.color[themeStyle][needProperty]
+                style.getPropertyValue(needProperty)
             );
         }
         console.log("[ThemeHelper] change theme to", themeStyle);
     }
+
     function autoChange() {
         if (!(window.matchMedia instanceof Function)) {
             changToTheme(THEME_STYLE.light);
@@ -32,6 +46,7 @@ const THEME_STYLE = {
             changToTheme(THEME_STYLE.light);
         }
     }
+
     window.addThemeHelper = () => {
         MESSAGE_HANDLER(MESSAGE_TYPE.ThemeChange, (event) => {
             const themeStyle = THEME_STYLE[event.detail.theme];
