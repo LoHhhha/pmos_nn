@@ -1,365 +1,357 @@
-(function () {
-    const rootStyle = getComputedStyle(document.querySelector(":root"));
-    rootStyle.var = (key) => rootStyle.getPropertyValue(key);
+class MiniMap {
+    constructor(navigator, canvasEle, miniMapWidth, miniMapHeight) {
+        this.navigator = navigator;
+        this.canvasEle = canvasEle;
 
-    class MiniMap {
-        constructor(navigator, canvasEle, miniMapWidth, miniMapHeight) {
-            this.navigator = navigator;
-            this.canvasEle = canvasEle;
-
-            this.miniMapEle = document.createElement("div");
-            this.miniMapEle.className = "minimap";
-            if (miniMapWidth !== undefined) {
-                this.miniMapEle.style.width = `${miniMapWidth}px`;
-            } else {
-                this.miniMapEle.style.width = `auto`;
-            }
-            miniMapHeight;
-            if (miniMapHeight !== undefined) {
-                this.miniMapEle.style.height = `${miniMapHeight}px`;
-            } else {
-                this.miniMapEle.style.height = `auto`;
-            }
-
-            this.miniMapViewportEle = this.createMiniMapViewportEle();
-            this.miniMapCanvasEle = this.createMiniMapCanvasEle();
-
-            this.miniMapViewportEle.appendChild(this.miniMapCanvasEle);
-            this.miniMapEle.appendChild(this.miniMapViewportEle);
-            this.miniMapEle.addEventListener(
-                "mousewheel",
-                this.handleMiddleMouseZoom.bind(this)
-            );
-            this.miniMapEle.onpointerdown = this.handlePointerDown.bind(this);
-            this.miniMapEle.onpointerup = this.handlePointerUp.bind(this);
-            this.refresh(true);
+        this.miniMapEle = document.createElement("div");
+        this.miniMapEle.className = "minimap";
+        if (miniMapWidth !== undefined) {
+            this.miniMapEle.style.width = `${miniMapWidth}px`;
+        } else {
+            this.miniMapEle.style.width = `auto`;
+        }
+        miniMapHeight;
+        if (miniMapHeight !== undefined) {
+            this.miniMapEle.style.height = `${miniMapHeight}px`;
+        } else {
+            this.miniMapEle.style.height = `auto`;
         }
 
-        handleMiddleMouseZoom(e) {
-            let scale = this.navigator.getCanvasScale();
-            if (e.wheelDeltaY > 0) {
-                scale += 0.1;
-            } else {
-                scale -= 0.1;
-            }
-            scale = this.navigator.getLegalCanvasScale(scale);
-            this.navigator.zoomTo(scale);
-            this.layout();
-            e.preventDefault();
-            e.stopPropagation();
-        }
+        this.miniMapViewportEle = this.createMiniMapViewportEle();
+        this.miniMapCanvasEle = this.createMiniMapCanvasEle();
 
-        handlePointerDown(e) {
-            this.miniMapEle.onpointermove = this.handlePointerMove.bind(this);
-            this.miniMapEle.style.cursor = "grabbing";
-            this.miniMapEle.setPointerCapture(e.pointerId);
-        }
+        this.miniMapViewportEle.appendChild(this.miniMapCanvasEle);
+        this.miniMapEle.appendChild(this.miniMapViewportEle);
+        this.miniMapEle.addEventListener(
+            "mousewheel",
+            this.handleMiddleMouseZoom.bind(this)
+        );
+        this.miniMapEle.onpointerdown = this.handlePointerDown.bind(this);
+        this.miniMapEle.onpointerup = this.handlePointerUp.bind(this);
+        this.refresh(true);
+    }
 
-        handlePointerMove(e) {
-            const rate =
-                window.devicePixelRatio !== undefined
-                    ? window.devicePixelRatio
-                    : 1;
-            if (e.buttons !== 1) {
-                this.miniMapEle.onpointermove = null;
-                this.miniMapEle.releasePointerCapture(e.pointerId);
-                return;
-            }
-            this.navigator.pan(
-                -e.movementX / (rate * this.viewScale),
-                -e.movementY / (rate * this.viewScale)
-            );
-            this.layout();
+    handleMiddleMouseZoom(e) {
+        let scale = this.navigator.getCanvasScale();
+        if (e.wheelDeltaY > 0) {
+            scale += 0.1;
+        } else {
+            scale -= 0.1;
         }
+        scale = this.navigator.getLegalCanvasScale(scale);
+        this.navigator.zoomTo(scale);
+        this.layout();
+        e.preventDefault();
+        e.stopPropagation();
+    }
 
-        handlePointerUp(e) {
+    handlePointerDown(e) {
+        this.miniMapEle.onpointermove = this.handlePointerMove.bind(this);
+        this.miniMapEle.style.cursor = "grabbing";
+        this.miniMapEle.setPointerCapture(e.pointerId);
+    }
+
+    handlePointerMove(e) {
+        const rate =
+            window.devicePixelRatio !== undefined ? window.devicePixelRatio : 1;
+        if (e.buttons !== 1) {
             this.miniMapEle.onpointermove = null;
             this.miniMapEle.releasePointerCapture(e.pointerId);
-            this.miniMapEle.style.cursor = "grab";
+            return;
         }
+        this.navigator.pan(
+            -e.movementX / (rate * this.viewScale),
+            -e.movementY / (rate * this.viewScale)
+        );
+        this.layout();
+    }
 
-        layout() {
-            const viewportBounds = this.navigator.getViewportBounds();
-            const canvasActualBounds = this.navigator.getCanvasActualBounds();
-            const canvasScale = this.navigator.getCanvasScale();
-            const globalBounds = {
-                left: Math.min(
-                    viewportBounds.left,
-                    canvasActualBounds.left * canvasScale
-                ),
-                top: Math.min(
-                    viewportBounds.top,
-                    canvasActualBounds.top * canvasScale
-                ),
-                right: Math.max(
-                    viewportBounds.left + viewportBounds.width,
-                    (canvasActualBounds.left + canvasActualBounds.width) *
-                        canvasScale
-                ),
-                bottom: Math.max(
-                    viewportBounds.top + viewportBounds.height,
-                    (canvasActualBounds.top + canvasActualBounds.height) *
-                        canvasScale
-                ),
-            };
-            globalBounds.width = globalBounds.right - globalBounds.left;
-            globalBounds.height = globalBounds.bottom - globalBounds.top;
-            const miniMapBounds = {
-                left: 4,
-                top: 4,
-                width: this.miniMapEle.offsetWidth - 8,
-                height: this.miniMapEle.offsetHeight - 8,
-            };
-            const viewBounds = {};
-            if (
-                miniMapBounds.width / miniMapBounds.height >
-                globalBounds.width / globalBounds.height
-            ) {
-                viewBounds.height = miniMapBounds.height;
-                viewBounds.width =
-                    viewBounds.height *
-                    (globalBounds.width / globalBounds.height);
-                viewBounds.left =
-                    miniMapBounds.left +
-                    (miniMapBounds.width - viewBounds.width) / 2;
-                viewBounds.top = miniMapBounds.top;
-            } else {
-                viewBounds.width = miniMapBounds.width;
-                viewBounds.height =
-                    viewBounds.width /
-                    (globalBounds.width / globalBounds.height);
-                viewBounds.left = miniMapBounds.left;
-                viewBounds.top =
-                    miniMapBounds.top +
-                    (miniMapBounds.height - viewBounds.height) / 2;
-            }
-            this.viewScale = viewBounds.width / globalBounds.width;
-            this.miniMapViewportEle.style.left = `${viewBounds.left}px`;
-            this.miniMapViewportEle.style.top = `${viewBounds.top}px`;
-            this.miniMapViewportEle.style.width = `${viewportBounds.width}px`;
-            this.miniMapViewportEle.style.height = `${viewportBounds.height}px`;
-            this.miniMapViewportEle.style.transform = `scale(${
-                this.viewScale
-            }) translate(${-globalBounds.left}px, ${-globalBounds.top}px)`;
-            this.miniMapCanvasEle.style.transform =
-                this.canvasEle.style.transform;
+    handlePointerUp(e) {
+        this.miniMapEle.onpointermove = null;
+        this.miniMapEle.releasePointerCapture(e.pointerId);
+        this.miniMapEle.style.cursor = "grab";
+    }
+
+    layout() {
+        const viewportBounds = this.navigator.getViewportBounds();
+        const canvasActualBounds = this.navigator.getCanvasActualBounds();
+        const canvasScale = this.navigator.getCanvasScale();
+        const globalBounds = {
+            left: Math.min(
+                viewportBounds.left,
+                canvasActualBounds.left * canvasScale
+            ),
+            top: Math.min(
+                viewportBounds.top,
+                canvasActualBounds.top * canvasScale
+            ),
+            right: Math.max(
+                viewportBounds.left + viewportBounds.width,
+                (canvasActualBounds.left + canvasActualBounds.width) *
+                    canvasScale
+            ),
+            bottom: Math.max(
+                viewportBounds.top + viewportBounds.height,
+                (canvasActualBounds.top + canvasActualBounds.height) *
+                    canvasScale
+            ),
+        };
+        globalBounds.width = globalBounds.right - globalBounds.left;
+        globalBounds.height = globalBounds.bottom - globalBounds.top;
+        const miniMapBounds = {
+            left: 4,
+            top: 4,
+            width: this.miniMapEle.offsetWidth - 8,
+            height: this.miniMapEle.offsetHeight - 8,
+        };
+        const viewBounds = {};
+        if (
+            miniMapBounds.width / miniMapBounds.height >
+            globalBounds.width / globalBounds.height
+        ) {
+            viewBounds.height = miniMapBounds.height;
+            viewBounds.width =
+                viewBounds.height * (globalBounds.width / globalBounds.height);
+            viewBounds.left =
+                miniMapBounds.left +
+                (miniMapBounds.width - viewBounds.width) / 2;
+            viewBounds.top = miniMapBounds.top;
+        } else {
+            viewBounds.width = miniMapBounds.width;
+            viewBounds.height =
+                viewBounds.width / (globalBounds.width / globalBounds.height);
+            viewBounds.left = miniMapBounds.left;
+            viewBounds.top =
+                miniMapBounds.top +
+                (miniMapBounds.height - viewBounds.height) / 2;
         }
+        this.viewScale = viewBounds.width / globalBounds.width;
+        this.miniMapViewportEle.style.left = `${viewBounds.left}px`;
+        this.miniMapViewportEle.style.top = `${viewBounds.top}px`;
+        this.miniMapViewportEle.style.width = `${viewportBounds.width}px`;
+        this.miniMapViewportEle.style.height = `${viewportBounds.height}px`;
+        this.miniMapViewportEle.style.transform = `scale(${
+            this.viewScale
+        }) translate(${-globalBounds.left}px, ${-globalBounds.top}px)`;
+        this.miniMapCanvasEle.style.transform = this.canvasEle.style.transform;
+    }
 
-        getNodesBoundsString() {
-            if (
-                !this.lastGetNodesBoundsStringTime ||
-                Date.now() - this.lastGetNodesBoundsStringTime > 200
-            ) {
-                this.cacheNodesBoundsString = "";
-                const elements =
-                    this.navigator.jsPlumbInstance.getManagedElements();
-                for (const key in elements) {
-                    const ele = elements[key].el;
-                    const left = parseInt(ele.offsetLeft);
-                    const top = parseInt(ele.offsetTop);
-                    const width = parseInt(ele.offsetWidth);
-                    const height = parseInt(ele.offsetHeight);
-                    this.cacheNodesBoundsString += `${left},${top},${width},${height},`;
-                }
-                this.lastGetNodesBoundsStringTime = Date.now();
-            }
-            return this.cacheNodesBoundsString;
-        }
-
-        createMiniMapViewportEle() {
-            const ele = document.createElement("div");
-            ele.className = "minimap-viewport";
-            return ele;
-        }
-
-        createMiniMapCanvasEle() {
-            const ele = document.createElement("div");
-            ele.className = "minimap-canvas";
-            return ele;
-        }
-
-        createNodeOutlineEle(bounds) {
-            const ele = document.createElement("div");
-            ele.className = "minimap-node-outline";
-            ele.style.left = `${bounds.left}px`;
-            ele.style.top = `${bounds.top}px`;
-            ele.style.width = `${bounds.width}px`;
-            ele.style.height = `${bounds.height}px`;
-            return ele;
-        }
-
-        drawCanvasOutline() {
-            this.miniMapCanvasEle.innerHTML = "";
-            const fragment = document.createDocumentFragment();
+    getNodesBoundsString() {
+        if (
+            !this.lastGetNodesBoundsStringTime ||
+            Date.now() - this.lastGetNodesBoundsStringTime > 200
+        ) {
+            this.cacheNodesBoundsString = "";
             const elements =
                 this.navigator.jsPlumbInstance.getManagedElements();
             for (const key in elements) {
                 const ele = elements[key].el;
-                const bounds = {
-                    left: ele.offsetLeft,
-                    top: ele.offsetTop,
-                    width: ele.offsetWidth,
-                    height: ele.offsetHeight,
-                };
-                fragment.appendChild(this.createNodeOutlineEle(bounds));
+                const left = parseInt(ele.offsetLeft);
+                const top = parseInt(ele.offsetTop);
+                const width = parseInt(ele.offsetWidth);
+                const height = parseInt(ele.offsetHeight);
+                this.cacheNodesBoundsString += `${left},${top},${width},${height},`;
             }
-            this.miniMapCanvasEle.appendChild(fragment);
+            this.lastGetNodesBoundsStringTime = Date.now();
         }
-
-        refresh(force) {
-            if (this.miniMapEle.style.display !== "none") {
-                let redraw = false;
-                let reLayout = false;
-                const nodesBoundsString = this.getNodesBoundsString();
-                if (nodesBoundsString !== this.nodesBoundsString) {
-                    this.nodesBoundsString = nodesBoundsString;
-                    redraw = true;
-                    reLayout = true;
-                }
-                if (
-                    this.canvasEle.style.transform !== this.canvasEleTransform
-                ) {
-                    this.canvasEleTransform = this.canvasEle.style.transform;
-                    reLayout = true;
-                }
-                if (reLayout || force) {
-                    if (redraw) {
-                        this.drawCanvasOutline();
-                    }
-                    this.layout();
-                }
-                if (!this.isDisposed) {
-                    this.animationFrameHandle = window.requestAnimationFrame(
-                        () => this.refresh()
-                    );
-                }
-            }
-        }
-
-        show() {
-            this.miniMapEle.style.display = "block";
-        }
-
-        hide() {
-            this.miniMapEle.style.display = "none";
-        }
-
-        dispose() {
-            window.cancelAnimationFrame(this.animationFrameHandle);
-            this.miniMapEle.onpointerdown = null;
-            this.miniMapEle.onpointermove = null;
-            this.miniMapEle.onpointerup = null;
-            this.miniMapEle.removeEventListener(
-                "mousewheel",
-                this.handleMiddleMouseZoom
-            );
-            this.isDisposed = true;
-        }
+        return this.cacheNodesBoundsString;
     }
 
-    class Toolbar {
-        zoomInSvg = `<svg class="toolbar-button-svg" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path d="M637 443H519V309c0-4.4-3.6-8-8-8h-60c-4.4 0-8 3.6-8 8v134H325c-4.4 0-8 3.6-8 8v60c0 4.4 3.6 8 8 8h118v134c0 4.4 3.6 8 8 8h60c4.4 0 8-3.6 8-8V519h118c4.4 0 8-3.6 8-8v-60c0-4.4-3.6-8-8-8z" p-id="8525"></path><path d="M921 867L775 721c122.1-148.9 113.6-369.5-26-509-148-148.1-388.4-148.1-537 0-148.1 148.6-148.1 389 0 537 139.5 139.6 360.1 148.1 509 26l146 146c3.2 2.8 8.3 2.8 11 0l43-43c2.8-2.7 2.8-7.8 0-11zM696 696c-118.8 118.7-311.2 118.7-430 0-118.7-118.8-118.7-311.2 0-430 118.8-118.7 311.2-118.7 430 0 118.7 118.8 118.7 311.2 0 430z" p-id="8526"></path></svg>`;
-        zoomOutSvg = `<svg class="toolbar-button-svg" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path d="M637 443H325c-4.4 0-8 3.6-8 8v60c0 4.4 3.6 8 8 8h312c4.4 0 8-3.6 8-8v-60c0-4.4-3.6-8-8-8z" p-id="8665"></path><path d="M921 867L775 721c122.1-148.9 113.6-369.5-26-509-148-148.1-388.4-148.1-537 0-148.1 148.6-148.1 389 0 537 139.5 139.6 360.1 148.1 509 26l146 146c3.2 2.8 8.3 2.8 11 0l43-43c2.8-2.7 2.8-7.8 0-11zM696 696c-118.8 118.7-311.2 118.7-430 0-118.7-118.8-118.7-311.2 0-430 118.8-118.7 311.2-118.7 430 0 118.7 118.8 118.7 311.2 0 430z" p-id="8666"></path></svg>`;
-        zoomTo100Svg = `<svg class="toolbar-button-svg" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path d="M316 672h60c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8h-60c-4.4 0-8 3.6-8 8v304c0 4.4 3.6 8 8 8zM512 622c22.1 0 40-17.9 40-39 0-23.1-17.9-41-40-41s-40 17.9-40 41c0 21.1 17.9 39 40 39zM512 482c22.1 0 40-17.9 40-39 0-23.1-17.9-41-40-41s-40 17.9-40 41c0 21.1 17.9 39 40 39z" p-id="8805"></path><path d="M880 112H144c-17.7 0-32 14.3-32 32v736c0 17.7 14.3 32 32 32h736c17.7 0 32-14.3 32-32V144c0-17.7-14.3-32-32-32z m-40 728H184V184h656v656z" p-id="8806"></path><path d="M648 672h60c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8h-60c-4.4 0-8 3.6-8 8v304c0 4.4 3.6 8 8 8z" p-id="8807"></path></svg>`;
-        viewAllFitSvg = `<svg class="toolbar-button-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M17 4h3c1.1 0 2 .9 2 2v2h-2V6h-3zM4 8V6h3V4H4c-1.1 0-2 .9-2 2v2zm16 8v2h-3v2h3c1.1 0 2-.9 2-2v-2zM7 18H4v-2H2v2c0 1.1.9 2 2 2h3zm9-8v4H8v-4zm2-2H6v8h12z"/></svg>`;
-        helpSvg = `<svg class="toolbar-button-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M11 18h2v-2h-2zm1-16A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8m0-14a4 4 0 0 0-4 4h2a2 2 0 0 1 2-2a2 2 0 0 1 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5a4 4 0 0 0-4-4"/></svg>`;
-        autoThemeSvg = `<svg class="toolbar-button-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M7.5 2c-1.79 1.15-3 3.18-3 5.5s1.21 4.35 3.03 5.5C4.46 13 2 10.54 2 7.5A5.5 5.5 0 0 1 7.5 2m11.57 1.5l1.43 1.43L4.93 20.5L3.5 19.07zm-6.18 2.43L11.41 5L9.97 6l.42-1.7L9 3.24l1.75-.12l.58-1.65L12 3.1l1.73.03l-1.35 1.13zm-3.3 3.61l-1.16-.73l-1.12.78l.34-1.32l-1.09-.83l1.36-.09l.45-1.29l.51 1.27l1.36.03l-1.05.87zM19 13.5a5.5 5.5 0 0 1-5.5 5.5c-1.22 0-2.35-.4-3.26-1.07l7.69-7.69c.67.91 1.07 2.04 1.07 3.26m-4.4 6.58l2.77-1.15l-.24 3.35zm4.33-2.7l1.15-2.77l2.2 2.54zm1.15-4.96l-1.14-2.78l3.34.24zM9.63 18.93l2.77 1.15l-2.53 2.19z"/></svg>`;
-        lightThemeSvg = `<svg class="toolbar-button-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1m.64 5l-.71.71a1 1 0 0 0 0 1.41a1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17M12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1m5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41a1 1 0 0 0 .66.29m-12-.29a1 1 0 0 0 .7.29a1 1 0 0 0 .71-.29a1 1 0 0 0 0-1.41l-.71-.71a1 1 0 0 0-1.43 1.41ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2m-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0a1 1 0 0 0 0-1.41ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5m0 9a3.5 3.5 0 1 1 3.5-3.5a3.5 3.5 0 0 1-3.5 3.5m0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1"/></svg>`;
-        darkThemeSvg = `<svg class="toolbar-button-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="m17.75 4.09l-2.53 1.94l.91 3.06l-2.63-1.81l-2.63 1.81l.91-3.06l-2.53-1.94L12.44 4l1.06-3l1.06 3zm3.5 6.91l-1.64 1.25l.59 1.98l-1.7-1.17l-1.7 1.17l.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85c-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14c.4-.4.82-.76 1.27-1.08c.75-.53 1.93.36 1.85 1.19c-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82c-2.81 3.14-2.7 7.96.31 10.98c3.02 3.01 7.84 3.12 10.98.31"/></svg>`;
+    createMiniMapViewportEle() {
+        const ele = document.createElement("div");
+        ele.className = "minimap-viewport";
+        return ele;
+    }
 
-        constructor(operatorBar) {
-            this.operatorBar = operatorBar;
+    createMiniMapCanvasEle() {
+        const ele = document.createElement("div");
+        ele.className = "minimap-canvas";
+        return ele;
+    }
 
-            this.toolbarEle = document.createElement("div");
-            this.toolbarEle.className = "toolbar";
+    createNodeOutlineEle(bounds) {
+        const ele = document.createElement("div");
+        ele.className = "minimap-node-outline";
+        ele.style.left = `${bounds.left}px`;
+        ele.style.top = `${bounds.top}px`;
+        ele.style.width = `${bounds.width}px`;
+        ele.style.height = `${bounds.height}px`;
+        return ele;
+    }
 
-            this.toolbarEle.appendChild(
-                this.createTool("Zoom In", this.zoomInSvg, () => {
-                    MESSAGE_PUSH(MESSAGE_TYPE.NavigatorZoomIn);
-                })
-            );
-            this.toolbarEle.appendChild(
-                this.createTool("Zoom Out", this.zoomOutSvg, () => {
-                    MESSAGE_PUSH(MESSAGE_TYPE.NavigatorZoomOut);
-                })
-            );
-            this.toolbarEle.appendChild(
-                this.createTool("Zoom to 100%", this.zoomTo100Svg, () => {
-                    MESSAGE_PUSH(MESSAGE_TYPE.NavigatorZoomTo100);
-                })
-            );
-            this.toolbarEle.appendChild(
-                this.createTool("View All", this.viewAllFitSvg, () => {
-                    MESSAGE_PUSH(MESSAGE_TYPE.NavigatorViewAllFit);
-                })
-            );
-            this.toolbarEle.appendChild(this.createThemeButton());
-            this.toolbarEle.appendChild(
-                this.createTool("Help", this.helpSvg, () => {
-                    const linkEle = document.createElement("a");
-                    linkEle.innerHTML =
-                        "<a>Have a good time :)<br>You can learn how to use PMoS at here.<br>What's more, welcome to report any issue to us!</a>";
-
-                    linkEle.href = PMoS_HREF;
-                    linkEle.target = "_blank";
-
-                    MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
-                        title: "PMoS",
-                        elements: [linkEle],
-                        buttonMode: COVERING_BUTTON_MODE.CloseButton,
-                    });
-                })
-            );
-        }
-
-        createTool(title, image, click) {
-            const button = document.createElement("button");
-            button.className = "toolbar-button";
-            button.title = title;
-            button.innerHTML = image;
-            button.onclick = click;
-            return button;
-        }
-
-        createThemeButton() {
-            const button = this.createTool("Theme", this.autoThemeSvg, null);
-            button.currentTheme = THEME_STYLE.auto;
-            button.onclick = () => {
-                switch (button.currentTheme) {
-                    case THEME_STYLE.auto:
-                        button.currentTheme = THEME_STYLE.light;
-                        button.innerHTML = this.lightThemeSvg;
-                        MESSAGE_PUSH(MESSAGE_TYPE.ThemeChange, {
-                            theme: THEME_STYLE.light,
-                        });
-                        break;
-                    case THEME_STYLE.light:
-                        button.currentTheme = THEME_STYLE.dark;
-                        button.innerHTML = this.darkThemeSvg;
-                        MESSAGE_PUSH(MESSAGE_TYPE.ThemeChange, {
-                            theme: THEME_STYLE.dark,
-                        });
-                        break;
-                    default:
-                        button.currentTheme = THEME_STYLE.auto;
-                        button.innerHTML = this.autoThemeSvg;
-                        MESSAGE_PUSH(MESSAGE_TYPE.ThemeChange, {
-                            theme: THEME_STYLE.auto,
-                        });
-                        break;
-                }
+    drawCanvasOutline() {
+        this.miniMapCanvasEle.innerHTML = "";
+        const fragment = document.createDocumentFragment();
+        const elements = this.navigator.jsPlumbInstance.getManagedElements();
+        for (const key in elements) {
+            const ele = elements[key].el;
+            const bounds = {
+                left: ele.offsetLeft,
+                top: ele.offsetTop,
+                width: ele.offsetWidth,
+                height: ele.offsetHeight,
             };
-            return button;
+            fragment.appendChild(this.createNodeOutlineEle(bounds));
         }
+        this.miniMapCanvasEle.appendChild(fragment);
+    }
 
-        show() {
-            this.toolbarEle.style.display = "block";
-        }
-
-        hide() {
-            this.toolbarEle.style.display = "none";
+    refresh(force) {
+        if (this.miniMapEle.style.display !== "none") {
+            let redraw = false;
+            let reLayout = false;
+            const nodesBoundsString = this.getNodesBoundsString();
+            if (nodesBoundsString !== this.nodesBoundsString) {
+                this.nodesBoundsString = nodesBoundsString;
+                redraw = true;
+                reLayout = true;
+            }
+            if (this.canvasEle.style.transform !== this.canvasEleTransform) {
+                this.canvasEleTransform = this.canvasEle.style.transform;
+                reLayout = true;
+            }
+            if (reLayout || force) {
+                if (redraw) {
+                    this.drawCanvasOutline();
+                }
+                this.layout();
+            }
+            if (!this.isDisposed) {
+                this.animationFrameHandle = window.requestAnimationFrame(() =>
+                    this.refresh()
+                );
+            }
         }
     }
+
+    show() {
+        this.miniMapEle.style.display = "block";
+    }
+
+    hide() {
+        this.miniMapEle.style.display = "none";
+    }
+
+    dispose() {
+        window.cancelAnimationFrame(this.animationFrameHandle);
+        this.miniMapEle.onpointerdown = null;
+        this.miniMapEle.onpointermove = null;
+        this.miniMapEle.onpointerup = null;
+        this.miniMapEle.removeEventListener(
+            "mousewheel",
+            this.handleMiddleMouseZoom
+        );
+        this.isDisposed = true;
+    }
+}
+
+class Toolbar {
+    zoomInSvg = `<svg class="toolbar-button-svg" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path d="M637 443H519V309c0-4.4-3.6-8-8-8h-60c-4.4 0-8 3.6-8 8v134H325c-4.4 0-8 3.6-8 8v60c0 4.4 3.6 8 8 8h118v134c0 4.4 3.6 8 8 8h60c4.4 0 8-3.6 8-8V519h118c4.4 0 8-3.6 8-8v-60c0-4.4-3.6-8-8-8z" p-id="8525"></path><path d="M921 867L775 721c122.1-148.9 113.6-369.5-26-509-148-148.1-388.4-148.1-537 0-148.1 148.6-148.1 389 0 537 139.5 139.6 360.1 148.1 509 26l146 146c3.2 2.8 8.3 2.8 11 0l43-43c2.8-2.7 2.8-7.8 0-11zM696 696c-118.8 118.7-311.2 118.7-430 0-118.7-118.8-118.7-311.2 0-430 118.8-118.7 311.2-118.7 430 0 118.7 118.8 118.7 311.2 0 430z" p-id="8526"></path></svg>`;
+    zoomOutSvg = `<svg class="toolbar-button-svg" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path d="M637 443H325c-4.4 0-8 3.6-8 8v60c0 4.4 3.6 8 8 8h312c4.4 0 8-3.6 8-8v-60c0-4.4-3.6-8-8-8z" p-id="8665"></path><path d="M921 867L775 721c122.1-148.9 113.6-369.5-26-509-148-148.1-388.4-148.1-537 0-148.1 148.6-148.1 389 0 537 139.5 139.6 360.1 148.1 509 26l146 146c3.2 2.8 8.3 2.8 11 0l43-43c2.8-2.7 2.8-7.8 0-11zM696 696c-118.8 118.7-311.2 118.7-430 0-118.7-118.8-118.7-311.2 0-430 118.8-118.7 311.2-118.7 430 0 118.7 118.8 118.7 311.2 0 430z" p-id="8666"></path></svg>`;
+    zoomTo100Svg = `<svg class="toolbar-button-svg" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path d="M316 672h60c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8h-60c-4.4 0-8 3.6-8 8v304c0 4.4 3.6 8 8 8zM512 622c22.1 0 40-17.9 40-39 0-23.1-17.9-41-40-41s-40 17.9-40 41c0 21.1 17.9 39 40 39zM512 482c22.1 0 40-17.9 40-39 0-23.1-17.9-41-40-41s-40 17.9-40 41c0 21.1 17.9 39 40 39z" p-id="8805"></path><path d="M880 112H144c-17.7 0-32 14.3-32 32v736c0 17.7 14.3 32 32 32h736c17.7 0 32-14.3 32-32V144c0-17.7-14.3-32-32-32z m-40 728H184V184h656v656z" p-id="8806"></path><path d="M648 672h60c4.4 0 8-3.6 8-8V360c0-4.4-3.6-8-8-8h-60c-4.4 0-8 3.6-8 8v304c0 4.4 3.6 8 8 8z" p-id="8807"></path></svg>`;
+    viewAllFitSvg = `<svg class="toolbar-button-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M17 4h3c1.1 0 2 .9 2 2v2h-2V6h-3zM4 8V6h3V4H4c-1.1 0-2 .9-2 2v2zm16 8v2h-3v2h3c1.1 0 2-.9 2-2v-2zM7 18H4v-2H2v2c0 1.1.9 2 2 2h3zm9-8v4H8v-4zm2-2H6v8h12z"/></svg>`;
+    helpSvg = `<svg class="toolbar-button-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M11 18h2v-2h-2zm1-16A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8m0-14a4 4 0 0 0-4 4h2a2 2 0 0 1 2-2a2 2 0 0 1 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5a4 4 0 0 0-4-4"/></svg>`;
+    autoThemeSvg = `<svg class="toolbar-button-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M7.5 2c-1.79 1.15-3 3.18-3 5.5s1.21 4.35 3.03 5.5C4.46 13 2 10.54 2 7.5A5.5 5.5 0 0 1 7.5 2m11.57 1.5l1.43 1.43L4.93 20.5L3.5 19.07zm-6.18 2.43L11.41 5L9.97 6l.42-1.7L9 3.24l1.75-.12l.58-1.65L12 3.1l1.73.03l-1.35 1.13zm-3.3 3.61l-1.16-.73l-1.12.78l.34-1.32l-1.09-.83l1.36-.09l.45-1.29l.51 1.27l1.36.03l-1.05.87zM19 13.5a5.5 5.5 0 0 1-5.5 5.5c-1.22 0-2.35-.4-3.26-1.07l7.69-7.69c.67.91 1.07 2.04 1.07 3.26m-4.4 6.58l2.77-1.15l-.24 3.35zm4.33-2.7l1.15-2.77l2.2 2.54zm1.15-4.96l-1.14-2.78l3.34.24zM9.63 18.93l2.77 1.15l-2.53 2.19z"/></svg>`;
+    lightThemeSvg = `<svg class="toolbar-button-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1m.64 5l-.71.71a1 1 0 0 0 0 1.41a1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17M12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1m5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41a1 1 0 0 0 .66.29m-12-.29a1 1 0 0 0 .7.29a1 1 0 0 0 .71-.29a1 1 0 0 0 0-1.41l-.71-.71a1 1 0 0 0-1.43 1.41ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2m-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0a1 1 0 0 0 0-1.41ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5m0 9a3.5 3.5 0 1 1 3.5-3.5a3.5 3.5 0 0 1-3.5 3.5m0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1"/></svg>`;
+    darkThemeSvg = `<svg class="toolbar-button-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="m17.75 4.09l-2.53 1.94l.91 3.06l-2.63-1.81l-2.63 1.81l.91-3.06l-2.53-1.94L12.44 4l1.06-3l1.06 3zm3.5 6.91l-1.64 1.25l.59 1.98l-1.7-1.17l-1.7 1.17l.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85c-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14c.4-.4.82-.76 1.27-1.08c.75-.53 1.93.36 1.85 1.19c-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82c-2.81 3.14-2.7 7.96.31 10.98c3.02 3.01 7.84 3.12 10.98.31"/></svg>`;
+
+    constructor(operatorBar) {
+        this.operatorBar = operatorBar;
+
+        this.toolbarEle = document.createElement("div");
+        this.toolbarEle.className = "toolbar";
+
+        this.toolbarEle.appendChild(
+            this.createTool("Zoom In", this.zoomInSvg, () => {
+                MESSAGE_PUSH(MESSAGE_TYPE.NavigatorZoomIn);
+            })
+        );
+        this.toolbarEle.appendChild(
+            this.createTool("Zoom Out", this.zoomOutSvg, () => {
+                MESSAGE_PUSH(MESSAGE_TYPE.NavigatorZoomOut);
+            })
+        );
+        this.toolbarEle.appendChild(
+            this.createTool("Zoom to 100%", this.zoomTo100Svg, () => {
+                MESSAGE_PUSH(MESSAGE_TYPE.NavigatorZoomTo100);
+            })
+        );
+        this.toolbarEle.appendChild(
+            this.createTool("View All", this.viewAllFitSvg, () => {
+                MESSAGE_PUSH(MESSAGE_TYPE.NavigatorViewAllFit);
+            })
+        );
+        this.toolbarEle.appendChild(this.createThemeButton());
+        this.toolbarEle.appendChild(
+            this.createTool("Help", this.helpSvg, () => {
+                const linkEle = document.createElement("a");
+                linkEle.innerHTML =
+                    "<a>Have a good time :)<br>You can learn how to use PMoS at here.<br>What's more, welcome to report any issue to us!</a>";
+
+                linkEle.href = PMoS_HREF;
+                linkEle.target = "_blank";
+
+                MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
+                    title: "PMoS",
+                    elements: [linkEle],
+                    buttonMode: COVERING_BUTTON_MODE.CloseButton,
+                });
+            })
+        );
+    }
+
+    createTool(title, image, click) {
+        const button = document.createElement("button");
+        button.className = "toolbar-button";
+        button.title = title;
+        button.innerHTML = image;
+        button.onclick = click;
+        return button;
+    }
+
+    createThemeButton() {
+        const button = this.createTool("Theme", this.autoThemeSvg, null);
+        button.currentTheme = THEME_STYLE.auto;
+        button.onclick = () => {
+            switch (button.currentTheme) {
+                case THEME_STYLE.auto:
+                    button.currentTheme = THEME_STYLE.light;
+                    button.innerHTML = this.lightThemeSvg;
+                    MESSAGE_PUSH(MESSAGE_TYPE.ThemeChange, {
+                        theme: THEME_STYLE.light,
+                    });
+                    break;
+                case THEME_STYLE.light:
+                    button.currentTheme = THEME_STYLE.dark;
+                    button.innerHTML = this.darkThemeSvg;
+                    MESSAGE_PUSH(MESSAGE_TYPE.ThemeChange, {
+                        theme: THEME_STYLE.dark,
+                    });
+                    break;
+                default:
+                    button.currentTheme = THEME_STYLE.auto;
+                    button.innerHTML = this.autoThemeSvg;
+                    MESSAGE_PUSH(MESSAGE_TYPE.ThemeChange, {
+                        theme: THEME_STYLE.auto,
+                    });
+                    break;
+            }
+        };
+        return button;
+    }
+
+    show() {
+        this.toolbarEle.style.display = "block";
+    }
+
+    hide() {
+        this.toolbarEle.style.display = "none";
+    }
+}
+
+(function () {
+    const rootStyle = getComputedStyle(document.querySelector(":root"));
+    rootStyle.var = (key) => rootStyle.getPropertyValue(key);
 
     function createMapBar(jsPlumbNavigator, canvasEle, options) {
         const mapBarEle = document.createElement("div");

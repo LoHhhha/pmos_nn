@@ -14,8 +14,9 @@
             usedOutputName = new Set();
 
         // build all id2idx
-        for (const node of canvas.children) {
-            const nodeClassName = String(node.className);
+        for (const element of canvas.children) {
+            const node = element.origin;
+            const nodeClassName = String(element.className);
             if (!nodeClassName.includes("node")) continue;
 
             if (node.inputEndpointPrev.includes(null)) {
@@ -93,8 +94,9 @@
         }
 
         // build graph
-        for (const node of canvas.children) {
-            const nodeClassName = String(node.className);
+        for (const element of canvas.children) {
+            const node = element.origin;
+            const nodeClassName = String(element.className);
             if (!nodeClassName.includes("node")) continue;
 
             let idx = -1;
@@ -210,8 +212,8 @@
 
     window.createJsPlumbConnectionListener = (jsPlumbInstance) => {
         jsPlumbInstance.bind("connection", (info) => {
-            const sourceNode = info.source;
-            const targetNode = info.target;
+            const sourceNode = info.source.origin;
+            const targetNode = info.target.origin;
             const sourceEndpoint = info.sourceEndpoint;
             const targetEndpoint = info.targetEndpoint;
 
@@ -245,8 +247,8 @@
         });
 
         jsPlumbInstance.bind("connection:detach", (info) => {
-            const sourceNode = info.source;
-            const targetNode = info.target;
+            const sourceNode = info.source.origin;
+            const targetNode = info.target.origin;
             const sourceEndpoint = info.sourceEndpoint;
             const targetEndpoint = info.targetEndpoint;
 

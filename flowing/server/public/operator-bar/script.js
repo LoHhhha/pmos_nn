@@ -1,139 +1,91 @@
-/**
- * node: DOM-div
- *      .id:                (str) node's id
- *      .config:            (map) operatorBarNamespace.operators[x]
- *      .content:           (map) operatorBarNamespace.operators[x].args -> val
- *      .outputEndpoint:    (array) output endpoint for each place
- *      .inputEndpoint:     (array) input endpoint for each place
- *      .inputEndpointPrev: (array) input endpoint connect node and endpoint, using in other module
- *      .outline:           (DOM-div) to show some important args
- *      .outlineUpdate:     (func) to update outline
- *      .jsPlumbInstance
- */
+let MAX_Z_INDEX = 0;
+let NODE_COUNT = 0;
+let ENDPOINT_COUNT = 0;
 
-(function () {
-    const rootStyle = getComputedStyle(document.querySelector(":root"));
-    rootStyle.var = (key) => rootStyle.getPropertyValue(key);
+function getNextZIndex() {
+    return MAX_Z_INDEX++;
+}
 
-    let operatorNodeSelected = null;
-    let offsetX, offsetY;
+function getNextNodeId() {
+    return NODE_COUNT++;
+}
 
-    function operatorNodeDragStart(e) {
-        if (e.buttons !== 1) return false;
-        if (e.target === this) {
-            e.preventDefault();
+function getNextEndpointId() {
+    return ENDPOINT_COUNT++;
+}
 
-            operatorNodeSelected = this.cloneNode(true);
-            operatorNodeSelected.origin = this;
-
-            offsetX = e.clientX - this.getBoundingClientRect().left;
-            offsetY = e.clientY - this.getBoundingClientRect().top;
-
-            operatorNodeSelected.style.zIndex = getMaxZIndex();
-            operatorNodeSelected.style.position = "absolute";
-            document.body.appendChild(operatorNodeSelected);
-
-            document.addEventListener("pointermove", operatorNodeDrag, false);
-            document.addEventListener("pointerup", operatorNodeDragEnd, false);
-        }
-        return false;
+function getNodeElement(config) {
+    const node = document.createElement("div");
+    node.classList.add(operatorBarNamespace.baseNodeCssClass);
+    for (const x of config.extendCssClass) {
+        node.classList.add(x);
     }
+    node.textContent = config.apiName;
+    return node;
+}
 
-    function operatorNodeDrag(e) {
-        if (operatorNodeSelected !== null) {
-            e.preventDefault();
-            let x = e.clientX - offsetX;
-            let y = e.clientY - offsetY;
-            operatorNodeSelected.style.left = `${x}px`;
-            operatorNodeSelected.style.top = `${y}px`;
-        }
-    }
+class Node {
+    element; // element.origin -> this
+    config;
+    content;
+    canvas;
+    viewport;
+    jsPlumbInstance;
+    outputEndpoint;
+    inputEndpoint;
+    inputEndpointPrev;
+    outline;
 
-    function operatorNodeDragEnd(e) {
-        if (operatorNodeSelected !== null) {
-            const boundingClientRect =
-                operatorNodeSelected.origin.barEle.getBoundingClientRect();
-            const barMinX = boundingClientRect.left;
-            const barMaxX = boundingClientRect.right;
-            const barMinY = boundingClientRect.top;
-            const barMaxY = boundingClientRect.bottom;
-            if (
-                e.clientX > barMaxX ||
-                e.clientX < barMinX ||
-                e.clientY > barMaxY ||
-                e.clientY < barMinY
-            ) {
-                const scale =
-                    operatorNodeSelected.origin.jsPlumbNavigator.getCanvasScale();
-                operatorNodeSelected.origin.addNode(
-                    e.clientX - offsetX * scale,
-                    e.clientY - offsetY * scale
-                );
+    updateOutline() {
+        var outlineText = "";
+        for (const { name, short } of this.config.outlines) {
+            if (outlineText !== "") {
+                outlineText += " ";
             }
-            operatorNodeSelected.style.zIndex = null;
-            document.body.removeChild(operatorNodeSelected);
+            outlineText += `${short}:${String(this.content[name])}`;
         }
-        operatorNodeSelected = null;
-        document.removeEventListener("pointermove", operatorNodeDrag, false);
+        this.outline.textContent = outlineText;
+        if (this.config.changeCallBack instanceof Function) {
+            this.config.changeCallBack(this);
+        }
     }
 
-    function getMaxZIndex() {
-        if (!window.hasOwnProperty("maxZIndex")) {
-            window.maxZIndex = 0;
-        }
-        return ++window.maxZIndex;
+    upZIndex() {
+        this.element.style.zIndex = getNextZIndex();
     }
+    upZIndexFunc = this.upZIndex.bind(this);
 
-    function getNodeId() {
-        if (!window.hasOwnProperty("operatorNodeCount")) {
-            window.operatorNodeCount = 0;
-        }
-        return window.operatorNodeCount++;
-    }
-
-    function getEndpointId() {
-        if (!window.hasOwnProperty("operatorEndpointCount")) {
-            window.operatorEndpointCount = 0;
-        }
-        return window.operatorEndpointCount++;
-    }
-
-    function nodeOverview(e) {
-        const node = e.target;
-        const nodeStyle = window.getComputedStyle(node);
-        const canvas = node.parentElement;
-        const viewport = canvas.parentElement;
+    showOverview() {
+        const nodeStyle = window.getComputedStyle(this.element);
 
         const overview = document.createElement("div");
         overview.classList.add("overview");
         overview.style.left = nodeStyle.left;
         overview.style.top = nodeStyle.top;
+        overview.style.backgroundColor = nodeStyle.backgroundColor;
         overview.style.zIndex = Number.MAX_SAFE_INTEGER;
-        const rgb = nodeStyle.backgroundColor.match(/\d+/g).map(Number);
-        overview.style.backgroundColor =
-            "rgba(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + "," + "0.8)";
 
         // title
         const title = document.createElement("div");
         title.classList.add("overview-title");
         const link = document.createElement("a");
-        if (node.config.link) {
+        if (this.config.link) {
             link.onclick = () => {
                 MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
                     title: "Page Jump!",
-                    text: `Go to introduction for ${node.config.apiName} page?`,
+                    text: `Go to introduction for ${this.config.apiName} page?`,
                     buttonMode: COVERING_BUTTON_MODE.ConfirmAndCancelButton,
                     buttonCallback: {
                         confirm: () => {
-                            window.open(node.config.link);
+                            window.open(this.config.link);
                         },
                     },
                 });
             };
         }
-        link.text = node.config.apiName;
-        if (node.config.framework !== operatorBarNamespace.framework.all) {
-            link.text += "(" + node.config.framework + ")";
+        link.text = this.config.apiName;
+        if (this.config.framework !== operatorBarNamespace.framework.all) {
+            link.text += "(" + this.config.framework + ")";
         }
         link.target = "_blank";
         title.appendChild(link);
@@ -142,7 +94,7 @@
         // args
         const argsContainer = document.createElement("div");
         argsContainer.classList.add("overview-args-container");
-        for (const arg of node.config.args) {
+        for (const arg of this.config.args) {
             const item = document.createElement("div");
             item.classList.add("overview-item");
 
@@ -153,12 +105,14 @@
 
             const itemInput = document.createElement(arg.type.input.element);
             itemInput.classList.add("overview-item-input");
-            itemInput.type = arg.type.input.element.type;
+            if(arg.type.input.element.type){
+                itemInput.type = arg.type.input.element.type;
+            }
             switch (arg.type.input) {
                 case operatorBarNamespace.argsInputType.text:
                     itemInput.onchange = () => {
                         if (arg.type.reg.test(itemInput.value)) {
-                            node.content[arg.name] = itemInput.value;
+                            this.content[arg.name] = itemInput.value;
                         } else {
                             MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
                                 title: "Warning!",
@@ -166,7 +120,7 @@
                                 buttonMode: COVERING_BUTTON_MODE.CloseButton,
                             });
                             itemInput.value = arg.default;
-                            node.content[arg.name] = arg.default;
+                            this.content[arg.name] = arg.default;
                         }
                     };
                     break;
@@ -179,7 +133,7 @@
                     }
 
                     itemInput.onchange = () => {
-                        node.content[arg.name] = itemInput.value;
+                        this.content[arg.name] = itemInput.value;
                     };
                     break;
                 default:
@@ -192,24 +146,12 @@
                         buttonMode: COVERING_BUTTON_MODE.CloseButton,
                     });
             }
-            itemInput.value = node.content[arg.name];
+            itemInput.value = this.content[arg.name];
             item.appendChild(itemInput);
 
             argsContainer.appendChild(item);
         }
         overview.appendChild(argsContainer);
-
-        // button
-        const deleteButton = document.createElement("button");
-        deleteButton.classList.add("overview-delete-button");
-        deleteButton.textContent = "Delete";
-        deleteButton.addEventListener("click", () => {
-            node.jsPlumbInstance.removeAllEndpoints(node);
-            node.remove();
-            overview.remove();
-            document.removeEventListener("pointerdown", removeOverview, false);
-        });
-        overview.appendChild(deleteButton);
 
         const removeOverview = (e) => {
             // point down beyond the overview
@@ -221,180 +163,294 @@
                     false
                 );
             }
-            node.updateOutline();
+            this.updateOutline();
         };
         viewport.addEventListener("pointerdown", removeOverview, false);
 
+        // button
+        const deleteButton = document.createElement("button");
+        deleteButton.classList.add("overview-delete-button");
+        deleteButton.textContent = "Delete";
+        deleteButton.addEventListener("click", () => {
+            overview.remove();
+            this.dispose();
+            viewport.removeEventListener("pointerdown", removeOverview, false);
+        });
+        overview.appendChild(deleteButton);
+
         canvas.appendChild(overview);
     }
+    showOverviewFunc = this.showOverview.bind(this);
 
-    function createOperatorNode(
-        nodeConfig,
-        baseNodeCssClass,
-        barEle,
-        jsPlumbNavigator
-    ) {
-        const getNode = () => {
-            const ele = document.createElement("div");
-            ele.classList.add(baseNodeCssClass);
-            for (const x of nodeConfig.extendCssClass) {
-                ele.classList.add(x);
-            }
-            ele.textContent = nodeConfig.apiName;
-            return ele;
+    setHandle() {
+        // make sure being top
+        this.element.addEventListener("pointerdown", this.upZIndexFunc);
+
+        // overview
+        this.element.addEventListener("dblclick", this.showOverviewFunc);
+
+        // right-key-menu
+        this.element.oncontextmenu = (e) => {
+            MESSAGE_PUSH(MESSAGE_TYPE.RightKeyMenuShow, {
+                showLeft: e.clientX,
+                showTop: e.clientY,
+                items: [
+                    {
+                        title: "Copy",
+                    },
+                    {
+                        title: "Edit",
+                        callback: this.showOverviewFunc,
+                    },
+                    {
+                        title: "Delete",
+                        callback: this.dispose.bind(this),
+                    },
+                ],
+            });
+            return false;
         };
-
-        const ele = getNode();
-        ele.style.position = "relative";
-
-        ele.prevLeft = ele.style.left;
-        ele.prevTop = ele.style.top;
-        ele.barEle = barEle;
-        ele.jsPlumbNavigator = jsPlumbNavigator;
-        ele.addNode = (left, top) => {
-            const node = getNode();
-
-            node.id = getNodeId();
-            node.config = nodeConfig;
-            node.jsPlumbInstance = jsPlumbNavigator.jsPlumbInstance;
-            node.content = {};
-            node.content.default = {};
-            node.outputEndpoint = Array(nodeConfig.outputEnd.length);
-            node.inputEndpoint = Array(nodeConfig.inputEnd.length);
-            node.inputEndpointPrev = Array(nodeConfig.inputEnd.length);
-
-            const canvasBounds = jsPlumbNavigator.getCanvasBounds();
-            const canvasScale = jsPlumbNavigator.getCanvasScale();
-            // place
-            node.style.position = "absolute";
-            node.style.left = `${left / canvasScale - canvasBounds.left}px`;
-            node.style.top = `${top / canvasScale - canvasBounds.top}px`;
-            // make sure being top
-            const upZIndex = (e) => {
-                node.style.zIndex = getMaxZIndex();
-            };
-            node.addEventListener("pointerdown", upZIndex);
-            if (!window.hasOwnProperty("maxZIndex")) {
-                window.maxZIndex = 0;
-            }
-            node.style.zIndex = node.style.zIndex = getMaxZIndex();
-
-            jsPlumbNavigator.canvasEle.appendChild(node);
-            jsPlumbNavigator.jsPlumbInstance.manage(node);
-
-            // set inputEndpointPrev
-            for (var ptr = 0; ptr < nodeConfig.inputEnd.length; ptr++) {
-                node.inputEndpointPrev[ptr] = null;
-            }
-
-            // set endpoint
-            for (var ptr = 0; ptr < nodeConfig.outputEnd.length; ptr++) {
-                const endpointId = getEndpointId();
-                const placeRate = (ptr + 1) / (nodeConfig.outputEnd.length + 1);
-
-                // endpoint
-                node.outputEndpoint[ptr] =
-                    jsPlumbNavigator.jsPlumbInstance.addEndpoint(node, {
-                        uuid: endpointId,
-                        anchors: [placeRate, 1, 0, 1],
-                        ...operatorBarNamespace.outputEndpointDefaultStyle,
-                    });
-
-                // endpoint label
-                const endpointLabel = document.createElement("div");
-                endpointLabel.classList.add("node-endpoint-label");
-                endpointLabel.textContent = nodeConfig.outputEnd[ptr];
-                node.appendChild(endpointLabel);
-                endpointLabel.style.top = `${endpointLabel.offsetHeight / 2}px`;
-                endpointLabel.style.left = `${
-                    node.offsetWidth * placeRate - endpointLabel.offsetWidth / 2
-                }px`;
-            }
-            for (var ptr = 0; ptr < nodeConfig.inputEnd.length; ptr++) {
-                const endpointId = getEndpointId();
-                const placeRate = (ptr + 1) / (nodeConfig.inputEnd.length + 1);
-
-                node.inputEndpoint[ptr] =
-                    jsPlumbNavigator.jsPlumbInstance.addEndpoint(node, {
-                        uuid: endpointId,
-                        anchors: [placeRate, 0, 0, -1],
-                        ...operatorBarNamespace.inputEndpointDefaultStyle,
-                    });
-
-                // endpoint label
-                const endpointLabel = document.createElement("div");
-                endpointLabel.classList.add("node-endpoint-label");
-                endpointLabel.textContent = nodeConfig.inputEnd[ptr];
-                node.appendChild(endpointLabel);
-                endpointLabel.style.bottom = `${
-                    (endpointLabel.offsetHeight * 4) / 7
-                }px`;
-                endpointLabel.style.left = `${
-                    node.offsetWidth * placeRate - endpointLabel.offsetWidth / 2
-                }px`;
-            }
-
-            // args
-            for (const arg of node.config.args) {
-                node.content[arg.name] = arg.default;
-            }
-
-            // outline
-            const outline = document.createElement("span");
-            outline.classList.add("node-outline");
-            node.appendChild(outline);
-            node.outline = outline;
-
-            node.updateOutline = () => {
-                var outlineText = "";
-                for (const { name, short } of node.config.outlines) {
-                    if (outlineText !== "") {
-                        outlineText += " ";
-                    }
-                    outlineText += `${short}:${String(node.content[name])}`;
-                }
-                node.outline.textContent = outlineText;
-                if (node.config.changeCallBack instanceof Function) {
-                    node.config.changeCallBack(node);
-                }
-            };
-            node.updateOutline();
-
-            // overview
-            node.addEventListener("dblclick", nodeOverview);
-
-            // right-key-menu
-            node.oncontextmenu = (e) => {
-                MESSAGE_PUSH(MESSAGE_TYPE.RightKeyMenuShow, {
-                    showLeft: e.clientX,
-                    showTop: e.clientY,
-                    items: [
-                        {
-                            title: "Copy",
-                        },
-                        {
-                            title: "Edit",
-                            callback: () => {
-                                nodeOverview({ target: node });
-                            },
-                        },
-                        {
-                            title: "Delete",
-                            callback: () => {
-                                node.jsPlumbInstance.removeAllEndpoints(node);
-                                node.remove();
-                            },
-                        },
-                    ],
-                });
-                return false;
-            };
-        };
-
-        ele.addEventListener("pointerdown", operatorNodeDragStart, false);
-        barEle.appendChild(ele);
     }
 
+    constructor(nodeConfig, left, top, jsPlumbNavigator) {
+        this.id = getNextNodeId();
+        this.config = nodeConfig;
+        this.jsPlumbInstance = jsPlumbNavigator.jsPlumbInstance;
+        this.content = {};
+        this.content.default = {};
+        this.outputEndpoint = Array(nodeConfig.outputEnd.length);
+        this.inputEndpoint = Array(nodeConfig.inputEnd.length);
+        this.inputEndpointPrev = Array(nodeConfig.inputEnd.length);
+
+        this.element = getNodeElement(nodeConfig);
+        this.element.origin = this;
+        const canvasBounds = jsPlumbNavigator.getCanvasBounds();
+        const canvasScale = jsPlumbNavigator.getCanvasScale();
+        // place
+        this.element.style.position = "absolute";
+        this.element.style.left = `${left / canvasScale - canvasBounds.left}px`;
+        this.element.style.top = `${top / canvasScale - canvasBounds.top}px`;
+
+        this.upZIndex();
+
+        // jsPlumb
+        jsPlumbNavigator.canvasEle.appendChild(this.element);
+        jsPlumbNavigator.jsPlumbInstance.manage(this.element);
+
+        // set inputEndpointPrev
+        for (var ptr = 0; ptr < nodeConfig.inputEnd.length; ptr++) {
+            this.inputEndpointPrev[ptr] = null;
+        }
+
+        // set endpoint
+        for (var ptr = 0; ptr < nodeConfig.outputEnd.length; ptr++) {
+            const endpointId = getNextEndpointId();
+            const placeRate = (ptr + 1) / (nodeConfig.outputEnd.length + 1);
+
+            // endpoint
+            this.outputEndpoint[ptr] =
+                jsPlumbNavigator.jsPlumbInstance.addEndpoint(this.element, {
+                    uuid: endpointId,
+                    anchors: [placeRate, 1, 0, 1],
+                    ...operatorBarNamespace.outputEndpointDefaultStyle,
+                });
+
+            // endpoint label
+            const endpointLabel = document.createElement("div");
+            endpointLabel.classList.add("node-endpoint-label");
+            endpointLabel.textContent = nodeConfig.outputEnd[ptr];
+            this.element.appendChild(endpointLabel);
+            endpointLabel.style.top = `${endpointLabel.offsetHeight / 2}px`;
+            endpointLabel.style.left = `${
+                this.element.offsetWidth * placeRate -
+                endpointLabel.offsetWidth / 2
+            }px`;
+        }
+        for (var ptr = 0; ptr < nodeConfig.inputEnd.length; ptr++) {
+            const endpointId = getNextEndpointId();
+            const placeRate = (ptr + 1) / (nodeConfig.inputEnd.length + 1);
+
+            this.inputEndpoint[ptr] =
+                jsPlumbNavigator.jsPlumbInstance.addEndpoint(this.element, {
+                    uuid: endpointId,
+                    anchors: [placeRate, 0, 0, -1],
+                    ...operatorBarNamespace.inputEndpointDefaultStyle,
+                });
+
+            // endpoint label
+            const endpointLabel = document.createElement("div");
+            endpointLabel.classList.add("node-endpoint-label");
+            endpointLabel.textContent = nodeConfig.inputEnd[ptr];
+            this.element.appendChild(endpointLabel);
+            endpointLabel.style.bottom = `${
+                (endpointLabel.offsetHeight * 4) / 7
+            }px`;
+            endpointLabel.style.left = `${
+                this.element.offsetWidth * placeRate -
+                endpointLabel.offsetWidth / 2
+            }px`;
+        }
+
+        // set content
+        for (const arg of this.config.args) {
+            this.content[arg.name] = arg.default;
+        }
+
+        // set outline
+        const outline = document.createElement("span");
+        outline.classList.add("node-outline");
+        this.element.appendChild(outline);
+        this.outline = outline;
+        this.updateOutline();
+
+        this.setHandle();
+    }
+
+    dispose() {
+        if (this.element) {
+            this.jsPlumbInstance.removeAllEndpoints(this.element);
+            this.element.removeEventListener("pointerdown", this.upZIndexFunc);
+            this.element.removeEventListener("dblclick", this.showOverviewFunc);
+            this.element.oncontextmenu = null;
+            this.element.remove();
+        }
+    }
+}
+
+class OperatorNode {
+    element;
+    config;
+    static container;
+    static jsPlumbNavigator;
+
+    static pointFollowNode = null;
+
+    static deletePointFollowNode() {
+        if (OperatorNode.pointFollowNode !== null) {
+            document.removeEventListener(
+                "pointermove",
+                OperatorNode.handleDrag,
+                false
+            );
+            document.removeEventListener(
+                "pointerup",
+                OperatorNode.handleDragEnd,
+                false
+            );
+            OperatorNode.pointFollowNode?.remove();
+            OperatorNode.pointFollowNode = null;
+        }
+    }
+
+    handleDragStart(e) {
+        // left button only
+        if (e.buttons !== 1) return false;
+
+        if (OperatorNode.pointFollowNode !== null) {
+            OperatorNode.deletePointFollowNode();
+        }
+
+        OperatorNode.pointFollowNode = getNodeElement(this.config);
+        OperatorNode.pointFollowNode.style.position = "absolute";
+        document.body.appendChild(OperatorNode.pointFollowNode);
+        OperatorNode.pointFollowNode.origin = this;
+
+        const rect = this.element.getBoundingClientRect();
+
+        OperatorNode.pointFollowNode.offsetX = e.clientX - rect.left;
+        OperatorNode.pointFollowNode.offsetY = e.clientY - rect.top;
+
+        OperatorNode.pointFollowNode.style.left = `${rect.left}px`;
+        OperatorNode.pointFollowNode.style.top = `${rect.top}px`;
+
+        document.addEventListener(
+            "pointermove",
+            OperatorNode.handleDrag,
+            false
+        );
+        document.addEventListener(
+            "pointerup",
+            OperatorNode.handleDragEnd,
+            false
+        );
+
+        return false;
+    }
+    handleDragStartFunc = this.handleDragStart.bind(this);
+
+    static handleDrag(e) {
+        if (OperatorNode.pointFollowNode === null) {
+            console.warn(
+                "[OperatorNode] handleDrag found null pointFollowNode"
+            );
+            OperatorNode.deletePointFollowNode();
+            return false;
+        }
+
+        e.preventDefault();
+        const x = e.clientX - OperatorNode.pointFollowNode.offsetX;
+        const y = e.clientY - OperatorNode.pointFollowNode.offsetY;
+        OperatorNode.pointFollowNode.style.left = `${x}px`;
+        OperatorNode.pointFollowNode.style.top = `${y}px`;
+    }
+
+    static handleDragEnd(e) {
+        if (OperatorNode.pointFollowNode === null) {
+            console.warn(
+                "[OperatorNode] handleDragEnd found null pointFollowNode"
+            );
+            OperatorNode.deletePointFollowNode();
+            return false;
+        }
+
+        const rect = OperatorNode.container.getBoundingClientRect();
+        const barMinX = rect.left;
+        const barMaxX = rect.right;
+        const barMinY = rect.top;
+        const barMaxY = rect.bottom;
+        if (
+            e.clientX > barMaxX ||
+            e.clientX < barMinX ||
+            e.clientY > barMaxY ||
+            e.clientY < barMinY
+        ) {
+            const scale = OperatorNode.jsPlumbNavigator.getCanvasScale();
+            OperatorNode.pointFollowNode.origin.addNode(
+                e.clientX - OperatorNode.pointFollowNode.offsetX * scale,
+                e.clientY - OperatorNode.pointFollowNode.offsetY * scale
+            );
+        }
+
+        OperatorNode.deletePointFollowNode();
+    }
+
+    addNode(left, right) {
+        new Node(this.config, left, right, OperatorNode.jsPlumbNavigator);
+    }
+
+    constructor(nodeConfig, container, jsPlumbNavigator) {
+        OperatorNode.container = container;
+        OperatorNode.jsPlumbNavigator = jsPlumbNavigator;
+        this.config = nodeConfig;
+        this.element = getNodeElement(nodeConfig);
+        this.element.style.position = "relative";
+        this.element.addEventListener(
+            "pointerdown",
+            this.handleDragStartFunc,
+            false
+        );
+    }
+
+    dispose() {
+        this.element.removeEventListener(
+            "pointerdown",
+            this.handleDragStartFunc,
+            false
+        );
+    }
+}
+
+(function () {
     class OperatorBar {
         constructor(jsPlumbNavigator, options) {
             this.options = options;
@@ -444,12 +500,14 @@
                     hrEle.className = "operator-bar-hr";
                     this.barEle.appendChild(hrEle);
                 }
-                createOperatorNode(
+
+                const operatorNode = new OperatorNode(
                     operator,
-                    operatorBarNamespace.baseNodeCssClass,
                     this.barEle,
                     this.jsPlumbNavigator
                 );
+                this.barEle.appendChild(operatorNode.element);
+
                 preOperatorTypeCode = operator.typeCode;
             }
         }
@@ -462,8 +520,8 @@
         };
 
         jsPlumbNavigator.jsPlumbInstance.bind("beforeDrop", function (info) {
-            const sourceNode = info.connection.source;
-            const targetNode = info.connection.target;
+            const sourceNode = info.connection.source.origin;
+            const targetNode = info.connection.target.origin;
             const sourceEndpoint = info.connection.endpoints[0];
             const targetEndpoint = info.dropEndpoint;
 
@@ -512,12 +570,11 @@
             const canvasEle = document.getElementById("canvas");
 
             for (let ptr = canvasEle.children.length - 1; ptr >= 0; ptr--) {
-                const node = canvasEle.children[ptr];
-                const nodeClassName = String(node.className);
-                if (!nodeClassName.includes("node")) continue;
+                const element = canvasEle.children[ptr];
+                const elementClassName = String(element.className);
+                if (!elementClassName.includes("node")) continue;
 
-                node.jsPlumbInstance.removeAllEndpoints(node);
-                node.remove();
+                element.origin.dispose();
             }
         });
 
