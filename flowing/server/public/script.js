@@ -26,4 +26,6 @@ jsPlumb.ready(() => {
     )
 
     window.createJsPlumbConnectionListener(jsPlumbInstance);
+
+    window.addNodesCopyHelper(jsPlumbNavigator);
 });

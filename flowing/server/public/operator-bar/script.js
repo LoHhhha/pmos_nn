@@ -1,3 +1,14 @@
+/**
+ * MESSAGE_TYPE.ClearNode
+ *
+ * MESSAGE_TYPE.CreateNode
+ *      <event.detail.nodesInfo: Array> <event.detail.connectionsInfo: Array> [<event.detail.offsetLeft: int> <event.detail.offsetTop: int>]
+ *          <event.detail.nodesInfo>: [{config, left, top, content}]
+ *          <event.detail.connectionsInfo>: todo
+ *          -> node
+ *
+ */
+
 let MAX_Z_INDEX = 0;
 let NODE_COUNT = 0;
 let ENDPOINT_COUNT = 0;
@@ -105,7 +116,7 @@ class Node {
 
             const itemInput = document.createElement(arg.type.input.element);
             itemInput.classList.add("overview-item-input");
-            if(arg.type.input.element.type){
+            if (arg.type.input.element.type) {
                 itemInput.type = arg.type.input.element.type;
             }
             switch (arg.type.input) {
@@ -197,6 +208,11 @@ class Node {
                 items: [
                     {
                         title: "Copy",
+                        callback: () => {
+                            MESSAGE_PUSH(MESSAGE_TYPE.NodesCopy, {
+                                nodes: [this],
+                            });
+                        },
                     },
                     {
                         title: "Edit",
@@ -575,6 +591,39 @@ class OperatorNode {
                 if (!elementClassName.includes("node")) continue;
 
                 element.origin.dispose();
+            }
+        });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.CreateNode, (event) => {
+            if (
+                !(event.detail?.nodesInfo instanceof Array) ||
+                !(event.detail?.connectionsInfo instanceof Array)
+            ) {
+                console.log("[CreateNode] get an unexpected event as", event);
+                return;
+            }
+
+            let offsetLeft = event.detail?.offsetLeft,
+                offsetTop = event.detail?.offsetTop;
+            offsetLeft = offsetLeft === undefined ? 0 : offsetLeft;
+            offsetTop = offsetTop === undefined ? 0 : offsetTop;
+
+            const addNodes = Array(0);
+            for (const { config, left, top, content } of event.detail
+                .nodesInfo) {
+                const node = new Node(
+                    config,
+                    left + offsetLeft,
+                    top + offsetTop,
+                    jsPlumbNavigator
+                );
+                if (content !== undefined) {
+                    for (const arg of config.args) {
+                        node.content[arg.name] = content[arg.name];
+                    }
+                    node.updateOutline();
+                }
+                addNodes.push(node);
             }
         });
 

@@ -95,6 +95,14 @@ class Navigator {
             items: [
                 {
                     title: "Paste",
+                    callback: MEMORY_GET(MEMORY_KEYS.CanPasteNodes, false)
+                        ? () => {
+                              MESSAGE_PUSH(MESSAGE_TYPE.NodesPaste, {
+                                  left: e.clientX,
+                                  top: e.clientY,
+                              });
+                          }
+                        : undefined,
                 },
                 {
                     title: "Zoom In",
