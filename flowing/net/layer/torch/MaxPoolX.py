@@ -52,14 +52,14 @@ class _MaxPool(Layer):
                 f"kernel_size={self.kernel_size}, stride={self.stride}, padding={self.padding}, "
                 f"dilation={self.dilation}, return_indices={self.return_indices}, ceil_mode={self.ceil_mode})")
 
-    def output_size(self, input_size: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
+    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
         # need dim as args.
         dim = kwargs['dim']
 
-        if len(input_size) not in (dim + 1, dim + 2):
+        if len(input_shape) not in (dim + 1, dim + 2):
             raise ValueError(
                 f"Expected {dim + 1}D (unbatched) or {dim + 2}D (batched) input to {self._api_name}, "
-                f"but got input of size: {input_size}"
+                f"but got input of size: {input_shape}"
             )
 
         if isinstance(self.kernel_size, int):
@@ -84,32 +84,32 @@ class _MaxPool(Layer):
         else:
             dilation = self.dilation
 
-        output_size = [size for size in input_size]
+        output_shape = list(input_shape)
 
         for i in range(dim):
-            output_size[-dim + i] = math.floor(
-                (input_size[-dim + i] + 2 * padding[i] - dilation[i] * (kernel_size[i] - 1) - 1) / stride[i] + 1
+            output_shape[-dim + i] = math.floor(
+                (input_shape[-dim + i] + 2 * padding[i] - dilation[i] * (kernel_size[i] - 1) - 1) / stride[i] + 1
             )
 
-        return tuple(output_size)
+        return tuple(output_shape)
 
 
 class MaxPool1d(_MaxPool):
     _api_name = "MaxPool1d"
 
-    def output_size(self, input_size: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return super().output_size(input_size, dim=1)
+    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
+        return super().output_shape(input_shape, dim=1)
 
 
 class MaxPool2d(_MaxPool):
     _api_name = "MaxPool2d"
 
-    def output_size(self, input_size: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return super().output_size(input_size, dim=2)
+    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
+        return super().output_shape(input_shape, dim=2)
 
 
 class MaxPool3d(_MaxPool):
     _api_name = "MaxPool3d"
 
-    def output_size(self, input_size: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return super().output_size(input_size, dim=3)
+    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
+        return super().output_shape(input_shape, dim=3)

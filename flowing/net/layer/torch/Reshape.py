@@ -1,32 +1,34 @@
 # Copyright © 2024 PMoS. All rights reserved.
 
+from functools import reduce
 from typing import Tuple, List
 
 from flowing.net.layer import Layer
 
 __all__ = [
-    'Add',
-    'Subtract',
-    'Multiply',
-    'Divide',
+    'Reshape'
 ]
 
+class Reshape(Layer):
+    _api_name = "Reshape"
 
-class _Operation(Layer):
-    operation: str = ...
+    output_shape: Tuple[int, ...]
+    __output_shape_mul: int = ...
 
+    data_amount = 1
     output_amount = 1
 
-    layer_name = "Useless"
+    def __init__(self, output_shape, data_amount: int | None = None):
+        self.output_shape = output_shape
+        self.__output_shape_mul = reduce(lambda x, y: x * y, self.output_shape)
 
-    def __init__(self, data_amount: int | None = None):
         self._set_data(data_amount=data_amount)
 
     def init_code(self, package: str = "torch.nn", add_self: bool = True):
         super().init_code()
         return None
 
-    def forward_code(self, add_self: bool = True):
+    def forward_code(self, add_self: bool = False):
         # add_self is useless
 
         if self.output_name is ... or self.data_names is ...:
@@ -34,31 +36,11 @@ class _Operation(Layer):
                 "please first assign the Layer.output_name and Layer.data_name before you call "
                 "Layer.forward_code()"
             )
-        return f"{self.output_name} = {self._get_args(block=f' {self.operation} ')}"
+        return f"{self.output_name} = torch.reshape(input={self.output_name}, shape={self.output_shape})"
 
     def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return tuple(input_shape)
+        input_mul = reduce(lambda x, y: x * y, input_shape)
 
-
-class Add(_Operation):
-    _api_name = "Add"
-
-    operation = "+"
-
-
-class Subtract(_Operation):
-    _api_name = "Subtract"
-
-    operation = "-"
-
-
-class Multiply(_Operation):
-    _api_name = "Multiply"
-
-    operation = "*"
-
-
-class Divide(_Operation):
-    _api_name = "Divide"
-
-    operation = "/"
+        if input_mul != self.__output_shape_mul:
+            return tuple()
+        return tuple(self.output_shape)

@@ -11,7 +11,7 @@
     --node-width: var(--node-width);
     --node-height: var(--node-height);
 
-    --node-overview-min-width: 150px;
+    --node-overview-min-width: var(--node-width);
     --node-overview-max-width: 300px;
     --node-overview-container-max-height: 250px;
     --node-overview-outline-color: var(--content-outline-color);
@@ -168,102 +168,169 @@
     background-color: var(--node-overview-button-hover-background-color);
 }
 
+/* IO */
 .Input {
-    background-color: rgb(160, 96, 0);
+    background-color: rgb(192, 128, 0);
 }
 
 .Output {
-    background-color: rgb(160, 96, 160);
-}
-
-.Add {
-    background-color: rgb(96, 160, 128);
-}
-
-.Subtract {
-    background-color: rgb(96, 160, 144);
-}
-
-.Multiply {
-    background-color: rgb(96, 160, 160);
-}
-
-.Divide {
-    background-color: rgb(96, 160, 176);
-}
-
-.Identity {
-    background-color: rgb(96, 128, 128);
-}
-
-.ReLU {
-    background-color: rgb(96, 128, 144);
-}
-
-.LeakyReLU {
-    background-color: rgb(96, 128, 160);
-}
-
-.SELU {
-    background-color: rgb(96, 128, 176);
-}
-
-.CELU {
-    background-color: rgb(96, 128, 192);
-}
-
-.Sigmoid {
-    background-color: rgb(96, 128, 208);
-}
-
-.Softmax {
-    background-color: rgb(96, 128, 224);
-}
-
-.Conv1d {
-    background-color: rgb(0, 128, 128);
-}
-
-.Conv2d {
-    background-color: rgb(0, 128, 144);
-}
-
-.Conv3d {
-    background-color: rgb(0, 128, 160);
-}
-
-.ConvTranspose1d {
-    background-color: rgb(0, 128, 176);
-}
-
-.ConvTranspose2d {
     background-color: rgb(0, 128, 192);
 }
 
-.ConvTranspose3d {
-    background-color: rgb(0, 128, 208);
+/* math (0, 128, x) */
+.Add {
+    background-color: rgb(0, 128, 96);
 }
 
+.Subtract {
+    background-color: rgb(0, 128, 112);
+}
+
+.Multiply {
+    background-color: rgb(0, 128, 128);
+}
+
+.Divide {
+    background-color: rgb(0, 128, 144);
+}
+
+/* transform (160, 96, x+16) */
+.Reshape {
+    background-color: rgb(160, 96, 96);
+}
+
+.Flatten {
+    background-color: rgb(160, 96, 112);
+}
+
+.Unflatten {
+    background-color: rgb(160, 96, 128);
+}
+
+/* transform (160, 128, x+8) */
+.Dropout {
+    background-color: rgb(160, 128, 96);
+}
+
+.Dropout1d {
+    background-color: rgb(160, 128, 104);
+}
+
+.Dropout2d {
+    background-color: rgb(160, 128, 112);
+}
+
+.Dropout3d {
+    background-color: rgb(160, 128, 120);
+}
+
+.Identity {
+    background-color: rgb(160, 128, 128);
+}
+
+.ReLU {
+    background-color: rgb(160, 128, 136);
+}
+
+.LeakyReLU {
+    background-color: rgb(160, 128, 144);
+}
+
+.SELU {
+    background-color: rgb(160, 128, 152);
+}
+
+.CELU {
+    background-color: rgb(160, 128, 160);
+}
+
+.Sigmoid {
+    background-color: rgb(160, 128, 168);
+}
+
+.Softmax {
+    background-color: rgb(160, 128, 176);
+}
+
+/* transform (160, 144, x+8) */
+.Conv1d {
+    background-color: rgb(160, 144, 96);
+}
+
+.Conv2d {
+    background-color: rgb(160, 144, 104);
+}
+
+.Conv3d {
+    background-color: rgb(160, 144, 112);
+}
+
+.LazyConv1d {
+    background-color: rgb(160, 144, 120);
+}
+
+.LazyConv2d {
+    background-color: rgb(160, 144, 128);
+}
+
+.LazyConv3d {
+    background-color: rgb(160, 144, 136);
+}
+
+.ConvTranspose1d {
+    background-color: rgb(160, 144, 144);
+}
+
+.ConvTranspose2d {
+    background-color: rgb(160, 144, 152);
+}
+
+.ConvTranspose3d {
+    background-color: rgb(160, 144, 160);
+}
+
+.LazyConvTranspose1d {
+    background-color: rgb(160, 144, 168);
+}
+
+.LazyConvTranspose2d {
+    background-color: rgb(160, 144, 176);
+}
+
+.LazyConvTranspose3d {
+    background-color: rgb(160, 144, 184);
+}
+
+/* pool (160, 160, x+16) */
 .MaxPool1d {
-    background-color: rgb(64, 128, 128);
+    background-color: rgb(160, 160, 96);
 }
 
 .MaxPool2d {
-    background-color: rgb(64, 128, 144);
+    background-color: rgb(160, 160, 112);
 }
 
 .MaxPool3d {
-    background-color: rgb(64, 128, 160);
+    background-color: rgb(160, 160, 128);
 }
 
 .MaxUnpool1d {
-    background-color: rgb(64, 128, 176);
+    background-color: rgb(160, 160, 144);
 }
 
 .MaxUnpool2d {
-    background-color: rgb(64, 128, 192);
+    background-color: rgb(160, 160, 160);
 }
 
 .MaxUnpool3d {
-    background-color: rgb(64, 128, 208);
+    background-color: rgb(160, 160, 172);
+}
+
+/* linear (160, 172, x) */
+.Linear {
+    background-color: rgb(160, 172, 96);
+}
+
+.LayerLinear {
+    background-color: rgb(160, 172, 112);
 }

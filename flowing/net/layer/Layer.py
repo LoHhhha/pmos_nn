@@ -57,7 +57,10 @@ class Layer(ABC):
         return f"{self.output_name} = {"self." if add_self else ""}{self.layer_name}({self._get_args()})"
 
     @abstractmethod
-    def output_size(self, input_size: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
+    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
+        """
+        Return what shape of date will get if push [input_shape] data to Layer.
+        """
         ...
 
     def __repr__(self):

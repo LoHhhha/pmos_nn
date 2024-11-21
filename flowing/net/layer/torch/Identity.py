@@ -22,5 +22,5 @@ class Identity(Layer):
         super().init_code()
         return f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}()"
 
-    def output_size(self, input_size: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return input_size
+    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
+        return tuple(input_shape)

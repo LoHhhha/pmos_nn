@@ -1,5 +1,5 @@
 :root {
-    --main-bar-width: 250px;
+    --main-bar-width: 300px;
     --main-bar-margin: var(--margin);
 
     --toolbar-outline-color: var(--container-outline-color);
