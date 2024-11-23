@@ -9,6 +9,9 @@
  *
  */
 
+const rootStyle = getComputedStyle(document.querySelector(":root"));
+rootStyle.var = (key) => rootStyle.getPropertyValue(key);
+
 let MAX_Z_INDEX = 0;
 let NODE_COUNT = 0;
 let ENDPOINT_COUNT = 0;
@@ -35,6 +38,180 @@ function getNodeElement(config) {
     return node;
 }
 
+class Overview {
+    static #overviewInstance = null;
+
+    element;
+    viewport;
+    isShow;
+
+    constructor(jsPlumbNavigator, options) {
+        if (Overview.#overviewInstance !== null) {
+            return Overview.#overviewInstance;
+        }
+        this.viewport = jsPlumbNavigator.viewportEle;
+
+        const { nodeOverviewPosition } = options;
+        this.element = document.createElement("div");
+        this.element.classList.add("overview");
+        const margin = rootStyle.var("--node-overview-margin");
+        switch (nodeOverviewPosition) {
+            case "top-left":
+                this.element.style.left = margin;
+                this.element.style.top = margin;
+                break;
+            case "top-right":
+                this.element.style.right = margin;
+                this.element.style.top = margin;
+                break;
+            case "bottom-left":
+                this.element.style.left = margin;
+                this.element.style.bottom = margin;
+                break;
+            default:
+                this.element.style.right = margin;
+                this.element.style.bottom = margin;
+                break;
+        }
+        this.viewport.appendChild(this.element);
+        this.hide();
+        return (Overview.#overviewInstance = this);
+    }
+
+    show(node) {
+        if (this.isShow) {
+            console.error(
+                "[Node-Overview] detect a overview show call when another node showing its overview!"
+            );
+            return;
+        }
+        this.isShow = true;
+
+        // title
+        const title = document.createElement("div");
+        title.classList.add("overview-title");
+        const link = document.createElement("a");
+        if (node.config.link) {
+            link.onclick = () => {
+                MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
+                    title: "Page Jump!",
+                    text: `Go to introduction for ${node.config.apiName} page?`,
+                    buttonMode: COVERING_BUTTON_MODE.ConfirmAndCancelButton,
+                    buttonCallback: {
+                        confirm: () => {
+                            window.open(node.config.link);
+                        },
+                    },
+                });
+            };
+        }
+        link.text = node.config.apiName;
+        if (node.config.framework !== operatorBarNamespace.framework.all) {
+            link.text += "(" + node.config.framework + ")";
+        }
+        link.target = "_blank";
+        title.appendChild(link);
+        this.element.appendChild(title);
+
+        // args
+        const argsContainer = document.createElement("div");
+        argsContainer.classList.add("overview-args-container");
+        for (const arg of node.config.args) {
+            const item = document.createElement("div");
+            item.classList.add("overview-item");
+
+            const itemName = document.createElement("div");
+            itemName.classList.add("overview-item-text");
+            itemName.textContent = arg.name;
+            item.appendChild(itemName);
+
+            const itemInput = document.createElement(arg.type.input.element);
+            itemInput.classList.add("overview-item-input");
+            if (arg.type.input.element.type) {
+                itemInput.type = arg.type.input.element.type;
+            }
+            switch (arg.type.input) {
+                case operatorBarNamespace.argsInputType.text:
+                    itemInput.onchange = () => {
+                        console.log(
+                            itemInput.value,
+                            arg.type.reg,
+                            arg.type.reg.test(itemInput.value),
+                            itemInput.value,
+                            arg.type.reg,
+                            arg.type.reg.test(itemInput.value),
+                        );
+                        if (arg.type.reg.test(itemInput.value)) {
+                            node.content[arg.name] = itemInput.value;
+                        } else {
+                            MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
+                                title: "Warning!",
+                                text: arg.type.note,
+                                buttonMode: COVERING_BUTTON_MODE.CloseButton,
+                            });
+                            itemInput.value = arg.default;
+                            node.content[arg.name] = arg.default;
+                        }
+                        node.updateOutline();
+                    };
+                    break;
+                case operatorBarNamespace.argsInputType.select:
+                    for (const value of arg.type.values) {
+                        const selectEle = document.createElement("option");
+                        selectEle.value = value;
+                        selectEle.textContent = value;
+                        itemInput.appendChild(selectEle);
+                    }
+
+                    itemInput.onchange = () => {
+                        node.content[arg.name] = itemInput.value;
+                        node.updateOutline();
+                    };
+                    break;
+                default:
+                    console.error(
+                        "[operator-bar] get a nonsupport input type: ${arg.type.input}."
+                    );
+                    MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
+                        title: "Error!",
+                        text: `Found nonsupport input type: ${arg.type.input}, please report to us.`,
+                        buttonMode: COVERING_BUTTON_MODE.CloseButton,
+                    });
+            }
+            itemInput.value = node.content[arg.name];
+            item.appendChild(itemInput);
+
+            argsContainer.appendChild(item);
+        }
+        this.element.appendChild(argsContainer);
+
+        const hideOverview = () => {
+            // point down beyond the overview
+            this.hide();
+            node.updateOutline();
+            node.hideOverview = null;
+        };
+        node.hideOverview = hideOverview.bind(this);
+
+        // button
+        const deleteButton = document.createElement("button");
+        deleteButton.classList.add("overview-delete-button");
+        deleteButton.textContent = "Delete";
+        deleteButton.addEventListener("click", () => {
+            this.hide();
+            node.dispose();
+        });
+        this.element.appendChild(deleteButton);
+    }
+
+    hide() {
+        this.isShow = false;
+        while (this.element.firstChild) {
+            this.element.removeChild(this.element.lastChild);
+        }
+    }
+}
+
 class Node {
     element; // element.origin -> this
     config;
@@ -46,6 +223,35 @@ class Node {
     inputEndpoint;
     inputEndpointPrev;
     outline;
+
+    // static method
+    static SELECTED_NODES = new Set();
+    static clearSelect() {
+        for (const node of Node.SELECTED_NODES) {
+            node.unSelect();
+        }
+        Node.SELECTED_NODES.clear();
+    }
+    static selectNode(node, control) {
+        if (control) {
+            if (Node.SELECTED_NODES.has(node)) {
+                // unselect when select again
+                Node.SELECTED_NODES.delete(node);
+                node.unSelect();
+            } else {
+                // select
+                Node.SELECTED_NODES.add(node);
+                node.select(false);
+            }
+        } else {
+            // clear if node not selected and select it
+            if (!Node.SELECTED_NODES.has(node)) {
+                Node.clearSelect();
+            }
+            Node.SELECTED_NODES.add(node);
+            node.select(true);
+        }
+    }
 
     updateOutline() {
         var outlineText = "";
@@ -64,141 +270,29 @@ class Node {
     upZIndex() {
         this.element.style.zIndex = getNextZIndex();
     }
-    upZIndexFunc = this.upZIndex.bind(this);
 
-    showOverview() {
-        const nodeStyle = window.getComputedStyle(this.element);
-
-        const overview = document.createElement("div");
-        overview.classList.add("overview");
-        overview.style.left = nodeStyle.left;
-        overview.style.top = nodeStyle.top;
-        overview.style.backgroundColor = nodeStyle.backgroundColor;
-        overview.style.zIndex = Number.MAX_SAFE_INTEGER;
-
-        // title
-        const title = document.createElement("div");
-        title.classList.add("overview-title");
-        const link = document.createElement("a");
-        if (this.config.link) {
-            link.onclick = () => {
-                MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
-                    title: "Page Jump!",
-                    text: `Go to introduction for ${this.config.apiName} page?`,
-                    buttonMode: COVERING_BUTTON_MODE.ConfirmAndCancelButton,
-                    buttonCallback: {
-                        confirm: () => {
-                            window.open(this.config.link);
-                        },
-                    },
-                });
-            };
+    pointerDownHandler(e) {
+        this.upZIndex();
+        if (e.button == 0) {
+            Node.selectNode(this, e.ctrlKey);
         }
-        link.text = this.config.apiName;
-        if (this.config.framework !== operatorBarNamespace.framework.all) {
-            link.text += "(" + this.config.framework + ")";
-        }
-        link.target = "_blank";
-        title.appendChild(link);
-        overview.appendChild(title);
-
-        // args
-        const argsContainer = document.createElement("div");
-        argsContainer.classList.add("overview-args-container");
-        for (const arg of this.config.args) {
-            const item = document.createElement("div");
-            item.classList.add("overview-item");
-
-            const itemName = document.createElement("div");
-            itemName.classList.add("overview-item-text");
-            itemName.textContent = arg.name;
-            item.appendChild(itemName);
-
-            const itemInput = document.createElement(arg.type.input.element);
-            itemInput.classList.add("overview-item-input");
-            if (arg.type.input.element.type) {
-                itemInput.type = arg.type.input.element.type;
-            }
-            switch (arg.type.input) {
-                case operatorBarNamespace.argsInputType.text:
-                    itemInput.onchange = () => {
-                        if (arg.type.reg.test(itemInput.value)) {
-                            this.content[arg.name] = itemInput.value;
-                        } else {
-                            MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
-                                title: "Warning!",
-                                text: arg.type.note,
-                                buttonMode: COVERING_BUTTON_MODE.CloseButton,
-                            });
-                            itemInput.value = arg.default;
-                            this.content[arg.name] = arg.default;
-                        }
-                    };
-                    break;
-                case operatorBarNamespace.argsInputType.select:
-                    for (const value of arg.type.values) {
-                        const selectEle = document.createElement("option");
-                        selectEle.value = value;
-                        selectEle.textContent = value;
-                        itemInput.appendChild(selectEle);
-                    }
-
-                    itemInput.onchange = () => {
-                        this.content[arg.name] = itemInput.value;
-                    };
-                    break;
-                default:
-                    console.error(
-                        "[operator-bar] get a nonsupport input type: ${arg.type.input}."
-                    );
-                    MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
-                        title: "Error!",
-                        text: `Found nonsupport input type: ${arg.type.input}, please report to us.`,
-                        buttonMode: COVERING_BUTTON_MODE.CloseButton,
-                    });
-            }
-            itemInput.value = this.content[arg.name];
-            item.appendChild(itemInput);
-
-            argsContainer.appendChild(item);
-        }
-        overview.appendChild(argsContainer);
-
-        const removeOverview = (e) => {
-            // point down beyond the overview
-            if (e.target != overview && !overview.contains(e.target)) {
-                canvas.removeChild(overview);
-                viewport.removeEventListener(
-                    "pointerdown",
-                    removeOverview,
-                    false
-                );
-            }
-            this.updateOutline();
-        };
-        viewport.addEventListener("pointerdown", removeOverview, false);
-
-        // button
-        const deleteButton = document.createElement("button");
-        deleteButton.classList.add("overview-delete-button");
-        deleteButton.textContent = "Delete";
-        deleteButton.addEventListener("click", () => {
-            overview.remove();
-            this.dispose();
-            viewport.removeEventListener("pointerdown", removeOverview, false);
-        });
-        overview.appendChild(deleteButton);
-
-        canvas.appendChild(overview);
     }
-    showOverviewFunc = this.showOverview.bind(this);
+    pointerDownHandlerFunc = this.pointerDownHandler.bind(this);
+
+    hideOverview = null;
+    showOverview() {
+        new Overview().show(this);
+    }
 
     setHandle() {
         // make sure being top
-        this.element.addEventListener("pointerdown", this.upZIndexFunc);
+        this.element.addEventListener(
+            "pointerdown",
+            this.pointerDownHandlerFunc
+        );
 
         // overview
-        this.element.addEventListener("dblclick", this.showOverviewFunc);
+        // show when node is being selected.
 
         // right-key-menu
         this.element.oncontextmenu = (e) => {
@@ -209,14 +303,13 @@ class Node {
                     {
                         title: "Copy",
                         callback: () => {
+                            // if not selected nodes using this node
                             MESSAGE_PUSH(MESSAGE_TYPE.NodesCopy, {
-                                nodes: [this],
+                                nodes: Node.SELECTED_NODES.size
+                                    ? Node.SELECTED_NODES
+                                    : [this],
                             });
                         },
-                    },
-                    {
-                        title: "Edit",
-                        callback: this.showOverviewFunc,
                     },
                     {
                         title: "Delete",
@@ -232,6 +325,8 @@ class Node {
         this.id = getNextNodeId();
         this.config = nodeConfig;
         this.jsPlumbInstance = jsPlumbNavigator.jsPlumbInstance;
+        this.canvas = jsPlumbNavigator.canvasEle;
+        this.viewport = jsPlumbNavigator.viewportEle;
         this.content = {};
         this.content.default = {};
         this.outputEndpoint = Array(nodeConfig.outputEnd.length);
@@ -241,11 +336,10 @@ class Node {
         this.element = getNodeElement(nodeConfig);
         this.element.origin = this;
         const canvasBounds = jsPlumbNavigator.getCanvasBounds();
-        const canvasScale = jsPlumbNavigator.getCanvasScale();
         // place
         this.element.style.position = "absolute";
-        this.element.style.left = `${left / canvasScale - canvasBounds.left}px`;
-        this.element.style.top = `${top / canvasScale - canvasBounds.top}px`;
+        this.element.style.left = `${left - canvasBounds.left}px`;
+        this.element.style.top = `${top - canvasBounds.top}px`;
 
         this.upZIndex();
 
@@ -322,11 +416,38 @@ class Node {
         this.setHandle();
     }
 
+    select(showOverview) {
+        this.element.style.outlineColor = rootStyle.var(
+            "--node-selected-outline-color"
+        );
+        this.element.style.outlineWidth = rootStyle.var(
+            "--node-selected-outline-width"
+        );
+        if (showOverview && this.hideOverview === null) {
+            this.showOverview(true);
+        }
+        this.jsPlumbInstance.addToDragSelection(this.element);
+    }
+
+    unSelect() {
+        this.element.style.outlineColor = rootStyle.var("--node-outline-color");
+        this.element.style.outlineWidth = rootStyle.var("--border-width");
+        if (this.hideOverview !== null) {
+            this.hideOverview();
+        }
+        this.jsPlumbInstance.removeFromDragSelection(this.element);
+    }
+
     dispose() {
         if (this.element) {
+            if (this.hideOverview !== null) {
+                this.hideOverview();
+            }
             this.jsPlumbInstance.removeAllEndpoints(this.element);
-            this.element.removeEventListener("pointerdown", this.upZIndexFunc);
-            this.element.removeEventListener("dblclick", this.showOverviewFunc);
+            this.element.removeEventListener(
+                "pointerdown",
+                this.pointerDownHandlerFunc
+            );
             this.element.oncontextmenu = null;
             this.element.remove();
         }
@@ -432,8 +553,8 @@ class OperatorNode {
         ) {
             const scale = OperatorNode.jsPlumbNavigator.getCanvasScale();
             OperatorNode.pointFollowNode.origin.addNode(
-                e.clientX - OperatorNode.pointFollowNode.offsetX * scale,
-                e.clientY - OperatorNode.pointFollowNode.offsetY * scale
+                e.clientX / scale - OperatorNode.pointFollowNode.offsetX,
+                e.clientY / scale - OperatorNode.pointFollowNode.offsetY
             );
         }
 
@@ -472,18 +593,20 @@ class OperatorNode {
             this.options = options;
             this.jsPlumbNavigator = jsPlumbNavigator;
 
-            this.barEle = this.createBarEle();
+            this.barEle = this.#createBarEle();
             jsPlumbNavigator.viewportEle.appendChild(this.barEle);
             this.#setOperatorEle();
         }
 
-        createBarEle() {
+        #createBarEle() {
             const { barWidth, barPosition } = this.options;
             const ele = document.createElement("div");
             ele.className = "operator-bar";
-            ele.style.width = `${barWidth}px`;
+            if (barWidth !== null) {
+                ele.style.width = `${barWidth}px`;
+            }
 
-            const margin = "4px";
+            const margin = rootStyle.var("--node-overview-margin");
             switch (barPosition) {
                 case "left":
                     ele.style.left = margin;
@@ -533,6 +656,7 @@ class OperatorNode {
         const defaultOptions = {
             barWidth: null,
             barPosition: "left",
+            nodeOverviewPosition: "right-bottom", // [top / bottom]-[left / right]
         };
 
         jsPlumbNavigator.jsPlumbInstance.bind("beforeDrop", function (info) {
@@ -624,6 +748,21 @@ class OperatorNode {
                     node.updateOutline();
                 }
                 addNodes.push(node);
+            }
+        });
+
+        // init overview
+        new Overview(jsPlumbNavigator, { ...defaultOptions, ...options });
+
+        // unselect all
+        const viewport = jsPlumbNavigator.viewportEle;
+        viewport.addEventListener("pointerdown", (e) => {
+            if (e.target !== viewport) {
+                return;
+            }
+            // when no enter ctrlKey, unselect all
+            if (!e.ctrlKey) {
+                Node.clearSelect();
             }
         });
 

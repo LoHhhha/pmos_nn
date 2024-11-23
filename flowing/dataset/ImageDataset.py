@@ -91,6 +91,7 @@ class ImageDataset(torch.utils.data.Dataset):
         self.data_path = [os.path.join(directory, image_name) for image_name in os.listdir(directory)]
         self.data_path = [path for path in self.data_path if os.path.isfile(path)]
         self.data_path = self.data_path[:min(max_size, len(self.data_path))]
+        self.data_path.sort()
 
         # whether read now
         self.read_to_mem_at_start = read_to_mem_at_start

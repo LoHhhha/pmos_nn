@@ -1,14 +1,14 @@
 /**
  * MESSAGE_TYPE.NodesCopy
- *      <event.detail.nodes: Array<Node>> -> NODES_COPY_DATA
+ *      <event.detail.nodes: Array<Node>|Set<Node> -> NODES_COPY_DATA
  *
  * MESSAGE_TYPE.NodesPaste
  *      <event.detail.left> <event.detail.top> -> MESSAGE_TYPE.CreateNode
  *
  */
 
-let NODES_COPY_DATA = Array(0);
-let CONNECTION_COPY_DATA = Array(0); // todo
+let NODES_COPY_DATA = new Array(0);
+let CONNECTION_COPY_DATA = new Array(0); // todo
 
 (function () {
     window.addNodesCopyHelper = (jsPlumbNavigator) => {
@@ -16,20 +16,28 @@ let CONNECTION_COPY_DATA = Array(0); // todo
 
         MESSAGE_HANDLER(MESSAGE_TYPE.NodesCopy, (event) => {
             const nodes = event.detail?.nodes;
-            if (!(nodes instanceof Array)) {
+            const len = nodes.length !== undefined ? nodes.length : nodes.size;
+            if (
+                nodes[Symbol.iterator] === undefined ||
+                len === undefined ||
+                len === 0
+            ) {
                 console.warn(
                     "[NodesCopyHelper-NodesCopy] get an unexpected nodes as",
                     nodes
                 );
+                MEMORY_SET(MEMORY_KEYS.CanPasteNodes, false);
                 return;
             }
 
-            let minLeft = Number.MAX_SAFE_INTEGER,
-                minTop = Number.MAX_SAFE_INTEGER;
+            let midLeft = 0,
+                midTop = 0;
             for (const node of nodes) {
-                minLeft = Math.min(node.element.offsetLeft, minLeft);
-                minTop = Math.min(node.element.offsetTop, minTop);
+                midLeft += node.element.offsetLeft;
+                midTop += node.element.offsetTop;
             }
+            midLeft /= len;
+            midTop /= len;
 
             NODES_COPY_DATA.length = 0;
             for (const node of nodes) {
@@ -38,8 +46,8 @@ let CONNECTION_COPY_DATA = Array(0); // todo
                     content[arg.name] = node.content[arg.name];
                 }
                 NODES_COPY_DATA.push({
-                    left: node.element.offsetLeft - minLeft,
-                    top: node.element.offsetTop - minTop,
+                    left: node.element.offsetLeft - midLeft,
+                    top: node.element.offsetTop - midTop,
                     config: node.config,
                     content: content,
                 });
@@ -62,12 +70,12 @@ let CONNECTION_COPY_DATA = Array(0); // todo
                 );
                 return;
             }
-
+            const scale = jsPlumbNavigator.getCanvasScale();
             MESSAGE_PUSH(MESSAGE_TYPE.CreateNode, {
                 nodesInfo: NODES_COPY_DATA,
                 connectionsInfo: CONNECTION_COPY_DATA,
-                offsetLeft: event.detail.left,
-                offsetTop: event.detail.top,
+                offsetLeft: event.detail.left / scale,
+                offsetTop: event.detail.top / scale,
             });
 
             console.log(

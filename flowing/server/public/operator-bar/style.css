@@ -1,19 +1,24 @@
 :root {
     --operator-bar-background-color: var(--container-background-color);
     --operator-bar-outline-color: var(--container-outline-color);
+    --operator-bar-margin: var(--margin);
 
     --node-outline-color: var(--container-outline-color);
     --node-outline-font-size: var(--label-font-size);
     --node-selected-outline-color: var(--default-color);
+    --node-hover-outline-color: var(--default-color);
+    --node-selected-outline-width: calc(var(--border-width) * 2);
+    --node-hover-outline-width: calc(var(--border-width) * 2);
     --node-end-point-overlays-label-color: var(--container-outline-color);
     --node-end-point-label-display: "inline";
     --node-end-point-label-font-size: var(--label-font-size);
     --node-width: var(--node-width);
     --node-height: var(--node-height);
 
-    --node-overview-min-width: var(--node-width);
-    --node-overview-max-width: 300px;
+    --node-overview-background-color: var(--container-background-color);
+    --node-overview-width: 300px;
     --node-overview-container-max-height: 250px;
+    --node-overview-margin: var(--margin);
     --node-overview-outline-color: var(--content-outline-color);
     --node-overview-item-input-width: var(--node-width);
     --node-overview-item-input-outline-color: var(--sub-content-outline-color);
@@ -37,6 +42,7 @@
     background-color: var(--operator-bar-background-color);
     outline: var(--border-width) solid var(--operator-bar-outline-color);
     height: 1;
+    width: auto;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -70,8 +76,8 @@
 }
 
 .node:hover {
-    outline: calc(var(--border-width) * 2) solid
-        var(--node-selected-outline-color);
+    outline: var(--node-hover-outline-width) solid
+        var(--node-hover-outline-color) !important;
 }
 
 .node-outline {
@@ -100,9 +106,9 @@
 
 .overview {
     outline: var(--border-width) solid var(--node-overview-outline-color);
+    background-color: var(--node-overview-background-color);
     backdrop-filter: var(--blur);
-    min-width: var(--node-overview-min-width);
-    max-width: var(--node-overview-max-width);
+    width: var(--node-overview-width);
     height: auto;
     position: absolute;
     display: flex;
