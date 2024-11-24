@@ -8,7 +8,7 @@
  */
 
 let NODES_COPY_DATA = new Array(0);
-let CONNECTION_COPY_DATA = new Array(0); // todo
+let CONNECTION_COPY_DATA = new Array(0);
 
 (function () {
     window.addNodesCopyHelper = (jsPlumbNavigator) => {
@@ -39,23 +39,49 @@ let CONNECTION_COPY_DATA = new Array(0); // todo
             midLeft /= len;
             midTop /= len;
 
-            NODES_COPY_DATA.length = 0;
+            NODES_COPY_DATA.length = len;
+            id2idx = new Map();
+            let idx = 0; // nodes: Array or Set
             for (const node of nodes) {
                 const content = {};
                 for (const arg of node.config.args) {
                     content[arg.name] = node.content[arg.name];
                 }
-                NODES_COPY_DATA.push({
+                NODES_COPY_DATA[idx] = {
                     left: node.element.offsetLeft - midLeft,
                     top: node.element.offsetTop - midTop,
                     config: node.config,
                     content: content,
-                });
+                };
+                id2idx.set(node.id, idx);
+
+                idx++;
+            }
+
+            CONNECTION_COPY_DATA.length = 0;
+            idx = 0; // nodes: Array or Set
+            for (const node of nodes) {
+                for (const [eIdx, point] of node.inputEndpointPrev.entries()) {
+                    if (point === null) continue;
+                    const fromNodeId = point.nodeId,
+                        fromNodeEndpointIdx = point.endpointIdx;
+                    const fromNodeIdx = id2idx.get(fromNodeId);
+                    if (fromNodeIdx === undefined) continue;
+
+                    CONNECTION_COPY_DATA.push({
+                        srcNodeIdx: fromNodeIdx,
+                        srcEndpointIdx: fromNodeEndpointIdx,
+                        tarNodeIdx: idx,
+                        tarEndpointIdx: eIdx,
+                    });
+                }
+
+                idx++;
             }
 
             MEMORY_SET(MEMORY_KEYS.CanPasteNodes, true);
             console.log(
-                `[NodesCopyHelper-NodesCopy] copy ${NODES_COPY_DATA.length} node`
+                `[NodesCopyHelper-NodesCopy] copy ${NODES_COPY_DATA.length} node with ${CONNECTION_COPY_DATA.length} edges.`
             );
         });
 

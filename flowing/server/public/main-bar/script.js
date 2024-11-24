@@ -1,3 +1,7 @@
+const HASH_MOD = 998244353;
+const BASE = 1e6;
+
+// todo: node and MiniMap-node should be one-to-one correspondence
 class MiniMap {
     constructor(navigator, canvasEle, miniMapWidth, miniMapHeight) {
         this.navigator = navigator;
@@ -16,6 +20,8 @@ class MiniMap {
         } else {
             this.miniMapEle.style.height = `auto`;
         }
+
+        this.prevNodesInfoHash = 0;
 
         this.miniMapViewportEle = this.createMiniMapViewportEle();
         this.miniMapCanvasEle = this.createMiniMapCanvasEle();
@@ -136,12 +142,12 @@ class MiniMap {
         this.miniMapCanvasEle.style.transform = this.canvasEle.style.transform;
     }
 
-    getNodesBoundsString() {
+    getNodesInfoHash() {
+        let nodesInfoHash = 0;
         if (
             !this.lastGetNodesBoundsStringTime ||
             Date.now() - this.lastGetNodesBoundsStringTime > 200
         ) {
-            this.cacheNodesBoundsString = "";
             const elements =
                 this.navigator.jsPlumbInstance.getManagedElements();
             for (const key in elements) {
@@ -150,11 +156,24 @@ class MiniMap {
                 const top = parseInt(ele.offsetTop);
                 const width = parseInt(ele.offsetWidth);
                 const height = parseInt(ele.offsetHeight);
-                this.cacheNodesBoundsString += `${left},${top},${width},${height},`;
+                nodesInfoHash =
+                    (((nodesInfoHash * BASE) % HASH_MOD) + left + HASH_MOD) %
+                    HASH_MOD;
+                nodesInfoHash =
+                    (((nodesInfoHash * BASE) % HASH_MOD) + top + HASH_MOD) %
+                    HASH_MOD;
+                nodesInfoHash =
+                    (((nodesInfoHash * BASE) % HASH_MOD) + width + HASH_MOD) %
+                    HASH_MOD;
+                nodesInfoHash =
+                    (((nodesInfoHash * BASE) % HASH_MOD) + height + HASH_MOD) %
+                    HASH_MOD;
             }
             this.lastGetNodesBoundsStringTime = Date.now();
+        } else {
+            nodesInfoHash = this.prevNodesInfoHash;
         }
-        return this.cacheNodesBoundsString;
+        return nodesInfoHash;
     }
 
     createMiniMapViewportEle() {
@@ -200,9 +219,9 @@ class MiniMap {
         if (this.miniMapEle.style.display !== "none") {
             let redraw = false;
             let reLayout = false;
-            const nodesBoundsString = this.getNodesBoundsString();
-            if (nodesBoundsString !== this.nodesBoundsString) {
-                this.nodesBoundsString = nodesBoundsString;
+            const nodesInfoHash = this.getNodesInfoHash();
+            if (nodesInfoHash !== this.prevNodesInfoHash) {
+                this.prevNodesInfoHash = nodesInfoHash;
                 redraw = true;
                 reLayout = true;
             }

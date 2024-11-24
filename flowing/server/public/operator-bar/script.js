@@ -4,7 +4,7 @@
  * MESSAGE_TYPE.CreateNode
  *      <event.detail.nodesInfo: Array> <event.detail.connectionsInfo: Array> [<event.detail.offsetLeft: int> <event.detail.offsetTop: int>]
  *          <event.detail.nodesInfo>: [{config, left, top, content}]
- *          <event.detail.connectionsInfo>: todo
+ *          <event.detail.connectionsInfo> [{srcNodeIdx, srcEndpointIdx, tarNodeIdx, tarEndpointIdx}]
  *          -> node
  *
  */
@@ -139,7 +139,7 @@ class Overview {
                             arg.type.reg.test(itemInput.value),
                             itemInput.value,
                             arg.type.reg,
-                            arg.type.reg.test(itemInput.value),
+                            arg.type.reg.test(itemInput.value)
                         );
                         if (arg.type.reg.test(itemInput.value)) {
                             node.content[arg.name] = itemInput.value;
@@ -213,6 +213,7 @@ class Overview {
 }
 
 class Node {
+    id;
     element; // element.origin -> this
     config;
     content;
@@ -221,22 +222,20 @@ class Node {
     jsPlumbInstance;
     outputEndpoint;
     inputEndpoint;
-    inputEndpointPrev;
+    inputEndpointPrev; // update at graph
     outline;
 
     // static method
     static SELECTED_NODES = new Set();
     static clearSelect() {
         for (const node of Node.SELECTED_NODES) {
-            node.unSelect();
+            node.unSelect(); // unSelect will delete itself from SELECTED_NODES.
         }
-        Node.SELECTED_NODES.clear();
     }
     static selectNode(node, control) {
         if (control) {
             if (Node.SELECTED_NODES.has(node)) {
                 // unselect when select again
-                Node.SELECTED_NODES.delete(node);
                 node.unSelect();
             } else {
                 // select
@@ -436,13 +435,12 @@ class Node {
             this.hideOverview();
         }
         this.jsPlumbInstance.removeFromDragSelection(this.element);
+        Node.SELECTED_NODES.delete(this);
     }
 
     dispose() {
         if (this.element) {
-            if (this.hideOverview !== null) {
-                this.hideOverview();
-            }
+            this.unSelect();
             this.jsPlumbInstance.removeAllEndpoints(this.element);
             this.element.removeEventListener(
                 "pointerdown",
@@ -748,6 +746,18 @@ class OperatorNode {
                     node.updateOutline();
                 }
                 addNodes.push(node);
+            }
+
+            for (const {
+                srcNodeIdx,
+                srcEndpointIdx,
+                tarNodeIdx,
+                tarEndpointIdx,
+            } of event.detail.connectionsInfo) {
+                jsPlumbNavigator.jsPlumbInstance.connect({
+                    source: addNodes[srcNodeIdx].outputEndpoint[srcEndpointIdx],
+                    target: addNodes[tarNodeIdx].inputEndpoint[tarEndpointIdx],
+                });
             }
         });
 

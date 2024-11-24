@@ -138,7 +138,7 @@
     display: grid;
     grid-column: auto;
     grid-row: auto auto;
-    margin: 2px 0px 2px 0px;
+    margin: 2px 5% 2px 5%;
 }
 
 .overview-item-text {
