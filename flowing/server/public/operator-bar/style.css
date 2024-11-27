@@ -12,8 +12,6 @@
     --node-end-point-overlays-label-color: var(--container-outline-color);
     --node-end-point-label-display: "inline";
     --node-end-point-label-font-size: var(--label-font-size);
-    --node-width: var(--node-width);
-    --node-height: var(--node-height);
 
     --node-overview-background-color: var(--container-background-color);
     --node-overview-width: 300px;
@@ -131,6 +129,11 @@
     margin: 5px 10px 5px 10px;
     font-size: large;
     font-weight: bold;
+    user-select: none;
+}
+
+.overview-id {
+    text-align: center;
     user-select: none;
 }
 

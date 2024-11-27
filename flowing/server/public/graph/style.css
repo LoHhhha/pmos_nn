@@ -1,5 +1,11 @@
+:root {
+    --download-button-outline-color: var(--sub-content-outline-color);
+    --download-button-background-color: var(--sub-content-background-color);
+    --download-button-hover-background-color: var(--sub-content-outline-color);
+    --download-button-height: var(--node-height);
+}
+
 .logger-div {
-    position: absolute;
     display: flex;
     flex-direction: column;
 }
@@ -7,4 +13,22 @@
 .log-text {
     white-space: pre-line;
     word-break: break-word;
+}
+
+.download-button {
+    font-size: medium;
+    height: var(--download-button-height);
+    text-align: center;
+    width: 100%;
+    border-radius: var(--radius);
+    margin: 20px auto;
+    user-select: none;
+    border: none;
+    outline: var(--border-width) solid var(--download-button-outline-color);
+    background-color: var(--download-button-background-color);
+    cursor: pointer;
+}
+
+.download-button:hover {
+    background-color: var(--download-button-hover-background-color);
 }

@@ -1,4 +1,4 @@
 VERSION = '0.0.alpha202411'
-BUILD_TIME = '2024-11-21'
+BUILD_TIME = '2024-11-27'
 MODULE = 'PMoS.nn.flowing'
 OWNER = 'PMoS'

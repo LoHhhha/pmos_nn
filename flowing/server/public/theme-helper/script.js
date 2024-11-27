@@ -32,7 +32,12 @@ THEME_ELEMENT.id = "theme-helper";
                 style.getPropertyValue(needProperty)
             );
         }
-        console.log("[ThemeHelper] change theme to", themeStyle);
+        console.info("[ThemeHelper] switch theme to", themeStyle);
+        MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+            config: PROMPT_CONFIG.INFO,
+            content: `Switch theme to ${themeStyle}`,
+            timeout: 1000,
+        });
     }
 
     function autoChange() {

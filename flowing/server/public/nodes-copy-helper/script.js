@@ -7,8 +7,8 @@
  *
  */
 
-let NODES_COPY_DATA = new Array(0);
-let CONNECTION_COPY_DATA = new Array(0);
+const NODES_COPY_DATA = new Array(0);
+const CONNECTION_COPY_DATA = new Array(0);
 
 (function () {
     window.addNodesCopyHelper = (jsPlumbNavigator) => {
@@ -80,9 +80,14 @@ let CONNECTION_COPY_DATA = new Array(0);
             }
 
             MEMORY_SET(MEMORY_KEYS.CanPasteNodes, true);
-            console.log(
-                `[NodesCopyHelper-NodesCopy] copy ${NODES_COPY_DATA.length} node with ${CONNECTION_COPY_DATA.length} edges.`
+            console.info(
+                `[NodesCopyHelper-NodesCopy] copy ${NODES_COPY_DATA.length} node(s) and ${CONNECTION_COPY_DATA.length} edge(s).`
             );
+            MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+                config: PROMPT_CONFIG.INFO,
+                content: `Copy ${NODES_COPY_DATA.length} node(s) and ${CONNECTION_COPY_DATA.length} edge(s)`,
+                timeout: 1000,
+            });
         });
 
         MESSAGE_HANDLER(MESSAGE_TYPE.NodesPaste, (event) => {
@@ -97,16 +102,21 @@ let CONNECTION_COPY_DATA = new Array(0);
                 return;
             }
             const scale = jsPlumbNavigator.getCanvasScale();
-            MESSAGE_PUSH(MESSAGE_TYPE.CreateNode, {
+            MESSAGE_PUSH(MESSAGE_TYPE.CreateNodes, {
                 nodesInfo: NODES_COPY_DATA,
                 connectionsInfo: CONNECTION_COPY_DATA,
                 offsetLeft: event.detail.left / scale,
                 offsetTop: event.detail.top / scale,
             });
 
-            console.log(
-                `[NodesCopyHelper-NodesPaste] paste ${NODES_COPY_DATA.length} node`
+            console.info(
+                `[NodesCopyHelper-NodesPaste] paste ${NODES_COPY_DATA.length} node(s) and ${CONNECTION_COPY_DATA.length} edge(s).`
             );
+            MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+                config: PROMPT_CONFIG.INFO,
+                content: `Paste ${NODES_COPY_DATA.length} node(s) and ${CONNECTION_COPY_DATA.length} edge(s)`,
+                timeout: 1000,
+            });
         });
     };
 })();

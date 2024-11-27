@@ -241,7 +241,7 @@
                 sourceNode.id,
                 srcEndpointIdx
             );
-            console.log(
+            console.info(
                 `[Connection] node${sourceNode.id}@out${srcEndpointIdx} -> node${targetNode.id}@in${tarEndpointIdx}`
             );
         });
@@ -273,7 +273,7 @@
             }
 
             targetNode.inputEndpointPrev[tarEndpointIdx] = null;
-            console.log(
+            console.info(
                 `[Connection] node${sourceNode.id}@out${srcEndpointIdx} -X-> node${targetNode.id}@in${tarEndpointIdx}`
             );
         });
@@ -285,7 +285,7 @@
             loggerEle.className = "logger-div";
 
             const add2Logger = (msg) => {
-                const logEle = document.createElement("p");
+                const logEle = document.createElement("div");
                 logEle.className = "log-text";
                 logEle.textContent = msg;
                 loggerEle.appendChild(logEle);
@@ -300,7 +300,12 @@
             });
 
             const graph = calculate(canvasEle);
-            if (graph === null) {
+            if (
+                graph === null ||
+                graph.input_nodes.length === 0 ||
+                graph.net_nodes.length === 0 ||
+                graph.output_nodes.length === 0
+            ) {
                 add2Logger(
                     "Found an impossible network construction, please check and try a again."
                 );
@@ -336,8 +341,9 @@
                 add2Logger(`Analysis finished: ${info.msg}.`);
 
                 if (info.fn) {
-                    const downloadLink = document.createElement("a");
-                    downloadLink.text = "Click here to download!";
+                    const downloadLink = document.createElement("button");
+                    downloadLink.className = "download-button";
+                    downloadLink.textContent = "Download Code";
                     downloadLink.onclick = () => {
                         window.open(`/model/download/${info.fn}`);
                         return false;

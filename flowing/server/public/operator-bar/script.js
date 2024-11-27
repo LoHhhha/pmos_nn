@@ -1,27 +1,35 @@
 /**
  * MESSAGE_TYPE.ClearNode
  *
- * MESSAGE_TYPE.CreateNode
+ * MESSAGE_TYPE.CreateNodes
  *      <event.detail.nodesInfo: Array> <event.detail.connectionsInfo: Array> [<event.detail.offsetLeft: int> <event.detail.offsetTop: int>]
  *          <event.detail.nodesInfo>: [{config, left, top, content}]
  *          <event.detail.connectionsInfo> [{srcNodeIdx, srcEndpointIdx, tarNodeIdx, tarEndpointIdx}]
+ *          [<event.detail.noSelectNodes: bool>]
  *          -> node
+ *
+ * MESSAGE_TYPE.SelectNodes
+ *      <event.detail.nodes: Array<node>|Set<node>>
+ *
+ * MESSAGE_TYPE.SelectNodes
+ *      <event.detail.nodes: Array<node>|Set<node>>
  *
  */
 
-const rootStyle = getComputedStyle(document.querySelector(":root"));
-rootStyle.var = (key) => rootStyle.getPropertyValue(key);
-
 let MAX_Z_INDEX = 0;
-let NODE_COUNT = 0;
+let CREATE_NODE_COUNT = 0;
 let ENDPOINT_COUNT = 0;
+
+let PERFORMANCE_ACTION_NODES_COUNT = 200;
+let PERFORMANCE_ACTION_SELECT_NODES_COUNT = 20;
+let CURRENT_NODES_COUNT = 0;
 
 function getNextZIndex() {
     return MAX_Z_INDEX++;
 }
 
 function getNextNodeId() {
-    return NODE_COUNT++;
+    return CREATE_NODE_COUNT++;
 }
 
 function getNextEndpointId() {
@@ -43,7 +51,6 @@ class Overview {
 
     element;
     viewport;
-    isShow;
 
     constructor(jsPlumbNavigator, options) {
         if (Overview.#overviewInstance !== null) {
@@ -74,18 +81,15 @@ class Overview {
                 break;
         }
         this.viewport.appendChild(this.element);
-        this.hide();
         return (Overview.#overviewInstance = this);
     }
 
+    prevHideOverview = null;
     show(node) {
-        if (this.isShow) {
-            console.error(
-                "[Node-Overview] detect a overview show call when another node showing its overview!"
-            );
-            return;
+        // switch to another
+        if (this.prevHideOverview !== null) {
+            this.prevHideOverview();
         }
-        this.isShow = true;
 
         // title
         const title = document.createElement("div");
@@ -113,6 +117,12 @@ class Overview {
         title.appendChild(link);
         this.element.appendChild(title);
 
+        // id
+        const id = document.createElement("div");
+        id.classList.add("overview-id");
+        id.textContent = `#${node.id}`;
+        this.element.appendChild(id);
+
         // args
         const argsContainer = document.createElement("div");
         argsContainer.classList.add("overview-args-container");
@@ -133,14 +143,6 @@ class Overview {
             switch (arg.type.input) {
                 case operatorBarNamespace.argsInputType.text:
                     itemInput.onchange = () => {
-                        console.log(
-                            itemInput.value,
-                            arg.type.reg,
-                            arg.type.reg.test(itemInput.value),
-                            itemInput.value,
-                            arg.type.reg,
-                            arg.type.reg.test(itemInput.value)
-                        );
                         if (arg.type.reg.test(itemInput.value)) {
                             node.content[arg.name] = itemInput.value;
                         } else {
@@ -185,30 +187,30 @@ class Overview {
         }
         this.element.appendChild(argsContainer);
 
-        const hideOverview = () => {
-            // point down beyond the overview
-            this.hide();
-            node.updateOutline();
-            node.hideOverview = null;
-        };
-        node.hideOverview = hideOverview.bind(this);
-
         // button
         const deleteButton = document.createElement("button");
         deleteButton.classList.add("overview-delete-button");
         deleteButton.textContent = "Delete";
         deleteButton.addEventListener("click", () => {
-            this.hide();
+            this.remove();
             node.dispose();
         });
         this.element.appendChild(deleteButton);
+
+        const hideOverview = () => {
+            // point down beyond the overview
+            this.remove();
+            node.updateOutline();
+            node.hideOverview = null;
+        };
+        this.prevHideOverview = node.hideOverview = hideOverview.bind(this);
     }
 
-    hide() {
-        this.isShow = false;
+    remove() {
         while (this.element.firstChild) {
             this.element.removeChild(this.element.lastChild);
         }
+        this.prevHideOverview = null;
     }
 }
 
@@ -217,38 +219,45 @@ class Node {
     element; // element.origin -> this
     config;
     content;
-    canvas;
-    viewport;
-    jsPlumbInstance;
     outputEndpoint;
     inputEndpoint;
     inputEndpointPrev; // update at graph
     outline;
+    canvas;
+    viewport;
+    jsPlumbInstance;
 
     // static method
-    static SELECTED_NODES = new Set();
+    static SELECTED_NODES_SET = new Set();
     static clearSelect() {
-        for (const node of Node.SELECTED_NODES) {
-            node.unSelect(); // unSelect will delete itself from SELECTED_NODES.
+        for (const node of Node.SELECTED_NODES_SET) {
+            node.unSelect(); // unSelect will delete itself from SELECTED_NODES_SET.
         }
     }
     static selectNode(node, control) {
         if (control) {
-            if (Node.SELECTED_NODES.has(node)) {
+            if (Node.SELECTED_NODES_SET.has(node)) {
                 // unselect when select again
                 node.unSelect();
             } else {
                 // select
-                Node.SELECTED_NODES.add(node);
+                Node.SELECTED_NODES_SET.add(node);
                 node.select(false);
             }
         } else {
             // clear if node not selected and select it
-            if (!Node.SELECTED_NODES.has(node)) {
+            if (!Node.SELECTED_NODES_SET.has(node)) {
                 Node.clearSelect();
             }
-            Node.SELECTED_NODES.add(node);
+            Node.SELECTED_NODES_SET.add(node);
             node.select(true);
+        }
+    }
+    static setSelectNodes(nodes) {
+        this.clearSelect();
+        for (const node of nodes) {
+            this.SELECTED_NODES_SET.add(node);
+            node.select(false);
         }
     }
 
@@ -278,13 +287,22 @@ class Node {
     }
     pointerDownHandlerFunc = this.pointerDownHandler.bind(this);
 
+    redrawMiniMapNode() {
+        MESSAGE_PUSH(MESSAGE_TYPE.RedrawMapNode, {
+            id: this.id,
+            left: this.element.offsetLeft,
+            top: this.element.offsetTop,
+            width: this.element.offsetWidth,
+            height: this.element.offsetHeight,
+        });
+    }
+
     hideOverview = null;
     showOverview() {
         new Overview().show(this);
     }
 
     setHandle() {
-        // make sure being top
         this.element.addEventListener(
             "pointerdown",
             this.pointerDownHandlerFunc
@@ -304,15 +322,22 @@ class Node {
                         callback: () => {
                             // if not selected nodes using this node
                             MESSAGE_PUSH(MESSAGE_TYPE.NodesCopy, {
-                                nodes: Node.SELECTED_NODES.size
-                                    ? Node.SELECTED_NODES
+                                nodes: Node.SELECTED_NODES_SET.size
+                                    ? Node.SELECTED_NODES_SET
                                     : [this],
                             });
                         },
                     },
                     {
                         title: "Delete",
-                        callback: this.dispose.bind(this),
+                        callback: () => {
+                            // if not selected nodes using this node
+                            MESSAGE_PUSH(MESSAGE_TYPE.DeleteNodes, {
+                                nodes: Node.SELECTED_NODES_SET.size
+                                    ? Node.SELECTED_NODES_SET
+                                    : [this],
+                            });
+                        },
                     },
                 ],
             });
@@ -333,6 +358,7 @@ class Node {
         this.inputEndpointPrev = Array(nodeConfig.inputEnd.length);
 
         this.element = getNodeElement(nodeConfig);
+        this.element.id = this.id;
         this.element.origin = this;
         const canvasBounds = jsPlumbNavigator.getCanvasBounds();
         // place
@@ -344,7 +370,7 @@ class Node {
 
         // jsPlumb
         jsPlumbNavigator.canvasEle.appendChild(this.element);
-        jsPlumbNavigator.jsPlumbInstance.manage(this.element);
+        jsPlumbNavigator.jsPlumbInstance.manage(this.element, this.id);
 
         // set inputEndpointPrev
         for (var ptr = 0; ptr < nodeConfig.inputEnd.length; ptr++) {
@@ -413,6 +439,17 @@ class Node {
         this.updateOutline();
 
         this.setHandle();
+
+        // add to MiniMap
+        MESSAGE_PUSH(MESSAGE_TYPE.CreateMapNode, {
+            id: this.id,
+            left: this.element.offsetLeft,
+            top: this.element.offsetTop,
+            width: this.element.offsetWidth,
+            height: this.element.offsetHeight,
+        });
+
+        CURRENT_NODES_COUNT++;
     }
 
     select(showOverview) {
@@ -423,9 +460,10 @@ class Node {
             "--node-selected-outline-width"
         );
         if (showOverview && this.hideOverview === null) {
-            this.showOverview(true);
+            this.showOverview();
         }
         this.jsPlumbInstance.addToDragSelection(this.element);
+        Node.SELECTED_NODES_SET.add(this);
     }
 
     unSelect() {
@@ -435,20 +473,26 @@ class Node {
             this.hideOverview();
         }
         this.jsPlumbInstance.removeFromDragSelection(this.element);
-        Node.SELECTED_NODES.delete(this);
+        Node.SELECTED_NODES_SET.delete(this);
     }
 
     dispose() {
         if (this.element) {
             this.unSelect();
             this.jsPlumbInstance.removeAllEndpoints(this.element);
+            this.jsPlumbInstance.unmanage(this.element);
             this.element.removeEventListener(
                 "pointerdown",
                 this.pointerDownHandlerFunc
             );
             this.element.oncontextmenu = null;
             this.element.remove();
+            CURRENT_NODES_COUNT--;
         }
+        // delete from MiniMap
+        MESSAGE_PUSH(MESSAGE_TYPE.DeleteMapNode, {
+            id: this.id,
+        });
     }
 }
 
@@ -559,8 +603,18 @@ class OperatorNode {
         OperatorNode.deletePointFollowNode();
     }
 
-    addNode(left, right) {
-        new Node(this.config, left, right, OperatorNode.jsPlumbNavigator);
+    addNode(left, top) {
+        MESSAGE_PUSH(MESSAGE_TYPE.CreateNodes, {
+            nodesInfo: [
+                {
+                    config: this.config,
+                    left: left,
+                    top: top,
+                },
+            ],
+            connectionsInfo: [],
+            noSelectNodes: true,
+        });
     }
 
     constructor(nodeConfig, container, jsPlumbNavigator) {
@@ -585,71 +639,70 @@ class OperatorNode {
     }
 }
 
-(function () {
-    class OperatorBar {
-        constructor(jsPlumbNavigator, options) {
-            this.options = options;
-            this.jsPlumbNavigator = jsPlumbNavigator;
+class OperatorBar {
+    constructor(jsPlumbNavigator, options) {
+        this.options = options;
+        this.jsPlumbNavigator = jsPlumbNavigator;
 
-            this.barEle = this.#createBarEle();
-            jsPlumbNavigator.viewportEle.appendChild(this.barEle);
-            this.#setOperatorEle();
-        }
-
-        #createBarEle() {
-            const { barWidth, barPosition } = this.options;
-            const ele = document.createElement("div");
-            ele.className = "operator-bar";
-            if (barWidth !== null) {
-                ele.style.width = `${barWidth}px`;
-            }
-
-            const margin = rootStyle.var("--node-overview-margin");
-            switch (barPosition) {
-                case "left":
-                    ele.style.left = margin;
-                    ele.style.top = margin;
-                    ele.style.bottom = margin;
-                    break;
-                case "right":
-                    ele.style.right = margin;
-                    ele.style.top = margin;
-                    ele.style.bottom = margin;
-                    break;
-                default:
-                    ele.style.left = margin;
-                    ele.style.top = margin;
-                    ele.style.bottom = margin;
-                    break;
-            }
-            return ele;
-        }
-
-        #setOperatorEle() {
-            let preOperatorTypeCode = -1;
-            if (operatorBarNamespace.operators.length > 0) {
-                preOperatorTypeCode =
-                    operatorBarNamespace.operators[0].typeCode;
-            }
-            for (var operator of operatorBarNamespace.operators) {
-                if (preOperatorTypeCode != operator.typeCode) {
-                    const hrEle = document.createElement("hr");
-                    hrEle.className = "operator-bar-hr";
-                    this.barEle.appendChild(hrEle);
-                }
-
-                const operatorNode = new OperatorNode(
-                    operator,
-                    this.barEle,
-                    this.jsPlumbNavigator
-                );
-                this.barEle.appendChild(operatorNode.element);
-
-                preOperatorTypeCode = operator.typeCode;
-            }
-        }
+        this.barEle = this.#createBarEle();
+        jsPlumbNavigator.viewportEle.appendChild(this.barEle);
+        this.#setOperatorEle();
     }
 
+    #createBarEle() {
+        const { barWidth, barPosition } = this.options;
+        const ele = document.createElement("div");
+        ele.className = "operator-bar";
+        if (barWidth !== null) {
+            ele.style.width = `${barWidth}px`;
+        }
+
+        const margin = rootStyle.var("--node-overview-margin");
+        switch (barPosition) {
+            case "left":
+                ele.style.left = margin;
+                ele.style.top = margin;
+                ele.style.bottom = margin;
+                break;
+            case "right":
+                ele.style.right = margin;
+                ele.style.top = margin;
+                ele.style.bottom = margin;
+                break;
+            default:
+                ele.style.left = margin;
+                ele.style.top = margin;
+                ele.style.bottom = margin;
+                break;
+        }
+        return ele;
+    }
+
+    #setOperatorEle() {
+        let preOperatorTypeCode = -1;
+        if (operatorBarNamespace.operators.length > 0) {
+            preOperatorTypeCode = operatorBarNamespace.operators[0].typeCode;
+        }
+        for (var operator of operatorBarNamespace.operators) {
+            if (preOperatorTypeCode != operator.typeCode) {
+                const hrEle = document.createElement("hr");
+                hrEle.className = "operator-bar-hr";
+                this.barEle.appendChild(hrEle);
+            }
+
+            const operatorNode = new OperatorNode(
+                operator,
+                this.barEle,
+                this.jsPlumbNavigator
+            );
+            this.barEle.appendChild(operatorNode.element);
+
+            preOperatorTypeCode = operator.typeCode;
+        }
+    }
+}
+
+(function () {
     window.createOperatorBar = (jsPlumbNavigator, options) => {
         const defaultOptions = {
             barWidth: null,
@@ -714,14 +767,18 @@ class OperatorNode {
 
                 element.origin.dispose();
             }
+            MESSAGE_PUSH(MESSAGE_TYPE.NavigatorViewAllFit);
         });
 
-        MESSAGE_HANDLER(MESSAGE_TYPE.CreateNode, (event) => {
+        MESSAGE_HANDLER(MESSAGE_TYPE.CreateNodes, (event) => {
             if (
                 !(event.detail?.nodesInfo instanceof Array) ||
                 !(event.detail?.connectionsInfo instanceof Array)
             ) {
-                console.log("[CreateNode] get an unexpected event as", event);
+                console.error(
+                    "[CreateNodes] get an unexpected event as",
+                    event
+                );
                 return;
             }
 
@@ -748,6 +805,10 @@ class OperatorNode {
                 addNodes.push(node);
             }
 
+            if (!event.detail?.noSelectNodes) {
+                MESSAGE_PUSH(MESSAGE_TYPE.SelectNodes, { nodes: addNodes });
+            }
+
             for (const {
                 srcNodeIdx,
                 srcEndpointIdx,
@@ -759,6 +820,44 @@ class OperatorNode {
                     target: addNodes[tarNodeIdx].inputEndpoint[tarEndpointIdx],
                 });
             }
+        });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.DeleteNodes, (event) => {
+            if (event.detail.nodes[Symbol.iterator] === undefined) {
+                console.error(
+                    "[DeleteNodes] get an unexpected event as",
+                    event
+                );
+                return;
+            }
+
+            const len =
+                event.detail.nodes.length !== undefined
+                    ? event.detail.nodes.length
+                    : event.detail.nodes.size;
+
+            for (const node of event.detail.nodes) {
+                node.dispose();
+            }
+
+            console.info(`[DeleteNodes] delete ${len} node(s).`);
+            MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+                config: PROMPT_CONFIG.INFO,
+                content: `Delete ${len} node(s)`,
+                timeout: 1000,
+            });
+        });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.SelectNodes, (event) => {
+            if (event.detail.nodes[Symbol.iterator] === undefined) {
+                console.error(
+                    "[SelectNodes] get an unexpected event as",
+                    event
+                );
+                return;
+            }
+
+            Node.setSelectNodes(event.detail.nodes);
         });
 
         // init overview
@@ -775,6 +874,36 @@ class OperatorNode {
                 Node.clearSelect();
             }
         });
+
+        // update MiniMap
+        jsPlumbNavigator.jsPlumbInstance.bind(
+            "drag:stop",
+            (dragStopPayload) => {
+                for (const ele of dragStopPayload.elements) {
+                    const node = ele.el.origin;
+                    node.redrawMiniMapNode();
+                }
+            }
+        );
+        jsPlumbNavigator.jsPlumbInstance.bind(
+            "drag:move",
+            (dragMovePayload) => {
+                console;
+                // when the nodes or select nodes count are small, just redraw when drag
+                if (
+                    CURRENT_NODES_COUNT >= PERFORMANCE_ACTION_NODES_COUNT ||
+                    Node.SELECTED_NODES_SET.size >=
+                        PERFORMANCE_ACTION_SELECT_NODES_COUNT *
+                            (1 -
+                                CURRENT_NODES_COUNT /
+                                    PERFORMANCE_ACTION_NODES_COUNT)
+                ) {
+                    return;
+                }
+
+                dragMovePayload.el.origin.redrawMiniMapNode();
+            }
+        );
 
         return new OperatorBar(jsPlumbNavigator, {
             ...defaultOptions,

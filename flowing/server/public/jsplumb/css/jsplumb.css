@@ -303,7 +303,7 @@ a:active {
 
 /* ---------------------- bootstrap dropdowns ------------------------- */
 .clearfix {
-  *zoom: 1;
+  zoom: 1;
 }
 
 .clearfix:before,

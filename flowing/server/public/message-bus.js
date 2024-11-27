@@ -3,10 +3,12 @@ const MESSAGE_BUS = document.createElement("div");
 const MESSAGE_TYPE = {
     // graph
     CalculateGraph: "calculate-graph",
-    
+
     // operator-bar
     ClearNode: "clear-node",
-    CreateNode: "create-node",
+    CreateNodes: "create-nodes",
+    DeleteNodes: "delete-nodes",
+    SelectNodes: "select-nodes",
 
     // covering
     CoveringShowCustom: "covering-show-custom",
@@ -28,6 +30,14 @@ const MESSAGE_TYPE = {
     // nodes-copy-helper
     NodesCopy: "nodes-copy",
     NodesPaste: "nodes-paste",
+
+    // operator-bar-mini-map
+    CreateMapNode: "create-map-node",
+    DeleteMapNode: "delete-map-node",
+    RedrawMapNode: "redraw-map-node",
+
+    // prompt
+    ShowDefaultPrompt: "show-default-prompt",
 };
 
 const MESSAGE_PUSH = (msgType, detail) => {

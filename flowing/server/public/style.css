@@ -13,6 +13,9 @@
 :root {
     --lucency-red: rgba(238, 0, 0, 0.8);
 
+    --lucency-reddish: rgba(193, 44, 31, 0.5);
+    --lucency-yellowish: rgba(255, 238, 111, 0.5);
+
     --radius: 5px;
     --margin: 5px;
 
@@ -34,10 +37,11 @@
     box-sizing: border-box;
     color: var(--default-color);
     transition: background-color 0.5s ease;
+    touch-action: none;
 }
 
 a {
-    color: inherit;
+    color: var(--default-color);
 }
 
 a:hover {
@@ -69,7 +73,6 @@ body {
     height: 100%;
     background-color: var(--viewport-background-color);
     overflow: hidden;
-    touch-action: none;
 }
 
 #canvas {

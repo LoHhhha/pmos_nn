@@ -1,6 +1,12 @@
-const PMoS_HREF = "https://github.com/LoHhhha/pmos_nn";
-
 jsPlumb.ready(() => {
+    MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+        config: PROMPT_CONFIG.INFO,
+        content: "Welcome to PMoS, click me to know more about PMoS!",
+        onclick: (promptItem) => {
+            window.open(PMoS_HREF);
+            promptItem.dispose();
+        },
+    });
 
     window.addThemeHelper();
 
@@ -22,8 +28,8 @@ jsPlumb.ready(() => {
     const minimapBar = window.createMainBar(
         jsPlumbNavigator,
         viewportEle,
-        canvasEle,
-    )
+        canvasEle
+    );
 
     window.createJsPlumbConnectionListener(jsPlumbInstance);
 

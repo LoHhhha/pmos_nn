@@ -345,6 +345,13 @@ class Navigator {
         }
         this.setCanvasLocationAndScale(left / scale, top / scale, scale, true);
         this.jsPlumbInstance.setZoom(scale);
+
+        MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+            config: PROMPT_CONFIG.INFO,
+            content: `Try to view all nodes`,
+            timeout: 1000,
+        });
+
         return scale;
     }
 
