@@ -20,8 +20,6 @@ limitations under the License.
 
 from setuptools import setup, find_packages
 
-from flowing.config import VERSION
-
 """
 how to use this?
 >>> python flowing_setup.py bdist_wheel
@@ -29,7 +27,7 @@ how to use this?
 
 setup(
     name="flowing",
-    version=VERSION,
+    version="0.0.a202411",
     author="0x4c48",
     author_email="lohhhha@qq.com",
     description="PMoS-flowing",
