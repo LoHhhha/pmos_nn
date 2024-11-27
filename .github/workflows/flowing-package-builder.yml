@@ -19,12 +19,12 @@ jobs:
       - name: package flowing
         run: python flowing_setup.py bdist_wheel
       - name: upload package
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: ${{ github.workspace }}/dist
       - name: file codes
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: code
           path: ${{ github.workspace }}/flowing
