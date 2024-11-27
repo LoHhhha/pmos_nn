@@ -322,7 +322,7 @@ class Node {
                         callback: () => {
                             // if not selected nodes using this node
                             MESSAGE_PUSH(MESSAGE_TYPE.NodesCopy, {
-                                nodes: Node.SELECTED_NODES_SET.size
+                                nodes: Node.SELECTED_NODES_SET.has(this)
                                     ? Node.SELECTED_NODES_SET
                                     : [this],
                             });
@@ -333,7 +333,7 @@ class Node {
                         callback: () => {
                             // if not selected nodes using this node
                             MESSAGE_PUSH(MESSAGE_TYPE.DeleteNodes, {
-                                nodes: Node.SELECTED_NODES_SET.size
+                                nodes: Node.SELECTED_NODES_SET.has(this)
                                     ? Node.SELECTED_NODES_SET
                                     : [this],
                             });
