@@ -1,6 +1,6 @@
 name: flowing-package-builder
 
-on: [push]
+on: [ push ]
 
 jobs:
   build:
@@ -9,8 +9,22 @@ jobs:
       max-parallel: 5
 
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-      with:
-        python-version: '3.12' 
-    - run: python flowing_setup.py
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install setuptools
+      - name: install flowing
+        run: python flowing_setup.py install
+      - name: package flowing
+        run: python flowing_setup.py bdist_wheel
+      - name: upload package
+        uses: actions/upload-artifact@v1
+        with:
+          name: dist
+          path: ${{ github.workspace }}/dist
+      - name: file codes
+        uses: actions/upload-artifact@v1
+        with:
+          name: code
+          path: ${{ github.workspace }}/flowing
