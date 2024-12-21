@@ -1,3 +1,5 @@
+# Copyright © 2024 PMoS. All rights reserved.
+
 class JSONParseException(Exception):
     pass
 

@@ -122,7 +122,7 @@ class Action:
                         loss = loss_pair.loss
                     else:
                         loss += loss_pair.loss
-            args.loss_buffer = filter(lambda _pair: _pair.model_idx != self.model_idx, args.loss_buffer)
+            args.loss_buffer = list(filter(lambda _pair: _pair.model_idx != self.model_idx, args.loss_buffer))
             if loss is not None:
                 loss.backward()
             args.update_loss_information(loss_item=loss.item(), model_idx=self.model_idx)

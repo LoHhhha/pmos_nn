@@ -25,7 +25,7 @@ let PERFORMANCE_ACTION_SELECT_NODES_COUNT = 20;
 let CURRENT_NODES_COUNT = 0;
 
 function getNextZIndex() {
-    return MAX_Z_INDEX++;
+    return ++MAX_Z_INDEX;
 }
 
 function getNextNodeId() {
@@ -154,7 +154,7 @@ class Overview {
                             itemInput.value = arg.default;
                             node.content[arg.name] = arg.default;
                         }
-                        node.updateOutline();
+                        node.update();
                     };
                     break;
                 case operatorBarNamespace.argsInputType.select:
@@ -167,7 +167,7 @@ class Overview {
 
                     itemInput.onchange = () => {
                         node.content[arg.name] = itemInput.value;
-                        node.updateOutline();
+                        node.update();
                     };
                     break;
                 default:
@@ -200,7 +200,7 @@ class Overview {
         const hideOverview = () => {
             // point down beyond the overview
             this.remove();
-            node.updateOutline();
+            node.update();
             node.hideOverview = null;
         };
         this.prevHideOverview = node.hideOverview = hideOverview.bind(this);
@@ -222,6 +222,9 @@ class Node {
     outputEndpoint;
     inputEndpoint;
     inputEndpointPrev; // update at graph
+    inputEndpointShape; // update at graph
+    outputEndpointShape; // update at graph
+    outputEndpointConnectionOverlays; // update at graph
     outline;
     canvas;
     viewport;
@@ -261,7 +264,8 @@ class Node {
         }
     }
 
-    updateOutline() {
+    update() {
+        // outline
         var outlineText = "";
         for (const { name, short } of this.config.outlines) {
             if (outlineText !== "") {
@@ -273,6 +277,11 @@ class Node {
         if (this.config.changeCallBack instanceof Function) {
             this.config.changeCallBack(this);
         }
+
+        // shape
+        MESSAGE_PUSH(MESSAGE_TYPE.UpdateShape, {
+            node: this,
+        });
     }
 
     upZIndex() {
@@ -355,7 +364,14 @@ class Node {
         this.content.default = {};
         this.outputEndpoint = Array(nodeConfig.outputEnd.length);
         this.inputEndpoint = Array(nodeConfig.inputEnd.length);
-        this.inputEndpointPrev = Array(nodeConfig.inputEnd.length);
+        this.inputEndpointPrev = Array(nodeConfig.inputEnd.length).fill(null);
+        this.inputEndpointShape = Array(nodeConfig.inputEnd.length).fill(null);
+        this.outputEndpointShape = Array(nodeConfig.outputEnd.length).fill(
+            null
+        );
+        this.outputEndpointConnection = Array(nodeConfig.outputEnd.length).fill(
+            null
+        );
 
         this.element = getNodeElement(nodeConfig);
         this.element.id = this.id;
@@ -368,14 +384,14 @@ class Node {
 
         this.upZIndex();
 
+        // set outputEndpointConnection
+        for (let idx = 0; idx < nodeConfig.outputEnd.length; idx++) {
+            this.outputEndpointConnection[idx] = new Set();
+        }
+
         // jsPlumb
         jsPlumbNavigator.canvasEle.appendChild(this.element);
         jsPlumbNavigator.jsPlumbInstance.manage(this.element, this.id);
-
-        // set inputEndpointPrev
-        for (var ptr = 0; ptr < nodeConfig.inputEnd.length; ptr++) {
-            this.inputEndpointPrev[ptr] = null;
-        }
 
         // set endpoint
         for (var ptr = 0; ptr < nodeConfig.outputEnd.length; ptr++) {
@@ -436,7 +452,8 @@ class Node {
         outline.classList.add("node-outline");
         this.element.appendChild(outline);
         this.outline = outline;
-        this.updateOutline();
+
+        this.update();
 
         this.setHandle();
 
@@ -800,7 +817,7 @@ class OperatorBar {
                     for (const arg of config.args) {
                         node.content[arg.name] = content[arg.name];
                     }
-                    node.updateOutline();
+                    node.update();
                 }
                 addNodes.push(node);
             }

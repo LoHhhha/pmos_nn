@@ -1,2 +1,2 @@
-from flowing.net.parser.Parser import Parser
-from flowing.net.parser.TorchParser import TorchParser
+from flowing.net.parser.parser import Parser
+from flowing.net.parser.torch_parser import TorchParser

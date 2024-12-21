@@ -4,6 +4,8 @@ import os
 import inspect
 from datetime import datetime
 
+from flowing.config import Mate
+
 DEBUG_MSG = 0
 INFO_MSG = 1
 WARNING_MSG = 2
@@ -47,14 +49,14 @@ def __print_out(msg_type: int, *msg) -> None:
 
     # inspect.stack()[1] is info/warning/error
     caller_frame = inspect.stack()[2]
-    try:
-        caller_file = os.path.basename(caller_frame[1]).split('.')[0]
-        caller_line = caller_frame[2]
-    except IndexError:
-        caller_file = "Unknown"
-        caller_line = "None"
 
-    print(f'[{MSG_TYPES_STR[msg_type]}|{datetime.now()}|{caller_file}:{caller_line}]', *msg)
+    caller_name = f"{os.path.relpath(
+        caller_frame.filename,
+        Mate.PACKAGE_PATH
+    ).split('.')[0].replace('\\', '/').replace('/', '.')}"
+
+    print(f'[{MSG_TYPES_STR[msg_type]}|{datetime.now()}|{caller_name}:{caller_frame.function}:{caller_frame.lineno}]',
+          *msg)
 
     # todo: log save
 

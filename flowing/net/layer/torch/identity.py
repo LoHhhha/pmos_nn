@@ -22,5 +22,9 @@ class Identity(Layer):
         super().init_code()
         return f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}()"
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return tuple(input_shape)
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        if len(input_shape) != self.data_amount:
+            raise ValueError(
+                f"detect an unexpected input_shape as {input_shape}"
+            )
+        return tuple(input_shape[0]),

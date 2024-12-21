@@ -1,13 +1,11 @@
 # Copyright © 2024 PMoS. All rights reserved.
 
 from fastapi import APIRouter
-
-from flowing.server.model import calculate, download
+from flowing.server.shape import calculate
 
 router = APIRouter(
-    prefix="/model",
-    tags=["model"],
+    prefix="/shape",
+    tags=["shape"],
 )
 
 router.include_router(calculate.router)
-router.include_router(download.router)

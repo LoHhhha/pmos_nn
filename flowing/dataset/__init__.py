@@ -1,5 +1,5 @@
-from flowing.dataset.ImageDataset import ImageDataset
-from flowing.dataset.LinkDataset import LinkDataset
+from flowing.dataset.image_dataset import ImageDataset
+from flowing.dataset.link_dataset import LinkDataset
 
 """
 How to use this module:

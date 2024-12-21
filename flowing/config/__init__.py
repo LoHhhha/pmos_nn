@@ -1,1 +1,1 @@
-from flowing.config.Package import *
+from flowing.config.Mate import *

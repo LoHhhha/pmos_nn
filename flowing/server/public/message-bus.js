@@ -3,6 +3,7 @@ const MESSAGE_BUS = document.createElement("div");
 const MESSAGE_TYPE = {
     // graph
     CalculateGraph: "calculate-graph",
+    UpdateShape: "update-shape",
 
     // operator-bar
     ClearNode: "clear-node",

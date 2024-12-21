@@ -37,14 +37,26 @@ class _MaxUnpool(Layer):
         return (f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
                 f"kernel_size={self.kernel_size}, stride={self.stride}, padding={self.padding})")
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         # need dim as args.
         dim = kwargs['dim']
 
-        if len(input_shape) not in (dim + 1, dim + 2):
+        if len(input_shape) != self.data_amount:
+            raise ValueError(
+                f"detect an unexpected input_shape as {input_shape}"
+            )
+
+        data_shape, info_shape = input_shape
+
+        if tuple(data_shape) != tuple(info_shape):
+            raise ValueError(
+                f"detect an unexpected input_shape as {input_shape}, expected both of shapes should be same."
+            )
+
+        if len(data_shape) not in (dim + 1, dim + 2):
             raise ValueError(
                 f"Expected {dim + 1}D (unbatched) or {dim + 2}D (batched) input to {self._api_name}, "
-                f"but got input of size: {input_shape}"
+                f"but got input of size: {data_shape}"
             )
 
         if isinstance(self.kernel_size, int):
@@ -64,30 +76,30 @@ class _MaxUnpool(Layer):
         else:
             stride = self.stride
 
-        output_shape = list(input_shape)
+        output_shape = list(data_shape)
 
         for i in range(dim):
-            output_shape[-dim + i] = (input_shape[-dim + i] - 1) * stride[i] - 2 * padding[i] + kernel_size[i]
+            output_shape[-dim + i] = (data_shape[-dim + i] - 1) * stride[i] - 2 * padding[i] + kernel_size[i]
 
-        return tuple(output_shape)
+        return tuple(output_shape),
 
 
 class MaxUnpool1d(_MaxUnpool):
     _api_name = "MaxUnpool1d"
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return super().output_shape(input_shape, dim=1)
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        return super().output_shape(*input_shape, dim=1)
 
 
 class MaxUnpool2d(_MaxUnpool):
     _api_name = "MaxUnpool2d"
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return super().output_shape(input_shape, dim=2)
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        return super().output_shape(*input_shape, dim=2)
 
 
 class MaxUnpool3d(_MaxUnpool):
     _api_name = "MaxUnpool3d"
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return super().output_shape(input_shape, dim=3)
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        return super().output_shape(*input_shape, dim=3)

@@ -269,7 +269,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.Flatten.html#torch.nn.Flatten",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Flatten.html#torch.nn.Flatten",
     },
     {
         apiName: "Unflatten",
@@ -294,7 +294,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.Flatten.html#torch.nn.Flatten",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Flatten.html#torch.nn.Flatten",
     },
     {
         apiName: "Dropout",
@@ -316,7 +316,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.Dropout.html#torch.nn.Dropout",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Dropout.html#torch.nn.Dropout",
     },
     {
         apiName: "Dropout1d",
@@ -338,7 +338,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.Dropout1d.html#torch.nn.Dropout1d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Dropout1d.html#torch.nn.Dropout1d",
     },
     {
         apiName: "Dropout2d",
@@ -360,7 +360,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.Dropout2d.html#torch.nn.Dropout2d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Dropout2d.html#torch.nn.Dropout2d",
     },
     {
         apiName: "Dropout3d",
@@ -382,7 +382,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.Dropout3d.html#torch.nn.Dropout3d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Dropout3d.html#torch.nn.Dropout3d",
     },
     {
         apiName: "Identity",
@@ -393,7 +393,7 @@ operatorBarNamespace.operators = [
         outlines: [],
         args: [],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.Identity.html#torch.nn.Identity",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Identity.html#torch.nn.Identity",
     },
     {
         apiName: "ReLU",
@@ -421,7 +421,7 @@ operatorBarNamespace.operators = [
         outlines: [],
         args: [
             {
-                name: "negative_slope ",
+                name: "negative_slope",
                 type: operatorBarNamespace.argsType.strFloat,
                 default: "0.01",
             },
@@ -745,7 +745,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.LazyConv1d.html#torch.nn.LazyConv1d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyConv1d.html#torch.nn.LazyConv1d",
     },
     {
         apiName: "LazyConv2d",
@@ -802,7 +802,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.LazyConv2d.html#torch.nn.LazyConv2d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyConv2d.html#torch.nn.LazyConv2d",
     },
     {
         apiName: "LazyConv3d",
@@ -859,7 +859,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.LazyConv3d.html#torch.nn.LazyConv3d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyConv3d.html#torch.nn.LazyConv3d",
     },
     {
         apiName: "ConvTranspose1d",
@@ -1105,7 +1105,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.LazyConvTranspose1d.html#torch.nn.LazyConvTranspose1d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyConvTranspose1d.html#torch.nn.LazyConvTranspose1d",
     },
     {
         apiName: "LazyConvTranspose2d",
@@ -1162,7 +1162,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.LazyConvTranspose2d.html#torch.nn.LazyConvTranspose2d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyConvTranspose2d.html#torch.nn.LazyConvTranspose2d",
     },
     {
         apiName: "LazyConvTranspose3d",
@@ -1219,7 +1219,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.LazyConvTranspose3d.html#torch.nn.LazyConvTranspose3d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyConvTranspose3d.html#torch.nn.LazyConvTranspose3d",
     },
     {
         apiName: "MaxPool1d",
@@ -1266,7 +1266,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.MaxPool1d.html#torch.nn.MaxPool1d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.MaxPool1d.html#torch.nn.MaxPool1d",
         changeCallBack: (node) => {
             if (
                 !operatorBarNamespace.argsType.bool.getValue(
@@ -1326,7 +1326,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.MaxPool2d.html#torch.nn.MaxPool2d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.MaxPool2d.html#torch.nn.MaxPool2d",
         changeCallBack: (node) => {
             if (
                 !operatorBarNamespace.argsType.bool.getValue(
@@ -1386,7 +1386,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.MaxPool3d.html#torch.nn.MaxPool3d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.MaxPool3d.html#torch.nn.MaxPool3d",
         changeCallBack: (node) => {
             if (
                 !operatorBarNamespace.argsType.bool.getValue(
@@ -1431,7 +1431,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.MaxUnpool1d.html#torch.nn.MaxUnpool1d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.MaxUnpool1d.html#torch.nn.MaxUnpool1d",
     },
     {
         apiName: "MaxUnpool2d",
@@ -1463,7 +1463,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.MaxUnpool2d.html#torch.nn.MaxUnpool2d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.MaxUnpool2d.html#torch.nn.MaxUnpool2d",
     },
     {
         apiName: "MaxUnpool3d",
@@ -1495,7 +1495,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.MaxUnpool3d.html#torch.nn.MaxUnpool3d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.MaxUnpool3d.html#torch.nn.MaxUnpool3d",
     },
     {
         apiName: "Linear",
@@ -1525,7 +1525,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.Linear.html#torch.nn.Linear",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Linear.html#torch.nn.Linear",
     },
     {
         apiName: "LayerLinear",
@@ -1547,7 +1547,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.ac.cn/docs/stable/generated/torch.nn.LazyLinear.html#torch.nn.LazyLinear",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyLinear.html#torch.nn.LazyLinear",
     },
 ];
 operatorBarNamespace.operators.sort(function (a, b) {
@@ -1559,6 +1559,7 @@ operatorBarNamespace.operators.sort(function (a, b) {
     if (a.typeCode === b.typeCode) return 0;
     return a.typeCode < b.typeCode ? -1 : 1;
 });
+// call(srcNode, tarNode, srcEndpointIdx, tarEndpointIdx)
 operatorBarNamespace.connectionRule = [
     {
         name: "SelfNotSelf",

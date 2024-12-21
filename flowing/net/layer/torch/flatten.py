@@ -31,8 +31,13 @@ class Flatten(Layer):
         return (f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
                 f"start_dim={self.start_dim}, end_dim={self.end_dim})")
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        input_shape = list(input_shape)
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        if len(input_shape) != self.data_amount:
+            raise ValueError(
+                f"detect an unexpected input_shape as {input_shape}"
+            )
+
+        input_shape = list(input_shape[0])
         output_shape = []
         start_dim = self.start_dim if self.start_dim >= 0 else len(input_shape) + self.start_dim
         if start_dim < 0 or start_dim >= len(input_shape):
@@ -63,7 +68,7 @@ class Flatten(Layer):
                 output_shape.append(num)
         if mul != -1:
             output_shape.append(mul)
-        return tuple(output_shape)
+        return tuple(output_shape),
 
 
 class Unflatten(Layer):
@@ -88,8 +93,13 @@ class Unflatten(Layer):
         return (f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
                 f"dim={self.dim}, unflattened_size={self.unflattened_size})")
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        input_shape = list(input_shape)
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        if len(input_shape) != self.data_amount:
+            raise ValueError(
+                f"detect an unexpected input_shape as {input_shape}"
+            )
+
+        input_shape = list(input_shape[0])
 
         dim = self.dim if self.dim >= 0 else len(input_shape) + self.dim
         if dim < 0 or dim >= len(input_shape):
@@ -100,9 +110,9 @@ class Unflatten(Layer):
 
         if input_shape[dim] != self.__unflattened_size_mul:
             raise ValueError(
-                f"Expected input_shape[dim] should be {self.__unflattened_size_mul} , "
-                f"but got dim={self.dim} and input_shape={input_shape}"
+                f"Expected input_shape[{dim}] should be {self.__unflattened_size_mul} , "
+                f"but got input_shape={input_shape}"
             )
 
         input_shape[dim:dim + 1] = self.unflattened_size
-        return tuple(input_shape)
+        return tuple(input_shape),

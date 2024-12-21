@@ -1,10 +1,12 @@
 # Copyright © 2024 PMoS. All rights reserved.
+
 import os
 import time
 import autopep8
 from datetime import datetime
 from collections import deque
 from typing import List, Tuple, Any
+from case_convert import snake_case
 
 from flowing.config import VERSION
 from flowing.shower import Logger
@@ -21,8 +23,8 @@ Net definition:
     output_nodes: To confirm the items of each time forward get.
 '''
 
-LAYER_NAME_FMT = "layer_{idx}"
-LAYER_OUTPUT_NAME_FMT = "out_{idx}"
+LAYER_NAME_FMT = "{api_name}_{api_idx}"
+LAYER_OUTPUT_NAME_FMT = "h_{api_name}_{api_idx}"
 INPUT_NAME_FMT = "x_{idx}"
 OUTPUT_NAME_FMT = "y_{idx}"
 
@@ -274,10 +276,16 @@ class TorchParser(Parser):
         #     if data_name is None:
         #         raise
 
+        api_counter = dict()
         for idx in self._parse_sequence_index_list:
             node = self.net_nodes[idx]
-            node.layer_object.layer_name = LAYER_NAME_FMT.format(idx=idx)
-            node.layer_object.output_name = LAYER_OUTPUT_NAME_FMT.format(idx=idx)
+            api_idx = api_counter.get(node.api_name, 0)
+            api_counter[node.api_name] = api_idx + 1
+            node.layer_object.layer_name = LAYER_NAME_FMT.format(api_name=snake_case(node.api_name), api_idx=api_idx)
+            node.layer_object.output_name = LAYER_OUTPUT_NAME_FMT.format(
+                api_name=snake_case(node.api_name),
+                api_idx=api_idx
+            )
             for data_ptr in range(len(node.from_data)):
                 data = node.from_data[data_ptr]
                 # if it was None, it came from input.

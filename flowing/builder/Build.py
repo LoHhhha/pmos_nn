@@ -11,7 +11,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from flowing.shower import Logger
 from flowing.builder import Transit
-from flowing.builder.Action import Action
+from flowing.builder.action import Action
 from flowing.helper import LearningRate, TorchCompile
 
 DEFAULT_TENSORBOARD_LOG_DIR_FMT = './log/{build_id}/tb_log'

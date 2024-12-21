@@ -1,2 +1,2 @@
-from flowing.builder.struct.LossPair import LossPair
-from flowing.builder.struct.ModelPair import ModelPair
+from flowing.builder.struct.loss_pair import LossPair
+from flowing.builder.struct.model_pair import ModelPair

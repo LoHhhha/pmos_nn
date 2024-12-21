@@ -1,1 +1,1 @@
-from flowing.checker.Classification import Classification
+from flowing.checker.classification import Classification

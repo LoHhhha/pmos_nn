@@ -1,4 +1,4 @@
-from flowing.builder.ActionCode import ActionCode
-from flowing.builder.Action import Action
-from flowing.builder.Args import Args
+from flowing.builder.args import Args
+from flowing.builder.action_code import ActionCode
+from flowing.builder.action import Action
 from flowing.builder import Build, Transit

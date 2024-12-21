@@ -1,1 +1,1 @@
-from flowing.net.struct.NodeDataPair import NodeDataPair
+from flowing.net.struct.node_data_pair import NodeDataPair

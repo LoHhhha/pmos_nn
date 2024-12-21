@@ -3,6 +3,11 @@
     --download-button-background-color: var(--sub-content-background-color);
     --download-button-hover-background-color: var(--sub-content-outline-color);
     --download-button-height: var(--node-height);
+
+    --connection-overlay-font-size: var(--label-font-size);
+    --connection-overlay-color: var(--default-color);
+    --connection-overlay-background-color: var(--container-background-color);
+    --connection-overlay-outline-color: var(--container-outline-color);
 }
 
 .logger-div {
@@ -31,4 +36,21 @@
 
 .download-button:hover {
     background-color: var(--download-button-hover-background-color);
+}
+
+.connection-overlay {
+    position: relative;
+    top: auto;
+    left: auto;
+    font-size: var(--connection-overlay-font-size);
+    pointer-events: none;
+    user-select: none;
+    word-wrap: break-word;
+    white-space: nowrap;
+    color: var(--connection-overlay-color);
+    border-radius: var(--radius);
+    background-color: var(--connection-overlay-background-color);
+    outline: var(--border-width) solid var(--connection-overlay-outline-color);
+    backdrop-filter: var(--blur);
+    padding: var(--margin);
 }

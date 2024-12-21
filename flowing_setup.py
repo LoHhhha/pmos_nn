@@ -27,7 +27,7 @@ how to use this?
 
 setup(
     name="flowing",
-    version="0.0.a202411",
+    version="0.1.202412",
     author="0x4c48",
     author_email="lohhhha@qq.com",
     description="PMoS-flowing",
@@ -40,7 +40,8 @@ setup(
         'numpy',
         'fastapi',
         'uvicorn',
-        'autopep8'
+        'autopep8',
+        'case-convert'
     ],
     include_package_data=True,
     package_data={

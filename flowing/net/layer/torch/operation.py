@@ -1,5 +1,6 @@
 # Copyright © 2024 PMoS. All rights reserved.
 
+from functools import reduce
 from typing import Tuple, List
 
 from flowing.net.layer import Layer
@@ -36,8 +37,24 @@ class _Operation(Layer):
             )
         return f"{self.output_name} = {self._get_args(block=f' {self.operation} ')}"
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return tuple(input_shape)
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        if self.data_amount == 0:
+            raise ValueError(
+                f"detect an unexpected no input _Operation"
+            )
+
+        if len(input_shape) != self.data_amount:
+            raise ValueError(
+                f"detect an unexpected input_shape as {input_shape}"
+            )
+
+        prev = tuple(input_shape[0])
+        for shape in input_shape:
+            if tuple(shape) != prev:
+                raise ValueError(
+                    f"detect an unexpected input_shape as {input_shape}, has different shape"
+                )
+        return prev,
 
 
 class Add(_Operation):

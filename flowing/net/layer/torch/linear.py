@@ -30,7 +30,14 @@ class LayerLinear(Layer):
         return (f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
                 f"out_features={self.out_features}, bias={self.bias})")
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        if len(input_shape) != self.data_amount:
+            raise ValueError(
+                f"detect an unexpected input_shape as {input_shape}"
+            )
+
+        input_shape = input_shape[0]
+
         output_shape = list(input_shape)
         try:
             output_shape[-1] = self.out_features
@@ -38,7 +45,7 @@ class LayerLinear(Layer):
             raise ValueError(
                 f"Expected unexpected input_shape as {input_shape}, "
             )
-        return tuple(output_shape)
+        return tuple(output_shape),
 
 
 class Linear(LayerLinear):
@@ -54,3 +61,14 @@ class Linear(LayerLinear):
         super().init_code()
         return (f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
                 f"in_features={self.in_features}, out_features={self.out_features}, bias={self.bias})")
+
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        output_shape = super().output_shape(*input_shape)
+
+        input_shape = input_shape[0]
+        if input_shape[-1] != self.in_features:
+            raise ValueError(
+                f"Expected unexpected input_shape as {input_shape}, "
+            )
+
+        return output_shape

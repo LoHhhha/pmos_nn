@@ -29,8 +29,14 @@ class _ReLU(Layer):
         super().init_code()
         return f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}(inplace={self.inplace})"
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return tuple(input_shape)
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        if len(input_shape) != self.data_amount:
+            raise ValueError(
+                f"detect an unexpected input_shape as {input_shape}"
+            )
+
+        input_shape = input_shape[0]
+        return tuple(input_shape),
 
 
 class ReLU(_ReLU):
@@ -76,8 +82,14 @@ class Sigmoid(Layer):
         super().init_code()
         return f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}()"
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return tuple(input_shape)
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        if len(input_shape) != self.data_amount:
+            raise ValueError(
+                f"detect an unexpected input_shape as {input_shape}"
+            )
+
+        input_shape = input_shape[0]
+        return tuple(input_shape),
 
 
 class Softmax(Layer):
@@ -97,5 +109,11 @@ class Softmax(Layer):
         super().init_code()
         return f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}(dim={self.dim})"
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return tuple(input_shape)
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        if len(input_shape) != self.data_amount:
+            raise ValueError(
+                f"detect an unexpected input_shape as {input_shape}"
+            )
+
+        input_shape = input_shape[0]
+        return tuple(input_shape),

@@ -1,12 +1,13 @@
+# Copyright © 2024 PMoS. All rights reserved.
+
 from pydantic import BaseModel
 
 from flowing.server.common import get_json_response
 
-JSON_PARSE_ERROR_RESPONSE = get_json_response(400, "Get an unexpected JSON and can not be parsed")
-JSON_NOT_DICT_ERROR_RESPONSE = get_json_response(400, "Get an unexpected JSON that is not a dictionary")
 NOT_INPUT_NODES_ERROR_RESPONSE = get_json_response(400, "Get an unexpected JSON that have not input_nodes")
 NOT_OUTPUT_NODES_ERROR_RESPONSE = get_json_response(400, "Get an unexpected JSON that have not output_nodes")
 NOT_NET_NODES_ERROR_RESPONSE = get_json_response(400, "Get an unexpected JSON that have not net_nodes")
+
 INPUT_NODES_PARSE_ERROR_RESPONSE = get_json_response(400, "Get an unexpected input_nodes")
 OUTPUT_NODES_PARSE_ERROR_RESPONSE = get_json_response(400, "Get an unexpected output_nodes")
 NET_NODES_PARSE_ERROR_RESPONSE = get_json_response(400, "Get an unexpected net_nodes")

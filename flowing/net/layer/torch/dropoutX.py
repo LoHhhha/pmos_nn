@@ -32,9 +32,16 @@ class _Dropout(Layer):
         return (f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
                 f"p={self.p}, inplace={self.inplace})")
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        if len(input_shape) != self.data_amount:
+            raise ValueError(
+                f"detect an unexpected input_shape as {input_shape}"
+            )
+
         # need dim and output_padding as args.
         dim = kwargs['dim']
+
+        input_shape = input_shape[0]
 
         size = len(input_shape)
         if dim != -1 and size != dim + 1 and size != dim + 2:
@@ -43,32 +50,32 @@ class _Dropout(Layer):
                 f"but got shape of input as: {input_shape}"
             )
 
-        return tuple(input_shape)
+        return tuple(input_shape),
 
 
 class Dropout(_Dropout):
     _api_name = 'Dropout'
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return super().output_shape(input_shape=input_shape, dim=-1, **kwargs)
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        return super().output_shape(*input_shape, dim=-1, **kwargs)
 
 
 class Dropout1d(_Dropout):
     _api_name = 'Dropout1d'
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return super().output_shape(input_shape=input_shape, dim=1, **kwargs)
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        return super().output_shape(*input_shape, dim=1, **kwargs)
 
 
 class Dropout2d(_Dropout):
     _api_name = 'Dropout2d'
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return super().output_shape(input_shape=input_shape, dim=2, **kwargs)
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        return super().output_shape(*input_shape, dim=2, **kwargs)
 
 
 class Dropout3d(_Dropout):
     _api_name = 'Dropout3d'
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return super().output_shape(input_shape=input_shape, dim=3, **kwargs)
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        return super().output_shape(*input_shape, dim=3, **kwargs)

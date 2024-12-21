@@ -64,10 +64,17 @@ class _LazyConv(Layer):
                 f"padding={self.padding}, padding_mode='{self.padding_mode}', dilation={self.dilation}, "
                 f"groups={self.groups}, bias={self.bias})")
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        if len(input_shape) != self.data_amount:
+            raise ValueError(
+                f"detect an unexpected input_shape as {input_shape}"
+            )
+
         # need dim and output_padding as args.
         dim = kwargs['dim']
         output_padding = kwargs.get('output_padding', None)
+
+        input_shape = input_shape[0]
 
         if len(input_shape) not in (dim + 1, dim + 2):
             raise ValueError(
@@ -112,7 +119,7 @@ class _LazyConv(Layer):
                     (input_shape[-dim + i] - 1) * stride[i] - 2 * padding[i] + dilation[i] * (kernel_size[i] - 1) + \
                     output_padding[i] + 1
 
-        return tuple(output_shape)
+        return tuple(output_shape),
 
 
 class _LazyConvTranspose(_LazyConv):
@@ -147,23 +154,30 @@ class _Conv(_LazyConv):
             f"padding_mode='{self.padding_mode}', dilation={self.dilation}, groups={self.groups}, bias={self.bias})"
         )
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        if len(input_shape) != self.data_amount:
+            raise ValueError(
+                f"detect an unexpected input_shape as {input_shape}"
+            )
+
         # need dim and output_padding as args.
         dim = kwargs['dim']
 
+        data_shape = input_shape[0]
+
         # (N, C, ...)
         try:
-            C_in = input_shape[-dim - 1]
+            C_in = data_shape[-dim - 1]
         except IndexError:
             raise ValueError(
-                f"Expected unexpected input_shape as {input_shape}, "
+                f"Expected unexpected input_shape as {data_shape}, "
             )
         if C_in != self.in_channels:
             raise ValueError(
                 f"Expected input_shape.C={self.in_channels}(as self.in_channels), but got input_shape.C={C_in}"
             )
 
-        return super().output_shape(input_shape, **kwargs)
+        return super().output_shape(*input_shape, **kwargs)
 
 
 class _ConvTranspose(_Conv):
@@ -186,82 +200,82 @@ class _ConvTranspose(_Conv):
 class LazyConv1d(_LazyConv):
     _api_name = "LazyConv1d"
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return super().output_shape(input_shape, dim=1)
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        return super().output_shape(*input_shape, dim=1)
 
 
 class LazyConv2d(_LazyConv):
     _api_name = "LazyConv2d"
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return super().output_shape(input_shape, dim=2)
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        return super().output_shape(*input_shape, dim=2)
 
 
 class LazyConv3d(_LazyConv):
     _api_name = "LazyConv3d"
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return super().output_shape(input_shape, dim=3)
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        return super().output_shape(*input_shape, dim=3)
 
 
 class LazyConvTranspose1d(_LazyConvTranspose):
     _api_name = "LazyConvTranspose1d"
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return super().output_shape(input_shape, dim=1, output_padding=self.output_padding)
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        return super().output_shape(*input_shape, dim=1, output_padding=self.output_padding)
 
 
 class LazyConvTranspose2d(_LazyConvTranspose):
     _api_name = "LazyConvTranspose2d"
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return super().output_shape(input_shape, dim=2, output_padding=self.output_padding)
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        return super().output_shape(*input_shape, dim=2, output_padding=self.output_padding)
 
 
 class LazyConvTranspose3d(_LazyConvTranspose):
     _api_name = "LazyConvTranspose3d"
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return super().output_shape(input_shape, dim=1, output_padding=self.output_padding)
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        return super().output_shape(*input_shape, dim=1, output_padding=self.output_padding)
 
 
 class Conv1d(_Conv):
     _api_name = "Conv1d"
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return super().output_shape(input_shape, dim=1)
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        return super().output_shape(*input_shape, dim=1)
 
 
 class Conv2d(_Conv):
     _api_name = "Conv2d"
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return super().output_shape(input_shape, dim=2)
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        return super().output_shape(*input_shape, dim=2)
 
 
 class Conv3d(_Conv):
     _api_name = "Conv3d"
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return super().output_shape(input_shape, dim=3)
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        return super().output_shape(*input_shape, dim=3)
 
 
 class ConvTranspose1d(_ConvTranspose):
     _api_name = "ConvTranspose1d"
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return super().output_shape(input_shape, dim=1, output_padding=self.output_padding)
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        return super().output_shape(*input_shape, dim=1, output_padding=self.output_padding)
 
 
 class ConvTranspose2d(_ConvTranspose):
     _api_name = "ConvTranspose2d"
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return super().output_shape(input_shape, dim=2, output_padding=self.output_padding)
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        return super().output_shape(*input_shape, dim=2, output_padding=self.output_padding)
 
 
 class ConvTranspose3d(_ConvTranspose):
     _api_name = "ConvTranspose3d"
 
-    def output_shape(self, input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[int, ...]:
-        return super().output_shape(input_shape, dim=3, output_padding=self.output_padding)
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        return super().output_shape(*input_shape, dim=3, output_padding=self.output_padding)
