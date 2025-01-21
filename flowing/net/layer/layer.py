@@ -51,21 +51,6 @@ class Layer(ABC):
 
         self.data_names = [None] * self.data_amount
 
-    def _get_args(self, block: str = ", ") -> str:
-        # ensure data_name is not ...
-        return block.join(self.data_names)
-
-    def get_contents(self):
-        contents = []
-        for cls in self.__class__.__mro__:
-            if not issubclass(cls, Layer):
-                continue
-            for key, value_cls in cls.__annotations__.items():
-                if value_cls.__name__ == Annotated.__name__ and Layer.LayerContent in value_cls.__metadata__:
-                    contents.append((key, getattr(self, key)))
-
-        return contents
-
     @staticmethod
     def named_check(init_code):
         @wraps(init_code)
@@ -115,6 +100,22 @@ class Layer(ABC):
 
         return wrapped_function
 
+    @injected_check
+    def get_forward_args(self, block: str = ", ") -> str:
+        # ensure data_name is not ...
+        return block.join(self.data_names)
+
+    def get_contents(self):
+        contents = []
+        for cls in self.__class__.__mro__:
+            if not issubclass(cls, Layer):
+                continue
+            for key, value_cls in cls.__annotations__.items():
+                if value_cls.__name__ == Annotated.__name__ and Layer.LayerContent in value_cls.__metadata__:
+                    contents.append((key, getattr(self, key)))
+
+        return contents
+
     # planning
     # def extra_class_code(self) -> Tuple[Tuple[str, str], ...]:
     #     """
@@ -129,10 +130,9 @@ class Layer(ABC):
         package_name = f"{package}." if package and not package.endswith(".") else package
         return f"{"self." if add_self else ""}{self.layer_name} = {package_name}{self._api_name}({init_params_str})",
 
-    # override
-    @injected_check
+    # using @Layer.injected_check on the circumstances
     def forward_code(self, add_self: bool = True) -> Tuple[str, ...]:
-        return f"{self.output_name} = {"self." if add_self else ""}{self.layer_name}({self._get_args()})",
+        return f"{self.output_name} = {"self." if add_self else ""}{self.layer_name}({self.get_forward_args()})",
 
     @abstractmethod
     @input_shape_check

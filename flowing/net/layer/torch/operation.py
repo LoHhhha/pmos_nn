@@ -26,10 +26,9 @@ class _Operation(Layer):
     def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
         return ()
 
-    @Layer.injected_check
     def forward_code(self, add_self: bool = True) -> Tuple[str, ...]:
         # add_self is useless
-        return f"{self.output_name} = {self._get_args(block=f' {self.operation} ')}",
+        return f"{self.output_name} = {self.get_forward_args(block=f' {self.operation} ')}",
 
     @Layer.input_shape_check
     @Layer.data_amount_not_zero_check
