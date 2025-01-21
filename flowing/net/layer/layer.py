@@ -57,9 +57,12 @@ class Layer(ABC):
 
     def get_contents(self):
         contents = []
-        for key, cls in self.__annotations__.items():
-            if cls.__name__ == Annotated.__name__ and Layer.LayerContent in cls.__metadata__:
-                contents.append((key, getattr(self, key)))
+        for cls in self.__class__.__mro__:
+            if not issubclass(cls, Layer):
+                continue
+            for key, value_cls in cls.__annotations__.items():
+                if value_cls.__name__ == Annotated.__name__ and Layer.LayerContent in value_cls.__metadata__:
+                    contents.append((key, getattr(self, key)))
 
         return contents
 
@@ -122,7 +125,7 @@ class Layer(ABC):
     @named_check
     def init_code(self, package: str = "", add_self: bool = True) -> Tuple[str, ...]:
         init_params = self.get_contents()
-        init_params_str = ", ".join(f"{key}={value}" for key, value in init_params)
+        init_params_str = ", ".join(f"{key}={repr(value)}" for key, value in init_params)
         package_name = f"{package}." if package and not package.endswith(".") else package
         return f"{"self." if add_self else ""}{self.layer_name} = {package_name}{self._api_name}({init_params_str})",
 
