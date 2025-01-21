@@ -1,4 +1,4 @@
-# Copyright © 2024 PMoS. All rights reserved.
+# Copyright © 2024-2025 PMoS. All rights reserved.
 
 from typing import Tuple, List
 
@@ -22,22 +22,17 @@ class _Dropout(Layer):
     output_amount = 1
 
     def __init__(self, p: float = 0.5, inplace: bool = False, data_amount: int | None = None):
+        super().__init__(data_amount=data_amount)
         self.p = p
         self.inplace = inplace
 
-        self._set_data(data_amount)
-
-    def init_code(self, package: str = "torch.nn", add_self: bool = True):
-        super().init_code()
+    @Layer.named_check
+    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
         return (f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
-                f"p={self.p}, inplace={self.inplace})")
+                f"p={self.p}, inplace={self.inplace})"),
 
+    @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        if len(input_shape) != self.data_amount:
-            raise ValueError(
-                f"detect an unexpected input_shape as {input_shape}"
-            )
-
         # need dim and output_padding as args.
         dim = kwargs['dim']
 

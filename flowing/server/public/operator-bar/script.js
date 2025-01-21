@@ -657,16 +657,35 @@ class OperatorNode {
 }
 
 class OperatorBar {
+    options;
+    jsPlumbNavigator;
+    barEle;
+    searchEle;
+
+    // using to chose operators need to show.
+    onlyChoseNameLike = "";
+    excludeTypes = new Set();
+
+    static searchIconSvg = `<svg class="operator-bar-svg" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M18.319 14.433A8.001 8.001 0 0 0 6.343 3.868a8 8 0 0 0 10.564 11.976l.043.045l4.242 4.243a1 1 0 1 0 1.415-1.415l-4.243-4.242zm-2.076-9.15a6 6 0 1 1-8.485 8.485a6 6 0 0 1 8.485-8.485" clip-rule="evenodd"/></svg>`;
+    static clearIconSvg = `<svg class="operator-bar-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M6.225 4.811a1 1 0 0 0-1.414 1.414L10.586 12L4.81 17.775a1 1 0 1 0 1.414 1.414L12 13.414l5.775 5.775a1 1 0 0 0 1.414-1.414L13.414 12l5.775-5.775a1 1 0 0 0-1.414-1.414L12 10.586z"/></svg>`;
+
+    static visibleSvg = `<svg class="operator-bar-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M6.343 7.757L4.93 9.172l7.07 7.07l7.071-7.07l-1.414-1.415L12 13.414z"/></svg>`;
+    static hiddenSvg = `<svg class="operator-bar-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M16.243 6.343L14.828 4.93L7.758 12l7.07 7.071l1.415-1.414L10.586 12z"/></svg>`;
+
     constructor(jsPlumbNavigator, options) {
         this.options = options;
         this.jsPlumbNavigator = jsPlumbNavigator;
 
-        this.barEle = this.#createBarEle();
+        this.barEle = this.#initBarEle();
+        this.searchEle = this.#initSearchEle();
+        if (this.options.needSearch) {
+            this.barEle.appendChild(this.searchEle);
+        }
         jsPlumbNavigator.viewportEle.appendChild(this.barEle);
-        this.#setOperatorEle();
+        this.refresh();
     }
 
-    #createBarEle() {
+    #initBarEle() {
         const { barWidth, barPosition } = this.options;
         const ele = document.createElement("div");
         ele.className = "operator-bar";
@@ -695,16 +714,133 @@ class OperatorBar {
         return ele;
     }
 
-    #setOperatorEle() {
-        let preOperatorTypeCode = -1;
-        if (operatorBarNamespace.operators.length > 0) {
-            preOperatorTypeCode = operatorBarNamespace.operators[0].typeCode;
+    #initSearchEle() {
+        if (!this.options.needSearch) {
+            return null;
         }
+
+        const ele = document.createElement("div");
+        ele.classList.add(operatorBarNamespace.baseNodeCssClass);
+        ele.classList.add("operator-bar-search-bar");
+
+        const searchIcon = document.createElement("div");
+        searchIcon.className = "operator-bar-search-icon";
+        searchIcon.innerHTML = OperatorBar.searchIconSvg;
+        ele.appendChild(searchIcon);
+
+        const searchInput = document.createElement("input");
+        searchInput.className = "operator-bar-search-input";
+        searchInput.placeholder = "Search Operator";
+        searchInput.onchange = () => {
+            this.onlyChoseNameLike = searchInput.value;
+            this.excludeTypes.clear();
+            this.refresh();
+        };
+        ele.appendChild(searchInput);
+
+        const closeIcon = document.createElement("div");
+        closeIcon.className = "operator-bar-search-icon";
+        closeIcon.innerHTML = OperatorBar.clearIconSvg;
+        closeIcon.onclick = () => {
+            searchInput.value = this.onlyChoseNameLike = "";
+            this.excludeTypes.clear();
+            this.refresh();
+        };
+
+        ele.appendChild(closeIcon);
+
+        return ele;
+    }
+
+    #createSeparation(typeInfo, isVisible) {
+        // typeInfo {name, code}
+        const sepEle = document.createElement("div");
+        sepEle.className = "operator-bar-sep";
+
+        const sepTitleEle = document.createElement("div");
+        sepTitleEle.className = "operator-bar-sep-title";
+        sepTitleEle.textContent = typeInfo.name;
+        sepEle.appendChild(sepTitleEle);
+
+        const sepSwitchEle = document.createElement("div");
+        sepSwitchEle.className = "operator-bar-sep-switch";
+        sepSwitchEle.innerHTML = isVisible
+            ? OperatorBar.visibleSvg
+            : OperatorBar.hiddenSvg;
+        sepEle.appendChild(sepSwitchEle);
+
+        sepEle.isChosen = isVisible;
+        sepEle.onclick = () => {
+            if (sepEle.isChosen) {
+                sepSwitchEle.innerHTML = OperatorBar.hiddenSvg;
+                this.excludeTypes.add(typeInfo.code);
+            } else {
+                sepSwitchEle.innerHTML = OperatorBar.visibleSvg;
+                this.excludeTypes.delete(typeInfo.code);
+            }
+            sepEle.isChosen = !sepEle.isChosen;
+            this.refresh();
+        };
+
+        sepEle.updateCount = (cnt) => {
+            sepTitleEle.textContent = `${typeInfo.name}(${cnt})`;
+        };
+
+        return sepEle;
+    }
+
+    refresh() {
+        // clear prev operators
+        for (let ptr = this.barEle.children.length - 1; ptr >= 0; ptr--) {
+            const element = this.barEle.children[ptr];
+            if (element === this.searchEle) {
+                break;
+            }
+            element.remove();
+        }
+
+        const onlyLike = this.onlyChoseNameLike.toLowerCase();
+
+        let prevOperatorTypeCode = -1;
+        let prevOperatorTypeSepEle = null;
+        let prevOperatorTypeCount = 0;
+        // operatorBarNamespace.operators is sort by prevOperatorTypeCode.
         for (var operator of operatorBarNamespace.operators) {
-            if (preOperatorTypeCode != operator.typeCode) {
-                const hrEle = document.createElement("hr");
-                hrEle.className = "operator-bar-hr";
-                this.barEle.appendChild(hrEle);
+            const operatorTypeInfo =
+                operatorBarNamespace.typeInfo[operator.typeCode];
+
+            // check if "operatorTypeName" or "apiName" contain "onlyLike"
+            if (
+                !operator.apiName.toLowerCase().includes(onlyLike) &&
+                !operatorTypeInfo.name.toLowerCase().includes(onlyLike)
+            ) {
+                continue;
+            }
+            
+            // when this type is excluded, don't add this operator, but add the sep if need.
+            const isExcludeType = this.excludeTypes.has(operator.typeCode);
+            if (prevOperatorTypeCode != operator.typeCode) {
+                const sepEle = this.#createSeparation(
+                    operatorTypeInfo,
+                    !isExcludeType
+                );
+                this.barEle.appendChild(sepEle);
+
+                // update prev count
+                if (prevOperatorTypeSepEle) {
+                    prevOperatorTypeSepEle.updateCount(prevOperatorTypeCount);
+                }
+                
+                prevOperatorTypeCode = operator.typeCode;
+                prevOperatorTypeCount = 0;
+                prevOperatorTypeSepEle = sepEle;
+            }
+
+            // count even excluded
+            prevOperatorTypeCount += 1;
+
+            if (isExcludeType) {
+                continue;
             }
 
             const operatorNode = new OperatorNode(
@@ -714,7 +850,10 @@ class OperatorBar {
             );
             this.barEle.appendChild(operatorNode.element);
 
-            preOperatorTypeCode = operator.typeCode;
+        }
+        // update prev count
+        if (prevOperatorTypeSepEle) {
+            prevOperatorTypeSepEle.updateCount(prevOperatorTypeCount);
         }
     }
 }
@@ -725,6 +864,7 @@ class OperatorBar {
             barWidth: null,
             barPosition: "left",
             nodeOverviewPosition: "right-bottom", // [top / bottom]-[left / right]
+            needSearch: true,
         };
 
         jsPlumbNavigator.jsPlumbInstance.bind("beforeDrop", function (info) {

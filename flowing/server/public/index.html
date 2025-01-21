@@ -13,8 +13,8 @@
         iframe {
             margin: 0;
             padding: 0;
-            width: -webkit-fill-available;
-            height:-webkit-fill-available;
+            width: 100vw;
+            height: 100vh;
             border: none;
             overflow: hidden;
             left: 0;
@@ -26,8 +26,8 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: -webkit-fill-available;
-            height:-webkit-fill-available;
+            width: 100vw;
+            height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -91,18 +91,6 @@
         }
         /* loading-rect */
     </style>
-    <script>
-        setTimeout(() => {
-            const loadingTipsElement = document.getElementById("loading-tips");
-            if (loadingTipsElement) {
-                loadingTipsElement.style.display = "inline";
-            }
-        }, 5000);
-
-        window.onload = () => {
-            document.getElementById("loading").remove();
-        };
-    </script>
     <body>
         <div id="loading">
             <h1 id="loading-title">PMoS</h1>
@@ -115,6 +103,18 @@
             </div>
             <p id="loading-tips">Almost done...</p>
         </div>
-        <iframe class="inner-frame" src="./main.html"></iframe>
+        <iframe id="inner-frame" src="./main.html"></iframe>
     </body>
+    <script>
+        setTimeout(() => {
+            const loadingTipsElement = document.getElementById("loading-tips");
+            if (loadingTipsElement) {
+                loadingTipsElement.style.display = "inline";
+            }
+        }, 5000);
+
+        window.onload = () => {
+            document.getElementById("loading").remove();
+        };
+    </script>
 </html>

@@ -3,9 +3,16 @@
     --operator-bar-outline-color: var(--container-outline-color);
     --operator-bar-margin: var(--margin);
 
+    --operator-bar-search-bar-background-color: var(--content-background-color);
+    --operator-bar-search-svg-color: var(--default-color);
+
+    --operator-bar-sep-svg-color: var(--default-color);
+    --operator-bar-sep-border-color: var(--container-outline-color);
+    --operator-bar-sep-hover-border-color: var(--default-color);
+
     --node-outline-color: var(--container-outline-color);
     --node-outline-font-size: var(--label-font-size);
-    
+
     --node-selected-outline-color: var(--default-color);
     --node-hover-outline-color: var(--default-color);
     --node-selected-outline-width: calc(var(--border-width) * 2);
@@ -33,33 +40,6 @@
     --node-overview-button-hover-background-color: var(
         --sub-content-outline-color
     );
-}
-
-.operator-bar {
-    touch-action: pan-y;
-    position: absolute;
-    backdrop-filter: var(--blur);
-    background-color: var(--operator-bar-background-color);
-    outline: var(--border-width) solid var(--operator-bar-outline-color);
-    height: 1;
-    width: auto;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    overflow-y: auto;
-    padding: 10px;
-    gap: 10px;
-    border-radius: var(--radius);
-    user-select: none;
-}
-
-.operator-bar-hr {
-    width: 80%;
-    pointer-events: none;
-    user-select: none;
-    border-left: none;
-    border-right: none;
-    border-bottom: none;
 }
 
 .node {
@@ -102,6 +82,81 @@
     word-wrap: break-word;
     white-space: nowrap;
     color: var(--node-end-point-overlays-label-color);
+}
+
+.operator-bar {
+    touch-action: pan-y;
+    position: absolute;
+    backdrop-filter: var(--blur);
+    background-color: var(--operator-bar-background-color);
+    outline: var(--border-width) solid var(--operator-bar-outline-color);
+    height: 1;
+    width: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    overflow-y: auto;
+    padding: 10px;
+    gap: 10px;
+    border-radius: var(--radius);
+    user-select: none;
+}
+
+.operator-bar-svg * {
+    fill: var(--operator-bar-sep-svg-color);
+}
+
+.operator-bar-sep {
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    grid-template-columns: 8fr 2fr;
+    border-bottom: var(--border-width) solid
+        var(--operator-bar-sep-border-color);
+    width: 100%;
+    padding-top: calc(var(--border-width));
+    padding-bottom: calc(var(--border-width));
+}
+
+.operator-bar-sep:hover {
+    border-color: var(--operator-bar-sep-hover-border-color);
+    border-width: calc(2 * var(--border-width));
+    padding-bottom: 0;
+}
+
+.operator-bar-sep-title {
+    text-align: left;
+}
+
+.operator-bar-sep-switch {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: end;
+}
+
+/* inherit node */
+.operator-bar-search-bar {
+    display: grid;
+    grid-template-columns: 2fr 6fr 2fr;
+    backdrop-filter: var(--blur);
+    background-color: var(--operator-bar-search-bar-background-color);
+}
+
+.operator-bar-search-input {
+    border-radius: var(--radius);
+    border: none;
+    outline: none;
+    background-color: rgba(0, 0, 0, 0);
+    width: 100%;
+    margin: 0 auto;
+    border-style: none;
+}
+
+.operator-bar-search-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .overview {
@@ -179,6 +234,8 @@
     background-color: var(--node-overview-button-hover-background-color);
 }
 
+/* inherit node */
+
 /* IO */
 .Input {
     background-color: rgb(192, 128, 0);
@@ -205,20 +262,85 @@
     background-color: rgb(0, 128, 144);
 }
 
-/* transform (160, 96, x+16) */
+/* data (160, 64, x+8) */
+.Rand {
+    background-color: rgb(160, 64, 96);
+}
+
+.RandNormal {
+    background-color: rgb(160, 64, 104);
+}
+
+.RandInt {
+    background-color: rgb(160, 64, 112);
+}
+
+.Ones {
+    background-color: rgb(160, 64, 120);
+}
+
+.Zeros {
+    background-color: rgb(160, 64, 128);
+}
+
+.Full {
+    background-color: rgb(160, 64, 136);
+}
+
+/* transform (160, 96, x+8) */
 .Reshape {
     background-color: rgb(160, 96, 96);
 }
 
 .Flatten {
-    background-color: rgb(160, 96, 112);
+    background-color: rgb(160, 96, 104);
 }
 
 .Unflatten {
+    background-color: rgb(160, 96, 112);
+}
+
+.Cat {
+    background-color: rgb(160, 96, 120);
+}
+
+.Stack {
     background-color: rgb(160, 96, 128);
 }
 
-/* transform (160, 128, x+8) */
+.Squeeze {
+    background-color: rgb(160, 96, 136);
+}
+
+.Unsqueeze {
+    background-color: rgb(160, 96, 144);
+}
+
+.RandLike {
+    background-color: rgb(160, 96, 152);
+}
+
+.RandNormalLike {
+    background-color: rgb(160, 96, 160);
+}
+
+.RandIntLike {
+    background-color: rgb(160, 96, 168);
+}
+
+.OnesLike {
+    background-color: rgb(160, 96, 176);
+}
+
+.ZerosLike {
+    background-color: rgb(160, 96, 184);
+}
+
+.FullLike {
+    background-color: rgb(160, 96, 192);
+}
+
+/* activation (160, 128, x+8) */
 .Dropout {
     background-color: rgb(160, 128, 96);
 }
@@ -263,7 +385,7 @@
     background-color: rgb(160, 128, 176);
 }
 
-/* transform (160, 144, x+8) */
+/* convolution (160, 144, x+8) */
 .Conv1d {
     background-color: rgb(160, 144, 96);
 }

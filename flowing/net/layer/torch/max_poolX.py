@@ -1,7 +1,7 @@
-# Copyright © 2024 PMoS. All rights reserved.
+# Copyright © 2024-2025 PMoS. All rights reserved.
 
 import math
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 
 from flowing.net.layer import Layer
 
@@ -14,7 +14,7 @@ __all__ = [
 
 class _MaxPool(Layer):
     kernel_size: int | Tuple[int, ...]
-    stride: int | Tuple[int, ...]
+    stride: Optional[int | Tuple[int, ...]]
     padding: int | Tuple[int, ...]
     dilation: int | Tuple[int, ...]
     return_indices: bool
@@ -25,13 +25,14 @@ class _MaxPool(Layer):
     def __init__(
             self,
             kernel_size: int | Tuple[int, ...],
-            stride: int | Tuple[int, ...] = None,  # default: stride = kernel_size
+            stride: Optional[int | Tuple[int, ...]] = None,  # default: stride = kernel_size
             padding: int | Tuple[int, ...] = 0,
             dilation: int | Tuple[int, ...] = 1,
             return_indices: bool = False,
             ceil_mode: bool = False,
             data_amount: int | None = None,
     ):
+        super().__init__(data_amount=data_amount)
         self.kernel_size = kernel_size
         self.stride = stride
         self.padding = padding
@@ -39,27 +40,21 @@ class _MaxPool(Layer):
         self.return_indices = return_indices
         self.ceil_mode = ceil_mode
 
-        self._set_data(data_amount=data_amount)
-
         if self.return_indices is True:
             self.output_amount = 2
         else:
             self.output_amount = 1
 
-    def init_code(self, package: str = "torch.nn", add_self: bool = True):
-        super().init_code()
+    @Layer.named_check
+    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
         return (f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
                 f"kernel_size={self.kernel_size}, stride={self.stride}, padding={self.padding}, "
-                f"dilation={self.dilation}, return_indices={self.return_indices}, ceil_mode={self.ceil_mode})")
+                f"dilation={self.dilation}, return_indices={self.return_indices}, ceil_mode={self.ceil_mode})"),
 
+    @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         # need dim as args.
         dim = kwargs['dim']
-
-        if len(input_shape) != self.data_amount:
-            raise ValueError(
-                f"detect an unexpected input_shape as {input_shape}"
-            )
 
         input_shape = input_shape[0]
 

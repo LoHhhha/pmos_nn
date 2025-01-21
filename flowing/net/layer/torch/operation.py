@@ -1,6 +1,5 @@
-# Copyright © 2024 PMoS. All rights reserved.
+# Copyright © 2024-2025 PMoS. All rights reserved.
 
-from functools import reduce
 from typing import Tuple, List
 
 from flowing.net.layer import Layer
@@ -21,33 +20,20 @@ class _Operation(Layer):
     layer_name = "Useless"
 
     def __init__(self, data_amount: int | None = None):
-        self._set_data(data_amount=data_amount)
+        super().__init__(data_amount=data_amount)
 
-    def init_code(self, package: str = "torch.nn", add_self: bool = True):
-        super().init_code()
-        return None
+    @Layer.named_check
+    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
+        return ()
 
-    def forward_code(self, add_self: bool = True):
+    @Layer.injected_check
+    def forward_code(self, add_self: bool = True) -> Tuple[str, ...]:
         # add_self is useless
+        return f"{self.output_name} = {self._get_args(block=f' {self.operation} ')}",
 
-        if self.output_name is ... or self.data_names is ...:
-            raise NotImplementedError(
-                "please first assign the Layer.output_name and Layer.data_name before you call "
-                "Layer.forward_code()"
-            )
-        return f"{self.output_name} = {self._get_args(block=f' {self.operation} ')}"
-
+    @Layer.input_shape_check
+    @Layer.data_amount_not_zero_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        if self.data_amount == 0:
-            raise ValueError(
-                f"detect an unexpected no input _Operation"
-            )
-
-        if len(input_shape) != self.data_amount:
-            raise ValueError(
-                f"detect an unexpected input_shape as {input_shape}"
-            )
-
         prev = tuple(input_shape[0])
         for shape in input_shape:
             if tuple(shape) != prev:

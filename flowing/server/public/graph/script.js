@@ -252,7 +252,7 @@ const NOT_SHAPE = null;
                 type: "Label",
                 options: {
                     location: 0.5,
-                    label:shapeShow,
+                    label: shapeShow,
                     cssClass: "connection-overlay",
                     id: SHAPE_CONNECTION_OVERLAY_ID,
                 },
@@ -385,10 +385,18 @@ const NOT_SHAPE = null;
                 }
             };
 
-            // Input node just need to push and not need to update
+            // Input/Data node just need to push and not need to update
             if (node.inputEndpoint.length === 0) {
-                // if have shape, using to outputEndpointShape
-                const shape = node.content.shape
+                // this node must have outputShapeComeFromArg
+                if (node.config.outputShapeComeFromArg == null) {
+                    log.error(
+                        "[PushShape] found a unexpect input/data node which not have outputShapeComeFromArg",
+                        node
+                    );
+                    return;
+                }
+                // using [outputShapeComeFromArg] to outputEndpointShape
+                const shape = node.content[node.config.outputShapeComeFromArg]
                     .match(/[-+]?\d+/g)
                     .map((item) => {
                         return parseInt(item, 10);

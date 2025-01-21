@@ -1,4 +1,4 @@
-# Copyright © 2024 PMoS. All rights reserved.
+# Copyright © 2024-2025 PMoS. All rights reserved.
 
 from typing import Tuple, List
 
@@ -20,22 +20,17 @@ class LayerLinear(Layer):
     output_amount = 1
 
     def __init__(self, out_features: int, bias: bool = True, data_amount: int | None = None):
+        super().__init__(data_amount=data_amount)
         self.out_features = out_features
         self.bias = bias
 
-        self._set_data(data_amount=data_amount)
-
-    def init_code(self, package: str = "torch.nn", add_self: bool = True):
-        super().init_code()
+    @Layer.named_check
+    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
         return (f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
-                f"out_features={self.out_features}, bias={self.bias})")
+                f"out_features={self.out_features}, bias={self.bias})"),
 
+    @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        if len(input_shape) != self.data_amount:
-            raise ValueError(
-                f"detect an unexpected input_shape as {input_shape}"
-            )
-
         input_shape = input_shape[0]
 
         output_shape = list(input_shape)
@@ -57,10 +52,10 @@ class Linear(LayerLinear):
         super().__init__(**kwargs)
         self.in_features = in_features
 
-    def init_code(self, package: str = "torch.nn", add_self: bool = True):
-        super().init_code()
+    @Layer.named_check
+    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
         return (f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
-                f"in_features={self.in_features}, out_features={self.out_features}, bias={self.bias})")
+                f"in_features={self.in_features}, out_features={self.out_features}, bias={self.bias})"),
 
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         output_shape = super().output_shape(*input_shape)

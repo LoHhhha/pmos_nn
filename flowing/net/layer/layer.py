@@ -1,5 +1,6 @@
 # Copyright © 2024 PMoS. All rights reserved.
 
+from functools import wraps
 from typing import List, Tuple
 from abc import ABC, abstractmethod
 
@@ -9,6 +10,16 @@ __all__ = [
 
 
 class Layer(ABC):
+    """
+    <extra_class_code>
+
+    class Net(xxx):
+        def __init__(self):
+            <init_code>
+
+        def forward/xxx(self):
+            <forward_code>
+    """
     _api_name: str = ...
 
     layer_name: str = ...
@@ -17,7 +28,7 @@ class Layer(ABC):
     output_name: str = ...  # through it maybe a tuple but also use one name.
     output_amount: int = ...  # when output_size == 1 means output_name is a var, or it is a tuple.
 
-    def _set_data(self, data_amount: int | None = None) -> None:
+    def __init__(self, data_amount: int | None = None):
         if data_amount is not None:
             if self.data_amount is ...:
                 self.data_amount = data_amount
@@ -34,29 +45,76 @@ class Layer(ABC):
 
     def _get_args(self, block: str = ", ") -> str:
         # ensure data_name is not ...
-        n = len(self.data_names)
-        args = ""
-        for idx in range(n):
-            args += self.data_names[idx] + (block if idx + 1 != n else "")
-        return args
+        return block.join(self.data_names)
 
-    # call and implement
-    def init_code(self):
-        if self.layer_name is ...:
-            raise NotImplementedError(
-                "please first assign the Layer.layer_name before you call Layer.init_code()"
-            )
+    @staticmethod
+    def named_check(init_code):
+        @wraps(init_code)
+        def wrapped_function(instance, *args, **kwargs):
+            if instance.layer_name is ...:
+                raise NotImplementedError(
+                    "please first assign the Layer.layer_name before you call Layer.init_code()"
+                )
+            return init_code(instance, *args, **kwargs)
 
-    # override
-    def forward_code(self, add_self: bool = True):
-        if self.layer_name is ... or self.output_name is ... or self.data_names is ...:
-            raise NotImplementedError(
-                "please first assign the Layer.layer_name, Layer.output_name and Layer.data_name before you call "
-                "Layer.forward_code()"
-            )
-        return f"{self.output_name} = {"self." if add_self else ""}{self.layer_name}({self._get_args()})"
+        return wrapped_function
+
+    @staticmethod
+    def injected_check(forward_code):
+        @wraps(forward_code)
+        def wrapped_function(instance, *args, **kwargs):
+            if instance.layer_name is ... or instance.output_name is ... or instance.data_names is ...:
+                raise NotImplementedError(
+                    "please first assign the Layer.layer_name, Layer.output_name and Layer.data_name before you call "
+                    "Layer.forward_code()"
+                )
+            return forward_code(instance, *args, **kwargs)
+
+        return wrapped_function
+
+    @staticmethod
+    def input_shape_check(output_shape):
+        @wraps(output_shape)
+        def wrapped_function(instance, *input_shape: Tuple[int, ...] | List[int], **kwargs):
+            if len(input_shape) != instance.data_amount:
+                raise ValueError(
+                    f"detect an unexpected input_shape as {input_shape}, expected len is {instance.data_amount}"
+                )
+            return output_shape(instance, *input_shape, **kwargs)
+
+        return wrapped_function
+
+    @staticmethod
+    def data_amount_not_zero_check(output_shape):
+        @wraps(output_shape)
+        def wrapped_function(instance, *input_shape: Tuple[int, ...] | List[int], **kwargs):
+            if instance.data_amount == 0:
+                raise ValueError(
+                    f"detect an unexpected empty input_shape as {input_shape}"
+                )
+            return output_shape(instance, *input_shape, **kwargs)
+
+        return wrapped_function
+
+    # planning
+    # def extra_class_code(self) -> Tuple[Tuple[str, str], ...]:
+    #     """
+    #     Return ((class_name, class_code), ...)
+    #     """
+    #     return ()
 
     @abstractmethod
+    @named_check
+    def init_code(self, package: str = "", add_self: bool = True) -> Tuple[str, ...]:
+        ...
+
+    # override
+    @injected_check
+    def forward_code(self, add_self: bool = True) -> Tuple[str, ...]:
+        return f"{self.output_name} = {"self." if add_self else ""}{self.layer_name}({self._get_args()})",
+
+    @abstractmethod
+    @input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         """
         Return what shape of date will get if push [input_shape] data to Layer.

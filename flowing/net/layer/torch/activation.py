@@ -1,4 +1,4 @@
-# Copyright © 2024 PMoS. All rights reserved.
+# Copyright © 2024-2025 PMoS. All rights reserved.
 
 from typing import Tuple, List
 
@@ -21,20 +21,15 @@ class _ReLU(Layer):
     output_amount = 1
 
     def __init__(self, inplace: bool = False, data_amount: int | None = None):
+        super().__init__(data_amount=data_amount)
         self.inplace = inplace
 
-        self._set_data(data_amount=data_amount)
+    @Layer.named_check
+    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
+        return f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}(inplace={self.inplace})",
 
-    def init_code(self, package: str = "torch.nn", add_self: bool = True):
-        super().init_code()
-        return f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}(inplace={self.inplace})"
-
+    @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        if len(input_shape) != self.data_amount:
-            raise ValueError(
-                f"detect an unexpected input_shape as {input_shape}"
-            )
-
         input_shape = input_shape[0]
         return tuple(input_shape),
 
@@ -76,18 +71,14 @@ class Sigmoid(Layer):
     output_amount = 1
 
     def __init__(self, data_amount: int | None = None):
-        self._set_data(data_amount=data_amount)
+        super().__init__(data_amount=data_amount)
 
-    def init_code(self, package: str = "torch.nn", add_self: bool = True):
-        super().init_code()
-        return f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}()"
+    @Layer.named_check
+    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
+        return f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}()",
 
+    @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        if len(input_shape) != self.data_amount:
-            raise ValueError(
-                f"detect an unexpected input_shape as {input_shape}"
-            )
-
         input_shape = input_shape[0]
         return tuple(input_shape),
 
@@ -101,19 +92,14 @@ class Softmax(Layer):
     output_amount = 1
 
     def __init__(self, dim: int = None, data_amount: int | None = None):
+        super().__init__(data_amount=data_amount)
         self.dim = dim
 
-        self._set_data(data_amount=data_amount)
+    @Layer.named_check
+    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
+        return f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}(dim={self.dim})",
 
-    def init_code(self, package: str = "torch.nn", add_self: bool = True):
-        super().init_code()
-        return f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}(dim={self.dim})"
-
+    @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        if len(input_shape) != self.data_amount:
-            raise ValueError(
-                f"detect an unexpected input_shape as {input_shape}"
-            )
-
         input_shape = input_shape[0]
         return tuple(input_shape),

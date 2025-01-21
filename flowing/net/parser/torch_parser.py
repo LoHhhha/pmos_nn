@@ -1,4 +1,4 @@
-# Copyright © 2024 PMoS. All rights reserved.
+# Copyright © 2024-2025 PMoS. All rights reserved.
 
 import os
 import time
@@ -73,8 +73,9 @@ class TorchParser(Parser):
         if self._init_code_result_list is not None:
             return self._init_code_result_list
 
-        self._init_code_result_list = \
-            [self.net_nodes[idx].layer_object.init_code() for idx in self._parse_sequence_index_list]
+        self._init_code_result_list = [
+            code for idx in self._parse_sequence_index_list for code in self.net_nodes[idx].layer_object.init_code()
+        ]
 
         # some op doesn't need init, so it is ok when some is None.
         # for idx in range(self.net_nodes_size):
@@ -88,9 +89,11 @@ class TorchParser(Parser):
         if self._forward_code_result_list is not None:
             return self._forward_code_result_list
 
-        self._forward_code_result_list = \
-            [self.net_nodes[idx].layer_object.forward_code() for idx in self._parse_sequence_index_list] + \
-            [node.forward_code() for node in self.output_nodes]
+        self._forward_code_result_list = [
+            code for idx in self._parse_sequence_index_list for code in
+            self.net_nodes[idx].layer_object.forward_code()
+        ]
+        self._forward_code_result_list += [node.forward_code() for node in self.output_nodes]
 
         parse_sequence_index_list_size = len(self._parse_sequence_index_list)
         for idx in range(parse_sequence_index_list_size):
@@ -175,7 +178,7 @@ class TorchParser(Parser):
                 next_idx_list[data.net_node_idx].append(idx)
 
         dq = deque()
-        start_node_set = set()
+        input_start_node_set = set()
         for idx in range(len(self.input_nodes)):
             node = self.input_nodes[idx]
             for data in node.to_data:
@@ -187,19 +190,24 @@ class TorchParser(Parser):
                     )
 
                 if to_deg[data.net_node_idx] == 0:
-                    start_node_set.add(data.net_node_idx)
+                    input_start_node_set.add(data.net_node_idx)
 
-        for idx in start_node_set:
+        for idx in input_start_node_set:
             dq.append(idx)
 
         dead_nodes = []
         for idx in range(self.net_nodes_size):
-            if to_deg[idx] == 0 and idx not in start_node_set:
-                dead_nodes.append(idx)
+            if to_deg[idx] == 0 and idx not in input_start_node_set:
+                # if from_data is zero, it maybe a 'data' node
+                # else it maybe a dead_nodes which means that not any node points to it.
+                if len(self.net_nodes[idx].from_data) == 0:
+                    dq.append(idx)
+                else:
+                    dead_nodes.append(idx)
         if len(dead_nodes) != 0:
             Logger.fault(f"Network({self.network_name}) sequence parse fail.")
             raise ValueError(
-                f"find this node of the network {dead_nodes} is not had any input_node point to, "
+                f"find this node of the network {dead_nodes} is not had any input_node point to or not a 'data' node, "
                 f"can not finish the parse."
             )
 

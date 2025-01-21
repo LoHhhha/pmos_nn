@@ -73,17 +73,27 @@ operatorBarNamespace.argsType = {
         note: "Please input a float such as 19528 or -0.15.",
     },
     strTuple: {
-        reg: /^\([-+]?[1-9]\d*(\,[-+]?[1-9]\d*)*\)$/,
+        reg: /^\([-+]?\d+(\,[-+]?\d+)*\)$/,
         input: operatorBarNamespace.argsInputType.text,
         getValue: (value) => {
             return value.match(/[-+]?\d+/g).map((item) => {
                 return parseInt(item, 10);
             });
         },
-        note: "Please input a list like string which divided by ',' and included by '(' and ')' such as '(1,3,64,64)'.",
+        note: "Please input a tuple containing integer like string which divided by ',' and included by '(' and ')' such as '(-1,3,64,64)'.",
+    },
+    strNotNegTuple: {
+        reg: /^\(\d+(\,\d+)*\)$/,
+        input: operatorBarNamespace.argsInputType.text,
+        getValue: (value) => {
+            return value.match(/\d+/g).map((item) => {
+                return parseInt(item, 10);
+            });
+        },
+        note: "Please input a tuple containing nonnegative integer like string which divided by ',' and included by '(' and ')' such as '(1,3,64,64)'.",
     },
     strIntOrTuple: {
-        reg: /^((\([-+]?[1-9]\d*(\,[-+]?[1-9]\d*)*\))|([-+]?\d+))$/,
+        reg: /^((\([-+]?\d+(\,[-+]?\d+)*\))|([-+]?\d+))$/,
         input: operatorBarNamespace.argsInputType.text,
         getValue: (value) => {
             const ret = value.match(/[-+]?\d+/g).map((item) => {
@@ -95,7 +105,7 @@ operatorBarNamespace.argsType = {
         note: "Please input a integer or a list like string which divided by ',' and included by '(' and ')' such as '(1,3,64,64)'.",
     },
     strIntOrTupleOrNone: {
-        reg: /^((\([-+]?[1-9]\d*(\,[-+]?[1-9]\d*)*\))|([-+]?\d+)|(None))$/,
+        reg: /^((\([-+]?\d+(\,[-+]?\d+)*\))|([-+]?\d+)|(None))$/,
         input: operatorBarNamespace.argsInputType.text,
         getValue: (value) => {
             if (value === "None") return null;
@@ -125,6 +135,40 @@ operatorBarNamespace.argsType = {
         values: ["zeros", "reflect", "replicate", "circular"],
         note: null,
     },
+    pytorchDevice: {
+        reg: ".*",
+        input: operatorBarNamespace.argsInputType.select,
+        getValue: (value) => {
+            if (value === "default") return null;
+            return value;
+        },
+        values: ["default", "cpu", "cuda", "mps", "xpu", "xla", "mate"],
+        note: null,
+    },
+    pytorchDataType: {
+        reg: ".*",
+        input: operatorBarNamespace.argsInputType.select,
+        getValue: (value) => {
+            if (value === "default") return null;
+            return value;
+        },
+        values: [
+            "default",
+            "bfloat16",
+            "float16",
+            "float32",
+            "float64",
+            "uint8",
+            "int8",
+            "int16",
+            "int32",
+            "int64",
+            "bool",
+            "complex64",
+            "complex128",
+        ],
+        note: null,
+    },
 };
 operatorBarNamespace.framework = {
     all: "all",
@@ -139,12 +183,37 @@ operatorBarNamespace.frameworkOrder = {
 operatorBarNamespace.typeCode = {
     IO: 0,
     math: 1,
-    transform: 2,
-    activation: 3,
-    convolution: 4,
-    pool: 5,
-    linear: 6,
+    data: 2,
+    transform: 3,
+    activation: 4,
+    convolution: 5,
+    pool: 6,
+    linear: 7,
 };
+operatorBarNamespace.typeInfo = {};
+for (const key in operatorBarNamespace.typeCode) {
+    const name = key.charAt(0).toUpperCase() + key.slice(1);
+    operatorBarNamespace.typeInfo[operatorBarNamespace.typeCode[key]] = {
+        name: name,
+        code: operatorBarNamespace.typeCode[key],
+    };
+}
+/**
+ * operator(
+ *      apiName:String
+ *      extendCssClass:Array<String>
+ *      typeCode:operatorBarNamespace.typeCode
+ *      inputEnd(Name):Array<String>
+ *      outputEnd(Name):Array<String>
+ *      outlines:Array<{name:String, short(Name):String}>
+ *      args:Array<{name:String, type:operatorBarNamespace.argsType, default(Value)}>
+ *      framework:operatorBarNamespace.framework
+ *      link:String/null
+ *      outputShapeComeFromArg:String/null
+ *          when inputEnd is empty, this must be set!
+ *      changeCallBack:Function<void(Node)>
+ * )
+ */
 operatorBarNamespace.operators = [
     {
         apiName: "Input",
@@ -161,12 +230,13 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "shape",
-                type: operatorBarNamespace.argsType.strTuple,
+                type: operatorBarNamespace.argsType.strNotNegTuple,
                 default: "(1,3,64,64)",
             },
         ],
         framework: operatorBarNamespace.framework.all,
         link: null,
+        outputShapeComeFromArg: "shape",
     },
     {
         apiName: "Output",
@@ -228,6 +298,222 @@ operatorBarNamespace.operators = [
         args: [],
         framework: operatorBarNamespace.framework.all,
         link: null,
+    },
+    {
+        apiName: "Rand",
+        extendCssClass: ["Rand"],
+        typeCode: operatorBarNamespace.typeCode.data,
+        inputEnd: [],
+        outputEnd: ["data"],
+        outlines: [],
+        args: [
+            {
+                name: "size",
+                type: operatorBarNamespace.argsType.strNotNegTuple,
+                default: "(16,16)",
+            },
+            {
+                name: "device",
+                type: operatorBarNamespace.argsType.pytorchDevice,
+                default: "default",
+            },
+            {
+                name: "dtype",
+                type: operatorBarNamespace.argsType.pytorchDataType,
+                default: "default",
+            },
+            {
+                name: "requires_grad",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.rand.html#torch.rand",
+        outputShapeComeFromArg: "size",
+    },
+    {
+        apiName: "RandNormal",
+        extendCssClass: ["RandNormal"],
+        typeCode: operatorBarNamespace.typeCode.data,
+        inputEnd: [],
+        outputEnd: ["data"],
+        outlines: [],
+        args: [
+            {
+                name: "size",
+                type: operatorBarNamespace.argsType.strNotNegTuple,
+                default: "(16,16)",
+            },
+            {
+                name: "device",
+                type: operatorBarNamespace.argsType.pytorchDevice,
+                default: "default",
+            },
+            {
+                name: "dtype",
+                type: operatorBarNamespace.argsType.pytorchDataType,
+                default: "default",
+            },
+            {
+                name: "requires_grad",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.randn.html#torch.randn",
+        outputShapeComeFromArg: "size",
+    },
+    {
+        apiName: "RandInt",
+        extendCssClass: ["RandInt"],
+        typeCode: operatorBarNamespace.typeCode.data,
+        inputEnd: [],
+        outputEnd: ["data"],
+        outlines: [
+            { name: "low", short: "L" },
+            { name: "high", short: "H" },
+        ],
+        args: [
+            {
+                name: "size",
+                type: operatorBarNamespace.argsType.strNotNegTuple,
+                default: "(16,16)",
+            },
+            {
+                name: "low",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "0",
+            },
+            {
+                name: "high",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "16",
+            },
+            {
+                name: "device",
+                type: operatorBarNamespace.argsType.pytorchDevice,
+                default: "default",
+            },
+            {
+                name: "dtype",
+                type: operatorBarNamespace.argsType.pytorchDataType,
+                default: "default",
+            },
+            {
+                name: "requires_grad",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.randint.html#torch.randint",
+        outputShapeComeFromArg: "size",
+    },
+    {
+        apiName: "Ones",
+        extendCssClass: ["Ones"],
+        typeCode: operatorBarNamespace.typeCode.data,
+        inputEnd: [],
+        outputEnd: ["data"],
+        outlines: [],
+        args: [
+            {
+                name: "size",
+                type: operatorBarNamespace.argsType.strNotNegTuple,
+                default: "(16,16)",
+            },
+            {
+                name: "device",
+                type: operatorBarNamespace.argsType.pytorchDevice,
+                default: "default",
+            },
+            {
+                name: "dtype",
+                type: operatorBarNamespace.argsType.pytorchDataType,
+                default: "default",
+            },
+            {
+                name: "requires_grad",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.ones.html#torch.ones",
+        outputShapeComeFromArg: "size",
+    },
+    {
+        apiName: "Zeros",
+        extendCssClass: ["Zeros"],
+        typeCode: operatorBarNamespace.typeCode.data,
+        inputEnd: [],
+        outputEnd: ["data"],
+        outlines: [],
+        args: [
+            {
+                name: "size",
+                type: operatorBarNamespace.argsType.strNotNegTuple,
+                default: "(16,16)",
+            },
+            {
+                name: "device",
+                type: operatorBarNamespace.argsType.pytorchDevice,
+                default: "default",
+            },
+            {
+                name: "dtype",
+                type: operatorBarNamespace.argsType.pytorchDataType,
+                default: "default",
+            },
+            {
+                name: "requires_grad",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.zeros.html#torch.zeros",
+        outputShapeComeFromArg: "size",
+    },
+    {
+        apiName: "Full",
+        extendCssClass: ["Full"],
+        typeCode: operatorBarNamespace.typeCode.data,
+        inputEnd: [],
+        outputEnd: ["data"],
+        outlines: [{ name: "fill_value", short: "V" }],
+        args: [
+            {
+                name: "size",
+                type: operatorBarNamespace.argsType.strNotNegTuple,
+                default: "(16,16)",
+            },
+            {
+                name: "fill_value",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "0.0",
+            },
+            {
+                name: "device",
+                type: operatorBarNamespace.argsType.pytorchDevice,
+                default: "default",
+            },
+            {
+                name: "dtype",
+                type: operatorBarNamespace.argsType.pytorchDataType,
+                default: "default",
+            },
+            {
+                name: "requires_grad",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.full.html#torch.full",
+        outputShapeComeFromArg: "size",
     },
     {
         apiName: "Reshape",
@@ -294,7 +580,195 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Flatten.html#torch.nn.Flatten",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Unflatten.html#torch.nn.Unflatten",
+    },
+    {
+        apiName: "Cat",
+        extendCssClass: ["Cat"],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input_0", "input_1"],
+        outputEnd: ["output"],
+        outlines: [{ name: "dim", short: "D" }],
+        args: [
+            {
+                name: "dim",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "0",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.cat.html#torch.cat",
+    },
+    {
+        apiName: "Stack",
+        extendCssClass: ["Stack"],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input_0", "input_1"],
+        outputEnd: ["output"],
+        outlines: [{ name: "dim", short: "D" }],
+        args: [
+            {
+                name: "dim",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "0",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.stack.html#torch.stack",
+    },
+    {
+        apiName: "Squeeze",
+        extendCssClass: ["Squeeze"],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "dim", short: "D" }],
+        args: [
+            {
+                name: "dim",
+                type: operatorBarNamespace.argsType.strIntOrTupleOrNone,
+                default: "None",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.squeeze.html#torch-squeeze",
+    },
+    {
+        apiName: "Unsqueeze",
+        extendCssClass: ["Unsqueeze"],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "dim", short: "D" }],
+        args: [
+            {
+                name: "dim",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "0",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.unsqueeze.html#torch-unsqueeze",
+    },
+    {
+        apiName: "RandLike",
+        extendCssClass: ["RandLike"],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input"],
+        outputEnd: ["data"],
+        outlines: [],
+        args: [
+            {
+                name: "requires_grad",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.rand_like.html#torch.rand_like",
+    },
+    {
+        apiName: "RandNormalLike",
+        extendCssClass: ["RandNormalLike"],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input"],
+        outputEnd: ["data"],
+        outlines: [],
+        args: [
+            {
+                name: "requires_grad",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.randn_like.html#torch.randn_like",
+    },
+    {
+        apiName: "RandNormalLike",
+        extendCssClass: ["RandNormalLike"],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input"],
+        outputEnd: ["data"],
+        outlines: [
+            { name: "low", short: "L" },
+            { name: "high", short: "H" },
+        ],
+        args: [
+            {
+                name: "low",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "0",
+            },
+            {
+                name: "high",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "16",
+            },
+            {
+                name: "requires_grad",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.randint_like.html#torch.randint_like",
+    },
+    {
+        apiName: "OnesLike",
+        extendCssClass: ["OnesLike"],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input"],
+        outputEnd: ["data"],
+        outlines: [],
+        args: [
+            {
+                name: "requires_grad",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.ones_like.html#torch.ones_like",
+    },
+    {
+        apiName: "ZerosLike",
+        extendCssClass: ["ZerosLike"],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input"],
+        outputEnd: ["data"],
+        outlines: [],
+        args: [
+            {
+                name: "requires_grad",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.zeros_like.html#torch.zeros_like",
+    },
+    {
+        apiName: "FullLike",
+        extendCssClass: ["FullLike"],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input"],
+        outputEnd: ["data"],
+        outlines: [{ name: "fill_value", short: "V" }],
+        args: [
+            {
+                name: "fill_value",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "0.0",
+            },
+            {
+                name: "requires_grad",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.full_like.html#torch.full_like",
     },
     {
         apiName: "Dropout",

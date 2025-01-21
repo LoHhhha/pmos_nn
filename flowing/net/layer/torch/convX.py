@@ -1,4 +1,4 @@
-# Copyright © 2024 PMoS. All rights reserved.
+# Copyright © 2024-2025 PMoS. All rights reserved.
 
 import math
 from typing import Tuple, List
@@ -46,6 +46,7 @@ class _LazyConv(Layer):
             bias: bool = True,
             data_amount: int | None = None,
     ):
+        super().__init__(data_amount=data_amount)
         self.out_channels = out_channels
         self.kernel_size = kernel_size
         self.stride = stride
@@ -55,21 +56,15 @@ class _LazyConv(Layer):
         self.groups = groups
         self.bias = bias
 
-        self._set_data(data_amount=data_amount)
-
-    def init_code(self, package: str = "torch.nn", add_self: bool = True):
-        super().init_code()
+    @Layer.named_check
+    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
         return (f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
                 f"out_channels={self.out_channels}, kernel_size={self.kernel_size}, stride={self.stride}, "
                 f"padding={self.padding}, padding_mode='{self.padding_mode}', dilation={self.dilation}, "
-                f"groups={self.groups}, bias={self.bias})")
+                f"groups={self.groups}, bias={self.bias})"),
 
+    @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        if len(input_shape) != self.data_amount:
-            raise ValueError(
-                f"detect an unexpected input_shape as {input_shape}"
-            )
-
         # need dim and output_padding as args.
         dim = kwargs['dim']
         output_padding = kwargs.get('output_padding', None)
@@ -130,12 +125,12 @@ class _LazyConvTranspose(_LazyConv):
 
         self.output_padding = output_padding
 
-    def init_code(self, package: str = "torch.nn", add_self: bool = True):
-        super().init_code()
+    @Layer.named_check
+    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
         return (f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
                 f"out_channels={self.out_channels}, kernel_size={self.kernel_size}, stride={self.stride}, "
                 f"padding={self.padding}, padding_mode='{self.padding_mode}', dilation={self.dilation}, "
-                f"groups={self.groups}, bias={self.bias}, output_padding={self.output_padding})")
+                f"groups={self.groups}, bias={self.bias}, output_padding={self.output_padding})"),
 
 
 class _Conv(_LazyConv):
@@ -145,21 +140,17 @@ class _Conv(_LazyConv):
         super().__init__(*args, **kwargs)
         self.in_channels = in_channels
 
-    def init_code(self, package: str = "torch.nn", add_self: bool = True):
-        super().init_code()
+    @Layer.named_check
+    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
         return (
             f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
             f"in_channels={self.in_channels}, out_channels={self.out_channels}, "
             f"kernel_size={self.kernel_size}, stride={self.stride}, padding={self.padding}, "
             f"padding_mode='{self.padding_mode}', dilation={self.dilation}, groups={self.groups}, bias={self.bias})"
-        )
+        ),
 
+    @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        if len(input_shape) != self.data_amount:
-            raise ValueError(
-                f"detect an unexpected input_shape as {input_shape}"
-            )
-
         # need dim and output_padding as args.
         dim = kwargs['dim']
 
@@ -188,13 +179,13 @@ class _ConvTranspose(_Conv):
 
         self.output_padding = output_padding
 
-    def init_code(self, package: str = "torch.nn", add_self: bool = True):
-        super().init_code()
+    @Layer.named_check
+    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
         return (f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
                 f"in_channels={self.in_channels}, out_channels={self.out_channels}, "
                 f"kernel_size={self.kernel_size}, stride={self.stride}, padding={self.padding}, "
                 f"padding_mode='{self.padding_mode}', dilation={self.dilation}, groups={self.groups}, "
-                f"bias={self.bias}, output_padding={self.output_padding})")
+                f"bias={self.bias}, output_padding={self.output_padding})"),
 
 
 class LazyConv1d(_LazyConv):

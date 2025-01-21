@@ -1,6 +1,6 @@
-# Copyright © 2024 PMoS. All rights reserved.
+# Copyright © 2024-2025 PMoS. All rights reserved.
 
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 
 from flowing.net.layer import Layer
 
@@ -13,7 +13,7 @@ __all__ = [
 
 class _MaxUnpool(Layer):
     kernel_size: int | Tuple[int, ...]
-    stride: int | Tuple[int, ...]
+    stride: Optional[int | Tuple[int, ...]]
     padding: int | Tuple[int, ...]
 
     data_amount = 2
@@ -22,29 +22,24 @@ class _MaxUnpool(Layer):
     def __init__(
             self,
             kernel_size: int | Tuple[int, ...],
-            stride: int | Tuple[int, ...] = None,  # default: stride = kernel_size
+            stride: Optional[int | Tuple[int, ...]] = None,  # default: stride = kernel_size
             padding: int | Tuple[int, ...] = 0,
             data_amount: int | None = None,
     ):
+        super().__init__(data_amount=data_amount)
         self.kernel_size = kernel_size
         self.stride = stride
         self.padding = padding
 
-        self._set_data(data_amount=data_amount)
-
-    def init_code(self, package: str = "torch.nn", add_self: bool = True):
-        super().init_code()
+    @Layer.named_check
+    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
         return (f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
-                f"kernel_size={self.kernel_size}, stride={self.stride}, padding={self.padding})")
+                f"kernel_size={self.kernel_size}, stride={self.stride}, padding={self.padding})"),
 
+    @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         # need dim as args.
         dim = kwargs['dim']
-
-        if len(input_shape) != self.data_amount:
-            raise ValueError(
-                f"detect an unexpected input_shape as {input_shape}"
-            )
 
         data_shape, info_shape = input_shape
 

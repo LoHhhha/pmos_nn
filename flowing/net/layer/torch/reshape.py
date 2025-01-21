@@ -1,4 +1,4 @@
-# Copyright © 2024 PMoS. All rights reserved.
+# Copyright © 2024-2025 PMoS. All rights reserved.
 
 from functools import reduce
 from typing import Tuple, List
@@ -20,31 +20,21 @@ class Reshape(Layer):
     output_amount = 1
 
     def __init__(self, output_shape, data_amount: int | None = None):
+        super().__init__(data_amount=data_amount)
         self.shape = output_shape
         self.__shape_mul = reduce(lambda x, y: x * y, self.shape)
 
-        self._set_data(data_amount=data_amount)
+    @Layer.named_check
+    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
+        return ()
 
-    def init_code(self, package: str = "torch.nn", add_self: bool = True):
-        super().init_code()
-        return None
-
-    def forward_code(self, add_self: bool = False):
+    @Layer.injected_check
+    def forward_code(self, add_self: bool = False) -> Tuple[str, ...]:
         # add_self is useless
+        return f"{self.output_name} = torch.reshape(input={self.data_names[0]}, shape={self.shape})",
 
-        if self.output_name is ... or self.data_names is ...:
-            raise NotImplementedError(
-                "please first assign the Layer.output_name and Layer.data_name before you call "
-                "Layer.forward_code()"
-            )
-        return f"{self.output_name} = torch.reshape(input={self.output_name}, shape={self.shape})"
-
+    @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        if len(input_shape) != self.data_amount:
-            raise ValueError(
-                f"detect an unexpected input_shape as {input_shape}"
-            )
-
         input_shape = input_shape[0]
         input_mul = reduce(lambda x, y: x * y, input_shape)
 
@@ -54,7 +44,7 @@ class Reshape(Layer):
                 f"detect an unexpected Reshape, having more than one -1 as {self.shape}"
             )
         if neg_one_count:
-            neg_one_idx = -1
+            neg_idx = -1
             output_mul = 1
             for idx, num in enumerate(self.shape):
                 if num < 0:
@@ -63,7 +53,7 @@ class Reshape(Layer):
                             f"detect an unexpected Reshape, having negative number, as {self.shape}"
                         )
                     else:
-                        neg_one_idx = idx
+                        neg_idx = idx
                 else:
                     output_mul *= num
             output_shape = list(self.shape)
@@ -71,7 +61,7 @@ class Reshape(Layer):
                 raise ValueError(
                     f"detect an unexpected input_shape:{input_shape}, which cannot reshape to {self.shape}"
                 )
-            output_shape[neg_one_idx] = input_mul // output_mul
+            output_shape[neg_idx] = input_mul // output_mul
             return tuple(output_shape),
 
         if input_mul != self.__shape_mul:

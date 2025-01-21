@@ -1,4 +1,4 @@
-# Copyright © 2024 PMoS. All rights reserved.
+# Copyright © 2024-2025 PMoS. All rights reserved.
 
 from functools import reduce
 from typing import Tuple, List
@@ -21,22 +21,17 @@ class Flatten(Layer):
     output_amount = 1
 
     def __init__(self, start_dim: int = 1, end_dim: int = -1, data_amount: int | None = None):
+        super().__init__(data_amount=data_amount)
         self.start_dim = start_dim
         self.end_dim = end_dim
 
-        self._set_data(data_amount=data_amount)
-
-    def init_code(self, package: str = "torch.nn", add_self: bool = True):
-        super().init_code()
+    @Layer.named_check
+    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
         return (f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
-                f"start_dim={self.start_dim}, end_dim={self.end_dim})")
+                f"start_dim={self.start_dim}, end_dim={self.end_dim})"),
 
+    @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        if len(input_shape) != self.data_amount:
-            raise ValueError(
-                f"detect an unexpected input_shape as {input_shape}"
-            )
-
         input_shape = list(input_shape[0])
         output_shape = []
         start_dim = self.start_dim if self.start_dim >= 0 else len(input_shape) + self.start_dim
@@ -81,25 +76,26 @@ class Unflatten(Layer):
     data_amount = 1
     output_amount = 1
 
-    def __init__(self, dim: int, unflattened_size: Tuple[int, ...], data_amount: int | None = None) -> None:
+    def __init__(self, dim: int, unflattened_size: Tuple[int, ...], data_amount: int | None = None):
+        super().__init__(data_amount=data_amount)
         self.dim = dim
         self.unflattened_size = unflattened_size
         self.__unflattened_size_mul = reduce(lambda x, y: x * y, unflattened_size)
 
-        self._set_data(data_amount=data_amount)
-
-    def init_code(self, package: str = "torch.nn", add_self: bool = True):
-        super().init_code()
+    @Layer.named_check
+    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
         return (f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
-                f"dim={self.dim}, unflattened_size={self.unflattened_size})")
+                f"dim={self.dim}, unflattened_size={self.unflattened_size})"),
 
+    @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        if len(input_shape) != self.data_amount:
-            raise ValueError(
-                f"detect an unexpected input_shape as {input_shape}"
-            )
-
         input_shape = list(input_shape[0])
+
+        neg_one_count = self.unflattened_size.count(-1)
+        if neg_one_count > 1:
+            raise ValueError(
+                f"detect an unexpected Unflatten, having more than one -1 as {self.unflattened_size}"
+            )
 
         dim = self.dim if self.dim >= 0 else len(input_shape) + self.dim
         if dim < 0 or dim >= len(input_shape):
@@ -107,6 +103,28 @@ class Unflatten(Layer):
                 f"Expected dim should be a index of input_shape, "
                 f"but got dim={self.dim} and input_shape={input_shape}"
             )
+
+        if neg_one_count:
+            neg_idx = -1
+            output_mul = 1
+            for idx, num in enumerate(self.unflattened_size):
+                if num < 0:
+                    if num != -1:
+                        raise ValueError(
+                            f"detect an unexpected Unflatten, having negative number, as {self.unflattened_size}"
+                        )
+                    else:
+                        neg_idx = idx
+                else:
+                    output_mul *= num
+            output_shape = list(self.unflattened_size)
+            if output_mul > input_shape[dim] or input_shape[dim] % output_mul != 0:
+                raise ValueError(
+                    f"detect an unexpected input_shape:{input_shape}, which cannot unflatten to {self.unflattened_size}"
+                )
+            output_shape[neg_idx] = input_shape[dim] // output_mul
+            input_shape[dim:dim + 1] = output_shape
+            return tuple(input_shape),
 
         if input_shape[dim] != self.__unflattened_size_mul:
             raise ValueError(

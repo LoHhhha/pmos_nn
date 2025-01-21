@@ -3,7 +3,7 @@
  |_____] |  |  | |     | |______
  |       |  |  | |_____| ______|
 
-Copyright © 2024 PMoS. All rights reserved.
+Copyright © 2024-2025 PMoS. All rights reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ how to use this?
 
 setup(
     name="flowing",
-    version="0.1.202412",
+    version="0.1.202501",
     author="0x4c48",
     author_email="lohhhha@qq.com",
     description="PMoS-flowing",
