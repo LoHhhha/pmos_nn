@@ -1,8 +1,7 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
 
-from abc import abstractmethod
 from collections.abc import Iterable
-from typing import Tuple, List, Optional
+from typing import Tuple, List, Optional, Annotated
 
 from flowing.net.layer import Layer
 
@@ -15,7 +14,7 @@ __all__ = [
 class Squeeze(Layer):
     _api_name = "squeeze"
 
-    dim: Optional[int | Tuple[int, ...]]
+    dim: Annotated[Optional[int | Tuple[int, ...]], Layer.LayerContent]
 
     data_amount = 1
     output_amount = 1
@@ -65,7 +64,7 @@ class Squeeze(Layer):
             except IndexError:
                 raise ValueError(
                     f"detect an unexpected input_shape as {input_shape}, "
-                    f"expected it's item has at least {dim + 1} dimensions"
+                    f"expected it's item has at least {dim + 1 if dim >= 0 else abs(dim)} dimensions"
                 )
 
         result_shape = [result_shape[idx] for idx in range(len(result_shape)) if idx not in need_remove_dims]
@@ -75,7 +74,7 @@ class Squeeze(Layer):
 class Unsqueeze(Layer):
     _api_name = "unsqueeze"
 
-    dim: int
+    dim: Annotated[int, Layer.LayerContent]
 
     data_amount = 1
     output_amount = 1
@@ -109,7 +108,7 @@ class Unsqueeze(Layer):
         except IndexError:
             raise ValueError(
                 f"detect an unexpected input_shape as {input_shape}, "
-                f"expected it's item has at least {self.dim} dimensions"
+                f"expected it's item has at least {self.dim + 1 if self.dim >= 0 else abs(self.dim)} dimensions"
             )
 
         rs_idx = 0

@@ -1,6 +1,6 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
 
-from typing import Tuple, List
+from typing import Tuple, List, Annotated
 
 from flowing.net.layer import Layer
 
@@ -15,7 +15,7 @@ __all__ = [
 
 
 class _ReLU(Layer):
-    inplace: bool
+    inplace: Annotated[bool, Layer.LayerContent]
 
     data_amount = 1
     output_amount = 1
@@ -24,9 +24,8 @@ class _ReLU(Layer):
         super().__init__(data_amount=data_amount)
         self.inplace = inplace
 
-    @Layer.named_check
     def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}(inplace={self.inplace})",
+        return super().init_code(package=package, add_self=add_self)
 
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
@@ -43,9 +42,9 @@ class SELU(_ReLU):
 
 
 class CELU(_ReLU):
-    alpha: float
-
     _api_name = "CELU"
+
+    alpha: Annotated[float, Layer.LayerContent]
 
     def __init__(self, alpha: float = 1.0, **kwargs):
         super().__init__(**kwargs)
@@ -54,9 +53,9 @@ class CELU(_ReLU):
 
 
 class LeakyReLU(_ReLU):
-    negative_slope: float
-
     _api_name = "LeakyReLU"
+
+    negative_slope: Annotated[float, Layer.LayerContent]
 
     def __init__(self, negative_slope: float = 0.01, **kwargs):
         super().__init__(**kwargs)
@@ -73,9 +72,8 @@ class Sigmoid(Layer):
     def __init__(self, data_amount: int | None = None):
         super().__init__(data_amount=data_amount)
 
-    @Layer.named_check
     def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}()",
+        return super().init_code(package=package, add_self=add_self)
 
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
@@ -84,9 +82,9 @@ class Sigmoid(Layer):
 
 
 class Softmax(Layer):
-    dim: int
-
     _api_name = "Softmax"
+
+    dim: Annotated[int, Layer.LayerContent]
 
     data_amount = 1
     output_amount = 1
@@ -95,9 +93,8 @@ class Softmax(Layer):
         super().__init__(data_amount=data_amount)
         self.dim = dim
 
-    @Layer.named_check
     def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}(dim={self.dim})",
+        return super().init_code(package=package, add_self=add_self)
 
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:

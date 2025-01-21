@@ -1,7 +1,7 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
 
 import math
-from typing import Tuple, List, Optional
+from typing import Tuple, List, Optional, Annotated
 
 from flowing.net.layer import Layer
 
@@ -13,12 +13,14 @@ __all__ = [
 
 
 class _MaxPool(Layer):
-    kernel_size: int | Tuple[int, ...]
-    stride: Optional[int | Tuple[int, ...]]
-    padding: int | Tuple[int, ...]
-    dilation: int | Tuple[int, ...]
-    return_indices: bool
-    ceil_mode: bool
+    _api_name = ...
+
+    kernel_size: Annotated[int | Tuple[int, ...], Layer.LayerContent]
+    stride: Annotated[Optional[int | Tuple[int, ...]], Layer.LayerContent]
+    padding: Annotated[int | Tuple[int, ...], Layer.LayerContent]
+    dilation: Annotated[int | Tuple[int, ...], Layer.LayerContent]
+    return_indices: Annotated[bool, Layer.LayerContent]
+    ceil_mode: Annotated[bool, Layer.LayerContent]
 
     data_amount = 1
 
@@ -45,11 +47,8 @@ class _MaxPool(Layer):
         else:
             self.output_amount = 1
 
-    @Layer.named_check
     def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return (f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
-                f"kernel_size={self.kernel_size}, stride={self.stride}, padding={self.padding}, "
-                f"dilation={self.dilation}, return_indices={self.return_indices}, ceil_mode={self.ceil_mode})"),
+        return super().init_code(package=package, add_self=add_self)
 
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:

@@ -1,6 +1,6 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
 
-from typing import Tuple, List
+from typing import Tuple, List, Annotated
 
 from flowing.net.layer import Layer
 
@@ -15,8 +15,8 @@ __all__ = [
 class _Dropout(Layer):
     _api_name = ...
 
-    p: float
-    inplace: bool
+    p: Annotated[float, Layer.LayerContent]
+    inplace: Annotated[bool, Layer.LayerContent]
 
     data_amount = 1
     output_amount = 1
@@ -26,10 +26,8 @@ class _Dropout(Layer):
         self.p = p
         self.inplace = inplace
 
-    @Layer.named_check
     def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return (f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
-                f"p={self.p}, inplace={self.inplace})"),
+        return super().init_code(package=package, add_self=add_self)
 
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:

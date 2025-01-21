@@ -1,6 +1,6 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
 
-from typing import Tuple, List
+from typing import Tuple, List, Annotated
 
 from flowing.net.layer import Layer
 
@@ -11,10 +11,10 @@ __all__ = [
 
 
 class LayerLinear(Layer):
-    out_features: int
-    bias: bool
-
     _api_name = "LayerLinear"
+
+    out_features: Annotated[int, Layer.LayerContent]
+    bias: Annotated[bool, Layer.LayerContent]
 
     data_amount = 1
     output_amount = 1
@@ -24,10 +24,8 @@ class LayerLinear(Layer):
         self.out_features = out_features
         self.bias = bias
 
-    @Layer.named_check
     def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return (f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
-                f"out_features={self.out_features}, bias={self.bias})"),
+        return super().init_code(package=package, add_self=add_self)
 
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
@@ -44,18 +42,13 @@ class LayerLinear(Layer):
 
 
 class Linear(LayerLinear):
-    in_features: int
-
     _api_name = "Linear"
+
+    in_features: Annotated[int, Layer.LayerContent]
 
     def __init__(self, in_features: int, **kwargs):
         super().__init__(**kwargs)
         self.in_features = in_features
-
-    @Layer.named_check
-    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return (f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
-                f"in_features={self.in_features}, out_features={self.out_features}, bias={self.bias})"),
 
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         output_shape = super().output_shape(*input_shape)

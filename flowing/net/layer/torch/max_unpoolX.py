@@ -1,6 +1,6 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
 
-from typing import Tuple, List, Optional
+from typing import Tuple, List, Optional, Annotated
 
 from flowing.net.layer import Layer
 
@@ -12,9 +12,11 @@ __all__ = [
 
 
 class _MaxUnpool(Layer):
-    kernel_size: int | Tuple[int, ...]
-    stride: Optional[int | Tuple[int, ...]]
-    padding: int | Tuple[int, ...]
+    _api_name = ...
+
+    kernel_size: Annotated[int | Tuple[int, ...], Layer.LayerContent]
+    stride: Annotated[Optional[int | Tuple[int, ...]], Layer.LayerContent]
+    padding: Annotated[int | Tuple[int, ...], Layer.LayerContent]
 
     data_amount = 2
     output_amount = 1
@@ -31,10 +33,8 @@ class _MaxUnpool(Layer):
         self.stride = stride
         self.padding = padding
 
-    @Layer.named_check
     def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return (f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
-                f"kernel_size={self.kernel_size}, stride={self.stride}, padding={self.padding})"),
+        return super().init_code(package=package, add_self=add_self)
 
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:

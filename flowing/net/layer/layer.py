@@ -1,7 +1,7 @@
 # Copyright © 2024 PMoS. All rights reserved.
 
 from functools import wraps
-from typing import List, Tuple
+from typing import List, Tuple, Annotated
 from abc import ABC, abstractmethod
 
 __all__ = [
@@ -20,6 +20,8 @@ class Layer(ABC):
         def forward/xxx(self):
             <forward_code>
     """
+    LayerContent: str = "LayerContentMark"  # using Annotated[type, Layer.LayerContent] to mark attr
+
     _api_name: str = ...
 
     layer_name: str = ...
@@ -29,6 +31,12 @@ class Layer(ABC):
     output_amount: int = ...  # when output_size == 1 means output_name is a var, or it is a tuple.
 
     def __init__(self, data_amount: int | None = None):
+        """
+        Unless data_amount is setting error, don't verify the params and raise another exception in here.
+        Ensure users can generate their own modules in their way.
+
+        So only assign <LayerContent> on __init__(), and remember to call super().__init__(data_amount)!
+        """
         if data_amount is not None:
             if self.data_amount is ...:
                 self.data_amount = data_amount
@@ -46,6 +54,14 @@ class Layer(ABC):
     def _get_args(self, block: str = ", ") -> str:
         # ensure data_name is not ...
         return block.join(self.data_names)
+
+    def get_contents(self):
+        contents = []
+        for key, cls in self.__annotations__.items():
+            if cls.__name__ == Annotated.__name__ and Layer.LayerContent in cls.__metadata__:
+                contents.append((key, getattr(self, key)))
+
+        return contents
 
     @staticmethod
     def named_check(init_code):
@@ -103,10 +119,12 @@ class Layer(ABC):
     #     """
     #     return ()
 
-    @abstractmethod
     @named_check
     def init_code(self, package: str = "", add_self: bool = True) -> Tuple[str, ...]:
-        ...
+        init_params = self.get_contents()
+        init_params_str = ", ".join(f"{key}={value}" for key, value in init_params)
+        package_name = f"{package}." if package and not package.endswith(".") else package
+        return f"{"self." if add_self else ""}{self.layer_name} = {package_name}{self._api_name}({init_params_str})",
 
     # override
     @injected_check

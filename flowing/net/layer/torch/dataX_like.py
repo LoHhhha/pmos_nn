@@ -1,6 +1,6 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
 
-from typing import Tuple, List
+from typing import Tuple, List, Annotated
 
 from flowing.net.layer import Layer
 
@@ -17,7 +17,7 @@ __all__ = [
 class _DataXLike(Layer):
     _api_name = ...
 
-    requires_grad: bool
+    requires_grad: Annotated[bool, Layer.LayerContent]
 
     data_amount = 1
     output_amount = 1
@@ -51,8 +51,8 @@ class RandNormalLike(_DataXLike):
 class RandIntLike(_DataXLike):
     _api_name = "randint_like"
 
-    low: int
-    high: int
+    low: Annotated[int, Layer.LayerContent]
+    high: Annotated[int, Layer.LayerContent]
 
     def __init__(self, high: int, low: int = 0, **kwargs):
         super().__init__(**kwargs)
@@ -77,7 +77,7 @@ class ZerosLike(_DataXLike):
 class FullLike(_DataXLike):
     _api_name = "full_like"
 
-    fill_value: float
+    fill_value: Annotated[float, Layer.LayerContent]
 
     def __init__(self, fill_value: float = 0, **kwargs):
         super().__init__(**kwargs)

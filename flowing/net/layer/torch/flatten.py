@@ -1,7 +1,7 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
 
 from functools import reduce
-from typing import Tuple, List
+from typing import Tuple, List, Annotated
 
 from flowing.net.layer import Layer
 
@@ -14,8 +14,8 @@ __all__ = [
 class Flatten(Layer):
     _api_name = "Flatten"
 
-    start_dim: int
-    end_dim: int
+    start_dim: Annotated[int, Layer.LayerContent]
+    end_dim: Annotated[int, Layer.LayerContent]
 
     data_amount = 1
     output_amount = 1
@@ -25,10 +25,8 @@ class Flatten(Layer):
         self.start_dim = start_dim
         self.end_dim = end_dim
 
-    @Layer.named_check
     def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return (f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
-                f"start_dim={self.start_dim}, end_dim={self.end_dim})"),
+        return super().init_code(package=package, add_self=add_self)
 
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
@@ -69,9 +67,9 @@ class Flatten(Layer):
 class Unflatten(Layer):
     _api_name = "Unflatten"
 
-    dim: int
-    unflattened_size: Tuple[int, ...]
-    __unflattened_size_mul: int
+    dim: Annotated[int, Layer.LayerContent]
+    unflattened_size: Annotated[Tuple[int, ...], Layer.LayerContent]
+    __unflattened_size_mul: Annotated[int, Layer.LayerContent]
 
     data_amount = 1
     output_amount = 1
@@ -82,10 +80,8 @@ class Unflatten(Layer):
         self.unflattened_size = unflattened_size
         self.__unflattened_size_mul = reduce(lambda x, y: x * y, unflattened_size)
 
-    @Layer.named_check
     def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return (f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
-                f"dim={self.dim}, unflattened_size={self.unflattened_size})"),
+        return super().init_code(package=package, add_self=add_self)
 
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:

@@ -18,9 +18,8 @@ class Identity(Layer):
     def __init__(self, data_amount: int | None = None):
         super().__init__(data_amount=data_amount)
 
-    @Layer.named_check
     def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}()",
+        return super().init_code(package=package, add_self=add_self)
 
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:

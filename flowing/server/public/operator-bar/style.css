@@ -316,28 +316,36 @@
     background-color: rgb(160, 96, 144);
 }
 
-.RandLike {
+.Permute {
     background-color: rgb(160, 96, 152);
 }
 
-.RandNormalLike {
+.Transpose {
     background-color: rgb(160, 96, 160);
 }
 
-.RandIntLike {
+.RandLike {
     background-color: rgb(160, 96, 168);
 }
 
-.OnesLike {
+.RandNormalLike {
     background-color: rgb(160, 96, 176);
 }
 
-.ZerosLike {
+.RandIntLike {
     background-color: rgb(160, 96, 184);
 }
 
-.FullLike {
+.OnesLike {
     background-color: rgb(160, 96, 192);
+}
+
+.ZerosLike {
+    background-color: rgb(160, 96, 200);
+}
+
+.FullLike {
+    background-color: rgb(160, 96, 208);
 }
 
 /* activation (160, 128, x+8) */
@@ -456,14 +464,35 @@
 }
 
 .MaxUnpool3d {
-    background-color: rgb(160, 160, 172);
+    background-color: rgb(160, 160, 176);
 }
 
-/* linear (160, 172, x) */
+/* linear (160, 176, x+16) */
 .Linear {
-    background-color: rgb(160, 172, 96);
+    background-color: rgb(160, 176, 96);
 }
 
 .LayerLinear {
-    background-color: rgb(160, 172, 112);
+    background-color: rgb(160, 176, 112);
+}
+
+/* normalization (160, 192, x+16) */
+.BatchNorm1d {
+    background-color: rgb(160, 192, 96);
+}
+
+.BatchNorm2d {
+    background-color: rgb(160, 192, 112);
+}
+
+.BatchNorm3d {
+    background-color: rgb(160, 192, 128);
+}
+
+.GroupNorm {
+    background-color: rgb(160, 192, 144);
+}
+
+.LayerNorm {
+    background-color: rgb(160, 192, 160);
 }

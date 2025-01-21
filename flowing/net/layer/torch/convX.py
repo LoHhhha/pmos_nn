@@ -1,7 +1,7 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
 
 import math
-from typing import Tuple, List
+from typing import Tuple, List, Annotated
 
 from flowing.net.layer import Layer
 
@@ -22,14 +22,16 @@ __all__ = [
 
 
 class _LazyConv(Layer):
-    out_channels: int
-    kernel_size: int | Tuple[int, ...]
-    stride: int | Tuple[int, ...]
-    padding: int | Tuple[int, ...]
-    padding_mode: str
-    dilation: int | Tuple[int, ...]
-    groups: int
-    bias: bool
+    _api_name = ...
+
+    out_channels: Annotated[int, Layer.LayerContent]
+    kernel_size: Annotated[int | Tuple[int, ...], Layer.LayerContent]
+    stride: Annotated[int | Tuple[int, ...], Layer.LayerContent]
+    padding: Annotated[int | Tuple[int, ...], Layer.LayerContent]
+    padding_mode: Annotated[str, Layer.LayerContent]
+    dilation: Annotated[int | Tuple[int, ...], Layer.LayerContent]
+    groups: Annotated[int, Layer.LayerContent]
+    bias: Annotated[bool, Layer.LayerContent]
 
     data_amount = 1
     output_amount = 1
@@ -56,12 +58,8 @@ class _LazyConv(Layer):
         self.groups = groups
         self.bias = bias
 
-    @Layer.named_check
     def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return (f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
-                f"out_channels={self.out_channels}, kernel_size={self.kernel_size}, stride={self.stride}, "
-                f"padding={self.padding}, padding_mode='{self.padding_mode}', dilation={self.dilation}, "
-                f"groups={self.groups}, bias={self.bias})"),
+        return super().init_code(package=package, add_self=add_self)
 
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
@@ -118,36 +116,24 @@ class _LazyConv(Layer):
 
 
 class _LazyConvTranspose(_LazyConv):
-    output_padding: int | Tuple[int, ...]
+    _api_name = ...
+
+    output_padding: Annotated[int | Tuple[int, ...], Layer.LayerContent]
 
     def __init__(self, output_padding: int | Tuple[int, ...] = 0, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.output_padding = output_padding
 
-    @Layer.named_check
-    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return (f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
-                f"out_channels={self.out_channels}, kernel_size={self.kernel_size}, stride={self.stride}, "
-                f"padding={self.padding}, padding_mode='{self.padding_mode}', dilation={self.dilation}, "
-                f"groups={self.groups}, bias={self.bias}, output_padding={self.output_padding})"),
-
 
 class _Conv(_LazyConv):
-    in_channels: int
+    _api_name = ...
+
+    in_channels: Annotated[int, Layer.LayerContent]
 
     def __init__(self, in_channels: int, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.in_channels = in_channels
-
-    @Layer.named_check
-    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return (
-            f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
-            f"in_channels={self.in_channels}, out_channels={self.out_channels}, "
-            f"kernel_size={self.kernel_size}, stride={self.stride}, padding={self.padding}, "
-            f"padding_mode='{self.padding_mode}', dilation={self.dilation}, groups={self.groups}, bias={self.bias})"
-        ),
 
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
@@ -172,20 +158,14 @@ class _Conv(_LazyConv):
 
 
 class _ConvTranspose(_Conv):
-    output_padding: int | Tuple[int, ...]
+    _api_name = ...
+
+    output_padding: Annotated[int | Tuple[int, ...], Layer.LayerContent]
 
     def __init__(self, output_padding: int | Tuple[int, ...] = 0, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.output_padding = output_padding
-
-    @Layer.named_check
-    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return (f"{"self." if add_self else ""}{self.layer_name} = {package}.{self._api_name}("
-                f"in_channels={self.in_channels}, out_channels={self.out_channels}, "
-                f"kernel_size={self.kernel_size}, stride={self.stride}, padding={self.padding}, "
-                f"padding_mode='{self.padding_mode}', dilation={self.dilation}, groups={self.groups}, "
-                f"bias={self.bias}, output_padding={self.output_padding})"),
 
 
 class LazyConv1d(_LazyConv):

@@ -1,7 +1,7 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
 
 from abc import abstractmethod
-from typing import Tuple, List
+from typing import Tuple, List, Annotated
 
 from flowing.net.layer import Layer
 
@@ -14,7 +14,7 @@ __all__ = [
 class _Concat(Layer):
     _api_name = ...
 
-    dim: int
+    dim: Annotated[int, Layer.LayerContent]
 
     output_amount = 1
 

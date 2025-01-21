@@ -65,12 +65,20 @@ operatorBarNamespace.argsType = {
         note: "Please input 'None' or a integer such as 19528.",
     },
     strFloat: {
-        reg: /^[-+]?\d+\.?\d*$/,
+        reg: /^[-+]?\d+\.?\d*(e[-+]?\d+)$/,
         input: operatorBarNamespace.argsInputType.text,
         getValue: (value) => {
             return parseFloat(value);
         },
-        note: "Please input a float such as 19528 or -0.15.",
+        note: "Please input a float such as 19528, -0.15 or 3.14e-2",
+    },
+    strFloatOrNone: {
+        reg: /^(([-+]?\d+\.?\d*(e[-+]?\d+))|(None))$/,
+        input: operatorBarNamespace.argsInputType.text,
+        getValue: (value) => {
+            return parseFloat(value);
+        },
+        note: "Please input a float such as 19528, -0.15 or 3.14e-2",
     },
     strTuple: {
         reg: /^\([-+]?\d+(\,[-+]?\d+)*\)$/,
@@ -189,6 +197,7 @@ operatorBarNamespace.typeCode = {
     convolution: 5,
     pool: 6,
     linear: 7,
+    normalization: 8,
 };
 operatorBarNamespace.typeInfo = {};
 for (const key in operatorBarNamespace.typeCode) {
@@ -649,6 +658,48 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.unsqueeze.html#torch-unsqueeze",
+    },
+    {
+        apiName: "Permute",
+        extendCssClass: ["Permute"],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "dims", short: "D" }],
+        args: [
+            {
+                name: "dims",
+                type: operatorBarNamespace.argsType.strTuple,
+                default: "(2,1,0)",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.permute.html#torch-permute",
+    },
+    {
+        apiName: "Transpose",
+        extendCssClass: ["Transpose"],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "dim0", short: "D0" },
+            { name: "dim1", short: "D1" },
+        ],
+        args: [
+            {
+                name: "dim0",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "0",
+            },
+            {
+                name: "dim1",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "1",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.transpose.html",
     },
     {
         apiName: "RandLike",
@@ -2022,6 +2073,184 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyLinear.html#torch.nn.LazyLinear",
+    },
+    {
+        apiName: "BatchNorm1d",
+        extendCssClass: ["BatchNorm1d"],
+        typeCode: operatorBarNamespace.typeCode.normalization,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "num_features", short: "NF" }],
+        args: [
+            {
+                name: "num_features",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "64",
+            },
+            {
+                name: "eps",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1e-5",
+            },
+            {
+                name: "momentum",
+                type: operatorBarNamespace.argsType.strFloatOrNone,
+                default: "None",
+            },
+            {
+                name: "affine",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+            {
+                name: "track_running_stats",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.BatchNorm1d.html",
+    },
+    {
+        apiName: "BatchNorm2d",
+        extendCssClass: ["BatchNorm2d"],
+        typeCode: operatorBarNamespace.typeCode.normalization,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "num_features", short: "NF" }],
+        args: [
+            {
+                name: "num_features",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "64",
+            },
+            {
+                name: "eps",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1e-5",
+            },
+            {
+                name: "momentum",
+                type: operatorBarNamespace.argsType.strFloatOrNone,
+                default: "None",
+            },
+            {
+                name: "affine",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+            {
+                name: "track_running_stats",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.BatchNorm2d.html",
+    },
+    {
+        apiName: "BatchNorm3d",
+        extendCssClass: ["BatchNorm3d"],
+        typeCode: operatorBarNamespace.typeCode.normalization,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "num_features", short: "NF" }],
+        args: [
+            {
+                name: "num_features",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "64",
+            },
+            {
+                name: "eps",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1e-5",
+            },
+            {
+                name: "momentum",
+                type: operatorBarNamespace.argsType.strFloatOrNone,
+                default: "None",
+            },
+            {
+                name: "affine",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+            {
+                name: "track_running_stats",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.BatchNorm3d.html",
+    },
+    {
+        apiName: "GroupNorm",
+        extendCssClass: ["GroupNorm"],
+        typeCode: operatorBarNamespace.typeCode.normalization,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "num_groups", short: "NG" },
+            { name: "num_channels", short: "NC" },
+        ],
+        args: [
+            {
+                name: "num_groups",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "3",
+            },
+            {
+                name: "num_channels",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "3",
+            },
+            {
+                name: "eps",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1e-5",
+            },
+            {
+                name: "affine",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.GroupNorm.html#groupnorm",
+    },
+    {
+        apiName: "LayerNorm",
+        extendCssClass: ["LayerNorm"],
+        typeCode: operatorBarNamespace.typeCode.normalization,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "normalized_shape", short: "S" }],
+        args: [
+            {
+                name: "normalized_shape",
+                type: operatorBarNamespace.argsType.strNotNegTuple,
+                default: "(3,64,64)",
+            },
+            {
+                name: "eps",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1e-5",
+            },
+            {
+                name: "elementwise_affine",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+            {
+                name: "bias",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LayerNorm.html#layernorm",
     },
 ];
 operatorBarNamespace.operators.sort(function (a, b) {

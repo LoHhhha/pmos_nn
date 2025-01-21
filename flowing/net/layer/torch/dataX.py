@@ -1,6 +1,6 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
 
-from typing import Tuple, List, Optional
+from typing import Tuple, List, Optional, Annotated
 
 from flowing.net.layer import Layer
 from flowing.net.layer.torch.types import Device, Dtype
@@ -18,10 +18,10 @@ __all__ = [
 class _DataX(Layer):
     _api_name = ...
 
-    size: Tuple[int, ...]
-    device: Device
-    dtype: Dtype
-    requires_grad: bool
+    size: Annotated[Tuple[int, ...], Layer.LayerContent]
+    device: Annotated[Device, Layer.LayerContent]
+    dtype: Annotated[Dtype, Layer.LayerContent]
+    requires_grad: Annotated[bool, Layer.LayerContent]
 
     data_amount = 0
     output_amount = 1
@@ -66,8 +66,8 @@ class RandNormal(_DataX):
 class RandInt(_DataX):
     _api_name = "randint"
 
-    low: int
-    high: int
+    low: Annotated[int, Layer.LayerContent]
+    high: Annotated[int, Layer.LayerContent]
 
     def __init__(self, high: int, low: int = 0, **kwargs):
         super().__init__(**kwargs)
@@ -92,7 +92,7 @@ class Zeros(_DataX):
 class Full(_DataX):
     _api_name = "full"
 
-    fill_value: float
+    fill_value: Annotated[float, Layer.LayerContent]
 
     def __init__(self, fill_value: float = 0, **kwargs):
         super().__init__(**kwargs)

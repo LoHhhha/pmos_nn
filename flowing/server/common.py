@@ -1,7 +1,7 @@
 # Copyright © 2024 PMoS. All rights reserved.
 
+from collections.abc import Iterable
 from typing import List
-
 from starlette.responses import JSONResponse
 
 from flowing.net.abstract import InputNode, OutputNode, LayerNode
@@ -126,6 +126,9 @@ def info_to_layer_node(node: dict):
     for arg in node.get("args"):
         try:
             args[arg["key"]] = arg["value"]
+            # ensure it can be a tuple
+            if isinstance(arg["value"], Iterable):
+                args[arg["key"]] = tuple(arg["value"])
         except KeyError:
             raise ValueError(
                 f"LayerNode have an error args, node={node}"
