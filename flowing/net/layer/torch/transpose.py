@@ -40,14 +40,15 @@ class Transpose(Layer):
 
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        result_shape = list(input_shape[0])
+        data_shape = input_shape[0]
+        result_shape = list(data_shape)
         try:
             dim_shape = result_shape[self.dim0]
             result_shape[self.dim0] = result_shape[self.dim1]
             result_shape[self.dim1] = dim_shape
         except IndexError:
             raise ValueError(
-                f"detect an unexpected input_shape as {input_shape}, "
+                f"detect an unexpected data_shape as {data_shape}, "
                 f"expected it's item has index {self.dim0} and {self.dim1} at least"
             )
         return tuple(result_shape),

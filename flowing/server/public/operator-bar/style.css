@@ -26,19 +26,17 @@
     --node-overview-width: 300px;
     --node-overview-container-max-height: 250px;
     --node-overview-margin: var(--margin);
-    --node-overview-outline-color: var(--content-outline-color);
-    --node-overview-item-input-width: var(--node-width);
-    --node-overview-item-input-outline-color: var(--sub-content-outline-color);
+    --node-overview-outline-color: var(--container-outline-color);
     --node-overview-item-input-background-color: var(
-        --sub-content-background-color
+        --content-background-color
     );
-    --node-overview-button-color: var(--lucency-red);
-    --node-overview-button-outline-color: var(--sub-content-outline-color);
+    --node-overview-button-color: var(--default-color);
+    --node-overview-button-outline-color: var(--content-outline-color);
     --node-overview-button-background-color: var(
-        --sub-content-background-color
+        --lucency-reddish
     );
     --node-overview-button-hover-background-color: var(
-        --sub-content-outline-color
+        --lucency-red
     );
 }
 
@@ -209,7 +207,8 @@
 .overview-item-input {
     border-radius: var(--radius);
     border: none;
-    outline: var(--border-width) solid var(--node-overview-item-outline-color);
+    outline: var(--border-width) solid var(--node-overview-item-input-background-color);
+    backdrop-filter: var(--blur);
     background-color: var(--node-overview-item-input-background-color);
     width: 100%;
     margin: 0 auto;

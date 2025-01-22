@@ -18,11 +18,11 @@
     --bar-button-height: var(--node-height);
     --bar-button-outline-color: var(--container-outline-color);
     --bar-button-background-color: var(--container-background-color);
-    --bar-button-background-hover-color: var(
-        --container-outline-color
-    );
+    --bar-button-background-hover-color: var(--container-outline-color);
 
-    --clear-button-color: var(--lucency-red);
+    --clear-button-color: var(--default-color);
+    --clear-button-background-color: var(--lucency-reddish);
+    --clear-button-background-hover-color: var(--lucency-red);
 }
 
 .main-bar {
@@ -97,8 +97,8 @@
 }
 
 .minimap-node-outline {
-    background-color:var(--minimap-node-outline-background-color);
-    position:absolute;
+    background-color: var(--minimap-node-outline-background-color);
+    position: absolute;
 }
 
 .bar-button {
@@ -119,4 +119,9 @@
 
 #clear-button {
     color: var(--clear-button-color);
+    background-color: var(--clear-button-background-color);
+}
+
+#clear-button:hover {
+    background-color: var(--clear-button-background-hover-color);
 }

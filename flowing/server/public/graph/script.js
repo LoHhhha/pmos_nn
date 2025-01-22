@@ -10,6 +10,9 @@ const SHAPE_CONNECTION_OVERLAY_ID = "shape-overlay";
 const ERROR_RESULT_SHAPE = undefined;
 const NOT_SHAPE = null;
 
+const CONNECTION_OVERLAY_CSS_CLASS = "connection-overlay";
+const CONNECTION_OVERLAY_ERROR_CSS_CLASS = "connection-overlay-error";
+
 (function () {
     function calculate(canvas) {
         const nodeId2Idx = new Map(),
@@ -229,7 +232,7 @@ const NOT_SHAPE = null;
         return s1 == s2;
     }
 
-    function addShapeToConnection(connection, shape) {
+    function addShapeToConnection(connection, shape, shapeInfo) {
         if (shape === NOT_SHAPE) {
             console.error(
                 "[AddShapeToConnection] detect a NOT_SHAPE",
@@ -240,30 +243,55 @@ const NOT_SHAPE = null;
         }
 
         // shape === ERROR_RESULT_SHAPE mean error shape
-        let shapeShow =
-            shape === ERROR_RESULT_SHAPE ? "Error" : shape.join("*");
+        const errorMode = shape === ERROR_RESULT_SHAPE;
+        const shapeShow = errorMode
+            ? "Error!\nClick to learn more."
+            : shape.join("*");
+        const overlayCssClass = errorMode
+            ? CONNECTION_OVERLAY_ERROR_CSS_CLASS
+            : CONNECTION_OVERLAY_CSS_CLASS;
 
         const overlay = connection.getOverlay(SHAPE_CONNECTION_OVERLAY_ID);
-        if (overlay) {
-            overlay.setLabel(shapeShow);
-            connection.showOverlay(SHAPE_CONNECTION_OVERLAY_ID);
-        } else {
+        // when no overlay or overlay.cssClass isn't overlayCssClass
+        // remove a new, else using the prev.
+        if (overlay == null || overlay.cssClass !== overlayCssClass) {
+            connection.removeOverlay(overlay);
             connection.addOverlay({
                 type: "Label",
                 options: {
                     location: 0.5,
-                    label: shapeShow,
-                    cssClass: "connection-overlay",
+                    cssClass: overlayCssClass,
                     id: SHAPE_CONNECTION_OVERLAY_ID,
                 },
             });
         }
+
+        const finalOverlay = connection.getOverlay(SHAPE_CONNECTION_OVERLAY_ID);
+        finalOverlay.setLabel(shapeShow);
+        connection.showOverlay(SHAPE_CONNECTION_OVERLAY_ID);
+        // add shapeInfo if need
+        if (shapeInfo) {
+            finalOverlay.showingInfo = false;
+            finalOverlay.bind("click", () => {
+                if (finalOverlay.showingInfo) {
+                    finalOverlay.setLabel(shapeShow);
+                    finalOverlay.showingInfo = false;
+                } else {
+                    finalOverlay.setLabel(shapeInfo);
+                    finalOverlay.showingInfo = true;
+                }
+            });
+        }
+
         connection.instance.repaint(connection.source);
     }
 
     function removeShapeFromConnection(connection) {
         const overlay = connection.getOverlay(SHAPE_CONNECTION_OVERLAY_ID);
         if (overlay) {
+            // clear prev shapeInfo func
+            overlay.unbind("click");
+
             connection.hideOverlay(SHAPE_CONNECTION_OVERLAY_ID);
         } else {
             console.warn(
@@ -339,7 +367,8 @@ const NOT_SHAPE = null;
                         // add connection shape overlay
                         addShapeToConnection(
                             connection,
-                            node.outputEndpointShape[idx]
+                            node.outputEndpointShape[idx],
+                            node.outputEndpointShapeInfo
                         );
 
                         // update next node inputEndpointShape
@@ -428,9 +457,9 @@ const NOT_SHAPE = null;
                         default:
                             MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
                                 config: PROMPT_CONFIG.ERROR,
-                                content: `[ShapeCalculate] Server internal error as ${
+                                content: `[ShapeCalculate] Server internal error, return '${
                                     JSON.parse(xhr.responseText).msg
-                                }, please contact us.`,
+                                }', please contact us.`,
                                 timeout: 5000,
                             });
                     }
@@ -460,7 +489,7 @@ const NOT_SHAPE = null;
                 // if return None means fail to calculate.
                 if (newShape === null) {
                     console.debug(
-                        "[ShapeCalculate] fail due to args and input_shape not match",
+                        "[ShapeCalculate] calculation failed at",
                         node
                     );
                     newShape = new Array(node.outputEndpointShape.length);
@@ -485,6 +514,16 @@ const NOT_SHAPE = null;
                 for (let idx = 0; idx < newShape.length; idx++) {
                     node.outputEndpointShape[idx] = newShape[idx];
                 }
+
+                // update shapeInfo
+                let calcMsg = info.net_nodes_msg[0];
+                if (calcMsg !== null) {
+                    console.debug(
+                        `[ShapeCalculate] calculation return msg as ${calcMsg} at`,
+                        node
+                    );
+                }
+                node.outputEndpointShapeInfo = calcMsg;
 
                 push();
             };
@@ -562,7 +601,11 @@ const NOT_SHAPE = null;
                 let shape = sourceNode.outputEndpointShape[srcEndpointIdx];
 
                 // push to connection
-                addShapeToConnection(connection, shape);
+                addShapeToConnection(
+                    connection,
+                    shape,
+                    sourceNode.outputEndpointShapeInfo
+                );
 
                 // shape.length === 0 mean this node get a error shape,
                 targetNode.inputEndpointShape[tarEndpointIdx] =

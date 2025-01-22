@@ -34,16 +34,16 @@ class _Dropout(Layer):
         # need dim and output_padding as args.
         dim = kwargs['dim']
 
-        input_shape = input_shape[0]
+        data_shape = input_shape[0]
 
-        size = len(input_shape)
+        size = len(data_shape)
         if dim != -1 and size != dim + 1 and size != dim + 2:
             raise ValueError(
-                f"Expected {dim + 1}D (unbatched) or {dim + 2}D (batched) input to {self._api_name}, "
-                f"but got shape of input as: {input_shape}"
+                f"detect an unexpected data_shape as {data_shape}, "
+                f"expected {dim + 1} dimensions(unbatched) or {dim + 2} dimensions(batched) input"
             )
 
-        return tuple(input_shape),
+        return tuple(data_shape),
 
 
 class Dropout(_Dropout):

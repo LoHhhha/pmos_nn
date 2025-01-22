@@ -50,15 +50,15 @@ class _BatchNorm(Layer):
         data_shape = input_shape[0]
         if len(data_shape) not in allowed_dims:
             raise ValueError(
-                f"detect an unexpected input_shape as {input_shape}, "
-                f"expected input_shape has {allowed_dims} dimensions"
+                f"detect an unexpected data_shape as {data_shape}, "
+                f"expected data_shape has {allowed_dims} dimensions"
             )
 
         # data_shape dimensions >=2
         if self.num_features != data_shape[1]:
             raise ValueError(
-                f"detect an unexpected input_shape as {input_shape}, "
-                f"expected input_shape's 2nd dimension is {self.num_features}"
+                f"detect an unexpected data_shape as {data_shape}, "
+                f"expected data_shape's NO.2 dimension is equal to num_features as {self.num_features}"
             )
         return tuple(data_shape),
 

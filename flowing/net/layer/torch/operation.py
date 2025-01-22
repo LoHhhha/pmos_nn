@@ -37,7 +37,8 @@ class _Operation(Layer):
         for shape in input_shape:
             if tuple(shape) != prev:
                 raise ValueError(
-                    f"detect an unexpected input_shape as {input_shape}, has different shape"
+                    f"detect an unexpected input_shape as {input_shape}, "
+                    f"has different shapes"
                 )
         return prev,
 

@@ -67,12 +67,12 @@ class _LazyConv(Layer):
         dim = kwargs['dim']
         output_padding = kwargs.get('output_padding', None)
 
-        input_shape = input_shape[0]
+        data_shape = input_shape[0]
 
-        if len(input_shape) not in (dim + 1, dim + 2):
+        if len(data_shape) not in (dim + 1, dim + 2):
             raise ValueError(
-                f"Expected {dim + 1}D (unbatched) or {dim + 2}D (batched) input to {self._api_name}, "
-                f"but got shape of input as: {input_shape}"
+                f"detect an unexpected data_shape as {data_shape}, "
+                f"expected {dim + 1} dimensions(unbatched) or {dim + 2} dimensions(batched) input"
             )
 
         if isinstance(self.kernel_size, int):
@@ -95,21 +95,21 @@ class _LazyConv(Layer):
         else:
             dilation = self.dilation
 
-        output_shape = [input_shape[0]] * len(input_shape)
+        output_shape = [data_shape[0]] * len(data_shape)
         # this maybe out_channels or N
         output_shape[-dim - 1] = self.out_channels
 
         if output_padding is None:
             for i in range(dim):
                 output_shape[-dim + i] = math.floor(
-                    (input_shape[-dim + i] + 2 * padding[i] - dilation[i] * (kernel_size[i] - 1) - 1) / stride[i] + 1
+                    (data_shape[-dim + i] + 2 * padding[i] - dilation[i] * (kernel_size[i] - 1) - 1) / stride[i] + 1
                 )
         else:
             if isinstance(output_padding, int):
                 output_padding = (output_padding,) * dim
             for i in range(dim):
                 output_shape[-dim + i] = \
-                    (input_shape[-dim + i] - 1) * stride[i] - 2 * padding[i] + dilation[i] * (kernel_size[i] - 1) + \
+                    (data_shape[-dim + i] - 1) * stride[i] - 2 * padding[i] + dilation[i] * (kernel_size[i] - 1) + \
                     output_padding[i] + 1
 
         return tuple(output_shape),
@@ -147,11 +147,13 @@ class _Conv(_LazyConv):
             C_in = data_shape[-dim - 1]
         except IndexError:
             raise ValueError(
-                f"Expected unexpected input_shape as {data_shape}, "
+                f"detect an unexpected data_shape as {data_shape}, "
+                f"expected it have at least {dim + 1} dimensions"
             )
         if C_in != self.in_channels:
             raise ValueError(
-                f"Expected input_shape.C={self.in_channels}(as self.in_channels), but got input_shape.C={C_in}"
+                f"detect an unexpected data_shape as {data_shape}, "
+                f"expected it's {-dim - 1} dimensions is equal to in_channels as {self.in_channels}"
             )
 
         return super().output_shape(*input_shape, **kwargs)

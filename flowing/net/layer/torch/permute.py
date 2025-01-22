@@ -45,20 +45,20 @@ class Permute(Layer):
         dims_set = set(really_dims)
         if len(dims_set) != length:
             raise ValueError(
-                f"detect an unexpected dims as {self.dims}, "
+                f"detect an unexpected Permute param dims as {self.dims}, "
                 f"expected it's items are different"
             )
 
         min_dim, max_dim = min(dims_set), max(dims_set)
         if min_dim != 0 or max_dim != length - 1:
             raise ValueError(
-                f"detect an unexpected dims as {self.dims}, "
+                f"detect an unexpected Permute param dims as {self.dims}, "
                 f"expected it is a permutation of 0 to length-1 or -length to -1"
             )
 
         if length != len(data_shape):
             raise ValueError(
-                f"detect an unexpected input_shape as {input_shape}, "
+                f"detect an unexpected data_shape as {data_shape}, "
                 f"expected it's item has {length} dimensions"
             )
 
@@ -68,7 +68,7 @@ class Permute(Layer):
                 result_shape[idx] = data_shape[dim]
         except IndexError:
             raise ValueError(
-                f"detect an unexpected input_shape as {input_shape}, "
-                f"expected it can find index of {self.dims}"
+                f"detect an unexpected data_shape as {data_shape}, "
+                f"expected it can find indexes of {self.dims}"
             )
         return tuple(result_shape),

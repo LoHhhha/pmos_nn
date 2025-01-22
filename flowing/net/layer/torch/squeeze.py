@@ -41,10 +41,11 @@ class Squeeze(Layer):
 
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        result_shape = list(input_shape[0])
+        data_shape = input_shape[0]
+        result_shape = list(data_shape)
 
         if self.dim is None:
-            result_shape.remove(1)
+            result_shape = [x for x in result_shape if x != 1]
             return tuple(result_shape),
 
         if isinstance(self.dim, Iterable):
@@ -53,7 +54,8 @@ class Squeeze(Layer):
             dims = [self.dim]
         else:
             raise ValueError(
-                f"detect an unexpected dim as {self.dim}, has type {type(self.dim)}"
+                f"detect an unexpected Squeeze params dim as {self.dim}, "
+                f"has type {type(self.dim)}"
             )
 
         need_remove_dims = set()
@@ -63,7 +65,7 @@ class Squeeze(Layer):
                     need_remove_dims.add(dim)
             except IndexError:
                 raise ValueError(
-                    f"detect an unexpected input_shape as {input_shape}, "
+                    f"detect an unexpected data_shape as {data_shape}, "
                     f"expected it's item has at least {dim + 1 if dim >= 0 else abs(dim)} dimensions"
                 )
 
@@ -107,7 +109,7 @@ class Unsqueeze(Layer):
             result_shape[self.dim] = 1
         except IndexError:
             raise ValueError(
-                f"detect an unexpected input_shape as {input_shape}, "
+                f"detect an unexpected data_shape as {data_shape}, "
                 f"expected it's item has at least {self.dim + 1 if self.dim >= 0 else abs(self.dim)} dimensions"
             )
 

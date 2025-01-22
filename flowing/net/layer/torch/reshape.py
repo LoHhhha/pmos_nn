@@ -36,38 +36,42 @@ class Reshape(Layer):
 
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        input_shape = input_shape[0]
-        input_mul = reduce(lambda x, y: x * y, input_shape)
+        data_shape = input_shape[0]
+        data_shape_mul = reduce(lambda x, y: x * y, data_shape)
 
-        neg_one_count = self.shape.count(-1)
-        if neg_one_count > 1:
+        neg_count = len([x for x in self.shape if x < 0])
+        if neg_count > 1:
             raise ValueError(
-                f"detect an unexpected Reshape, having more than one -1 as {self.shape}"
+                f"detect an unexpected Reshape params shape as {self.shape}, "
+                f"having more than one negative number"
             )
-        if neg_one_count:
+        if neg_count:
             neg_idx = -1
             output_mul = 1
             for idx, num in enumerate(self.shape):
                 if num < 0:
                     if num != -1:
                         raise ValueError(
-                            f"detect an unexpected Reshape, having negative number, as {self.shape}"
+                            f"detect an unexpected Reshape params shape as {self.shape}, "
+                            f"having negative number but not -1"
                         )
                     else:
                         neg_idx = idx
                 else:
                     output_mul *= num
             output_shape = list(self.shape)
-            if output_mul > input_mul or input_mul % output_mul != 0:
+            if output_mul > data_shape_mul or output_mul == 0 or data_shape_mul % output_mul != 0:
                 raise ValueError(
-                    f"detect an unexpected input_shape:{input_shape}, which cannot reshape to {self.shape}"
+                    f"detect an unexpected data_shape as {data_shape}, "
+                    f"which cannot reshape to {self.shape}"
                 )
-            output_shape[neg_idx] = input_mul // output_mul
+            output_shape[neg_idx] = data_shape_mul // output_mul
             return tuple(output_shape),
 
-        if input_mul != self.__shape_mul:
+        if data_shape_mul != self.__shape_mul:
             raise ValueError(
-                f"detect a different shape as {input_shape}, expected to product as {self.__shape_mul}"
+                f"detect an unexpected data_shape as {data_shape}, "
+                f"expected it's result of shape multiplication is {self.__shape_mul}"
             )
 
         return tuple(self.shape),

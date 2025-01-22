@@ -41,17 +41,18 @@ class _MaxUnpool(Layer):
         # need dim as args.
         dim = kwargs['dim']
 
-        data_shape, info_shape = input_shape
+        result_shape, info_shape = input_shape
 
-        if tuple(data_shape) != tuple(info_shape):
+        if tuple(result_shape) != tuple(info_shape):
             raise ValueError(
-                f"detect an unexpected input_shape as {input_shape}, expected both of shapes should be same."
+                f"detect an unexpected result_shape as {result_shape} or info_shape as {info_shape}, "
+                f"expected both of shapes should be same."
             )
 
-        if len(data_shape) not in (dim + 1, dim + 2):
+        if len(result_shape) not in (dim + 1, dim + 2):
             raise ValueError(
-                f"Expected {dim + 1}D (unbatched) or {dim + 2}D (batched) input to {self._api_name}, "
-                f"but got input of size: {data_shape}"
+                f"detect an unexpected result_shape as {result_shape}, "
+                f"expected {dim + 1} dimensions(unbatched) or {dim + 2} dimensions(batched) input"
             )
 
         if isinstance(self.kernel_size, int):
@@ -71,10 +72,10 @@ class _MaxUnpool(Layer):
         else:
             stride = self.stride
 
-        output_shape = list(data_shape)
+        output_shape = list(result_shape)
 
         for i in range(dim):
-            output_shape[-dim + i] = (data_shape[-dim + i] - 1) * stride[i] - 2 * padding[i] + kernel_size[i]
+            output_shape[-dim + i] = (result_shape[-dim + i] - 1) * stride[i] - 2 * padding[i] + kernel_size[i]
 
         return tuple(output_shape),
 

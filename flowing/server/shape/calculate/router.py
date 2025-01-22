@@ -43,6 +43,10 @@ async def shape_calculate_pytorch(request: ShapeCalculateRequest):
                     shape<tuple>|None:(<int>,...)   # when fail to calculate shape, it will be None!
                 ],
             ]
+            net_nodes_msg<list>:[
+                msg<str>|None    # when fail to calculate shape, 
+                                    it will be the reason why calculation failed else it will be None!
+            ]
     """
 
     try:
@@ -64,6 +68,7 @@ async def shape_calculate_pytorch(request: ShapeCalculateRequest):
         return NET_NODE_INFOS_PARSE_ERROR_RESPONSE
 
     net_nodes_shape = []
+    net_nodes_msg = []
     try:
         for info in net_node_infos:  # may raise TypeError
             node = info.get("node", None)
@@ -92,9 +97,11 @@ async def shape_calculate_pytorch(request: ShapeCalculateRequest):
 
             try:
                 net_nodes_shape.append(layer_node.layer_object.output_shape(*shape))  # may raise ValueError
+                net_nodes_msg.append(None)
             except ValueError as e:
                 Logger.warning(f"{info} shape calculate fail due to {e}")
                 net_nodes_shape.append(None)
+                net_nodes_msg.append(str(e))
     except TypeError as e:
         Logger.error(f"net_node_infos unexpected due to:{e}, {net_node_infos}")
         return NET_NODE_INFOS_PARSE_ERROR_RESPONSE
@@ -106,7 +113,7 @@ async def shape_calculate_pytorch(request: ShapeCalculateRequest):
         Logger.error(f"net_node_infos trigger a unexpected error {e}, {net_node_infos}")
         return NET_NODE_INFOS_PARSE_ERROR_RESPONSE
 
-    return get_json_response(status_code=200, net_nodes_shape=net_nodes_shape)
+    return get_json_response(status_code=200, net_nodes_shape=net_nodes_shape, net_nodes_msg=net_nodes_msg)
 
 
 @router.post("/tensorflow")

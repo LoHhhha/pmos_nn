@@ -55,12 +55,12 @@ class _MaxPool(Layer):
         # need dim as args.
         dim = kwargs['dim']
 
-        input_shape = input_shape[0]
+        data_shape = input_shape[0]
 
-        if len(input_shape) not in (dim + 1, dim + 2):
+        if len(data_shape) not in (dim + 1, dim + 2):
             raise ValueError(
-                f"Expected {dim + 1}D (unbatched) or {dim + 2}D (batched) input to {self._api_name}, "
-                f"but got input of size: {input_shape}"
+                f"detect an unexpected data_shape as {data_shape}, "
+                f"expected {dim + 1} dimensions(unbatched) or {dim + 2} dimensions(batched) input"
             )
 
         if isinstance(self.kernel_size, int):
@@ -85,17 +85,17 @@ class _MaxPool(Layer):
         else:
             dilation = self.dilation
 
-        data_shape = list(input_shape)
+        result_shape = list(data_shape)
 
         for i in range(dim):
-            data_shape[-dim + i] = math.floor(
-                (input_shape[-dim + i] + 2 * padding[i] - dilation[i] * (kernel_size[i] - 1) - 1) / stride[i] + 1
+            result_shape[-dim + i] = math.floor(
+                (data_shape[-dim + i] + 2 * padding[i] - dilation[i] * (kernel_size[i] - 1) - 1) / stride[i] + 1
             )
 
         if self.return_indices:
-            info_shape = list(data_shape)
-            return tuple(data_shape), tuple(info_shape)
-        return tuple(data_shape),
+            info_shape = list(result_shape)
+            return tuple(result_shape), tuple(info_shape)
+        return tuple(result_shape),
 
 
 class MaxPool1d(_MaxPool):

@@ -82,7 +82,8 @@ class Layer(ABC):
         def wrapped_function(instance, *input_shape: Tuple[int, ...] | List[int], **kwargs):
             if len(input_shape) != instance.data_amount:
                 raise ValueError(
-                    f"detect an unexpected input_shape as {input_shape}, expected len is {instance.data_amount}"
+                    f"detect an unexpected input_shape as {input_shape}, "
+                    f"expected len is {instance.data_amount}"
                 )
             return output_shape(instance, *input_shape, **kwargs)
 

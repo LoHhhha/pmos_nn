@@ -7,7 +7,10 @@
     --connection-overlay-font-size: var(--label-font-size);
     --connection-overlay-color: var(--default-color);
     --connection-overlay-background-color: var(--container-background-color);
+    --connection-overlay-background-hover-color: var(--container-outline-color);
     --connection-overlay-outline-color: var(--container-outline-color);
+    --connection-overlay-error-background-color: var(--lucency-reddish);
+    --connection-overlay-error-background-hover-color: var(--lucency-red);
 }
 
 .logger-div {
@@ -43,14 +46,39 @@
     top: auto;
     left: auto;
     font-size: var(--connection-overlay-font-size);
-    pointer-events: none;
     user-select: none;
     word-wrap: break-word;
     white-space: nowrap;
+    text-align: center;
     color: var(--connection-overlay-color);
     border-radius: var(--radius);
     background-color: var(--connection-overlay-background-color);
     outline: var(--border-width) solid var(--connection-overlay-outline-color);
     backdrop-filter: var(--blur);
     padding: var(--margin);
+}
+
+.connection-overlay:hover {
+    background-color: var(--connection-overlay-background-hover-color);
+}
+
+.connection-overlay-error {
+    position: relative;
+    top: auto;
+    left: auto;
+    font-size: var(--connection-overlay-font-size);
+    user-select: none;
+    word-wrap: break-word;
+    white-space: nowrap;
+    text-align: center;
+    color: var(--connection-overlay-color);
+    border-radius: var(--radius);
+    background-color: var(--connection-overlay-error-background-color);
+    outline: var(--border-width) solid var(--connection-overlay-outline-color);
+    backdrop-filter: var(--blur);
+    padding: var(--margin);
+}
+
+.connection-overlay-error:hover {
+    background-color: var(--connection-overlay-error-background-hover-color);
 }

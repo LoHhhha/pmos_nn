@@ -224,6 +224,7 @@ class Node {
     inputEndpointPrev; // update at graph
     inputEndpointShape; // update at graph
     outputEndpointShape; // update at graph
+    outputEndpointShapeInfo; // update at graph
     outputEndpointConnectionOverlays; // update at graph
     outline;
     canvas;
@@ -369,6 +370,7 @@ class Node {
         this.outputEndpointShape = Array(nodeConfig.outputEnd.length).fill(
             null
         );
+        this.outputEndpointShapeInfo = null;
         this.outputEndpointConnection = Array(nodeConfig.outputEnd.length).fill(
             null
         );
@@ -816,7 +818,7 @@ class OperatorBar {
             ) {
                 continue;
             }
-            
+
             // when this type is excluded, don't add this operator, but add the sep if need.
             const isExcludeType = this.excludeTypes.has(operator.typeCode);
             if (prevOperatorTypeCode != operator.typeCode) {
@@ -830,7 +832,7 @@ class OperatorBar {
                 if (prevOperatorTypeSepEle) {
                     prevOperatorTypeSepEle.updateCount(prevOperatorTypeCount);
                 }
-                
+
                 prevOperatorTypeCode = operator.typeCode;
                 prevOperatorTypeCount = 0;
                 prevOperatorTypeSepEle = sepEle;
@@ -849,7 +851,6 @@ class OperatorBar {
                 this.jsPlumbNavigator
             );
             this.barEle.appendChild(operatorNode.element);
-
         }
         // update prev count
         if (prevOperatorTypeSepEle) {

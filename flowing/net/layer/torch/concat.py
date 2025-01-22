@@ -61,12 +61,14 @@ class Cat(_Concat):
                 shape[self.dim] = -1  # this dim can be different
             except IndexError:
                 raise ValueError(
-                    f"detect an unexpected input_shape as {input_shape}, has so short shape than {self.dim}"
+                    f"detect an unexpected input_shape as {input_shape}, "
+                    f"has so short shape than dim as  {self.dim}"
                 )
 
             if prev_shape is not None and shape != prev_shape:
                 raise ValueError(
-                    f"detect an unexpected input_shape as {input_shape}, has different shape"
+                    f"detect an unexpected input_shape as {input_shape}, "
+                    f"which has different shapes"
                 )
             if prev_shape is None:
                 prev_shape = shape
@@ -91,7 +93,8 @@ class Stack(_Concat):
 
             if prev_shape is not None and shape != prev_shape:
                 raise ValueError(
-                    f"detect an unexpected input_shape as {input_shape}, has different shape"
+                    f"detect an unexpected input_shape as {input_shape}, "
+                    f"has different shapes"
                 )
             if prev_shape is None:
                 prev_shape = shape
@@ -105,7 +108,7 @@ class Stack(_Concat):
         except IndexError:
             raise ValueError(
                 f"detect an unexpected input_shape as {input_shape}, "
-                f"expected it's item has at least {self.dim + 1} dimensions"
+                f"expected it's item has at least {self.dim + 1} dimensions for dim as {self.dim}"
             )
 
         rs_idx = 0

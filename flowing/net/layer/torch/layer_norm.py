@@ -43,16 +43,16 @@ class LayerNorm(Layer):
 
         if len(data_shape) != 1 + len(self.normalized_shape):
             raise ValueError(
-                f"detect an unexpected input_shape as {input_shape}, "
-                f"expected input_shape must be {1 + len(self.normalized_shape)} dimensional"
+                f"detect an unexpected data_shape as {data_shape}, "
+                f"expected data_shape must have {1 + len(self.normalized_shape)} dimensions"
             )
 
         # all are List
         allowed_shape = list(data_shape[:1] + self.normalized_shape)
         if allowed_shape != data_shape:
             raise ValueError(
-                f"detect an unexpected input_shape as {input_shape}, "
-                f"expected input_shape must be {allowed_shape}"
+                f"detect an unexpected data_shape as {data_shape}, "
+                f"expected data_shape must be {allowed_shape}"
             )
 
         return tuple(data_shape),

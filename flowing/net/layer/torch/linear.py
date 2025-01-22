@@ -29,14 +29,15 @@ class LayerLinear(Layer):
 
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        input_shape = input_shape[0]
+        data_shape = input_shape[0]
 
-        output_shape = list(input_shape)
+        output_shape = list(data_shape)
         try:
             output_shape[-1] = self.out_features
         except IndexError:
             raise ValueError(
-                f"Expected unexpected input_shape as {input_shape}, "
+                f"detect an unexpected data_shape as {data_shape}, "
+                f"expected data_shape has at least 1 dimension"
             )
         return tuple(output_shape),
 
@@ -53,10 +54,11 @@ class Linear(LayerLinear):
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         output_shape = super().output_shape(*input_shape)
 
-        input_shape = input_shape[0]
-        if input_shape[-1] != self.in_features:
+        data_shape = input_shape[0]
+        if data_shape[-1] != self.in_features:
             raise ValueError(
-                f"Expected unexpected input_shape as {input_shape}, "
+                f"detect an unexpected data_shape as {data_shape}, "
+                f"expected data_shape -1 dimension is equal to out_features as {self.in_features}"
             )
 
         return output_shape

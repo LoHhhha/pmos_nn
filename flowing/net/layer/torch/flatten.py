@@ -30,26 +30,27 @@ class Flatten(Layer):
 
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        input_shape = list(input_shape[0])
+        data_shape = list(input_shape[0])
         output_shape = []
-        start_dim = self.start_dim if self.start_dim >= 0 else len(input_shape) + self.start_dim
-        if start_dim < 0 or start_dim >= len(input_shape):
+        start_dim = self.start_dim if self.start_dim >= 0 else len(data_shape) + self.start_dim
+        if start_dim < 0 or start_dim >= len(data_shape):
             raise ValueError(
-                f"Expected start_dim should be a index of input_shape, "
-                f"but got start_dim={self.start_dim} and input_shape={input_shape}"
+                f"detect an unexpected data_shape:{data_shape}, "
+                f"expected start_dim as {self.start_dim} should be a index of data_shape"
             )
-        end_dim = self.end_dim if self.end_dim >= 0 else len(input_shape) + self.end_dim
-        if end_dim < 0 or end_dim >= len(input_shape):
+        end_dim = self.end_dim if self.end_dim >= 0 else len(data_shape) + self.end_dim
+        if end_dim < 0 or end_dim >= len(data_shape):
             raise ValueError(
-                f"Expected end_dim should be a index of input_shape, "
-                f"but got end_dim={self.end_dim} and input_shape={input_shape}"
+                f"detect an unexpected data_shape:{data_shape}, "
+                f"expected end_dim as {self.end_dim} should be a index of data_shape as {data_shape}"
             )
         if start_dim > end_dim:
             raise ValueError(
-                f"start_dim={self.start_dim} which is greater than end_dim={self.end_dim}"
+                f"detect an unexpected Flatten params, "
+                f"start_dim as {self.start_dim} which is greater than end_dim as {self.end_dim}"
             )
         mul = 1
-        for dim, num in enumerate(input_shape):
+        for dim, num in enumerate(data_shape):
             if dim < start_dim:
                 output_shape.append(num)
             elif dim <= end_dim:
@@ -85,48 +86,51 @@ class Unflatten(Layer):
 
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        input_shape = list(input_shape[0])
+        data_shape = list(input_shape[0])
 
-        neg_one_count = self.unflattened_size.count(-1)
-        if neg_one_count > 1:
+        neg_count = len([x for x in self.unflattened_size if x < 0])
+        if neg_count > 1:
             raise ValueError(
-                f"detect an unexpected Unflatten, having more than one -1 as {self.unflattened_size}"
+                f"detect an unexpected Unflatten params unflattened_size as {self.unflattened_size}, "
+                f"having more than one negative number"
             )
 
-        dim = self.dim if self.dim >= 0 else len(input_shape) + self.dim
-        if dim < 0 or dim >= len(input_shape):
+        dim = self.dim if self.dim >= 0 else len(data_shape) + self.dim
+        if dim < 0 or dim >= len(data_shape):
             raise ValueError(
-                f"Expected dim should be a index of input_shape, "
-                f"but got dim={self.dim} and input_shape={input_shape}"
+                f"detect an unexpected data_shape:{data_shape}, "
+                f"expected dim as {self.dim} should be a index of data_shape"
             )
 
-        if neg_one_count:
+        if neg_count:
             neg_idx = -1
             output_mul = 1
             for idx, num in enumerate(self.unflattened_size):
                 if num < 0:
                     if num != -1:
                         raise ValueError(
-                            f"detect an unexpected Unflatten, having negative number, as {self.unflattened_size}"
+                            f"detect an unexpected Unflatten params unflattened_size as {self.unflattened_size}, "
+                            f"having negative number but not -1"
                         )
                     else:
                         neg_idx = idx
                 else:
                     output_mul *= num
             output_shape = list(self.unflattened_size)
-            if output_mul > input_shape[dim] or input_shape[dim] % output_mul != 0:
+            if output_mul > data_shape[dim] or output_mul == 0 or data_shape[dim] % output_mul != 0:
                 raise ValueError(
-                    f"detect an unexpected input_shape:{input_shape}, which cannot unflatten to {self.unflattened_size}"
+                    f"detect an unexpected data_shape:{data_shape}, "
+                    f"which NO.{self.dim} dimension cannot unflatten to {self.unflattened_size}"
                 )
-            output_shape[neg_idx] = input_shape[dim] // output_mul
-            input_shape[dim:dim + 1] = output_shape
-            return tuple(input_shape),
+            output_shape[neg_idx] = data_shape[dim] // output_mul
+            data_shape[dim:dim + 1] = output_shape
+            return tuple(data_shape),
 
-        if input_shape[dim] != self.__unflattened_size_mul:
+        if data_shape[dim] != self.__unflattened_size_mul:
             raise ValueError(
-                f"Expected input_shape[{dim}] should be {self.__unflattened_size_mul} , "
-                f"but got input_shape={input_shape}"
+                f"detect an unexpected data_shape as {data_shape}, "
+                f"expected data_shape's NO.{dim + 1} dimension should be {self.__unflattened_size_mul}"
             )
 
-        input_shape[dim:dim + 1] = self.unflattened_size
-        return tuple(input_shape),
+        data_shape[dim:dim + 1] = self.unflattened_size
+        return tuple(data_shape),
