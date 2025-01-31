@@ -1358,7 +1358,14 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
          *      3. clear shape
          *      4. update targetNode.prevNodes
          */
-        jsPlumbInstance.bind("connection:detach", (info) => {
+        const deleteConnection = (info) => {
+            // info {
+            //      source
+            //      target
+            //      sourceEndpoint
+            //      targetEndpoint
+            //      connection
+            // }
             const sourceNode = info.source.origin;
             const targetNode = info.target.origin;
             const sourceEndpoint = info.sourceEndpoint;
@@ -1423,7 +1430,17 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
             console.info(
                 `[Connection] node${sourceNode.id}@out${srcEndpointIdx} -X-> node${targetNode.id}@in${tarEndpointIdx}`
             );
+        };
+
+        jsPlumbInstance.bind("connection:move", (info) => {
+            info.source = info.connection.source;
+            info.target = info.originalEndpoint.element;
+            info.sourceEndpoint = info.connection.endpoints[0];
+            info.targetEndpoint = info.originalEndpoint;
+            deleteConnection(info);
         });
+
+        jsPlumbInstance.bind("connection:detach", deleteConnection);
 
         /**
          * using to:
