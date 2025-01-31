@@ -12,6 +12,7 @@
 
 :root {
     --lucency-red: rgba(238, 0, 0, 0.8);
+    --lucency-yellow: rgba(238, 238, 0, 0.8);
 
     --lucency-reddish: rgba(193, 44, 31, 0.5);
     --lucency-yellowish: rgba(255, 238, 111, 0.5);

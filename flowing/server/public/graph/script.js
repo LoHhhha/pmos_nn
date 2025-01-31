@@ -4,6 +4,7 @@
  * MESSAGE_TYPE.UpdateShape
  *      <event.detail.node: Node>
  *
+ * MESSAGE_TYPE.TidyNodes
  */
 
 const SHAPE_CONNECTION_OVERLAY_ID = "shape-overlay";
@@ -12,6 +13,20 @@ const NOT_SHAPE = null;
 
 const CONNECTION_OVERLAY_CSS_CLASS = "connection-overlay";
 const CONNECTION_OVERLAY_ERROR_CSS_CLASS = "connection-overlay-error";
+
+const TIDY_NODES_NODE_WIDTH = rootStyle
+    .var("--node-width")
+    .match(/\d+/g)
+    .map(parseInt)[0];
+const TIDY_NODES_NODE_HEIGHT = rootStyle
+    .var("--node-height")
+    .match(/\d+/g)
+    .map(parseInt)[0];
+const TIDY_NODES_MAX_ITERATIONS = 64;
+const TIDY_NODES_MAX_ENDPOINT_COUNT = 10;
+const TIDY_NODES_ROOT_NODE_TOP_PLACE_INTERVAL = 270;
+const TIDY_NODES_ROOT_NODE_SUB_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH;
+const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
 
 (function () {
     function calculate(canvas) {
@@ -470,7 +485,7 @@ const CONNECTION_OVERLAY_ERROR_CSS_CLASS = "connection-overlay-error";
                 if (info.net_nodes_shape === undefined) {
                     MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
                         config: PROMPT_CONFIG.ERROR,
-                        content: `[ShapeCalculate] Found error result from sever.`,
+                        content: `[ShapeCalculate] Found error result from sever, please contact us!`,
                         timeout: 5000,
                     });
                     return;
@@ -553,7 +568,724 @@ const CONNECTION_OVERLAY_ERROR_CSS_CLASS = "connection-overlay-error";
         }
     }
 
+    function tidyNodes() {
+        // base on node.prevNodes(set): prevNode
+        // base on node.inputEndpointPrev(array): Point(prevNode.id, prevNode.endpointIdx)
+        // base on node.id
+        // but no change it!!
+        let allNodes = [];
+
+        // step1: establish graph data structure
+        const canvasEle = document.getElementById("canvas");
+        for (let ptr = canvasEle.children.length - 1; ptr >= 0; ptr--) {
+            const element = canvasEle.children[ptr];
+            const elementClassName = String(element.className);
+            if (!elementClassName.includes("node")) continue;
+
+            const node = element.origin;
+            allNodes.push(node);
+        }
+
+        // nextNodes(Map): node.id->Set(nextNode,...)
+        function buildNextNodes(nodes) {
+            const nextNodes = new Map();
+            for (const node of nodes) {
+                nextNodes.set(node.id, new Set());
+            }
+            for (const node of nodes) {
+                for (const prevNode of node.prevNodes) {
+                    nextNodes.get(prevNode.id).add(node);
+                }
+            }
+            return nextNodes;
+        }
+        const nextNodes = buildNextNodes(allNodes);
+
+        // prevNodes(Map): node.id -> Set(prevNode,...)
+        function buildPrevNodes(nodes) {
+            const prevNodes = new Map();
+            for (const node of nodes) {
+                const prevNode = new Set();
+                for (const prev of node.prevNodes) {
+                    prevNode.add(prev);
+                }
+                prevNodes.set(node.id, prevNode);
+            }
+            return prevNodes;
+        }
+        const prevNodes = buildPrevNodes(allNodes);
+
+        // prevNodeEndpoints(Map): node.id->[[node.id,endpointIdx]|null, ...]*inputEndpointCount
+        function buildPrevNodeEndpoints(nodes) {
+            const prevNodeEndpoints = new Map();
+            for (const node of nodes) {
+                const prevNodeEndpoint = [];
+                for (const point of node.inputEndpointPrev) {
+                    if (point == null) {
+                        prevNodeEndpoint.push(null);
+                        continue;
+                    }
+                    prevNodeEndpoint.push([point.nodeId, point.endpointIdx]);
+                }
+                prevNodeEndpoints.set(node.id, prevNodeEndpoint);
+            }
+            return prevNodeEndpoints;
+        }
+        const prevNodeEndpoints = buildPrevNodeEndpoints(allNodes);
+
+        const uselessNodes = []; // not connection, push to same pile
+        const graphNodes = [];
+        for (const node of allNodes) {
+            if (
+                nextNodes.get(node.id).size === 0 &&
+                prevNodes.get(node.id).size === 0
+            ) {
+                uselessNodes.push(node);
+            } else {
+                graphNodes.push(node);
+            }
+        }
+
+        // step2: check if exist loop
+        const nodeVisitStatus = new Map(); // node.id->status
+        const visitCode = {
+            visiting: 0,
+            finish: 1,
+        };
+        function existLoop(u) {
+            nodeVisitStatus.set(u.id, visitCode.visiting);
+            for (const v of prevNodes.get(u.id)) {
+                switch (nodeVisitStatus.get(v.id)) {
+                    case visitCode.visiting:
+                        return true;
+                    case visitCode.finish:
+                        break;
+                    default:
+                        if (existLoop(v)) {
+                            return true;
+                        }
+                }
+            }
+            nodeVisitStatus.set(u.id, visitCode.finish);
+            return false;
+        }
+        for (const u of graphNodes) {
+            if (existLoop(u)) {
+                console.warn("[TidyNodes] loop found!", graphNodes);
+                MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+                    config: PROMPT_CONFIG.WARNING,
+                    content:
+                        "[TidyNodes] Loop has been found, so we can not tidy this graph!",
+                    timeout: 5000,
+                });
+                return;
+            }
+        }
+
+        // step3.1: confirm rank of nodes
+        const nodeRank = new Map(); // node.id->rank
+        let maxRank = 0;
+        function calcRank(u) {
+            if (nodeRank.has(u.id)) return nodeRank.get(u.id);
+            let rank = 0;
+            for (const v of nextNodes.get(u.id)) {
+                rank = Math.max(rank, calcRank(v) + 1);
+            }
+            nodeRank.set(u.id, rank);
+            return rank;
+        }
+        for (const u of graphNodes) {
+            // input/data node first do push
+            if (prevNodes.get(u.id).size === 0) {
+                maxRank = Math.max(maxRank, calcRank(u));
+            }
+        }
+        if (nodeRank.size != graphNodes.length) {
+            console.error(
+                "[TidyNodes] can't calculate the rank of nodes!",
+                graphNodes
+            );
+            MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+                config: PROMPT_CONFIG.WARNING,
+                content:
+                    "[TidyNodes] Can't calculate the rank of nodes, please contact us!",
+                timeout: 5000,
+            });
+            return;
+        }
+        // input node push to top
+        for (const u of graphNodes) {
+            // input/data node first do push
+            if (prevNodes.get(u.id).size === 0) {
+                nodeRank.set(u.id, maxRank);
+            }
+        }
+
+        // step3.2: patching skip connection
+        // remember only to change nextNodes
+        let fakeNodeIdCounter = 0;
+        const newFakeNode = (
+            prevNode,
+            outputEndpointIdx,
+            rank,
+            addNextNodes = true
+        ) => {
+            const node = {};
+            node.id = `f${fakeNodeIdCounter++}`;
+
+            // add to nextNodes
+            if (addNextNodes) {
+                nextNodes.get(prevNode.id).add(node);
+            }
+
+            // add to prevNodes
+            prevNodes.set(node.id, new Set());
+            prevNodes.get(node.id).add(prevNode);
+
+            // add prevNodeEndpoints
+            prevNodeEndpoints.set(node.id, [[prevNode.id, outputEndpointIdx]]);
+
+            // set rank
+            nodeRank.set(node.id, rank);
+
+            node.fakeNode = true;
+            nextNodes.set(node.id, new Set());
+            node.redraw = () => {
+                // do nothing
+            };
+
+            return node;
+        };
+        const addFakeNodes = [];
+        for (const u of graphNodes) {
+            const uRank = nodeRank.get(u.id);
+            const needDeleteNextNodes = [],
+                needAddNextNode = [];
+            for (const v of nextNodes.get(u.id)) {
+                const vRank = nodeRank.get(v.id);
+                if (uRank == vRank + 1) continue;
+
+                const connectEndpointInfo = []; // inputEndpointIdx(v), outputEndpointIdx(u)
+                for (const [inputEndpointIdx, pointInfo] of prevNodeEndpoints
+                    .get(v.id)
+                    .entries()) {
+                    if (pointInfo == null) continue;
+                    const [outputNodeId, outputEndpointIdx] = pointInfo;
+                    if (outputNodeId === u.id) {
+                        connectEndpointInfo.push([
+                            inputEndpointIdx,
+                            outputEndpointIdx,
+                        ]);
+                    }
+                }
+                // impossible
+                if (connectEndpointInfo.length === 0) {
+                    throw "Can't found a prevNode in a connection, please contact us!";
+                }
+
+                // new fakeNodes
+                const prevFakeNodes = [];
+                for (const [_, outputEndpointIdx] of connectEndpointInfo) {
+                    const fakeNode = newFakeNode(
+                        u,
+                        outputEndpointIdx,
+                        uRank - 1,
+                        false // not add to u.nextNodes now
+                    );
+                    addFakeNodes.push(fakeNode);
+                    prevFakeNodes.push(fakeNode);
+                    needAddNextNode.push(fakeNode);
+                }
+
+                const vPrevNodes = prevNodes.get(v.id);
+                // delete v.prevNodes
+                vPrevNodes.delete(u);
+                // delete u.nextNodes
+                needDeleteNextNodes.push(v);
+
+                let curRank = uRank - 2;
+                while (curRank > vRank) {
+                    for (const [idx, prevFakeNode] of prevFakeNodes.entries()) {
+                        const fakeNode = newFakeNode(prevFakeNode, 0, curRank);
+                        addFakeNodes.push(fakeNode);
+                        prevFakeNodes[idx] = fakeNode;
+                    }
+                    curRank--;
+                }
+
+                // set v.prevNodes v.prevNodeEndpoints fakeNodes.nextNodes
+                for (const [idx, fakeNode] of prevFakeNodes.entries()) {
+                    const [inputEndpointIdx, _] = connectEndpointInfo[idx];
+                    vPrevNodes.add(fakeNode);
+                    prevNodeEndpoints.get(v.id)[inputEndpointIdx] = [
+                        fakeNode.id,
+                        0,
+                    ];
+                    nextNodes.get(fakeNode.id).add(v);
+                }
+            }
+            // delete nextNodes
+            const uNextNodes = nextNodes.get(u.id);
+            for (const node of needDeleteNextNodes) {
+                uNextNodes.delete(node);
+            }
+
+            // add nextNodes
+            for (const node of needAddNextNode) {
+                uNextNodes.add(node);
+            }
+        }
+        // push to graphNodes
+        for (const node of addFakeNodes) {
+            graphNodes.push(node);
+        }
+        console.debug(`[TidyNodes] add ${fakeNodeIdCounter} fake node.`);
+
+        // step3.3: layer nodes
+        let nodeLayers = [];
+        for (let i = 0; i <= maxRank; i++) {
+            nodeLayers.push([]);
+        }
+        for (const node of graphNodes) {
+            nodeLayers[nodeRank.get(node.id)].push(node);
+        }
+        console.debug("[TidyNodes] calculate node rank success.", nodeLayers);
+
+        // step4: sort layers
+        const sameLengthArrayCompare = (a, b) => {
+            const n = a.length;
+            // impossible
+            if (b.length != n) {
+                throw "Get a unexpect array information, please contact us!";
+            }
+            for (const [idx, val] of a.entries()) {
+                if (b[idx] != val) {
+                    return a[idx] - b[idx];
+                }
+            }
+            return 0;
+        };
+        const dirsInfo = {
+            up: {
+                // output->input
+                start: (n) => {
+                    return 0;
+                },
+                check: (i, n) => {
+                    return i < n;
+                },
+                next: (i) => {
+                    return i + 1;
+                },
+                getOrders: (node, prevLayerNodesOrder) => {
+                    // check inputEndpoint
+                    const orders = [];
+                    for (const [_, info] of prevLayerNodesOrder) {
+                        const [prevNode, order] = info;
+                        for (const [
+                            inputEndpointIdx,
+                            point,
+                        ] of prevNodeEndpoints.get(prevNode.id).entries()) {
+                            if (point == null) continue;
+                            const [nodeId, _] = point;
+                            if (nodeId === node.id) {
+                                orders.push([order, inputEndpointIdx]);
+                            }
+                        }
+                    }
+                    orders.sort(sameLengthArrayCompare);
+                    return orders;
+                },
+            },
+            down: {
+                // input->output
+                start: (n) => {
+                    return n - 1;
+                },
+                check: (i, n) => {
+                    return i >= 0;
+                },
+                next: (i) => {
+                    return i - 1;
+                },
+                getOrders: (node, prevLayerNodesOrder) => {
+                    // check outputEndpoint
+                    const orders = [];
+                    for (const point of prevNodeEndpoints.get(node.id)) {
+                        if (point == null) continue;
+                        const [nodeId, outputEndpoint] = point;
+                        if (!prevLayerNodesOrder.has(nodeId)) continue;
+                        const [_, order] = prevLayerNodesOrder.get(nodeId);
+                        orders.push([order, outputEndpoint]);
+                    }
+                    orders.sort(sameLengthArrayCompare);
+                    return orders;
+                },
+            },
+        };
+        const getCrossCount = (uOrders, vOrders) => {
+            let res = 0;
+            const uN = uOrders.length,
+                vN = vOrders.length;
+            for (let uPtr = 0, vPtr = 0; uPtr < uN && vPtr < vN; vPtr++) {
+                while (uPtr < uN && uOrders[uPtr] <= vOrders[vPtr]) {
+                    uPtr++;
+                }
+                if (uPtr >= uN) break;
+                res += uN - uPtr;
+            }
+            return res;
+        };
+        const getNodePrevOrders = (layer, prevLayerNodesOrder, getOrders) => {
+            const nodePrevOrders = new Map(); // node.id->orders
+            for (const node of layer) {
+                const nodePrevOrder = getOrders(node, prevLayerNodesOrder);
+                nodePrevOrders.set(node.id, nodePrevOrder);
+            }
+            return nodePrevOrders;
+        };
+        const getWeight = (order) => {
+            const [nodeIdx, endpointIdx] = order;
+            return nodeIdx * TIDY_NODES_MAX_ENDPOINT_COUNT + endpointIdx;
+        };
+        const calcWeight = (orders) => {
+            const m = orders.length,
+                half = Math.floor(m / 2);
+            if (m == 0) {
+                return -1;
+            } else if (m % 2 == 1) {
+                return getWeight(orders[half]);
+            }
+            return (getWeight(orders[half]) + getWeight(orders[half - 1])) / 2;
+        };
+        const getWeights = (nodePrevOrders) => {
+            const weights = new Map(); // node.id->weight
+            for (const [nodeId, nodePrevOrder] of nodePrevOrders) {
+                weights.set(nodeId, calcWeight(nodePrevOrder));
+            }
+            return weights;
+        };
+        const orderedArrayUpperBound = (array, val, cmp) => {
+            const m = array.length;
+            if (m == 0) return 0;
+            let l = 0,
+                r = m - 1;
+            while (l < r) {
+                let mid = (l + r) >> 1;
+                if (cmp(val, array[mid]) >= 0) {
+                    l = mid + 1;
+                } else {
+                    r = mid;
+                }
+            }
+            if (cmp(val, array[l]) >= 0) l++; // l<-m
+            return l;
+        };
+        const orderedArrayPush = (array, val, cmp) => {
+            // in any case it is O(n)
+            array.push(val);
+            const m = array.length;
+            for (let i = m - 1; i > 0; i--) {
+                if (cmp(array[i - 1], array[i]) > 0) {
+                    const tmp = array[i];
+                    array[i] = array[i - 1];
+                    array[i - 1] = tmp;
+                } else {
+                    break;
+                }
+            }
+        };
+        const getLayersCrossCount = (layers) => {
+            let result = 0;
+            const prevLayerNodesOrder = new Map(); // node.id->(node,j)
+
+            for (const [_, layer] of layers.entries()) {
+                const prevOrders = [];
+                for (const [_, node] of layer.entries()) {
+                    const orders = dirsInfo.up.getOrders(
+                        node,
+                        prevLayerNodesOrder
+                    );
+
+                    for (const order of orders) {
+                        result +=
+                            prevOrders.length -
+                            orderedArrayUpperBound(
+                                prevOrders,
+                                order,
+                                sameLengthArrayCompare
+                            );
+                        // self order will not change the bound, because orders is ordered.
+                        orderedArrayPush(
+                            prevOrders,
+                            order,
+                            sameLengthArrayCompare
+                        );
+                    }
+                }
+
+                // update prevLayerNodesOrder
+                prevLayerNodesOrder.clear();
+                for (const [j, node] of layer.entries()) {
+                    prevLayerNodesOrder.set(node.id, [node, j]);
+                }
+            }
+            return result;
+        };
+        const isBetter = (baseLayers, currentLayer) => {
+            return (
+                getLayersCrossCount(baseLayers) >
+                getLayersCrossCount(currentLayer)
+            );
+        };
+        const copyLayers = (layers) => {
+            const newLayers = [];
+            for (const layer of layers) {
+                const newLayer = [];
+                newLayer.push(...layer);
+                newLayers.push(newLayer);
+            }
+            return newLayers;
+        };
+        function optimize(layers, dir) {
+            const n = layers.length;
+
+            const prevLayerNodesOrder = new Map(); // node.id->(node,j)
+            for (let i = dir.start(n); dir.check(i, n); i = dir.next(i)) {
+                const layer = layers[i];
+
+                // get prevNodeOrders
+                const nodePrevOrders = getNodePrevOrders(
+                    layer,
+                    prevLayerNodesOrder,
+                    dir.getOrders
+                );
+
+                // get weights
+                const weights = getWeights(nodePrevOrders); // node.id->weight
+
+                // sort this layer
+                layer.sort((u, v) => weights.get(u.id) - weights.get(v.id));
+
+                // fine tuning
+                const m = layer.length;
+                for (let j = 1; j < m; j++) {
+                    const u = layer[j],
+                        v = layer[j - 1];
+                    const uPrevOrder = nodePrevOrders.get(u.id);
+                    const vPrevOrder = nodePrevOrders.get(v.id);
+
+                    // (v,u) -?> (u,v)
+                    if (
+                        getCrossCount(vPrevOrder, uPrevOrder) >
+                        getCrossCount(uPrevOrder, vPrevOrder)
+                    ) {
+                        layer[j] = v;
+                        layer[j - 1] = u;
+                    }
+                }
+                for (let j = m - 2; j >= 0; j--) {
+                    const u = layer[j],
+                        v = layer[j + 1];
+                    const uPrevOrder = nodePrevOrders.get(u.id);
+                    const vPrevOrder = nodePrevOrders.get(v.id);
+
+                    // (u,v) -?> (v,u)
+                    if (
+                        getCrossCount(uPrevOrder, vPrevOrder) >
+                        getCrossCount(vPrevOrder, uPrevOrder)
+                    ) {
+                        layer[j] = v;
+                        layer[j + 1] = u;
+                    }
+                }
+
+                // update prevLayerNodesOrder
+                prevLayerNodesOrder.clear();
+                for (const [j, node] of layer.entries()) {
+                    prevLayerNodesOrder.set(node.id, [node, j]);
+                }
+            }
+        }
+        console.debug(
+            "[TidyNodes] begin to sort layers, current layers is",
+            nodeLayers
+        );
+        let tryTime = 0;
+        while (tryTime < TIDY_NODES_MAX_ITERATIONS) {
+            let currentNodeLayers = copyLayers(nodeLayers);
+
+            optimize(currentNodeLayers, dirsInfo.up);
+
+            if (!isBetter(nodeLayers, currentNodeLayers)) {
+                currentNodeLayers = copyLayers(nodeLayers);
+                optimize(currentNodeLayers, dirsInfo.down);
+                if (!isBetter(nodeLayers, currentNodeLayers)) {
+                    break;
+                }
+            }
+            nodeLayers = currentNodeLayers;
+            tryTime += 1;
+        }
+        if (tryTime === TIDY_NODES_MAX_ITERATIONS) {
+            console.warn("[TidyNodes] sort layers timeout!", nodeLayers);
+        } else {
+            console.debug(
+                `[TidyNodes] sort layers success at ${tryTime + 1} times.`,
+                nodeLayers
+            );
+        }
+        console.debug(
+            `[TidyNodes] cross point = ${getLayersCrossCount(nodeLayers)}.`
+        );
+
+        // step5.1: place graph nodes
+        //      base on: each child tree is disjointed
+        const nodeInDeg = new Map();
+        for (const u of graphNodes) {
+            for (const v of nextNodes.get(u.id)) {
+                const prevInDeg = nodeInDeg.get(v.id);
+                nodeInDeg.set(v.id, (prevInDeg ? prevInDeg : 0) + 1);
+            }
+        }
+        const placeOrders = new Map(); // node.id->(rank,order)
+        for (const [rank, layer] of nodeLayers.entries()) {
+            for (const [order, node] of layer.entries()) {
+                placeOrders.set(node.id, [rank, order]);
+            }
+        }
+        const nextNodeCompare = (u, v) => {
+            // rank more big means the node is near by input, more early to consider.
+            // order more small means the node is near by left, more early to consider.
+            const [uRank, uOrder] = placeOrders.get(u.id);
+            const [vRank, vOrder] = placeOrders.get(v.id);
+            if (uRank === vRank) {
+                return uOrder - vOrder;
+            }
+            return vRank - uRank;
+        };
+        function drawGraph(root, leftOffset) {
+            const nodeCoordinates = new Map(); // node->[left,top]
+            // step1: place
+            function placeNode(u, leftOffset) {
+                // consider a scene:
+                //      v in nextNodes.get(u), and rand(v')==rand(v), order(v')<order(v)
+                //  then v' hasn't been placed. order(v') order(v) are based on less
+                //  cross point count, and we traverse next nodes in the order of rank and
+                //  rank's order.
+                //  so: 1. v' in nextNodes.get(u): v' not placed is impossibility
+                //      2. v' not in nextNodes.get(u):
+                //          1. v' in u' which has same rank and bigger order to u
+                //                  based on less cross point count, we can say (u',u) is
+                //              better then (u,u'), so it is impossibility.
+                //          2. v' in u' which has same rank and smaller order to u
+                //                  v' not placed is impossibility
+                //  after all, we get: (v' in nextNodes.get(u)) xor (v' placed) is true.
+                // if (nodePlaced.has(u.id)) return 0;
+
+                const [rank, _] = placeOrders.get(u.id);
+                const uNextNodes = [...nextNodes.get(u.id)]; // array
+                uNextNodes.sort(nextNodeCompare);
+                const top =
+                    (maxRank - rank) * TIDY_NODES_ROOT_NODE_TOP_PLACE_INTERVAL;
+
+                // output node
+                if (uNextNodes.length == 0) {
+                    const width = u.element.offsetWidth;
+                    nodeCoordinates.set(u, [leftOffset, top]);
+                    return width;
+                }
+
+                let graphOffset = leftOffset;
+                let accessCounter = 0;
+                let left = -1;
+                for (const v of uNextNodes) {
+                    // calculate when the last time check a node.
+                    nodeInDeg.set(v.id, nodeInDeg.get(v.id) - 1);
+                    if (nodeInDeg.get(v.id) != 0) continue;
+
+                    const cWidth = placeNode(v, graphOffset);
+                    graphOffset += cWidth;
+                    if (v.fakeNode === true) {
+                        left = graphOffset - TIDY_NODES_NODE_WIDTH;
+                    }
+                    // add interval
+                    graphOffset += TIDY_NODES_ROOT_NODE_SUB_GRAPH_INTERVAL;
+                    accessCounter++;
+                }
+
+                let width = graphOffset - leftOffset;
+                if (accessCounter) {
+                    // delete needless interval
+                    width -= TIDY_NODES_ROOT_NODE_SUB_GRAPH_INTERVAL;
+                } else {
+                    // add self width
+                    width += TIDY_NODES_NODE_WIDTH;
+                }
+                // no fake node, we tend to set to right
+                if (left == -1) {
+                    left = leftOffset + width - TIDY_NODES_NODE_WIDTH;
+                }
+                nodeCoordinates.set(u, [left, top]);
+                return width;
+            }
+
+            placeNode(root, leftOffset);
+
+            // step2: reshape
+            // step2.1: delete blank
+            let minLeft = Number.MAX_SAFE_INTEGER;
+            for (const [node, coordinates] of nodeCoordinates) {
+                const [left, top] = coordinates;
+                minLeft = Math.min(minLeft, left);
+            }
+            for (const [node, coordinates] of nodeCoordinates) {
+                coordinates[0] = coordinates[0] - minLeft + leftOffset;
+            }
+
+            // step3: redraw
+            for (const [node, coordinates] of nodeCoordinates) {
+                node.redraw(...coordinates);
+            }
+
+            // step4: get width
+            let minL = Number.MAX_SAFE_INTEGER,
+                maxL = Number.MIN_SAFE_INTEGER;
+            for (const [_, coordinates] of nodeCoordinates) {
+                const [left, top] = coordinates;
+                minL = Math.min(minLeft, left);
+                maxL = Math.max(maxL, left);
+            }
+            console.debug(
+                "[TidyNodes] place a graph successfully!",
+                nodeCoordinates
+            );
+
+            return maxL - minL;
+        }
+        let offset = 0;
+        for (const node of nodeLayers.at(-1)) {
+            offset +=
+                drawGraph(node, offset) + TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL;
+        }
+
+        // step5.2: place useless nodes
+        let top = 0,
+            left = -TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL;
+        for (const node of uselessNodes) {
+            node.redraw(left, top);
+            top += node.element.offsetHeight;
+        }
+    }
+
     window.createJsPlumbConnectionListener = (jsPlumbInstance) => {
+        /**
+         * using to:
+         *      1. update targetNode.inputEndpointPrev
+         *      2. update outputEndpointConnection.outputEndpointConnection
+         *      3. push shape
+         *      4. update targetNode.prevNodes
+         */
         jsPlumbInstance.bind("connection", (info) => {
             const sourceNode = info.source.origin;
             const targetNode = info.target.origin;
@@ -594,6 +1326,7 @@ const CONNECTION_OVERLAY_ERROR_CSS_CLASS = "connection-overlay-error";
                 srcEndpointIdx
             );
             sourceNode.outputEndpointConnection[srcEndpointIdx].add(connection);
+            targetNode.prevNodes.add(sourceNode);
 
             // push shape if current node is ready or error
             if (sourceNode.outputEndpointShape[srcEndpointIdx] !== NOT_SHAPE) {
@@ -618,6 +1351,13 @@ const CONNECTION_OVERLAY_ERROR_CSS_CLASS = "connection-overlay-error";
             );
         });
 
+        /**
+         * using to:
+         *      1. delete targetNode.inputEndpointPrev
+         *      2. delete targetNode.inputEndpointShape
+         *      3. clear shape
+         *      4. update targetNode.prevNodes
+         */
         jsPlumbInstance.bind("connection:detach", (info) => {
             const sourceNode = info.source.origin;
             const targetNode = info.target.origin;
@@ -652,6 +1392,23 @@ const CONNECTION_OVERLAY_ERROR_CSS_CLASS = "connection-overlay-error";
 
             targetNode.inputEndpointPrev[tarEndpointIdx] = null;
             targetNode.inputEndpointShape[tarEndpointIdx] = NOT_SHAPE;
+            // update targetNode.prevNodes
+            let foundAnotherSrcNode = false;
+            for (const point of targetNode.inputEndpointPrev) {
+                if (point?.nodeId === sourceNode.id) {
+                    foundAnotherSrcNode = true;
+                }
+            }
+            if (!foundAnotherSrcNode) {
+                targetNode.prevNodes.delete(sourceNode);
+            } else {
+                console.debug(
+                    "[ConnectionDetach] found another connection from sourceNode to targetNode",
+                    sourceNode,
+                    targetNode
+                );
+            }
+
             if (
                 !sourceNode.outputEndpointConnection[srcEndpointIdx].delete(
                     info.connection
@@ -668,6 +1425,44 @@ const CONNECTION_OVERLAY_ERROR_CSS_CLASS = "connection-overlay-error";
             );
         });
 
+        /**
+         * using to:
+         *      1. check if the new adding edge will introduce a loop
+         */
+        jsPlumbInstance.bind("beforeDrop", function (info) {
+            const sourceNode = info.connection.source.origin;
+            const targetNode = info.connection.target.origin;
+
+            // check loop
+            const meetNodeIds = new Set();
+            const targetId = targetNode.id;
+            function canArrive(node) {
+                meetNodeIds.add(node.id);
+                if (node.id === targetId) {
+                    return true;
+                }
+                for (const nextNode of node.prevNodes) {
+                    if (meetNodeIds.has(nextNode)) continue;
+                    if (canArrive(nextNode)) return true;
+                }
+                return false;
+            }
+
+            if (canArrive(sourceNode)) {
+                MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
+                    title: "Error",
+                    text: "This connection will introduce a loop!",
+                    buttonMode: COVERING_BUTTON_MODE.CloseButton,
+                });
+                console.warn("[GraphChecker]", "Loop");
+                return false;
+            }
+
+            return true;
+        });
+    };
+
+    window.createGraphListener = (jsPlumbNavigator) => {
         MESSAGE_HANDLER(MESSAGE_TYPE.CalculateGraph, () => {
             const canvasEle = document.getElementById("canvas");
 
@@ -768,6 +1563,27 @@ const CONNECTION_OVERLAY_ERROR_CSS_CLASS = "connection-overlay-error";
             }
 
             pushShape(event.detail.node);
+        });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.TidyNodes, (event) => {
+            MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
+                title: "Tiding Nodes...",
+            });
+            setTimeout(() => {
+                // in any case, do not crash.
+                try {
+                    tidyNodes();
+                } catch (err) {
+                    console.error("[TidyNodes] failed.", err);
+                    MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+                        config: PROMPT_CONFIG.ERROR,
+                        content:
+                            "[TidyNodes] Tidy node failed, please contact us!",
+                    });
+                }
+                jsPlumbNavigator.viewAllFit();
+                MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose);
+            }, 500);
         });
     };
 })();

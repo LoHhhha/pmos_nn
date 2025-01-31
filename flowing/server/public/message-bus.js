@@ -4,6 +4,7 @@ const MESSAGE_TYPE = {
     // graph
     CalculateGraph: "calculate-graph",
     UpdateShape: "update-shape",
+    TidyNodes: "tidy-nodes",
 
     // operator-bar
     ClearNode: "clear-node",

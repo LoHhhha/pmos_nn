@@ -500,20 +500,71 @@ class Toolbar {
         return mapBarEle;
     }
 
+    function createAIbar() {
+        const AIBarEle = document.createElement("div");
+        AIBarEle.id = "ai-bar";
+        AIBarEle.className = "row-bar";
+
+        const generateButton = document.createElement("button");
+        generateButton.id = "generate-button";
+        generateButton.className = "bar-button";
+        generateButton.textContent = "Generate Network";
+        generateButton.addEventListener("click", () => {
+            MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
+                title: "Not Implemented",
+                buttonMode: COVERING_BUTTON_MODE.CloseButton,
+            });
+        });
+        AIBarEle.appendChild(generateButton);
+
+        return AIBarEle;
+    }
+
+    function createPortBar() {
+        const portBarEle = document.createElement("div");
+        portBarEle.id = "port-bar";
+        portBarEle.className = "row-bar";
+
+        const exportButton = document.createElement("button");
+        exportButton.id = "export-button";
+        exportButton.className = "bar-button";
+        exportButton.textContent = "Export";
+        exportButton.addEventListener("click", () => {
+            MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
+                title: "Not Implemented",
+                buttonMode: COVERING_BUTTON_MODE.CloseButton,
+            });
+        });
+        portBarEle.appendChild(exportButton);
+
+        const importButton = document.createElement("button");
+        importButton.id = "import-button";
+        importButton.className = "bar-button";
+        importButton.textContent = "Import";
+        importButton.addEventListener("click", () => {
+            MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
+                title: "Not Implemented",
+                buttonMode: COVERING_BUTTON_MODE.CloseButton,
+            });
+        });
+        portBarEle.appendChild(importButton);
+
+        return portBarEle;
+    }
+
     function createControlBar() {
         const controlBarEle = document.createElement("div");
         controlBarEle.id = "control-bar";
         controlBarEle.className = "row-bar";
 
-        const calculateButton = document.createElement("button");
-        calculateButton.id = "calculate-button";
-        calculateButton.className = "bar-button";
-        calculateButton.textContent = "Calculate";
-        calculateButton.style.flex = 2;
-        calculateButton.addEventListener("click", () => {
-            MESSAGE_PUSH(MESSAGE_TYPE.CalculateGraph);
+        const tidyButton = document.createElement("button");
+        tidyButton.id = "tidy-button";
+        tidyButton.className = "bar-button";
+        tidyButton.textContent = "Tidy";
+        tidyButton.addEventListener("click", () => {
+            MESSAGE_PUSH(MESSAGE_TYPE.TidyNodes);
         });
-        controlBarEle.appendChild(calculateButton);
+        controlBarEle.appendChild(tidyButton);
 
         const clearButton = document.createElement("button");
         clearButton.id = "clear-button";
@@ -533,6 +584,23 @@ class Toolbar {
         controlBarEle.appendChild(clearButton);
 
         return controlBarEle;
+    }
+
+    function createCalcBar() {
+        const calcBarEle = document.createElement("div");
+        calcBarEle.id = "calculation-bar";
+        calcBarEle.className = "row-bar";
+
+        const calculateButton = document.createElement("button");
+        calculateButton.id = "calculate-button";
+        calculateButton.className = "bar-button";
+        calculateButton.textContent = "Calculate";
+        calculateButton.addEventListener("click", () => {
+            MESSAGE_PUSH(MESSAGE_TYPE.CalculateGraph);
+        });
+        calcBarEle.appendChild(calculateButton);
+
+        return calcBarEle;
     }
 
     function createMainBar(jsPlumbNavigator, viewportEle, canvasEle, options) {
@@ -564,7 +632,11 @@ class Toolbar {
             createMapBar(jsPlumbNavigator, canvasEle, options)
         );
 
+        // mainBarEle.appendChild(createPortBar());
+        // mainBarEle.appendChild(createAIbar());
         mainBarEle.appendChild(createControlBar());
+        mainBarEle.appendChild(createCalcBar());
+        return mainBarEle;
     }
 
     window.createMainBar = (
@@ -580,7 +652,7 @@ class Toolbar {
             showToolbar: true,
         };
 
-        createMainBar(jsPlumbNavigator, viewportEle, canvasEle, {
+        return createMainBar(jsPlumbNavigator, viewportEle, canvasEle, {
             ...defaultOptions,
             ...options,
         });

@@ -120,6 +120,10 @@ class Navigator {
                     title: "View All",
                     callback: this.viewAllFit.bind(this),
                 },
+                {
+                    title: "Tidy Nodes",
+                    callback: () => MESSAGE_PUSH(MESSAGE_TYPE.TidyNodes),
+                },
             ],
         });
         return false;

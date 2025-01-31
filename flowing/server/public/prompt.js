@@ -117,7 +117,7 @@ class PromptItem {
     dispose() {
         if (!this.isDispose) {
             if (this.closeCallback instanceof Function) {
-                if(this.closeCallback()){
+                if (this.closeCallback()) {
                     return;
                 }
             }
@@ -174,11 +174,17 @@ function defaultCloseCallback() {
                     PROMPT,
                     event.detail.config.iconSvg,
                     event.detail.content,
-                    event.detail.onclick?event.detail.onclick:event.detail.config.onclick,
-                    event.detail.closeCallback?event.detail.closeCallback:event.detail.config.closeCallback,
+                    event.detail.onclick
+                        ? event.detail.onclick
+                        : event.detail.config.onclick,
+                    event.detail.closeCallback
+                        ? event.detail.closeCallback
+                        : event.detail.config.closeCallback,
                     defaultCloseCallback,
                     event.detail.config.color,
-                    event.detail.timeout?event.detail.timeout:event.detail.config.timeout
+                    event.detail.timeout
+                        ? event.detail.timeout
+                        : event.detail.config.timeout
                 )
             );
         });

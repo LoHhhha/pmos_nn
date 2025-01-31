@@ -33,5 +33,7 @@ jsPlumb.ready(() => {
 
     window.createJsPlumbConnectionListener(jsPlumbInstance);
 
+    window.createGraphListener(jsPlumbNavigator);
+
     window.addNodesCopyHelper(jsPlumbNavigator);
 });

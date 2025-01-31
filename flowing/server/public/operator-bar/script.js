@@ -226,6 +226,7 @@ class Node {
     outputEndpointShape; // update at graph
     outputEndpointShapeInfo; // update at graph
     outputEndpointConnectionOverlays; // update at graph
+    prevNodes; // update at graph
     outline;
     canvas;
     viewport;
@@ -296,6 +297,13 @@ class Node {
         }
     }
     pointerDownHandlerFunc = this.pointerDownHandler.bind(this);
+
+    redraw(left, top) {
+        this.element.style.left = `${left}px`;
+        this.element.style.top = `${top}px`;
+        this.jsPlumbInstance.revalidate(this.element);
+        this.redrawMiniMapNode();
+    }
 
     redrawMiniMapNode() {
         MESSAGE_PUSH(MESSAGE_TYPE.RedrawMapNode, {
@@ -374,6 +382,7 @@ class Node {
         this.outputEndpointConnection = Array(nodeConfig.outputEnd.length).fill(
             null
         );
+        this.prevNodes = new Set();
 
         this.element = getNodeElement(nodeConfig);
         this.element.id = this.id;
@@ -868,6 +877,10 @@ class OperatorBar {
             needSearch: true,
         };
 
+        /**
+         * using to:
+         *      1. check if after connection it will violate constraints
+         */
         jsPlumbNavigator.jsPlumbInstance.bind("beforeDrop", function (info) {
             const sourceNode = info.connection.source.origin;
             const targetNode = info.connection.target.origin;
@@ -920,7 +933,7 @@ class OperatorBar {
 
             for (let ptr = canvasEle.children.length - 1; ptr >= 0; ptr--) {
                 const element = canvasEle.children[ptr];
-                const elementClassName = String(element.className);
+                const elementClassName = String(element?.className);
                 if (!elementClassName.includes("node")) continue;
 
                 element.origin.dispose();
@@ -1033,7 +1046,10 @@ class OperatorBar {
             }
         });
 
-        // update MiniMap
+        /**
+         * using to:
+         *      1. update MiniMap
+         */
         jsPlumbNavigator.jsPlumbInstance.bind(
             "drag:stop",
             (dragStopPayload) => {
@@ -1043,6 +1059,11 @@ class OperatorBar {
                 }
             }
         );
+
+        /**
+         * using to:
+         *      1. update MiniMap
+         */
         jsPlumbNavigator.jsPlumbInstance.bind(
             "drag:move",
             (dragMovePayload) => {

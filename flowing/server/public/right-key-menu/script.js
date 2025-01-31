@@ -46,9 +46,6 @@ RIGHT_KEY_MENU.className = "right-key-menu";
             return;
         }
 
-        RIGHT_KEY_MENU.style.left = `${event.detail.showLeft}px`;
-        RIGHT_KEY_MENU.style.top = `${event.detail.showTop}px`;
-
         for (const { title, callback, disabled } of event.detail.items) {
             const item = document.createElement("div");
             item.className = "right-key-menu-item";
@@ -70,5 +67,17 @@ RIGHT_KEY_MENU.className = "right-key-menu";
 
         RIGHT_KEY_MENU.style.display = "inline";
         RIGHT_KEY_MENU.style.height = "auto";
+        RIGHT_KEY_MENU.style.visibility = "hidden";
+
+        RIGHT_KEY_MENU.style.left = `${Math.min(
+            event.detail.showLeft,
+            document.body.clientWidth - RIGHT_KEY_MENU.offsetWidth
+        )}px`;
+        RIGHT_KEY_MENU.style.top = `${Math.min(
+            event.detail.showTop,
+            document.body.clientHeight - RIGHT_KEY_MENU.offsetHeight
+        )}px`;
+
+        RIGHT_KEY_MENU.style.visibility = "visible";
     });
 })();
