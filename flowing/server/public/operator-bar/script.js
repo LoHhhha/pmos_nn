@@ -3,7 +3,7 @@
  *
  * MESSAGE_TYPE.CreateNodes
  *      <event.detail.nodesInfo: Array> <event.detail.connectionsInfo: Array> [<event.detail.offsetLeft: int> <event.detail.offsetTop: int>]
- *          <event.detail.nodesInfo>: [{config, left, top, content}]
+ *          <event.detail.nodesInfo>: [{apiName?, config?, left?, top?, content}] apiName or config require at least one, apiName preferential
  *          <event.detail.connectionsInfo> [{srcNodeIdx, srcEndpointIdx, tarNodeIdx, tarEndpointIdx}]
  *          [<event.detail.noSelectNodes: bool>]
  *          -> node
@@ -218,14 +218,13 @@ class Node {
     id;
     element; // element.origin -> this
     config;
-    content;
-    outputEndpoint;
-    inputEndpoint;
-    inputEndpointPrev; // update at graph
-    inputEndpointShape; // update at graph
-    outputEndpointShape; // update at graph
-    outputEndpointShapeInfo; // update at graph
-    outputEndpointConnectionOverlays; // update at graph
+    content; // object, "default" using to record default value.
+    outputEndpoint; // array[endpoint]
+    inputEndpoint; // array[endpoint]
+    inputEndpointPrev; // update at graph, array[Point]
+    inputEndpointShape; // update at graph, array[array|null|undefine]
+    outputEndpointShape; // update at graph, array[array|null|undefine]
+    outputEndpointShapeInfo; // update at graph, array[str|null]
     prevNodes; // update at graph
     outline;
     canvas;
@@ -950,17 +949,33 @@ class OperatorBar {
                     "[CreateNodes] get an unexpected event as",
                     event
                 );
-                return;
+                return false;
             }
 
             let offsetLeft = event.detail?.offsetLeft,
                 offsetTop = event.detail?.offsetTop;
-            offsetLeft = offsetLeft === undefined ? 0 : offsetLeft;
-            offsetTop = offsetTop === undefined ? 0 : offsetTop;
+            offsetLeft = offsetLeft == undefined ? 0 : offsetLeft;
+            offsetTop = offsetTop == undefined ? 0 : offsetTop;
 
             const addNodes = Array(0);
-            for (const { config, left, top, content } of event.detail
+            for (let { apiName, config, left, top, content } of event.detail
                 .nodesInfo) {
+                if (apiName != undefined) {
+                    config =
+                        operatorBarNamespace.apiName2operators.get(apiName);
+                }
+                if (config == undefined) {
+                    console.error(
+                        "[CreateNodes] get unexpected node",
+                        apiName,
+                        config
+                    );
+                    return false;
+                }
+
+                left = left == undefined ? 0 : left;
+                top = top == undefined ? 0 : top;
+
                 const node = new Node(
                     config,
                     left + offsetLeft,
@@ -991,6 +1006,8 @@ class OperatorBar {
                     target: addNodes[tarNodeIdx].inputEndpoint[tarEndpointIdx],
                 });
             }
+
+            return true;
         });
 
         MESSAGE_HANDLER(MESSAGE_TYPE.DeleteNodes, (event) => {

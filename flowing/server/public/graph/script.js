@@ -46,7 +46,7 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
         // build all id2idx
         for (const element of canvas.children) {
             const node = element.origin;
-            const nodeClassName = String(element.className);
+            const nodeClassName = String(element?.className);
             if (!nodeClassName.includes("node")) continue;
 
             if (node.inputEndpointPrev.includes(null)) {
@@ -126,7 +126,7 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
         // build graph
         for (const element of canvas.children) {
             const node = element.origin;
-            const nodeClassName = String(element.className);
+            const nodeClassName = String(element?.className);
             if (!nodeClassName.includes("node")) continue;
 
             let idx = -1;
@@ -579,7 +579,7 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
         const canvasEle = document.getElementById("canvas");
         for (let ptr = canvasEle.children.length - 1; ptr >= 0; ptr--) {
             const element = canvasEle.children[ptr];
-            const elementClassName = String(element.className);
+            const elementClassName = String(element?.className);
             if (!elementClassName.includes("node")) continue;
 
             const node = element.origin;
@@ -1596,6 +1596,7 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
                         config: PROMPT_CONFIG.ERROR,
                         content:
                             "[TidyNodes] Tidy node failed, please contact us!",
+                        timeout: 5000,
                     });
                 }
                 jsPlumbNavigator.viewAllFit();

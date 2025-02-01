@@ -40,14 +40,30 @@ const MESSAGE_TYPE = {
 
     // prompt
     ShowDefaultPrompt: "show-default-prompt",
+
+    // port
+    ImportGraph: "import-graph",
+    ExportGraph: "export-graph",
 };
+
+const MESSAGE_HANDLER_MAP = new Map();
 
 const MESSAGE_PUSH = (msgType, detail) => {
     MESSAGE_BUS.dispatchEvent(new CustomEvent(msgType, { detail: detail }));
 };
 
+const MESSAGE_CALL = (msgType, detail) => {
+    const result = [];
+    for (const handler of MESSAGE_HANDLER_MAP.get(msgType)) {
+        result.push(handler({ detail: detail }));
+    }
+    return result;
+};
+
 const MESSAGE_HANDLER = (msgType, handle) => {
     MESSAGE_BUS.addEventListener(msgType, handle);
+    if (!MESSAGE_HANDLER_MAP.has(msgType)) MESSAGE_HANDLER_MAP.set(msgType, []);
+    MESSAGE_HANDLER_MAP.get(msgType).push(handle);
 };
 
 (function () {

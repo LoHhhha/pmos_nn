@@ -530,10 +530,7 @@ class Toolbar {
         exportButton.className = "bar-button";
         exportButton.textContent = "Export";
         exportButton.addEventListener("click", () => {
-            MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
-                title: "Not Implemented",
-                buttonMode: COVERING_BUTTON_MODE.CloseButton,
-            });
+            MESSAGE_PUSH(MESSAGE_TYPE.ExportGraph);
         });
         portBarEle.appendChild(exportButton);
 
@@ -542,10 +539,7 @@ class Toolbar {
         importButton.className = "bar-button";
         importButton.textContent = "Import";
         importButton.addEventListener("click", () => {
-            MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
-                title: "Not Implemented",
-                buttonMode: COVERING_BUTTON_MODE.CloseButton,
-            });
+            MESSAGE_PUSH(MESSAGE_TYPE.ImportGraph);
         });
         portBarEle.appendChild(importButton);
 
@@ -632,7 +626,7 @@ class Toolbar {
             createMapBar(jsPlumbNavigator, canvasEle, options)
         );
 
-        // mainBarEle.appendChild(createPortBar());
+        mainBarEle.appendChild(createPortBar());
         // mainBarEle.appendChild(createAIbar());
         mainBarEle.appendChild(createControlBar());
         mainBarEle.appendChild(createCalcBar());

@@ -36,4 +36,6 @@ jsPlumb.ready(() => {
     window.createGraphListener(jsPlumbNavigator);
 
     window.addNodesCopyHelper(jsPlumbNavigator);
+
+    window.addPortHelper();
 });

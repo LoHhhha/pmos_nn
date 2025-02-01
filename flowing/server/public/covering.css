@@ -49,6 +49,7 @@
 .covering-button:hover {
     width: var(--covering-button-selected-size);
     height: var(--covering-button-selected-size);
+    cursor: pointer;
 }
 
 .covering-button-svg * {

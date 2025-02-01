@@ -114,7 +114,7 @@ const CONNECTION_COPY_DATA = new Array(0);
             );
             MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
                 config: PROMPT_CONFIG.INFO,
-                content: `Paste ${NODES_COPY_DATA.length} node(s) and ${CONNECTION_COPY_DATA.length} edge(s)`,
+                content: `Pasted ${NODES_COPY_DATA.length} node(s) and ${CONNECTION_COPY_DATA.length} edge(s)`,
                 timeout: 1000,
             });
         });

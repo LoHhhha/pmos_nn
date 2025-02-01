@@ -352,7 +352,7 @@ class Navigator {
 
         MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
             config: PROMPT_CONFIG.INFO,
-            content: `Try to view all nodes`,
+            content: "[Navigator] View all nodes",
             timeout: 1000,
         });
 

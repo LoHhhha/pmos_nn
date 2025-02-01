@@ -1,0 +1,43 @@
+:root {
+    --port-textarea-outline-color: var(--container-outline-color);
+    --port-textarea-background-color: var(--container-background-color);
+
+    --port-copy-button-outline-color: var(--content-outline-color);
+    --port-copy-button-background-color: var(--content-background-color);
+    --port-copy-button-hover-background-color: var(--content-outline-color);
+    --port-copy-button-height: var(--node-height);
+    --port-copy-button-width: var(--node-width);
+}
+
+.port-textarea {
+    font-size: medium;
+    border-radius: var(--radius);
+    outline: var(--border-width) solid var(--port-textarea-outline-color);
+    background-color: var(--port-textarea-background-color);
+    backdrop-filter: var(--blur);
+    color: var(--default-color);
+    margin: var(--margin) auto;
+    border: none;
+    max-width: 60vw;
+    max-height: 50vh;
+    min-width: 30vw;
+    min-height: 20vh;
+}
+
+.port-copy-button {
+    font-size: medium;
+    height: var(--port-copy-button-height);
+    width: 100%;
+    text-align: center;
+    border-radius: var(--radius);
+    margin: var(--margin) auto;
+    user-select: none;
+    border: none;
+    outline: var(--border-width) solid var(--port-copy-button-outline-color);
+    background-color: var(--port-copy-button-background-color);
+    cursor: pointer;
+}
+
+.port-copy-button:hover {
+    background-color: var(--port-copy-button-hover-background-color);
+}

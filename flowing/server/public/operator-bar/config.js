@@ -2262,6 +2262,10 @@ operatorBarNamespace.operators.sort(function (a, b) {
     if (a.typeCode === b.typeCode) return 0;
     return a.typeCode < b.typeCode ? -1 : 1;
 });
+operatorBarNamespace.apiName2operators = new Map();
+for (const operator of operatorBarNamespace.operators) {
+    operatorBarNamespace.apiName2operators.set(operator.apiName, operator);
+}
 // call(srcNode, tarNode, srcEndpointIdx, tarEndpointIdx)
 operatorBarNamespace.connectionRule = [
     {
