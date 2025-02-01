@@ -25,7 +25,6 @@
 
 .right-key-menu-item {
     text-align: left;
-    width: 100%;
     user-select: none;
     border-radius: var(--radius);
     padding: 0 5px 0 5px;

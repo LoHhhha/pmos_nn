@@ -31,7 +31,6 @@ class MiniMap {
         } else {
             this.miniMapEle.style.width = `auto`;
         }
-        miniMapHeight;
         if (miniMapHeight !== undefined) {
             this.miniMapEle.style.height = `${miniMapHeight}px`;
         } else {

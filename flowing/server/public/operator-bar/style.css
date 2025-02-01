@@ -32,12 +32,8 @@
     );
     --node-overview-button-color: var(--default-color);
     --node-overview-button-outline-color: var(--content-outline-color);
-    --node-overview-button-background-color: var(
-        --lucency-reddish
-    );
-    --node-overview-button-hover-background-color: var(
-        --lucency-red
-    );
+    --node-overview-button-background-color: var(--lucency-reddish);
+    --node-overview-button-hover-background-color: var(--lucency-red);
 }
 
 .node {
@@ -88,7 +84,7 @@
     backdrop-filter: var(--blur);
     background-color: var(--operator-bar-background-color);
     outline: var(--border-width) solid var(--operator-bar-outline-color);
-    height: 1;
+    height: 100%;
     width: auto;
     display: flex;
     flex-direction: column;
@@ -148,7 +144,6 @@
     background-color: rgba(0, 0, 0, 0);
     width: 100%;
     margin: 0 auto;
-    border-style: none;
 }
 
 .operator-bar-search-icon {
@@ -194,8 +189,8 @@
 
 .overview-item {
     display: grid;
-    grid-column: auto;
-    grid-row: auto auto;
+    grid-template-columns: auto;
+    grid-template-rows: auto auto;
     margin: 2px 5% 2px 5%;
 }
 
@@ -207,12 +202,12 @@
 .overview-item-input {
     border-radius: var(--radius);
     border: none;
-    outline: var(--border-width) solid var(--node-overview-item-input-background-color);
+    outline: var(--border-width) solid
+        var(--node-overview-item-input-background-color);
     backdrop-filter: var(--blur);
     background-color: var(--node-overview-item-input-background-color);
     width: 100%;
     margin: 0 auto;
-    border-style: none;
 }
 
 .overview-delete-button {

@@ -40,7 +40,7 @@ const CONNECTION_COPY_DATA = new Array(0);
             midTop /= len;
 
             NODES_COPY_DATA.length = len;
-            id2idx = new Map();
+            let id2idx = new Map();
             let idx = 0; // nodes: Array or Set
             for (const node of nodes) {
                 const content = {};
@@ -95,9 +95,9 @@ const CONNECTION_COPY_DATA = new Array(0);
                 event.detail?.left === undefined ||
                 event.detail?.top === undefined
             ) {
-                console.warn(
-                    "[NodesCopyHelper-NodesPaste] get an unexpected nodes as",
-                    nodes
+                console.error(
+                    "[NodesCopyHelper-NodesPaste] get an unexpected event as",
+                    event
                 );
                 return;
             }

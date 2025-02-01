@@ -38,10 +38,12 @@
                     connectionsInfo: importObject.connections,
                 });
                 if (result.includes(false)) {
+                    // error
                     console.error(
                         `[ImportGraph] graph create failed!`,
                         importObject
                     );
+                    MESSAGE_CALL(MESSAGE_TYPE.ClearNode);
                     MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
                         config: PROMPT_CONFIG.ERROR,
                         content:
@@ -66,6 +68,7 @@
                 buttonCallback: {
                     confirm: pushGraph,
                 },
+                afterInit: () => jsonTextEle.focus(),
             });
         });
 
@@ -147,6 +150,7 @@
                 title: "Export Graph",
                 elements: [exportJsonTextEle, exportCopyEle],
                 buttonMode: COVERING_BUTTON_MODE.CloseButton,
+                afterInit: () => exportJsonTextEle.focus(),
             });
         });
     };

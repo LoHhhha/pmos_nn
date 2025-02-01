@@ -29,7 +29,7 @@ class Navigator {
     }
 
     handleMiddleMouseScrollAndZoom(e) {
-        if (e.target == this.viewportEle) {
+        if (e.target === this.viewportEle) {
             let scale = this.getCanvasScale();
             if (e.ctrlKey) {
                 if (e.wheelDeltaY > 0) {

@@ -34,7 +34,7 @@
 }
 
 * {
-    font-family: "Microsoft YaHei", "sans serif";
+    font-family: "Microsoft YaHei", "sans serif", "serif";
     box-sizing: border-box;
     color: var(--default-color);
     transition: background-color 0.5s ease;

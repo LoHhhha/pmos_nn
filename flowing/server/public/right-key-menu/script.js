@@ -15,7 +15,7 @@ RIGHT_KEY_MENU.className = "right-key-menu";
     });
 
     function clearRightKeyMenu() {
-        RIGHT_KEY_MENU.style.height = 0;
+        RIGHT_KEY_MENU.style.height = "0px";
         RIGHT_KEY_MENU.style.display = "none";
         while (RIGHT_KEY_MENU.firstChild) {
             RIGHT_KEY_MENU.removeChild(RIGHT_KEY_MENU.firstChild);
@@ -23,7 +23,7 @@ RIGHT_KEY_MENU.className = "right-key-menu";
     }
 
     function pointOutOfRightKeyMenu(e) {
-        if (e.target != RIGHT_KEY_MENU && !RIGHT_KEY_MENU.contains(e.target)) {
+        if (e.target !== RIGHT_KEY_MENU && !RIGHT_KEY_MENU.contains(e.target)) {
             clearRightKeyMenu();
             document.removeEventListener(
                 "pointerdown",

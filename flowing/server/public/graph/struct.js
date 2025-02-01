@@ -21,7 +21,7 @@ class NodeDataPair {
 class LayerNode {
     api_name;
     from_data;
-    args;   // {key:..., value:...}
+    args; // {key:..., value:...}
 
     constructor(api_name) {
         this.api_name = api_name;

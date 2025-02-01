@@ -129,7 +129,7 @@ operatorBarNamespace.argsType = {
         reg: ".*",
         input: operatorBarNamespace.argsInputType.select,
         getValue: (value) => {
-            return value == "True";
+            return value === "True";
         },
         values: ["False", "True"],
         note: null,

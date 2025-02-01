@@ -69,8 +69,8 @@ const MESSAGE_HANDLER = (msgType, handle) => {
 (function () {
     window.addEventListener("load", () => {
         MESSAGE_BUS.id = "message-bus";
-        MESSAGE_BUS.style.width = 0;
-        MESSAGE_BUS.style.height = 0;
+        MESSAGE_BUS.style.width = "0px";
+        MESSAGE_BUS.style.height = "0px";
         MESSAGE_BUS.style.display = "none";
         document.body.appendChild(MESSAGE_BUS);
     });

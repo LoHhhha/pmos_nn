@@ -18,10 +18,6 @@ const TIDY_NODES_NODE_WIDTH = rootStyle
     .var("--node-width")
     .match(/\d+/g)
     .map(parseInt)[0];
-const TIDY_NODES_NODE_HEIGHT = rootStyle
-    .var("--node-height")
-    .match(/\d+/g)
-    .map(parseInt)[0];
 const TIDY_NODES_MAX_ITERATIONS = 64;
 const TIDY_NODES_MAX_ENDPOINT_COUNT = 10;
 const TIDY_NODES_ROOT_NODE_TOP_PLACE_INTERVAL = 270;
@@ -244,7 +240,7 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
         if (s1 && s2) {
             return s1.toString() === s2.toString();
         }
-        return s1 == s2;
+        return s1 === s2;
     }
 
     function addShapeToConnection(connection, shape, shapeInfo) {
@@ -268,7 +264,7 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
 
         const overlay = connection.getOverlay(SHAPE_CONNECTION_OVERLAY_ID);
         // when no overlay or overlay.cssClass isn't overlayCssClass
-        // remove a new, else using the prev.
+        // remove and new, else using the prev.
         if (overlay == null || overlay.cssClass !== overlayCssClass) {
             connection.removeOverlay(overlay);
             connection.addOverlay({
@@ -303,18 +299,16 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
 
     function removeShapeFromConnection(connection) {
         const overlay = connection.getOverlay(SHAPE_CONNECTION_OVERLAY_ID);
-        if (overlay) {
-            // clear prev shapeInfo func
-            overlay.unbind("click");
-
-            connection.hideOverlay(SHAPE_CONNECTION_OVERLAY_ID);
-        } else {
+        if (overlay == null) {
             console.warn(
-                "[AddShapeToConnection] detect a connection not have shape overlay",
+                "[RemoveShapeFromConnection] detect a connection not have shape overlay",
                 connection
             );
             return;
         }
+        // clear prev shapeInfo/func
+        overlay.unbind("click");
+        connection.hideOverlay(SHAPE_CONNECTION_OVERLAY_ID);
     }
 
     function pushShape(node) {
@@ -365,7 +359,7 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
             console.debug("[PushShape] calculate", node);
             // need to update
 
-            // Output not need to update
+            // Output doesn't need to update
             if (node.outputEndpoint.length === 0) {
                 return;
             }
@@ -433,25 +427,26 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
             if (node.inputEndpoint.length === 0) {
                 // this node must have outputShapeComeFromArg
                 if (node.config.outputShapeComeFromArg == null) {
-                    log.error(
+                    console.error(
                         "[PushShape] found a unexpect input/data node which not have outputShapeComeFromArg",
                         node
                     );
                     return;
                 }
                 // using [outputShapeComeFromArg] to outputEndpointShape
-                const shape = node.content[node.config.outputShapeComeFromArg]
+                node.outputEndpointShape[0] = node.content[
+                    node.config.outputShapeComeFromArg
+                ]
                     .match(/[-+]?\d+/g)
                     .map((item) => {
                         return parseInt(item, 10);
                     });
-                node.outputEndpointShape[0] = shape;
                 push();
                 return;
             }
 
             // update shape
-            var xhr = new XMLHttpRequest();
+            const xhr = new XMLHttpRequest();
             xhr.open("POST", "/shape/calculate/pytorch", true);
             xhr.setRequestHeader("Content-Type", "application/json");
             xhr.onreadystatechange = () => {
@@ -492,7 +487,7 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
                 }
 
                 // only one node
-                if (info.net_nodes_shape.length != 1) {
+                if (info.net_nodes_shape.length !== 1) {
                     console.error(
                         "[ShapeCalculate] get a unexpected net_nodes_shape",
                         info.net_nodes_shape
@@ -700,7 +695,7 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
                 maxRank = Math.max(maxRank, calcRank(u));
             }
         }
-        if (nodeRank.size != graphNodes.length) {
+        if (nodeRank.size !== graphNodes.length) {
             console.error(
                 "[TidyNodes] can't calculate the rank of nodes!",
                 graphNodes
@@ -763,7 +758,7 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
                 needAddNextNode = [];
             for (const v of nextNodes.get(u.id)) {
                 const vRank = nodeRank.get(v.id);
-                if (uRank == vRank + 1) continue;
+                if (uRank === vRank + 1) continue;
 
                 const connectEndpointInfo = []; // inputEndpointIdx(v), outputEndpointIdx(u)
                 for (const [inputEndpointIdx, pointInfo] of prevNodeEndpoints
@@ -855,11 +850,11 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
         const sameLengthArrayCompare = (a, b) => {
             const n = a.length;
             // impossible
-            if (b.length != n) {
+            if (b.length !== n) {
                 throw "Get a unexpect array information, please contact us!";
             }
             for (const [idx, val] of a.entries()) {
-                if (b[idx] != val) {
+                if (b[idx] !== val) {
                     return a[idx] - b[idx];
                 }
             }
@@ -951,9 +946,9 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
         const calcWeight = (orders) => {
             const m = orders.length,
                 half = Math.floor(m / 2);
-            if (m == 0) {
+            if (m === 0) {
                 return -1;
-            } else if (m % 2 == 1) {
+            } else if (m % 2 === 1) {
                 return getWeight(orders[half]);
             }
             return (getWeight(orders[half]) + getWeight(orders[half - 1])) / 2;
@@ -967,7 +962,7 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
         };
         const orderedArrayUpperBound = (array, val, cmp) => {
             const m = array.length;
-            if (m == 0) return 0;
+            if (m === 0) return 0;
             let l = 0,
                 r = m - 1;
             while (l < r) {
@@ -1190,7 +1185,7 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
                     (maxRank - rank) * TIDY_NODES_ROOT_NODE_TOP_PLACE_INTERVAL;
 
                 // output node
-                if (uNextNodes.length == 0) {
+                if (uNextNodes.length === 0) {
                     const width = u.element.offsetWidth;
                     nodeCoordinates.set(u, [leftOffset, top]);
                     return width;
@@ -1202,7 +1197,7 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
                 for (const v of uNextNodes) {
                     // calculate when the last time check a node.
                     nodeInDeg.set(v.id, nodeInDeg.get(v.id) - 1);
-                    if (nodeInDeg.get(v.id) != 0) continue;
+                    if (nodeInDeg.get(v.id) !== 0) continue;
 
                     const cWidth = placeNode(v, graphOffset);
                     graphOffset += cWidth;
@@ -1223,7 +1218,7 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
                     width += TIDY_NODES_NODE_WIDTH;
                 }
                 // no fake node, we tend to set to right
-                if (left == -1) {
+                if (left === -1) {
                     left = leftOffset + width - TIDY_NODES_NODE_WIDTH;
                 }
                 nodeCoordinates.set(u, [left, top]);
@@ -1235,11 +1230,11 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
             // step2: reshape
             // step2.1: delete blank
             let minLeft = Number.MAX_SAFE_INTEGER;
-            for (const [node, coordinates] of nodeCoordinates) {
-                const [left, top] = coordinates;
+            for (const [_, coordinates] of nodeCoordinates) {
+                const [left, _] = coordinates;
                 minLeft = Math.min(minLeft, left);
             }
-            for (const [node, coordinates] of nodeCoordinates) {
+            for (const [_, coordinates] of nodeCoordinates) {
                 coordinates[0] = coordinates[0] - minLeft + leftOffset;
             }
 
@@ -1252,7 +1247,7 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
             let minL = Number.MAX_SAFE_INTEGER,
                 maxL = Number.MIN_SAFE_INTEGER;
             for (const [_, coordinates] of nodeCoordinates) {
-                const [left, top] = coordinates;
+                const [left, _] = coordinates;
                 minL = Math.min(minLeft, left);
                 maxL = Math.max(maxL, left);
             }
@@ -1516,7 +1511,7 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
                 add2Logger("Calculation finished!");
             }
 
-            var xhr = new XMLHttpRequest();
+            const xhr = new XMLHttpRequest();
             xhr.open("POST", "/model/calculate/pytorch", true);
             xhr.setRequestHeader("Content-Type", "application/json");
             xhr.onreadystatechange = () => {
@@ -1567,7 +1562,6 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
                     name: null,
                 })
             );
-            return;
         });
 
         MESSAGE_HANDLER(MESSAGE_TYPE.UpdateShape, (event) => {

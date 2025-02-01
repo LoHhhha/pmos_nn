@@ -87,7 +87,7 @@ class Overview {
     prevHideOverview = null;
     show(node) {
         // switch to another
-        if (this.prevHideOverview !== null) {
+        if (this.prevHideOverview) {
             this.prevHideOverview();
         }
 
@@ -222,8 +222,8 @@ class Node {
     outputEndpoint; // array[endpoint]
     inputEndpoint; // array[endpoint]
     inputEndpointPrev; // update at graph, array[Point]
-    inputEndpointShape; // update at graph, array[array|null|undefine]
-    outputEndpointShape; // update at graph, array[array|null|undefine]
+    inputEndpointShape; // update at graph, array[array|null|undefined]
+    outputEndpointShape; // update at graph, array[array|null|undefined]
     outputEndpointShapeInfo; // update at graph, array[str|null]
     prevNodes; // update at graph
     outline;
@@ -267,7 +267,7 @@ class Node {
 
     update() {
         // outline
-        var outlineText = "";
+        let outlineText = "";
         for (const { name, short } of this.config.outlines) {
             if (outlineText !== "") {
                 outlineText += " ";
@@ -291,7 +291,7 @@ class Node {
 
     pointerDownHandler(e) {
         this.upZIndex();
-        if (e.button == 0) {
+        if (e.button === 0) {
             Node.selectNode(this, e.ctrlKey);
         }
     }
@@ -404,7 +404,7 @@ class Node {
         jsPlumbNavigator.jsPlumbInstance.manage(this.element, this.id);
 
         // set endpoint
-        for (var ptr = 0; ptr < nodeConfig.outputEnd.length; ptr++) {
+        for (let ptr = 0; ptr < nodeConfig.outputEnd.length; ptr++) {
             const endpointId = getNextEndpointId();
             const placeRate = (ptr + 1) / (nodeConfig.outputEnd.length + 1);
 
@@ -427,7 +427,7 @@ class Node {
                 endpointLabel.offsetWidth / 2
             }px`;
         }
-        for (var ptr = 0; ptr < nodeConfig.inputEnd.length; ptr++) {
+        for (let ptr = 0; ptr < nodeConfig.inputEnd.length; ptr++) {
             const endpointId = getNextEndpointId();
             const placeRate = (ptr + 1) / (nodeConfig.inputEnd.length + 1);
 
@@ -496,7 +496,7 @@ class Node {
     unSelect() {
         this.element.style.outlineColor = rootStyle.var("--node-outline-color");
         this.element.style.outlineWidth = rootStyle.var("--border-width");
-        if (this.hideOverview !== null) {
+        if (this.hideOverview) {
             this.hideOverview();
         }
         this.jsPlumbInstance.removeFromDragSelection(this.element);
@@ -815,7 +815,7 @@ class OperatorBar {
         let prevOperatorTypeSepEle = null;
         let prevOperatorTypeCount = 0;
         // operatorBarNamespace.operators is sort by prevOperatorTypeCode.
-        for (var operator of operatorBarNamespace.operators) {
+        for (let operator of operatorBarNamespace.operators) {
             const operatorTypeInfo =
                 operatorBarNamespace.typeInfo[operator.typeCode];
 
@@ -829,7 +829,7 @@ class OperatorBar {
 
             // when this type is excluded, don't add this operator, but add the sep if need.
             const isExcludeType = this.excludeTypes.has(operator.typeCode);
-            if (prevOperatorTypeCode != operator.typeCode) {
+            if (prevOperatorTypeCode !== operator.typeCode) {
                 const sepEle = this.#createSeparation(
                     operatorTypeInfo,
                     !isExcludeType
@@ -954,27 +954,28 @@ class OperatorBar {
 
             let offsetLeft = event.detail?.offsetLeft,
                 offsetTop = event.detail?.offsetTop;
-            offsetLeft = offsetLeft == undefined ? 0 : offsetLeft;
-            offsetTop = offsetTop == undefined ? 0 : offsetTop;
+            offsetLeft = offsetLeft === undefined ? 0 : offsetLeft;
+            offsetTop = offsetTop === undefined ? 0 : offsetTop;
 
             const addNodes = Array(0);
             for (let { apiName, config, left, top, content } of event.detail
                 .nodesInfo) {
-                if (apiName != undefined) {
+                if (apiName !== undefined) {
                     config =
                         operatorBarNamespace.apiName2operators.get(apiName);
                 }
-                if (config == undefined) {
+                if (config === undefined) {
                     console.error(
                         "[CreateNodes] get unexpected node",
                         apiName,
-                        config
+                        config,
+                        event
                     );
                     return false;
                 }
 
-                left = left == undefined ? 0 : left;
-                top = top == undefined ? 0 : top;
+                left = left === undefined ? 0 : left;
+                top = top === undefined ? 0 : top;
 
                 const node = new Node(
                     config,
@@ -995,16 +996,28 @@ class OperatorBar {
                 MESSAGE_PUSH(MESSAGE_TYPE.SelectNodes, { nodes: addNodes });
             }
 
-            for (const {
-                srcNodeIdx,
-                srcEndpointIdx,
-                tarNodeIdx,
-                tarEndpointIdx,
-            } of event.detail.connectionsInfo) {
-                jsPlumbNavigator.jsPlumbInstance.connect({
-                    source: addNodes[srcNodeIdx].outputEndpoint[srcEndpointIdx],
-                    target: addNodes[tarNodeIdx].inputEndpoint[tarEndpointIdx],
-                });
+            try {
+                for (const {
+                    srcNodeIdx,
+                    srcEndpointIdx,
+                    tarNodeIdx,
+                    tarEndpointIdx,
+                } of event.detail.connectionsInfo) {
+                    jsPlumbNavigator.jsPlumbInstance.connect({
+                        source: addNodes[srcNodeIdx].outputEndpoint[
+                            srcEndpointIdx
+                        ],
+                        target: addNodes[tarNodeIdx].inputEndpoint[
+                            tarEndpointIdx
+                        ],
+                    });
+                }
+            } catch (err) {
+                console.error(
+                    "[CreateNodes] can't connect some of nodes",
+                    event
+                );
+                return false;
             }
 
             return true;
@@ -1084,7 +1097,6 @@ class OperatorBar {
         jsPlumbNavigator.jsPlumbInstance.bind(
             "drag:move",
             (dragMovePayload) => {
-                console;
                 // when the nodes or select nodes count are small, just redraw when drag
                 if (
                     CURRENT_NODES_COUNT >= PERFORMANCE_ACTION_NODES_COUNT ||

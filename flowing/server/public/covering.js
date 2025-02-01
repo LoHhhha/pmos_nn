@@ -5,6 +5,7 @@
  *      push close button if <event.detail.buttonMode(COVERING_BUTTON_MODE))>.
  *          this will call <event.detail.buttonCallback.close>/<event.detail.buttonCallback.confirm>/<event.detail.buttonCallback.cancel>
  *      push <event.detail.elements(DOM-s)> to covering, and show.
+ *      call <event.detail.afterInit>
  *
  * MESSAGE_TYPE.CoveringClose
  *      close covering page
@@ -100,6 +101,10 @@ COVERING.className = "covering";
             buttonBar.remove();
         }
         COVERING.style.height = "100%";
+
+        if (event.detail?.afterInit) {
+            event.detail.afterInit();
+        }
     });
 
     MESSAGE_HANDLER(MESSAGE_TYPE.CoveringClose, () => {
