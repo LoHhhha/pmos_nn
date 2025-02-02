@@ -126,7 +126,7 @@ operatorBarNamespace.argsType = {
         note: "Please input 'None', a integer or a list like string which divided by ',' and included by '(' and ')' such as '(1,3,64,64)'.",
     },
     bool: {
-        reg: ".*",
+        reg: null,
         input: operatorBarNamespace.argsInputType.select,
         getValue: (value) => {
             return value === "True";
@@ -135,7 +135,7 @@ operatorBarNamespace.argsType = {
         note: null,
     },
     pytorchPaddingMode: {
-        reg: ".*",
+        reg: null,
         input: operatorBarNamespace.argsInputType.select,
         getValue: (value) => {
             return value;
@@ -144,7 +144,7 @@ operatorBarNamespace.argsType = {
         note: null,
     },
     pytorchDevice: {
-        reg: ".*",
+        reg: null,
         input: operatorBarNamespace.argsInputType.select,
         getValue: (value) => {
             if (value === "default") return null;
@@ -154,7 +154,7 @@ operatorBarNamespace.argsType = {
         note: null,
     },
     pytorchDataType: {
-        reg: ".*",
+        reg: null,
         input: operatorBarNamespace.argsInputType.select,
         getValue: (value) => {
             if (value === "default") return null;
@@ -177,6 +177,12 @@ operatorBarNamespace.argsType = {
         ],
         note: null,
     },
+};
+operatorBarNamespace.argsValueCheck = (type, value) => {
+    if (type.reg) {
+        return type.reg.test(value);
+    }
+    return type.values.includes(value);
 };
 operatorBarNamespace.framework = {
     all: "all",

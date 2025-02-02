@@ -142,7 +142,12 @@ class Overview {
             switch (arg.type.input) {
                 case operatorBarNamespace.argsInputType.text:
                     itemInput.onchange = () => {
-                        if (arg.type.reg.test(itemInput.value)) {
+                        if (
+                            operatorBarNamespace.argsValueCheck(
+                                arg.type,
+                                itemInput.value
+                            )
+                        ) {
                             node.content[arg.name] = itemInput.value;
                         } else {
                             MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
@@ -958,9 +963,7 @@ class OperatorBar {
                 }
                 if (config === undefined) {
                     console.error(
-                        "[CreateNodes] get unexpected node",
-                        apiName,
-                        config,
+                        `[CreateNodes] get unexpected node, can't find config from ${apiName}`,
                         event
                     );
                     return false;
@@ -977,7 +980,30 @@ class OperatorBar {
                 );
                 if (content !== undefined) {
                     for (const arg of config.args) {
+                        // check containing this arg
+                        if (!content.hasOwnProperty(arg.name)) {
+                            console.error(
+                                "[CreateNodes] get unexpected node, don't have enough args",
+                                event
+                            );
+                            return false;
+                        }
+
                         node.content[arg.name] = content[arg.name];
+
+                        // check the value is valid
+                        if (
+                            !operatorBarNamespace.argsValueCheck(
+                                arg.type,
+                                node.content[arg.name]
+                            )
+                        ) {
+                            console.error(
+                                "[CreateNodes] get unexpected node, have unexpected args value",
+                                event
+                            );
+                            return false;
+                        }
                     }
                     node.update();
                 }
@@ -995,6 +1021,14 @@ class OperatorBar {
                     tarNodeIdx,
                     tarEndpointIdx,
                 } of event.detail.connectionsInfo) {
+                    if (
+                        addNodes[srcNodeIdx].outputEndpoint[srcEndpointIdx] ==
+                            undefined ||
+                        addNodes[tarNodeIdx].inputEndpoint[tarEndpointIdx] ==
+                            undefined
+                    ) {
+                        throw "endpoint not found";
+                    }
                     jsPlumbNavigator.jsPlumbInstance.connect({
                         source: addNodes[srcNodeIdx].outputEndpoint[
                             srcEndpointIdx
@@ -1007,6 +1041,7 @@ class OperatorBar {
             } catch (err) {
                 console.error(
                     "[CreateNodes] can't connect some of nodes",
+                    err,
                     event
                 );
                 return false;
