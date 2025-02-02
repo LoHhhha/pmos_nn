@@ -7,7 +7,6 @@
     --prompt-item-background-hover-color: var(--container-outline-color);
     --prompt-item-outline-color: var(--container-outline-color);
     --prompt-item-hover-outline-color: var(--default-color);
-    --prompt-item-svg-color: var(--default-color);
     --prompt-item-hover-outline-width: calc(var(--border-width) * 2);
 
     --prompt-item-info-background-color: var(--prompt-item-background-color);
@@ -60,10 +59,6 @@
     justify-content: center;
     align-items: center;
     margin: var(--prompt-item-margin);
-}
-
-.prompt-item-icon-svg * {
-    fill: var(--prompt-item-svg-color);
 }
 
 .prompt-item-content {

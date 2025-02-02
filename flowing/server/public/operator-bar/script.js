@@ -676,11 +676,11 @@ class OperatorBar {
     onlyChoseNameLike = "";
     excludeTypes = new Set();
 
-    static searchIconSvg = `<svg class="operator-bar-svg" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M18.319 14.433A8.001 8.001 0 0 0 6.343 3.868a8 8 0 0 0 10.564 11.976l.043.045l4.242 4.243a1 1 0 1 0 1.415-1.415l-4.243-4.242zm-2.076-9.15a6 6 0 1 1-8.485 8.485a6 6 0 0 1 8.485-8.485" clip-rule="evenodd"/></svg>`;
-    static clearIconSvg = `<svg class="operator-bar-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M6.225 4.811a1 1 0 0 0-1.414 1.414L10.586 12L4.81 17.775a1 1 0 1 0 1.414 1.414L12 13.414l5.775 5.775a1 1 0 0 0 1.414-1.414L13.414 12l5.775-5.775a1 1 0 0 0-1.414-1.414L12 10.586z"/></svg>`;
+    static searchIconSvg = ICONS.search;
+    static clearIconSvg = ICONS.cross;
 
-    static visibleSvg = `<svg class="operator-bar-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M6.343 7.757L4.93 9.172l7.07 7.07l7.071-7.07l-1.414-1.415L12 13.414z"/></svg>`;
-    static hiddenSvg = `<svg class="operator-bar-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M16.243 6.343L14.828 4.93L7.758 12l7.07 7.071l1.415-1.414L10.586 12z"/></svg>`;
+    static visibleSvg = ICONS.downTriangle;
+    static hiddenSvg = ICONS.leftTriangle;
 
     constructor(jsPlumbNavigator, options) {
         this.options = options;

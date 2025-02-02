@@ -1,8 +1,6 @@
 :root {
     --covering-background-color: var(--container-background-color);
 
-    --covering-button-svg-color: var(--default-color);
-
     --covering-button-selected-size: 45px;
     --covering-button-size: 30px;
 }
@@ -50,8 +48,4 @@
     width: var(--covering-button-selected-size);
     height: var(--covering-button-selected-size);
     cursor: pointer;
-}
-
-.covering-button-svg * {
-    fill: var(--covering-button-svg-color);
 }

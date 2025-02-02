@@ -7,7 +7,6 @@
     --toolbar-button-free-background-color: var(--container-background-color);
     --toolbar-button-selected-background-color: var(--container-outline-color);
     --toolbar-button-size: 18px;
-    --toolbar-button-svg-color: var(--default-color);
 
     --minimap-background-color: var(--container-background-color);
     --minimap-outline-color: var(--container-outline-color);
@@ -67,10 +66,6 @@
 
 .toolbar-button:hover {
     background-color: var(--toolbar-button-selected-background-color);
-}
-
-.toolbar-button-svg * {
-    fill: var(--toolbar-button-svg-color);
 }
 
 .minimap {

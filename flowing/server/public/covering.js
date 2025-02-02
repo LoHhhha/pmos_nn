@@ -55,8 +55,7 @@ COVERING.className = "covering";
                 const closeButtonEle = document.createElement("div");
                 closeButtonEle.className = "covering-button";
                 closeButtonEle.title = "Close";
-                closeButtonEle.innerHTML =
-                    '<svg class="covering-button-svg" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12z"/></svg>';
+                closeButtonEle.innerHTML = ICONS.cross;
                 closeButtonEle.onclick = () => {
                     if (event.detail?.buttonCallback?.close) {
                         event.detail.buttonCallback.close();
@@ -69,8 +68,7 @@ COVERING.className = "covering";
                 const confirmButtonEle = document.createElement("div");
                 confirmButtonEle.className = "covering-button";
                 confirmButtonEle.title = "Confirm";
-                confirmButtonEle.innerHTML =
-                    '<svg class="covering-button-svg" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><path d="m9.55 18l-5.7-5.7l1.425-1.425L9.55 15.15l9.175-9.175L20.15 7.4z"/></svg>';
+                confirmButtonEle.innerHTML = ICONS.check;
                 confirmButtonEle.onclick = () => {
                     if (event.detail?.buttonCallback?.confirm) {
                         event.detail.buttonCallback.confirm();
@@ -82,8 +80,7 @@ COVERING.className = "covering";
                 const cancelButtonEle = document.createElement("div");
                 cancelButtonEle.className = "covering-button";
                 cancelButtonEle.title = "Cancel";
-                cancelButtonEle.innerHTML =
-                    '<svg class="covering-button-svg" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12z"/></svg>';
+                cancelButtonEle.innerHTML = ICONS.cross;
                 cancelButtonEle.onclick = () => {
                     if (event.detail?.buttonCallback?.cancel) {
                         event.detail.buttonCallback.cancel();
