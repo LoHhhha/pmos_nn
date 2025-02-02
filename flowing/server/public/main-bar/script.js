@@ -405,16 +405,25 @@ class Toolbar {
         this.toolbarEle.appendChild(this.createThemeButton());
         this.toolbarEle.appendChild(
             this.createTool("Help", Toolbar.helpSvg, () => {
-                const linkEle = document.createElement("a");
-                linkEle.innerHTML =
-                    "<a>Have a good time :)<br>You can learn how to use PMoS at here.<br>What's more, welcome to report any issue to us!</a>";
+                const readmeLinkEle = document.createElement("a");
+                readmeLinkEle.innerHTML = "Instruction";
+                readmeLinkEle.href = PMoS_README_HREF;
+                readmeLinkEle.target = "_blank";
 
-                linkEle.href = PMoS_HREF;
-                linkEle.target = "_blank";
+                const repLinkEle = document.createElement("a");
+                repLinkEle.innerHTML = "PMoS-nn Code Repository";
+                repLinkEle.href = PMoS_REP_HREF;
+                repLinkEle.target = "_blank";
+
+                const jsPlumbLinkEle = document.createElement("a");
+                jsPlumbLinkEle.innerHTML = "JsPlumb Code Repository";
+                jsPlumbLinkEle.href = JS_PLUMB_REP_HREF;
+                jsPlumbLinkEle.target = "_blank";
 
                 MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
                     title: "PMoS",
-                    elements: [linkEle],
+                    text: "Have a good time :)<br>Learn more about PMoS at the follow links.<br>What's more, welcome to report any issue to us!",
+                    elements: [readmeLinkEle, repLinkEle, jsPlumbLinkEle],
                     buttonMode: COVERING_BUTTON_MODE.CloseButton,
                 });
             })
@@ -625,10 +634,15 @@ class Toolbar {
             createMapBar(jsPlumbNavigator, canvasEle, options)
         );
 
-        mainBarEle.appendChild(createPortBar());
-        // mainBarEle.appendChild(createAIbar());
-        mainBarEle.appendChild(createControlBar());
-        mainBarEle.appendChild(createCalcBar());
+        const controlBarEle = document.createElement("div");
+        controlBarEle.className = "control-bar";
+
+        controlBarEle.appendChild(createPortBar());
+        // controlBarEle.appendChild(createAIbar());
+        controlBarEle.appendChild(createControlBar());
+        controlBarEle.appendChild(createCalcBar());
+
+        mainBarEle.append(controlBarEle);
         return mainBarEle;
     }
 

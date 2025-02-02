@@ -94,7 +94,7 @@ class Overview {
         // title
         const title = document.createElement("div");
         title.classList.add("overview-title");
-        const link = document.createElement("a");
+        const link = document.createElement("div");
         if (node.config.link) {
             link.onclick = () => {
                 MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
@@ -109,11 +109,10 @@ class Overview {
                 });
             };
         }
-        link.text = node.config.apiName;
+        link.textContent = node.config.apiName;
         if (node.config.framework !== operatorBarNamespace.framework.all) {
-            link.text += "(" + node.config.framework + ")";
+            link.textContent += "(" + node.config.framework + ")";
         }
-        link.target = "_blank";
         title.appendChild(link);
         this.element.appendChild(title);
 
@@ -703,22 +702,15 @@ class OperatorBar {
             ele.style.width = `${barWidth}px`;
         }
 
-        const margin = rootStyle.var("--node-overview-margin");
         switch (barPosition) {
             case "left":
-                ele.style.left = margin;
-                ele.style.top = margin;
-                ele.style.bottom = margin;
+                ele.style.left = "0px";
                 break;
             case "right":
-                ele.style.right = margin;
-                ele.style.top = margin;
-                ele.style.bottom = margin;
+                ele.style.right = "0px";
                 break;
             default:
-                ele.style.left = margin;
-                ele.style.top = margin;
-                ele.style.bottom = margin;
+                ele.style.left = "0px";
                 break;
         }
         return ele;

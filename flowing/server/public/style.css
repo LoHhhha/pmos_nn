@@ -13,16 +13,18 @@
 :root {
     --lucency-red: rgba(238, 0, 0, 0.8);
     --lucency-yellow: rgba(238, 238, 0, 0.8);
+    --lucency-blue: rgba(0, 0, 238, 0.8);
 
     --lucency-reddish: rgba(193, 44, 31, 0.5);
     --lucency-yellowish: rgba(255, 238, 111, 0.5);
+    --lucency-bluish: rgba(111, 155, 255, 0.5);
 
     --radius: 5px;
-    --margin: 5px;
+    --margin: 8px;
 
     --blur: blur(15px);
 
-    --border-width: 2px;
+    --border-width: 1px;
 
     --label-font-size: xx-small;
 
@@ -32,22 +34,6 @@
     --copyright-color: var(--sub-content-outline-color);
     --scrollbar-color: var(--content-outline-color);
     --icon-color: var(--default-color);
-}
-
-* {
-    font-family: "Microsoft YaHei", "sans serif", "serif";
-    box-sizing: border-box;
-    color: var(--default-color);
-    transition: background-color 0.5s ease;
-    touch-action: none;
-}
-
-a {
-    color: var(--default-color);
-}
-
-a:hover {
-    cursor: pointer;
 }
 
 html {
@@ -67,6 +53,24 @@ body {
     width: 100vw;
     height: 100vh;
     overflow: hidden;
+}
+
+* {
+    font-family: "Microsoft YaHei", "sans serif", "serif";
+    box-sizing: border-box;
+    color: var(--default-color);
+    transition: background-color 0.5s ease;
+    touch-action: none;
+}
+
+a,
+a:visited {
+    color: var(--lucency-bluish);
+}
+
+a:hover {
+    color: var(--lucency-blue);
+    cursor: pointer;
 }
 
 .icon-svg * {

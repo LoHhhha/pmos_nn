@@ -39,7 +39,7 @@ COVERING.className = "covering";
         }
         if (event.detail?.text) {
             const textEle = document.createElement("p");
-            textEle.textContent = event.detail.text;
+            textEle.innerHTML = event.detail.text;
             coveringContainerEle.appendChild(textEle);
         }
         if (event.detail?.elements) {

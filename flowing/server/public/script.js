@@ -3,7 +3,7 @@ jsPlumb.ready(() => {
         config: PROMPT_CONFIG.INFO,
         content: "Welcome to PMoS, click me to know more about PMoS!",
         onclick: (promptItem) => {
-            window.open(PMoS_HREF);
+            window.open(PMoS_REP_HREF);
             promptItem.dispose();
         },
     });

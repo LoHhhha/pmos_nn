@@ -1,4 +1,7 @@
-const PMoS_HREF = "https://github.com/LoHhhha/pmos_nn";
+const PMoS_REP_HREF = "https://github.com/LoHhhha/pmos_nn";
+const PMoS_README_HREF =
+    "https://github.com/LoHhhha/pmos_nn/blob/master/readme.md";
+const JS_PLUMB_REP_HREF = "https://github.com/jsplumb/community-edition";
 
 const rootStyle = getComputedStyle(document.querySelector(":root"));
 rootStyle.var = (key) => rootStyle.getPropertyValue(key);
