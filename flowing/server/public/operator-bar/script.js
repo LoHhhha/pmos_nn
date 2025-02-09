@@ -16,7 +16,7 @@
  *
  */
 
-let MAX_Z_INDEX = 0;
+let MAX_Z_INDEX = 16; // reserve 0-15
 let CREATE_NODE_COUNT = 0;
 let ENDPOINT_COUNT = 0;
 
@@ -301,11 +301,53 @@ class Node {
     }
     pointerDownHandlerFunc = this.pointerDownHandler.bind(this);
 
+    getCoordinates() {
+        return {
+            left: Number.parseFloat(this.element.style.left.slice(0, -2)),
+            top: Number.parseFloat(this.element.style.top.slice(0, -2)),
+        };
+    }
+
+    getSize() {
+        return {
+            width: this.element.offsetWidth,
+            height: this.element.offsetHeight,
+        };
+    }
+
+    coordinatesTruncate(left, top) {
+        const { width, height } = this.getSize();
+        if (
+            left > CANVAS_MAX_LEFT - width ||
+            left < CANVAS_MIN_LEFT ||
+            top > CANVAS_MAX_TOP - height ||
+            top < CANVAS_MIN_TOP
+        ) {
+            console.warn(`[Node] too extreme coordinates, truncated!`);
+        }
+        left = Math.min(
+            CANVAS_MAX_LEFT - width,
+            Math.max(left, CANVAS_MIN_LEFT)
+        );
+        top = Math.min(CANVAS_MAX_TOP - height, Math.max(top, CANVAS_MIN_TOP));
+
+        return {
+            left: left,
+            top: top,
+        };
+    }
+
     redraw(left, top) {
-        this.element.style.left = `${left}px`;
-        this.element.style.top = `${top}px`;
+        const { left: L, top: T } = this.coordinatesTruncate(left, top);
+        this.element.style.left = `${L}px`;
+        this.element.style.top = `${T}px`;
         this.jsPlumbInstance.revalidate(this.element);
+        this.updateNavigator();
         this.redrawMiniMapNode();
+    }
+
+    updateNavigator() {
+        MESSAGE_PUSH(MESSAGE_TYPE.NavigatorUpdateNode, { node: this });
     }
 
     redrawMiniMapNode() {
@@ -390,22 +432,35 @@ class Node {
         this.element = getNodeElement(nodeConfig);
         this.element.id = this.id;
         this.element.origin = this;
-        const canvasBounds = jsPlumbNavigator.getCanvasBounds();
+
         // place
+        const canvasBounds = jsPlumbNavigator.getCanvasBounds();
         this.element.style.position = "absolute";
-        this.element.style.left = `${left - canvasBounds.left}px`;
-        this.element.style.top = `${top - canvasBounds.top}px`;
+        left -= canvasBounds.left;
+        top -= canvasBounds.top;
+        this.element.style.left = `${left}px`;
+        this.element.style.top = `${top}px`;
 
         this.upZIndex();
+
+        // jsPlumb
+        MESSAGE_PUSH(MESSAGE_TYPE.NavigatorManageNode, { node: this });
+
+        // add to MiniMap
+        MESSAGE_PUSH(MESSAGE_TYPE.CreateMapNode, {
+            id: this.id,
+            left: this.element.offsetLeft,
+            top: this.element.offsetTop,
+            width: this.element.offsetWidth,
+            height: this.element.offsetHeight,
+        });
+
+        this.redraw(left, top);
 
         // set outputEndpointConnection
         for (let idx = 0; idx < nodeConfig.outputEnd.length; idx++) {
             this.outputEndpointConnection[idx] = new Set();
         }
-
-        // jsPlumb
-        jsPlumbNavigator.canvasEle.appendChild(this.element);
-        jsPlumbNavigator.jsPlumbInstance.manage(this.element, this.id);
 
         // set endpoint
         for (let ptr = 0; ptr < nodeConfig.outputEnd.length; ptr++) {
@@ -413,12 +468,14 @@ class Node {
             const placeRate = (ptr + 1) / (nodeConfig.outputEnd.length + 1);
 
             // endpoint
-            this.outputEndpoint[ptr] =
-                jsPlumbNavigator.jsPlumbInstance.addEndpoint(this.element, {
+            this.outputEndpoint[ptr] = this.jsPlumbInstance.addEndpoint(
+                this.element,
+                {
                     uuid: endpointId,
                     anchors: [placeRate, 1, 0, 1],
                     ...operatorBarNamespace.outputEndpointDefaultStyle,
-                });
+                }
+            );
 
             // endpoint label
             const endpointLabel = document.createElement("div");
@@ -435,12 +492,14 @@ class Node {
             const endpointId = getNextEndpointId();
             const placeRate = (ptr + 1) / (nodeConfig.inputEnd.length + 1);
 
-            this.inputEndpoint[ptr] =
-                jsPlumbNavigator.jsPlumbInstance.addEndpoint(this.element, {
+            this.inputEndpoint[ptr] = this.jsPlumbInstance.addEndpoint(
+                this.element,
+                {
                     uuid: endpointId,
                     anchors: [placeRate, 0, 0, -1],
                     ...operatorBarNamespace.inputEndpointDefaultStyle,
-                });
+                }
+            );
 
             // endpoint label
             const endpointLabel = document.createElement("div");
@@ -470,15 +529,6 @@ class Node {
         this.update();
 
         this.setHandle();
-
-        // add to MiniMap
-        MESSAGE_PUSH(MESSAGE_TYPE.CreateMapNode, {
-            id: this.id,
-            left: this.element.offsetLeft,
-            top: this.element.offsetTop,
-            width: this.element.offsetWidth,
-            height: this.element.offsetHeight,
-        });
 
         CURRENT_NODES_COUNT++;
     }
@@ -510,8 +560,6 @@ class Node {
     dispose() {
         if (this.element) {
             this.unSelect();
-            this.jsPlumbInstance.removeAllEndpoints(this.element);
-            this.jsPlumbInstance.unmanage(this.element);
             this.element.removeEventListener(
                 "pointerdown",
                 this.pointerDownHandlerFunc
@@ -523,6 +571,9 @@ class Node {
         // delete from MiniMap
         MESSAGE_PUSH(MESSAGE_TYPE.DeleteMapNode, {
             id: this.id,
+        });
+        MESSAGE_PUSH(MESSAGE_TYPE.NavigatorRemoveNode, {
+            node: this,
         });
     }
 }
@@ -635,7 +686,7 @@ class OperatorNode {
     }
 
     addNode(left, top) {
-        MESSAGE_PUSH(MESSAGE_TYPE.CreateNodes, {
+        const result = MESSAGE_CALL(MESSAGE_TYPE.CreateNodes, {
             nodesInfo: [
                 {
                     config: this.config,
@@ -646,6 +697,14 @@ class OperatorNode {
             connectionsInfo: [],
             noSelectNodes: true,
         });
+
+        if (result.includes(false)) {
+            MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+                config: PROMPT_CONFIG.ERROR,
+                content: "[AddNode] add node failed, please contact us!",
+                timeout: 5000,
+            });
+        }
     }
 
     constructor(nodeConfig, container, jsPlumbNavigator) {
@@ -1105,14 +1164,15 @@ class OperatorBar {
 
         /**
          * using to:
-         *      1. update MiniMap
+         *      1. redraw
          */
         jsPlumbNavigator.jsPlumbInstance.bind(
             "drag:stop",
             (dragStopPayload) => {
                 for (const ele of dragStopPayload.elements) {
                     const node = ele.el.origin;
-                    node.redrawMiniMapNode();
+                    const { left, top } = node.getCoordinates();
+                    node.redraw(left, top);
                 }
             }
         );

@@ -32,10 +32,12 @@ THEME_ELEMENT.id = "theme-helper";
                 style.getPropertyValue(needProperty)
             );
         }
-        console.info("[ThemeHelper] switch theme to", themeStyle);
+        console.info("[ThemeHelper] witch theme to", themeStyle);
         MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
             config: PROMPT_CONFIG.INFO,
-            content: `Switch theme to ${themeStyle}`,
+            content: `Switch to "${
+                themeStyle.charAt(0).toUpperCase() + themeStyle.slice(1)
+            }" theme.`,
             timeout: 1000,
         });
     }
@@ -52,7 +54,7 @@ THEME_ELEMENT.id = "theme-helper";
         }
     }
 
-    window.addThemeHelper = () => {
+    window.addThemeHelper = (initTheme) => {
         MESSAGE_HANDLER(MESSAGE_TYPE.ThemeChange, (event) => {
             const themeStyle = THEME_STYLE[event.detail.theme];
             if (themeStyle === undefined) {
@@ -72,6 +74,8 @@ THEME_ELEMENT.id = "theme-helper";
             changToTheme(themeStyle);
         });
 
-        MESSAGE_PUSH(MESSAGE_TYPE.ThemeChange, { theme: THEME_STYLE.auto });
+        if (initTheme) {
+            MESSAGE_PUSH(MESSAGE_TYPE.ThemeChange, { theme: initTheme });
+        }
     };
 })();

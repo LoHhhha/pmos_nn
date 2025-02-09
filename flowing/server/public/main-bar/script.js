@@ -9,9 +9,6 @@
  *      <event.detail.id: str|int> <event.detail.left: int|float> <event.detail.top: int|float> <event.detail.width: int|float> <event.detail.height: int|float>
  */
 
-const HASH_MOD = 998244353;
-const BASE = 1e6;
-
 class MiniMap {
     navigator;
     canvasEle;
@@ -19,6 +16,7 @@ class MiniMap {
     miniMapViewportEle;
     miniMapCanvasEle;
     miniMapNodeEleMap;
+    margin;
 
     constructor(navigator, canvasEle, miniMapWidth, miniMapHeight) {
         this.navigator = navigator;
@@ -38,8 +36,6 @@ class MiniMap {
         }
 
         this.margin = parseInt(rootStyle.var("--main-bar-margin").match(/\d+/));
-
-        this.prevNodesInfoHash = 0;
 
         this.miniMapNodeEleMap = new Map();
 
@@ -138,14 +134,11 @@ class MiniMap {
     }
 
     handleMiddleMouseZoom(e) {
-        let scale = this.navigator.getCanvasScale();
         if (e.wheelDeltaY > 0) {
-            scale += 0.1;
+            this.navigator.zoomIn();
         } else {
-            scale -= 0.1;
+            this.navigator.zoomOut();
         }
-        scale = this.navigator.getLegalCanvasScale(scale);
-        this.navigator.zoomTo(scale);
         this.layout();
         e.preventDefault();
         e.stopPropagation();
@@ -242,40 +235,6 @@ class MiniMap {
         this.miniMapCanvasEle.style.transform = this.canvasEle.style.transform;
     }
 
-    getNodesInfoHash() {
-        let nodesInfoHash = 0;
-        if (
-            !this.lastGetNodesInfoHashTime ||
-            Date.now() - this.lastGetNodesInfoHashTime > 200
-        ) {
-            const elements =
-                this.navigator.jsPlumbInstance.getManagedElements();
-            for (const key in elements) {
-                const ele = elements[key].el;
-                const left = parseInt(ele.offsetLeft);
-                const top = parseInt(ele.offsetTop);
-                const width = parseInt(ele.offsetWidth);
-                const height = parseInt(ele.offsetHeight);
-                nodesInfoHash =
-                    (((nodesInfoHash * BASE) % HASH_MOD) + left + HASH_MOD) %
-                    HASH_MOD;
-                nodesInfoHash =
-                    (((nodesInfoHash * BASE) % HASH_MOD) + top + HASH_MOD) %
-                    HASH_MOD;
-                nodesInfoHash =
-                    (((nodesInfoHash * BASE) % HASH_MOD) + width + HASH_MOD) %
-                    HASH_MOD;
-                nodesInfoHash =
-                    (((nodesInfoHash * BASE) % HASH_MOD) + height + HASH_MOD) %
-                    HASH_MOD;
-            }
-            this.lastGetNodesInfoHashTime = Date.now();
-        } else {
-            nodesInfoHash = this.prevNodesInfoHash;
-        }
-        return nodesInfoHash;
-    }
-
     createMiniMapViewportEle() {
         const ele = document.createElement("div");
         ele.className = "minimap-viewport";
@@ -322,11 +281,6 @@ class MiniMap {
     refresh(force) {
         if (this.miniMapEle?.style.display !== "none") {
             let reLayout = false;
-            const nodesInfoHash = this.getNodesInfoHash();
-            if (nodesInfoHash !== this.prevNodesInfoHash) {
-                this.prevNodesInfoHash = nodesInfoHash;
-                reLayout = true;
-            }
             if (this.canvasEle.style.transform !== this.canvasEleTransform) {
                 this.canvasEleTransform = this.canvasEle.style.transform;
                 reLayout = true;
@@ -376,9 +330,7 @@ class Toolbar {
     static lightThemeSvg = ICONS.lightTheme;
     static darkThemeSvg = ICONS.darkTheme;
 
-    constructor(operatorBar) {
-        this.operatorBar = operatorBar;
-
+    constructor() {
         this.toolbarEle = document.createElement("div");
         this.toolbarEle.className = "toolbar";
 
@@ -440,6 +392,8 @@ class Toolbar {
     }
 
     createThemeButton() {
+        MESSAGE_PUSH(MESSAGE_TYPE.ThemeChange, { theme: THEME_STYLE.auto });
+
         const button = this.createTool("Theme", Toolbar.autoThemeSvg, null);
         button.currentTheme = THEME_STYLE.auto;
         button.onclick = () => {
@@ -479,36 +433,105 @@ class Toolbar {
     }
 }
 
-(function () {
-    const rootStyle = getComputedStyle(document.querySelector(":root"));
-    rootStyle.var = (key) => rootStyle.getPropertyValue(key);
+class NavigatorBarBuilder {
+    static MoveModeSvg = ICONS.pointer;
+    static SelectModeSvg = ICONS.select;
 
-    function createMapBar(jsPlumbNavigator, canvasEle, options) {
-        const mapBarEle = document.createElement("div");
-        mapBarEle.id = "map-bar";
-        mapBarEle.className = "row-bar";
-        const toolbar = new Toolbar();
-        const miniMap = new MiniMap(jsPlumbNavigator, canvasEle);
-        switch (options.toolbarPosition) {
-            case "left":
-                mapBarEle.appendChild(toolbar.toolbarEle);
-                mapBarEle.appendChild(miniMap.miniMapEle);
-                break;
-            default:
-                mapBarEle.appendChild(miniMap.miniMapEle);
-                mapBarEle.appendChild(toolbar.toolbarEle);
-                break;
-        }
-        if (!options.showMiniMap) {
-            miniMap.hide();
-        }
-        if (!options.showToolbar) {
-            toolbar.hide();
-        }
-        return mapBarEle;
+    ele;
+    navigator;
+    moveMode;
+    infoEle;
+    modeEle;
+    constructor(navigator, ele) {
+        this.ele = ele;
+        this.navigator = navigator;
+
+        this.infoEle = this.#createInfoEle();
+        this.modeEle = this.#createModeEle();
+
+        const rowBar = document.createElement("div");
+        rowBar.className = "row-bar";
+        rowBar.appendChild(this.infoEle);
+        rowBar.appendChild(this.modeEle);
+
+        this.ele.appendChild(rowBar);
+
+        this.updateModeEle(true);
+        navigator.changeMoveMode(true);
+
+        this.updateInfoEle(navigator.getCanvasBoundsAndScale());
+        this.addHandler();
     }
 
-    function createAIbar() {
+    updateInfoEle(info) {
+        this.infoEle.innerHTML = `${info.scale.toFixed(2)}x<br>(${Math.floor(
+            info.left
+        )}, ${Math.floor(info.top)})`;
+    }
+
+    updateModeEle(moveMode) {
+        this.moveMode = moveMode;
+        this.modeEle.classList.remove("mode-bar-button-select");
+        this.modeEle.classList.remove("mode-bar-button-move");
+        if (moveMode === true) {
+            this.modeEle.iconEle.innerHTML = NavigatorBarBuilder.MoveModeSvg;
+            this.modeEle.titleEle.textContent = "Move";
+            this.modeEle.classList.add("mode-bar-button-move");
+        } else {
+            this.modeEle.iconEle.innerHTML = NavigatorBarBuilder.SelectModeSvg;
+            this.modeEle.titleEle.textContent = "Select";
+            this.modeEle.classList.add("mode-bar-button-select");
+        }
+    }
+
+    #createInfoEle() {
+        const infoEle = document.createElement("div");
+        infoEle.className = "bar-text";
+        infoEle.id = "viewport-info-bar-text";
+        return infoEle;
+    }
+
+    #createModeEle() {
+        const modeEle = document.createElement("button");
+        modeEle.classList.add("bar-button");
+        modeEle.classList.add("row-bar");
+        modeEle.id = "mode-bar-button";
+
+        const iconEle = document.createElement("div");
+        iconEle.id = "mode-bar-button-icon";
+
+        const titleEle = document.createElement("div");
+        titleEle.id = "mode-bar-button-title";
+
+        modeEle.iconEle = iconEle;
+        modeEle.titleEle = titleEle;
+
+        modeEle.appendChild(iconEle);
+        modeEle.appendChild(titleEle);
+
+        modeEle.onclick = () => {
+            MESSAGE_PUSH(MESSAGE_TYPE.NavigatorChangeMoveMode, {
+                moveMode: !this.moveMode,
+            });
+        };
+
+        return modeEle;
+    }
+
+    addHandler() {
+        MESSAGE_HANDLER(MESSAGE_TYPE.NavigationChanged, (event) => {
+            this.updateInfoEle(event.detail);
+        });
+        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorMoveModeChanged, (event) => {
+            this.updateModeEle(event.detail?.moveMode);
+        });
+    }
+}
+
+class ControlBarBuilder {
+    ele;
+
+    #createAIbar() {
         const AIBarEle = document.createElement("div");
         AIBarEle.id = "ai-bar";
         AIBarEle.className = "row-bar";
@@ -528,7 +551,7 @@ class Toolbar {
         return AIBarEle;
     }
 
-    function createPortBar() {
+    #createPortBar() {
         const portBarEle = document.createElement("div");
         portBarEle.id = "port-bar";
         portBarEle.className = "row-bar";
@@ -554,9 +577,9 @@ class Toolbar {
         return portBarEle;
     }
 
-    function createControlBar() {
+    #createGraphBar() {
         const controlBarEle = document.createElement("div");
-        controlBarEle.id = "control-bar";
+        controlBarEle.id = "graph-bar";
         controlBarEle.className = "row-bar";
 
         const tidyButton = document.createElement("button");
@@ -588,7 +611,7 @@ class Toolbar {
         return controlBarEle;
     }
 
-    function createCalcBar() {
+    #createCalcBar() {
         const calcBarEle = document.createElement("div");
         calcBarEle.id = "calculation-bar";
         calcBarEle.className = "row-bar";
@@ -603,6 +626,80 @@ class Toolbar {
         calcBarEle.appendChild(calculateButton);
 
         return calcBarEle;
+    }
+
+    constructor(ele) {
+        this.ele = ele;
+        this.ele.appendChild(this.#createPortBar());
+        this.ele.appendChild(this.#createAIbar());
+        this.ele.appendChild(this.#createGraphBar());
+        this.ele.appendChild(this.#createCalcBar());
+    }
+
+    hide() {
+        controlBarEle.style.display = "none";
+    }
+
+    show() {
+        this.toolbarEle.style.display = "block";
+    }
+}
+
+(function () {
+    const rootStyle = getComputedStyle(document.querySelector(":root"));
+    rootStyle.var = (key) => rootStyle.getPropertyValue(key);
+
+    function createMapBar(jsPlumbNavigator, canvasEle, options) {
+        const mapBarEle = document.createElement("div");
+        mapBarEle.id = "map-bar";
+        mapBarEle.className = "row-bar";
+        const toolbar = new Toolbar();
+        const miniMap = new MiniMap(jsPlumbNavigator, canvasEle);
+        switch (options.toolbarPosition) {
+            case "left":
+                mapBarEle.appendChild(toolbar.toolbarEle);
+                mapBarEle.appendChild(miniMap.miniMapEle);
+                break;
+            default:
+                mapBarEle.appendChild(miniMap.miniMapEle);
+                mapBarEle.appendChild(toolbar.toolbarEle);
+                break;
+        }
+        if (!options.showMarBap) {
+            miniMap.hide();
+            toolbar.hide();
+        }
+        return mapBarEle;
+    }
+
+    function createNavigatorBar(jsPlumbNavigator, options) {
+        const navigatorBarEle = document.createElement("div");
+        navigatorBarEle.id = "navigator-bar";
+        navigatorBarEle.className = "combo-bar";
+
+        const navigatorBar = new NavigatorBarBuilder(
+            jsPlumbNavigator,
+            navigatorBarEle
+        );
+
+        if (!options.showNavigatorBar) {
+            navigatorBar.hide();
+        }
+
+        return navigatorBarEle;
+    }
+
+    function createControlBar(options) {
+        const controlBarEle = document.createElement("div");
+        controlBarEle.className = "combo-bar";
+
+        const controlBar = new ControlBarBuilder(controlBarEle);
+
+        if (!options.showControlBar) {
+            controlBar.hide();
+        }
+
+        return controlBarEle;
     }
 
     function createMainBar(jsPlumbNavigator, viewportEle, canvasEle, options) {
@@ -634,15 +731,10 @@ class Toolbar {
             createMapBar(jsPlumbNavigator, canvasEle, options)
         );
 
-        const controlBarEle = document.createElement("div");
-        controlBarEle.className = "control-bar";
+        mainBarEle.appendChild(createNavigatorBar(jsPlumbNavigator, options));
 
-        controlBarEle.appendChild(createPortBar());
-        // controlBarEle.appendChild(createAIbar());
-        controlBarEle.appendChild(createControlBar());
-        controlBarEle.appendChild(createCalcBar());
+        mainBarEle.appendChild(createControlBar(options));
 
-        mainBarEle.append(controlBarEle);
         return mainBarEle;
     }
 
@@ -655,8 +747,9 @@ class Toolbar {
         const defaultOptions = {
             position: "top-right", // [top / bottom]-[left / right]
             toolbarPosition: "right", // left / right
-            showMiniMap: true,
-            showToolbar: true,
+            showMarBap: true,
+            showNavigatorBar: true,
+            showControlBar: true,
         };
 
         return createMainBar(jsPlumbNavigator, viewportEle, canvasEle, {

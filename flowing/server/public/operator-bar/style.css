@@ -19,6 +19,8 @@
     --node-selected-outline-width: calc(var(--border-width) * 2);
     --node-hover-outline-width: calc(var(--border-width) * 2);
 
+    --overview-title-hover-color: var(--lucency-bluish);
+
     --node-end-point-overlays-label-color: var(--container-outline-color);
     --node-end-point-label-display: "inline";
     --node-end-point-label-font-size: var(--label-font-size);
@@ -189,16 +191,17 @@
     flex: 1;
 }
 
-.overview-title {
+.overview-title * {
     text-align: center;
     margin: var(--operator-bar-margin);
     font-size: large;
     font-weight: bold;
     user-select: none;
+    cursor: pointer;
 }
 
-.overview-title:hover {
-    cursor: pointer;
+.overview-title:hover * {
+    color: var(--overview-title-hover-color);
 }
 
 .overview-id {

@@ -8,7 +8,8 @@ jsPlumb.ready(() => {
         },
     });
 
-    window.addThemeHelper();
+    // initTheme set as null, because minimapBar will set.
+    window.addThemeHelper(null);
 
     const viewportEle = document.getElementById("viewport");
     const canvasEle = document.getElementById("canvas");

@@ -65,7 +65,7 @@ operatorBarNamespace.argsType = {
         note: "Please input 'None' or a integer such as 19528.",
     },
     strFloat: {
-        reg: /^[-+]?\d+\.?\d*(e[-+]?\d+)$/,
+        reg: /^[-+]?\d+\.?\d*(e[-+]?\d+)?$/,
         input: operatorBarNamespace.argsInputType.text,
         getValue: (value) => {
             return parseFloat(value);
@@ -73,7 +73,7 @@ operatorBarNamespace.argsType = {
         note: "Please input a float such as 19528, -0.15 or 3.14e-2",
     },
     strFloatOrNone: {
-        reg: /^(([-+]?\d+\.?\d*(e[-+]?\d+))|(None))$/,
+        reg: /^(([-+]?\d+\.?\d*(e[-+]?\d+)?)|(None))$/,
         input: operatorBarNamespace.argsInputType.text,
         getValue: (value) => {
             return parseFloat(value);
@@ -81,7 +81,7 @@ operatorBarNamespace.argsType = {
         note: "Please input a float such as 19528, -0.15 or 3.14e-2",
     },
     strTuple: {
-        reg: /^\([-+]?\d+(\,[-+]?\d+)*\)$/,
+        reg: /^\([-+]?\d+(,[-+]?\d+)*\)$/,
         input: operatorBarNamespace.argsInputType.text,
         getValue: (value) => {
             return value.match(/[-+]?\d+/g).map((item) => {
@@ -91,7 +91,7 @@ operatorBarNamespace.argsType = {
         note: "Please input a tuple containing integer like string which divided by ',' and included by '(' and ')' such as '(-1,3,64,64)'.",
     },
     strNotNegTuple: {
-        reg: /^\(\d+(\,\d+)*\)$/,
+        reg: /^\(\d+(,\d+)*\)$/,
         input: operatorBarNamespace.argsInputType.text,
         getValue: (value) => {
             return value.match(/\d+/g).map((item) => {
@@ -101,7 +101,7 @@ operatorBarNamespace.argsType = {
         note: "Please input a tuple containing nonnegative integer like string which divided by ',' and included by '(' and ')' such as '(1,3,64,64)'.",
     },
     strIntOrTuple: {
-        reg: /^((\([-+]?\d+(\,[-+]?\d+)*\))|([-+]?\d+))$/,
+        reg: /^((\([-+]?\d+(,[-+]?\d+)*\))|([-+]?\d+))$/,
         input: operatorBarNamespace.argsInputType.text,
         getValue: (value) => {
             const ret = value.match(/[-+]?\d+/g).map((item) => {
@@ -113,7 +113,7 @@ operatorBarNamespace.argsType = {
         note: "Please input a integer or a list like string which divided by ',' and included by '(' and ')' such as '(1,3,64,64)'.",
     },
     strIntOrTupleOrNone: {
-        reg: /^((\([-+]?\d+(\,[-+]?\d+)*\))|([-+]?\d+)|(None))$/,
+        reg: /^((\([-+]?\d+(,[-+]?\d+)*\))|([-+]?\d+)|(None))$/,
         input: operatorBarNamespace.argsInputType.text,
         getValue: (value) => {
             if (value === "None") return null;

@@ -1,0 +1,12 @@
+:root {
+    --select-box-background-color: var(--lucency-bluish);
+    --select-box-outline-color: var(--lucency-blue);
+}
+
+.select-box {
+    z-index: 0;
+    position: absolute;
+    background-color: var(--select-box-background-color);
+    outline: var(--border-width) solid var(--select-box-outline-color);
+    user-select: none;
+}

@@ -1,6 +1,9 @@
 const MESSAGE_BUS = document.createElement("div");
 
 const MESSAGE_TYPE = {
+    // gridding-background
+    ChangeGridding: "change-gridding",
+
     // graph
     CalculateGraph: "calculate-graph",
     UpdateShape: "update-shape",
@@ -21,6 +24,12 @@ const MESSAGE_TYPE = {
     NavigatorZoomOut: "navigator-zoom-out",
     NavigatorZoomTo100: "navigator-zoom-to-100",
     NavigatorViewAllFit: "navigator-view-all-fit",
+    NavigatorManageNode: "navigator-manage-node",
+    NavigatorUpdateNode: "navigator-update-node",
+    NavigatorRemoveNode: "navigator-remove-node",
+    NavigatorChangeMoveMode: "navigator-change-move-mode",
+    NavigationChanged: "navigator-changed", // out
+    NavigatorMoveModeChanged: "navigator-move-mode-changed", // out
 
     // right-key-menu
     RightKeyMenuShow: "right-key-menu-show",
@@ -54,6 +63,9 @@ const MESSAGE_PUSH = (msgType, detail) => {
 
 const MESSAGE_CALL = (msgType, detail) => {
     const result = [];
+    if (MESSAGE_HANDLER_MAP.get(msgType) == undefined) {
+        return result;
+    }
     for (const handler of MESSAGE_HANDLER_MAP.get(msgType)) {
         result.push(handler({ detail: detail }));
     }

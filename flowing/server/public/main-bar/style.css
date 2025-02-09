@@ -5,8 +5,8 @@
     --main-bar-outline-color: var(--container-outline-color);
     --main-bar-background-color: var(--container-background-color);
 
-    --control-bar-outline-color: var(--container-outline-color);
-    --control-bar-background-color: var(--container-background-color);
+    --combo-bar-outline-color: var(--container-outline-color);
+    --combo-bar-background-color: var(--container-background-color);
 
     --toolbar-outline-color: var(--container-outline-color);
     --toolbar-background-color: var(--container-background-color);
@@ -26,6 +26,11 @@
     --bar-button-background-color: var(--container-background-color);
     --bar-button-background-hover-color: var(--container-outline-color);
 
+    --mode-bar-button-height: calc(1.5 * var(--node-height));
+    --mode-bar-button-icon-height: calc(var(--node-height));
+    --mode-bar-button-select-background-color: var(--lucency-bluish);
+    --mode-bar-button-move-background-color: var(--lucency-yellowish);
+
     --clear-button-background-color: var(--lucency-reddish);
     --clear-button-background-hover-color: var(--lucency-red);
 }
@@ -38,16 +43,16 @@
     width: var(--main-bar-width);
 }
 
-.control-bar {
+.combo-bar {
     display: flex;
     flex-direction: column;
     gap: var(--main-bar-margin);
     padding: var(--main-bar-margin);
     width: 100%;
     backdrop-filter: var(--blur);
-    background-color: var(--control-bar-background-color);
+    background-color: var(--combo-bar-background-color);
     border-radius: var(--radius);
-    outline: var(--border-width) solid var(--control-bar-outline-color);
+    outline: var(--border-width) solid var(--combo-bar-outline-color);
 }
 
 .row-bar {
@@ -102,6 +107,7 @@
     background-color: var(--minimap-viewport-background-color);
     outline: var(--border-width) solid var(--minimap-viewport-outline-color);
     border-radius: var(--radius);
+    cursor: grab;
 }
 
 .minimap-canvas {
@@ -125,10 +131,43 @@
     border-style: none;
     outline: var(--border-width) solid var(--bar-button-outline-color);
     cursor: pointer;
+    align-self: center;
 }
 
 .bar-button:hover {
     background-color: var(--bar-button-background-hover-color);
+}
+
+.bar-text {
+    flex: 1;
+    text-align: center;
+    user-select: none;
+    align-self: center;
+    width: 100%;
+}
+
+.mode-bar-button-select {
+    background-color: var(--mode-bar-button-select-background-color);
+}
+
+.mode-bar-button-move {
+    background-color: var(--mode-bar-button-move-background-color);
+}
+
+#mode-bar-button {
+    height: var(--mode-bar-button-height);
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+#mode-bar-button-icon {
+    height: 70%;
+}
+
+#mode-bar-button-title {
+    font-size: large;
+    text-align: center;
 }
 
 #clear-button {
