@@ -96,6 +96,6 @@ Note: Because the project is in continuous iteration, this instruction may conta
 
 - 点击`import`按钮，导入先前导出的节点、节点参数及连接结构。<br>Click the `import` button to import the previously exported nodes, nodes parameters, and connection structure.
 
-  您可以在[这里](../example/flowing/web/)找到一些示例。<br>You can find some examples in [here](.../example/flowing/web/).
+  您可以在[这里](../example/flowing/web/)找到一些示例。<br>You can find some examples in [here](../example/flowing/web/).
 
   ![import_nodes](../gif/import_nodes.gif)

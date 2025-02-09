@@ -359,7 +359,7 @@ class Toolbar {
             this.createTool("Help", Toolbar.helpSvg, () => {
                 const readmeLinkEle = document.createElement("a");
                 readmeLinkEle.innerHTML = "Instruction";
-                readmeLinkEle.href = PMoS_README_HREF;
+                readmeLinkEle.href = PMoS_FLOWING_INSTRUCTION_HREF;
                 readmeLinkEle.target = "_blank";
 
                 const repLinkEle = document.createElement("a");

@@ -1,6 +1,6 @@
 const PMoS_REP_HREF = "https://github.com/LoHhhha/pmos_nn";
-const PMoS_README_HREF =
-    "https://github.com/LoHhhha/pmos_nn/blob/master/readme.md";
+const PMoS_FLOWING_INSTRUCTION_HREF =
+    "https://github.com/LoHhhha/pmos_nn/blob/master/doc/help/flowing-instruction.md";
 const JS_PLUMB_REP_HREF = "https://github.com/jsplumb/community-edition";
 
 const rootStyle = getComputedStyle(document.querySelector(":root"));
