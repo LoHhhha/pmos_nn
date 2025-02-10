@@ -50,7 +50,7 @@ example project for network training is `segment`.
          ```
     3. 启动`flowing`服务。
         ```bash
-        python -m server.runner --port 54321 --host 127.0.0.1 --log_level INFO
+        python -m flowing.server.runner --port 54321 --host 127.0.0.1 --log_level INFO
         ```
     4. 根据启动参数，打开对应的Web服务，例如：`127.0.0.1:54321`。
 
@@ -67,7 +67,7 @@ example project for network training is `segment`.
          ```
     3. Start the `flowing` service.
          ```bash
-         python -m server.runner --port 54321 --host 127.0.0.1 --log_level INFO
+         python -m flowing.server.runner --port 54321 --host 127.0.0.1 --log_level INFO
          ```
     4. Open the corresponding Web service according to the startup parameters, such as `127.0.0.1:54321`.
 
