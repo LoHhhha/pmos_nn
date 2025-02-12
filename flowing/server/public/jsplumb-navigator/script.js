@@ -26,6 +26,10 @@
  *          moveMode
  *      }
  *
+ * MESSAGE_TYPE.NavigatorMoveWhenAtEdge
+ *
+ * MESSAGE_TYPE.NavigatorCancelMoveWhenAtEdge
+ *
  */
 
 const NAVIGATOR_MIN_SCALE = 0.1;
@@ -34,7 +38,9 @@ const NAVIGATOR_INTERVAL_SCALE = 0.1;
 const NAVIGATOR_DEFAULT_SCALE = 1.0;
 const NAVIGATOR_SCROLL_INTERVAL_DISTANCE = 50;
 const NAVIGATOR_MOVE_BASE_INTERVAL_DISTANCE = 0;
-const NAVIGATOR_MOVE_MAX_INTERVAL_DISTANCE = 64;
+const NAVIGATOR_MOVE_ADD_INTERVAL_DISTANCE = 1;
+const NAVIGATOR_MOVE_MAX_INTERVAL_DISTANCE = 16;
+const NAVIGATOR_EDGE_WIDTH = 16;
 
 class Navigator {
     jsPlumbInstance;
@@ -42,13 +48,23 @@ class Navigator {
     viewportEle;
     selectBoxEle;
     canvasTransform;
+
     moveMode;
-    nodeTree = new QuadTree({
-        left: CANVAS_MIN_LEFT,
-        top: CANVAS_MIN_TOP,
-        width: CANVAS_MAX_LEFT - CANVAS_MIN_LEFT,
-        height: CANVAS_MAX_TOP - CANVAS_MIN_TOP,
-    });
+    selectBoxUpdateHandler;
+    nodeTree = new QuadTree(
+        {
+            left: CANVAS_MIN_LEFT,
+            top: CANVAS_MIN_TOP,
+            width: CANVAS_MAX_LEFT - CANVAS_MIN_LEFT,
+            height: CANVAS_MAX_TOP - CANVAS_MIN_TOP,
+        },
+        true
+    );
+
+    moveWhenAtEdge = 0; // >=1 means true
+    moveSpeedAtEdge = 0;
+    edgeStatus = 0; // bit [bottom, top, right, left]
+    edgeHighlight;
 
     constructor(jsPlumbInstance, viewportEle, options) {
         this.jsPlumbInstance = jsPlumbInstance;
@@ -67,7 +83,9 @@ class Navigator {
         this.selectBoxEle = this.#createSelectBoxEle();
         this.canvasEle.appendChild(this.selectBoxEle);
 
-        this.#addChangeMoveModeHandler();
+        this.edgeHighlight = new EdgeHighlighter(viewportEle);
+
+        this.#addHandler();
 
         this.changeMoveMode(true, false);
 
@@ -95,7 +113,34 @@ class Navigator {
         }
     }
 
-    #addChangeMoveModeHandler() {
+    #addHandler() {
+        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorManageNode, (event) => {
+            const node = event.detail?.node;
+            if (node == undefined) {
+                console.error("[NavigatorManageNode] not node provided!");
+                return;
+            }
+            this.addNode(node);
+        });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorUpdateNode, (event) => {
+            const node = event.detail?.node;
+            if (node == undefined) {
+                console.error("[NavigatorManageNode] not node provided!");
+                return;
+            }
+            this.updateNode(node);
+        });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorRemoveNode, (event) => {
+            const node = event.detail?.node;
+            if (node == undefined) {
+                console.error("[NavigatorManageNode] not node provided!");
+                return;
+            }
+            this.removeNode(node);
+        });
+
         MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorChangeMoveMode, (event) => {
             if (event?.detail?.moveMode == undefined) {
                 console.error(
@@ -106,6 +151,61 @@ class Navigator {
             }
             this.changeMoveMode(event.detail.moveMode);
         });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorMoveWhenAtEdge, () => {
+            if (this.moveWhenAtEdge++ > 0) {
+                console.warn(
+                    "[NavigatorCancelMoveWhenAtEdge] more than one setting MoveWhenAtEdge!"
+                );
+            }
+        });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorCancelMoveWhenAtEdge, () => {
+            if (this.moveWhenAtEdge === 0) {
+                console.error("[NavigatorCancelMoveWhenAtEdge] cannot cancel!");
+                return;
+            }
+            this.moveWhenAtEdge--;
+        });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorZoomIn, () => {
+            this.zoomIn();
+        });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorZoomOut, () => {
+            this.zoomOut();
+        });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorZoomTo100, () => {
+            this.zoomTo100();
+        });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorViewAllFit, () => {
+            this.viewAllFit();
+        });
+
+        document.documentElement.addEventListener("mousemove", (event) => {
+            this.edgeStatus = 0;
+            if (!this.moveWhenAtEdge) {
+                return;
+            }
+            const clientX = event.clientX;
+            const clientY = event.clientY;
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            if (clientX <= NAVIGATOR_EDGE_WIDTH) {
+                this.edgeStatus = this.edgeStatus ^ 1;
+            }
+            if (windowWidth - clientX <= NAVIGATOR_EDGE_WIDTH) {
+                this.edgeStatus = this.edgeStatus ^ 2;
+            }
+            if (clientY <= NAVIGATOR_EDGE_WIDTH) {
+                this.edgeStatus = this.edgeStatus ^ 4;
+            }
+            if (windowHeight - clientY <= NAVIGATOR_EDGE_WIDTH) {
+                this.edgeStatus = this.edgeStatus ^ 8;
+            }
+        });
     }
 
     addNode(node) {
@@ -115,12 +215,28 @@ class Navigator {
         }
 
         const { left, top } = node.getCoordinates();
-        this.nodeTree.insert(left, top, node);
+        if (!this.nodeTree.insert(left, top, node)) {
+            console.error("[Navigator] detect error in addNode.");
+            MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+                config: PROMPT_CONFIG.ERROR,
+                content:
+                    "[Navigator] Detect error during adding node, please contact us!",
+                timeout: 2000,
+            });
+        }
     }
 
     updateNode(node) {
         const { left, top } = node.getCoordinates();
-        this.nodeTree.update(left, top, node);
+        if (!this.nodeTree.update(left, top, node)) {
+            console.error("[Navigator] detect error in updateNode.");
+            MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+                config: PROMPT_CONFIG.ERROR,
+                content:
+                    "[Navigator] Detect error during updating node, please contact us!",
+                timeout: 2000,
+            });
+        }
     }
 
     removeNode(node) {
@@ -129,7 +245,15 @@ class Navigator {
             this.jsPlumbInstance.unmanage(node.element);
         }
 
-        this.nodeTree.remove(node);
+        if (!this.nodeTree.remove(node)) {
+            console.error("[Navigator] detect error in deleteNode.");
+            MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+                config: PROMPT_CONFIG.ERROR,
+                content:
+                    "[Navigator] Detect error during deleting node, please contact us!",
+                timeout: 2000,
+            });
+        }
     }
 
     getNodesFromRange(left, top, width, height) {
@@ -169,7 +293,7 @@ class Navigator {
     }
 
     changeViewportBackground(scale, offsetLeft, offsetTop) {
-        MESSAGE_PUSH(MESSAGE_TYPE.ChangeGridding, {
+        MESSAGE_PUSH(MESSAGE_TYPE.ChangeChecksBackground, {
             scale: scale,
             offsetLeft: offsetLeft,
             offsetTop: offsetTop,
@@ -241,50 +365,29 @@ class Navigator {
                 // selectBox
                 let originX = e.clientX;
                 let originY = e.clientY;
-                let currentX, currentY;
-                let overScreenMoveSpeed = NAVIGATOR_MOVE_BASE_INTERVAL_DISTANCE;
+                let currentX = e.clientX;
+                let currentY = e.clientY;
+                const prevScale = this.getCanvasScale();
+                const { left: prevLeft, top: preTop } = this.getCanvasBounds();
 
-                this.viewportEle.selectBoxIntervalId = setInterval(() => {
+                this.selectBoxUpdateHandler = () => {
                     const scale = this.getCanvasScale();
                     let { left, top } = this.getCanvasBounds();
-                    let leftOffset = 0;
-                    let topOffset = 0;
-                    let overScreenBits = 3;
-                    if (currentX >= window.innerWidth) {
-                        leftOffset -= overScreenMoveSpeed;
-                    } else if (currentX <= 0) {
-                        leftOffset += overScreenMoveSpeed;
-                    } else {
-                        overScreenBits ^= 1;
-                    }
-                    if (currentY >= window.innerHeight) {
-                        topOffset -= overScreenMoveSpeed;
-                    } else if (currentY <= 0) {
-                        topOffset += overScreenMoveSpeed;
-                    } else {
-                        overScreenBits ^= 2;
-                    }
-                    if (overScreenBits) {
-                        originX += leftOffset;
-                        originY += topOffset;
-                        top += topOffset / scale;
-                        left += leftOffset / scale;
-                        this.setCanvasLocationAndScale(left, top, scale);
-                        overScreenMoveSpeed = Math.min(
-                            NAVIGATOR_MOVE_MAX_INTERVAL_DISTANCE,
-                            overScreenMoveSpeed + 4
-                        );
-                        this.showSelectBox(
-                            originX,
-                            originY,
-                            Math.max(0, Math.min(window.innerWidth, currentX)),
-                            Math.max(0, Math.min(window.innerHeight, currentY))
+                    this.showSelectBox(
+                        originX + (left * scale - prevLeft * prevScale),
+                        originY + (top * scale - preTop * prevScale),
+                        Math.max(0, Math.min(window.innerWidth, currentX)),
+                        Math.max(0, Math.min(window.innerHeight, currentY))
+                    );
+                    if (this.selectBoxUpdateHandler) {
+                        window.requestAnimationFrame(
+                            this.selectBoxUpdateHandler
                         );
                     } else {
-                        overScreenMoveSpeed =
-                            NAVIGATOR_MOVE_BASE_INTERVAL_DISTANCE;
+                        this.hideSelectBox();
                     }
-                }, 50);
+                };
+                this.moveWhenAtEdge += 1;
 
                 this.viewportEle.onpointermove = (moveEvent) => {
                     if (moveEvent.buttons !== 1) {
@@ -297,20 +400,24 @@ class Navigator {
 
                     if (firstMove) {
                         this.viewportEle.setPointerCapture(moveEvent.pointerId);
+                        window.requestAnimationFrame(
+                            this.selectBoxUpdateHandler
+                        );
+                        firstMove = false;
                     }
-
-                    this.showSelectBox(originX, originY, currentX, currentY);
                 };
             }
         }
     }
 
     handleViewportPointerUp(e) {
+        if (this.selectBoxUpdateHandler) {
+            this.selectBoxUpdateHandler = null;
+            this.moveWhenAtEdge -= 1;
+        }
         this.viewportEle.onpointermove = null;
         this.viewportEle.releasePointerCapture(e.pointerId);
         this.viewportEle.style.cursor = null;
-        clearInterval(this.viewportEle.selectBoxIntervalId);
-        this.hideSelectBox();
     }
 
     handleViewportRightKeyMenu(e) {
@@ -359,28 +466,58 @@ class Navigator {
         return false;
     }
 
-    setCanvasTransform() {
+    refresh() {
         if (
             this.canvasTransform &&
             this.canvasTransform !== this.canvasEle.style.transform
         ) {
             this.canvasEle.style.transform = this.canvasTransform;
         }
+        this.edgeHighlight.setEdges(this.edgeStatus);
+        if (this.moveWhenAtEdge && this.edgeStatus) {
+            const scale = this.getCanvasScale();
+            let { left, top } = this.getCanvasBounds();
+            let leftOffset = 0;
+            let topOffset = 0;
+            const LREdgeStatus = this.edgeStatus % 4;
+            const TBEdgeStatus = this.edgeStatus >> 2;
+            if (LREdgeStatus & 1) {
+                leftOffset += this.moveSpeedAtEdge;
+            }
+            if (LREdgeStatus & 2) {
+                leftOffset -= this.moveSpeedAtEdge;
+            }
+            if (TBEdgeStatus & 1) {
+                topOffset += this.moveSpeedAtEdge;
+            }
+            if (TBEdgeStatus & 2) {
+                topOffset -= this.moveSpeedAtEdge;
+            }
+            top += topOffset / scale;
+            left += leftOffset / scale;
+            this.setCanvasLocationAndScale(left, top, scale);
+            this.moveSpeedAtEdge = Math.min(
+                NAVIGATOR_MOVE_MAX_INTERVAL_DISTANCE,
+                this.moveSpeedAtEdge + NAVIGATOR_MOVE_ADD_INTERVAL_DISTANCE
+            );
+        } else {
+            this.moveSpeedAtEdge = 0;
+        }
         if (!this.isDisposed) {
-            this.setCanvasTransformFrameHandle = window.requestAnimationFrame(
-                () => this.setCanvasTransform()
+            this.setRefreshHandle = window.requestAnimationFrame(() =>
+                this.refresh()
             );
         }
     }
 
     startAnimationFrame() {
-        this.setCanvasTransform();
+        this.refresh();
     }
 
     stopAnimationFrame() {
         this.canvasTransform = undefined;
-        if (this.setCanvasTransformFrameHandle) {
-            window.cancelAnimationFrame(this.setCanvasTransformFrameHandle);
+        if (this.setRefreshHandle) {
+            window.cancelAnimationFrame(this.setRefreshHandle);
         }
     }
 
@@ -620,45 +757,10 @@ class Navigator {
     window.createJsPlumbNavigator = (jsPlumbInstance, viewportEle) => {
         const navigator = new Navigator(jsPlumbInstance, viewportEle);
 
-        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorManageNode, (event) => {
-            const node = event.detail.node;
-            if (node == undefined) {
-                console.error("[NavigatorManageNode] not node provided!");
-                return;
-            }
-            navigator.addNode(node);
-        });
-
-        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorUpdateNode, (event) => {
-            const node = event.detail.node;
-            if (node == undefined) {
-                console.error("[NavigatorManageNode] not node provided!");
-                return;
-            }
-            navigator.updateNode(node);
-        });
-
-        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorRemoveNode, (event) => {
-            const node = event.detail.node;
-            if (node == undefined) {
-                console.error("[NavigatorManageNode] not node provided!");
-                return;
-            }
-            navigator.removeNode(node);
-        });
-
-        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorZoomIn, () => {
-            navigator.zoomIn();
-        });
-        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorZoomOut, () => {
-            navigator.zoomOut();
-        });
-        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorZoomTo100, () => {
-            navigator.zoomTo100();
-        });
-        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorViewAllFit, () => {
-            navigator.viewAllFit();
-        });
+        window.createJsPlumbNavigator = () => {
+            console.warn("Do not create JsPlumbNavigator more than once!");
+            return navigator;
+        };
         return navigator;
     };
 })();

@@ -233,7 +233,7 @@ class Node {
     outline;
     canvas;
     viewport;
-    jsPlumbInstance;
+    static jsPlumbInstance;
 
     // static method
     static SELECTED_NODES_SET = new Set();
@@ -337,13 +337,27 @@ class Node {
         };
     }
 
-    redraw(left, top) {
-        const { left: L, top: T } = this.coordinatesTruncate(left, top);
-        this.element.style.left = `${L}px`;
-        this.element.style.top = `${T}px`;
-        this.jsPlumbInstance.revalidate(this.element);
+    redrawPlanned = false;
+    nextLeft;
+    nextTop;
+    #redraw() {
+        this.element.style.left = `${this.nextLeft}px`;
+        this.element.style.top = `${this.nextTop}px`;
+        Node.jsPlumbInstance.revalidate(this.element);
         this.updateNavigator();
         this.redrawMiniMapNode();
+        this.redrawPlanned = false;
+    }
+    redraw(left, top, force) {
+        const { left: L, top: T } = this.coordinatesTruncate(left, top);
+        this.nextLeft = L;
+        this.nextTop = T;
+        if (force) {
+            this.#redraw();
+        } else if (!this.redrawPlanned) {
+            this.redrawPlanned = true;
+            window.requestAnimationFrame(this.#redraw.bind(this));
+        }
     }
 
     updateNavigator() {
@@ -411,7 +425,7 @@ class Node {
     constructor(nodeConfig, left, top, jsPlumbNavigator) {
         this.id = getNextNodeId();
         this.config = nodeConfig;
-        this.jsPlumbInstance = jsPlumbNavigator.jsPlumbInstance;
+        Node.jsPlumbInstance = jsPlumbNavigator.jsPlumbInstance;
         this.canvas = jsPlumbNavigator.canvasEle;
         this.viewport = jsPlumbNavigator.viewportEle;
         this.content = {};
@@ -468,7 +482,7 @@ class Node {
             const placeRate = (ptr + 1) / (nodeConfig.outputEnd.length + 1);
 
             // endpoint
-            this.outputEndpoint[ptr] = this.jsPlumbInstance.addEndpoint(
+            this.outputEndpoint[ptr] = Node.jsPlumbInstance.addEndpoint(
                 this.element,
                 {
                     uuid: endpointId,
@@ -492,7 +506,7 @@ class Node {
             const endpointId = getNextEndpointId();
             const placeRate = (ptr + 1) / (nodeConfig.inputEnd.length + 1);
 
-            this.inputEndpoint[ptr] = this.jsPlumbInstance.addEndpoint(
+            this.inputEndpoint[ptr] = Node.jsPlumbInstance.addEndpoint(
                 this.element,
                 {
                     uuid: endpointId,
@@ -543,7 +557,7 @@ class Node {
         if (showOverview && this.hideOverview === null) {
             this.showOverview();
         }
-        this.jsPlumbInstance.addToDragSelection(this.element);
+        Node.jsPlumbInstance.addToDragSelection(this.element);
         Node.SELECTED_NODES_SET.add(this);
     }
 
@@ -553,7 +567,7 @@ class Node {
         if (this.hideOverview) {
             this.hideOverview();
         }
-        this.jsPlumbInstance.removeFromDragSelection(this.element);
+        Node.jsPlumbInstance.removeFromDragSelection(this.element);
         Node.SELECTED_NODES_SET.delete(this);
     }
 
@@ -624,6 +638,8 @@ class OperatorNode {
         OperatorNode.pointFollowNode.style.left = `${rect.left}px`;
         OperatorNode.pointFollowNode.style.top = `${rect.top}px`;
 
+        MESSAGE_PUSH(MESSAGE_TYPE.NavigatorMoveWhenAtEdge);
+
         document.addEventListener(
             "pointermove",
             OperatorNode.handleDrag,
@@ -681,6 +697,8 @@ class OperatorNode {
                 e.clientY / scale - OperatorNode.pointFollowNode.offsetY
             );
         }
+
+        MESSAGE_PUSH(MESSAGE_TYPE.NavigatorCancelMoveWhenAtEdge);
 
         OperatorNode.deletePointFollowNode();
     }
@@ -1172,7 +1190,7 @@ class OperatorBar {
                 for (const ele of dragStopPayload.elements) {
                     const node = ele.el.origin;
                     const { left, top } = node.getCoordinates();
-                    node.redraw(left, top);
+                    node.redraw(left, top, true);
                 }
             }
         );

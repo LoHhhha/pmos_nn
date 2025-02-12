@@ -1,14 +1,14 @@
 class QuadTree {
     /**
      * Constraint:
-     *      'node' need have 'element'(DOM) property
+     *      1. 'node' need have 'element'(DOM) and 'id' property
      */
     static NOT_SUBTREE = null;
     static INF = Number.MAX_SAFE_INTEGER;
     static NEG_INF = Number.MIN_SAFE_INTEGER;
     static COLLAPSE_RATE = 0.25;
-    static TREE_MIN_WIDTH = 4;
-    static TREE_MIN_HEIGHT = 4;
+    static TREE_MIN_WIDTH = 30;
+    static TREE_MIN_HEIGHT = 30;
 
     boundary;
     capacity;
@@ -24,7 +24,8 @@ class QuadTree {
             top: QuadTree.NEG_INF,
         },
     };
-    _collapseCapacity;
+    #nodeId2Locations; // only in super tree, Map, node.id->{left,top}
+    #collapseCapacity;
 
     static intersects(rectA, rectB) {
         const { left: aL, top: aT, width: aW, height: aH } = rectA;
@@ -46,25 +47,42 @@ class QuadTree {
     static contains(rect, point) {
         const { left: L, top: T, width: W, height: H } = rect;
         const { left, top } = point;
+
         const R = L + W;
         const B = T + H;
+
         return L <= left && left < R && T <= top && top < B;
     }
 
-    constructor(boundary, capacity = 8) {
+    constructor(boundary, isSuper = false, capacity = 8) {
         /**
          * boundary: {left, top, width, height}
          */
         this.boundary = boundary;
         this.capacity = capacity;
 
-        this._collapseCapacity = Math.floor(capacity * QuadTree.COLLAPSE_RATE);
+        this.#collapseCapacity = Math.floor(capacity * QuadTree.COLLAPSE_RATE);
+
+        if (isSuper) {
+            this.#nodeId2Locations = new Map();
+        }
+    }
+
+    onMiddleLine(left, top, width, height) {
+        const { left: L, top: T, width: W, height: H } = this.boundary;
+
+        const ML = L + W / 2;
+        const MT = T + H / 2;
+        const right = left + width;
+        const bottom = top + height;
+
+        return (left <= ML && ML < right) || (top <= MT && MT < bottom);
     }
 
     canDivide() {
         return (
-            this.width > QuadTree.TREE_MIN_WIDTH &&
-            this.height > QuadTree.TREE_MIN_HEIGHT
+            this.boundary.width > QuadTree.TREE_MIN_WIDTH &&
+            this.boundary.height > QuadTree.TREE_MIN_HEIGHT
         );
     }
 
@@ -106,24 +124,12 @@ class QuadTree {
                 top: QuadTree.NEG_INF,
             },
         };
-        if (this.subtree === QuadTree.NOT_SUBTREE) return;
-        for (const sub of this.subtree) {
-            const { left, top, width, height } = sub.getExtremumBoundary();
-            this.updateDataBoundary(left, top, width, height);
+        if (this.subtree !== QuadTree.NOT_SUBTREE) {
+            for (const sub of this.subtree) {
+                const { left, top, width, height } = sub.getExtremumBoundary();
+                this.updateDataBoundary(left, top, width, height);
+            }
         }
-    }
-
-    refreshDataBoundary() {
-        this.dataBoundary = {
-            topLeft: {
-                left: QuadTree.INF,
-                top: QuadTree.INF,
-            },
-            bottomRight: {
-                left: QuadTree.NEG_INF,
-                top: QuadTree.NEG_INF,
-            },
-        };
         for (const { left, top, node } of this.data) {
             this.updateDataBoundary(
                 left,
@@ -171,15 +177,15 @@ class QuadTree {
                 return;
             }
         }
-        if (dataCount >= this._collapseCapacity) {
+        if (dataCount >= this.#collapseCapacity) {
             return;
         }
 
         for (const sub of this.subtree) {
             this.data.push(...sub.data);
         }
-        this.subtree = NOT_SUBTREE;
-        this.refreshDataBoundary();
+        this.subtree = QuadTree.NOT_SUBTREE;
+        this.maintainDataBoundary();
     }
 
     contains(left, top) {
@@ -227,23 +233,44 @@ class QuadTree {
             }),
         ];
 
-        for (const { left, top, node } of this.data) {
+        const prevData = this.data;
+        this.data = [];
+        for (const { left, top, node } of prevData) {
+            if (
+                this.onMiddleLine(
+                    left,
+                    top,
+                    node.offsetWidth,
+                    node.offsetHeight
+                )
+            ) {
+                this.data.push({
+                    left: left,
+                    top: top,
+                    node: node,
+                });
+                continue;
+            }
+
             for (const sub of this.subtree) {
                 if (sub.contains(left, top)) {
-                    sub.insert(left, top, node);
+                    sub.#insert(left, top, node);
                     break;
                 }
             }
         }
-        this.data = [];
     }
 
-    insert(left, top, node) {
+    #insert(left, top, node) {
         if (!this.contains(left, top)) return false;
 
+        const width = node.element.offsetWidth;
+        const height = node.element.offsetHeight;
+
         if (
-            this.subtree === QuadTree.NOT_SUBTREE &&
-            (this.data.length < this.capacity || !this.canDivide())
+            this.onMiddleLine(left, top, width, height) ||
+            (this.subtree === QuadTree.NOT_SUBTREE &&
+                (this.data.length < this.capacity || !this.canDivide()))
         ) {
             this.data.push({
                 left: left,
@@ -251,12 +278,7 @@ class QuadTree {
                 node: node,
             });
 
-            this.updateDataBoundary(
-                left,
-                top,
-                node.element.offsetWidth,
-                node.element.offsetHeight
-            );
+            this.updateDataBoundary(left, top, width, height);
 
             return true;
         }
@@ -266,24 +288,30 @@ class QuadTree {
         }
 
         const inserted = this.subtree.some((sub) =>
-            sub.insert(left, top, node)
+            sub.#insert(left, top, node)
         );
         if (inserted) {
-            this.maintainDataBoundary();
+            this.updateDataBoundary(left, top, width, height);
         }
-
         return inserted;
     }
 
-    remove(node) {
-        if (this.subtree !== QuadTree.NOT_SUBTREE) {
-            const deleted = this.subtree.some((sub) => sub.remove(node));
-            if (deleted) {
-                this.maintainDataBoundary();
-                this.maintainSubTree();
-            }
-            return deleted;
+    insert(left, top, node) {
+        if (!this.#insert(left, top, node)) {
+            console.error("[QuadTree] cannot insert node!", {
+                left: left,
+                top: top,
+                node: node,
+                tree: this,
+            });
+            return false;
         }
+        this.#nodeId2Locations.set(node.id, { left: left, top: top });
+        return true;
+    }
+
+    #remove(left, top, node) {
+        if (!this.contains(left, top)) return false;
 
         let idx = -1;
         for (const [i, info] of this.data.entries()) {
@@ -294,15 +322,52 @@ class QuadTree {
         }
         if (idx !== -1) {
             this.data.splice(idx, 1);
-            this.refreshDataBoundary();
+            this.maintainDataBoundary();
             return true;
         }
+
+        if (this.subtree !== QuadTree.NOT_SUBTREE) {
+            const deleted = this.subtree.some((sub) =>
+                sub.#remove(left, top, node)
+            );
+            if (deleted) {
+                this.maintainDataBoundary();
+                this.maintainSubTree();
+            }
+            return deleted;
+        }
+
         return false;
     }
 
+    remove(node) {
+        if (!this.#nodeId2Locations.has(node.id)) {
+            console.error("[QuadTree] node not found, cannot remove!", node);
+            return false;
+        }
+        const { left, top } = this.#nodeId2Locations.get(node.id);
+        if (!this.#remove(left, top, node)) {
+            console.error("[QuadTree] cannot remove node!", {
+                left: left,
+                top: top,
+                node: node,
+                tree: this,
+            });
+            return false;
+        }
+        this.#nodeId2Locations.delete(node.id);
+        return true;
+    }
+
     update(left, top, node) {
-        this.remove(node);
-        this.insert(left, top, node);
+        if (!this.#nodeId2Locations.has(node.id)) {
+            console.error("[QuadTree] node not found, cannot update!", node);
+            return false;
+        }
+        if (!this.remove(node) || !this.insert(left, top, node)) {
+            return false;
+        }
+        return true;
     }
 
     query(left, top, width, height, res = []) {
@@ -312,28 +377,78 @@ class QuadTree {
             this.subtree.forEach((sub) =>
                 sub.query(left, top, width, height, res)
             );
-        } else {
-            for (const { left: L, top: T, node } of this.data) {
-                if (
-                    QuadTree.intersects(
-                        {
-                            left: left,
-                            top: top,
-                            width: width,
-                            height: height,
-                        },
-                        {
-                            left: L,
-                            top: T,
-                            width: node.element.offsetWidth,
-                            height: node.element.offsetHeight,
-                        }
-                    )
-                ) {
-                    res.push(node);
-                }
+        }
+
+        for (const { left: L, top: T, node } of this.data) {
+            if (
+                QuadTree.intersects(
+                    {
+                        left: left,
+                        top: top,
+                        width: width,
+                        height: height,
+                    },
+                    {
+                        left: L,
+                        top: T,
+                        width: node.element.offsetWidth,
+                        height: node.element.offsetHeight,
+                    }
+                )
+            ) {
+                res.push(node);
             }
         }
         return res;
+    }
+}
+
+class EdgeHighlighter {
+    static BASE_CLASS_NAME = "edge-highlight";
+    static BIT_TO_DIR = ["left", "right", "top", "bottom"];
+
+    viewportEle;
+    currentMask = 0;
+    constructor(viewportEle) {
+        this.viewportEle = viewportEle;
+
+        this.#createEdgeElements();
+    }
+
+    #createEdgeElements() {
+        this.edges = {
+            top: document.createElement("div"),
+            right: document.createElement("div"),
+            bottom: document.createElement("div"),
+            left: document.createElement("div"),
+        };
+
+        Object.entries(this.edges).forEach(([dir, element]) => {
+            element.classList.add(EdgeHighlighter.BASE_CLASS_NAME);
+            element.classList.add(EdgeHighlighter.BASE_CLASS_NAME + `-${dir}`);
+            this.#elementChange(element, false);
+
+            this.viewportEle.appendChild(element);
+        });
+    }
+
+    #elementChange(element, visible) {
+        if (visible) {
+            element.style.display = "inline";
+        } else {
+            element.style.display = "none";
+        }
+    }
+
+    setEdges(mask) {
+        const needChange = mask ^ this.currentMask;
+        for (let i = 0; i < 4; i++) {
+            if (((needChange >> i) & 1) == 0) continue;
+            this.#elementChange(
+                this.edges[EdgeHighlighter.BIT_TO_DIR[i]],
+                (mask >> i) & 1
+            );
+        }
+        this.currentMask = mask;
     }
 }

@@ -126,10 +126,14 @@ class MiniMap {
                 );
                 return;
             }
-            node.style.left = `${event.detail.left}px`;
-            node.style.top = `${event.detail.top}px`;
-            node.style.width = `${event.detail.width}px`;
-            node.style.height = `${event.detail.height}px`;
+
+            window.requestAnimationFrame(() => {
+                node.style.left = `${event.detail.left}px`;
+                node.style.top = `${event.detail.top}px`;
+                node.style.width = `${event.detail.width}px`;
+                node.style.height = `${event.detail.height}px`;
+                this.layout();
+            });
         });
     }
 

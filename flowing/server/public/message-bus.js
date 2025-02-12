@@ -1,8 +1,8 @@
 const MESSAGE_BUS = document.createElement("div");
 
 const MESSAGE_TYPE = {
-    // gridding-background
-    ChangeGridding: "change-gridding",
+    // checks-background
+    ChangeChecksBackground: "change-checks-background",
 
     // graph
     CalculateGraph: "calculate-graph",
@@ -30,6 +30,8 @@ const MESSAGE_TYPE = {
     NavigatorChangeMoveMode: "navigator-change-move-mode",
     NavigationChanged: "navigator-changed", // out
     NavigatorMoveModeChanged: "navigator-move-mode-changed", // out
+    NavigatorMoveWhenAtEdge: "navigator-move-when-at-edge",
+    NavigatorCancelMoveWhenAtEdge: "navigator-cancel-move-when-at-edge",
 
     // right-key-menu
     RightKeyMenuShow: "right-key-menu-show",

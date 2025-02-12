@@ -14,7 +14,7 @@ jsPlumb.ready(() => {
     const viewportEle = document.getElementById("viewport");
     const canvasEle = document.getElementById("canvas");
 
-    window.addGriddingBackGroupTo(viewportEle);
+    window.addChecksBackgroundTo(viewportEle);
 
     const jsPlumbInstance = window.createJsPlumbInstance(canvasEle);
 

@@ -1,12 +1,53 @@
 :root {
     --select-box-background-color: var(--lucency-bluish);
     --select-box-outline-color: var(--lucency-blue);
+
+    --edge-size: calc(2 * var(--margin));
+    --edge-color: var(--lucency-bluish);
 }
 
 .select-box {
-    z-index: 0;
+    z-index: 8;
     position: absolute;
     background-color: var(--select-box-background-color);
     outline: var(--border-width) solid var(--select-box-outline-color);
     user-select: none;
+}
+
+.edge-highlight {
+    position: fixed;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.edge-highlight-top {
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: var(--edge-size);
+    background: linear-gradient(to bottom, var(--edge-color), transparent);
+}
+
+.edge-highlight-right {
+    top: 0;
+    right: 0;
+    width: var(--edge-size);
+    height: 100vh;
+    background: linear-gradient(to left, var(--edge-color), transparent);
+}
+
+.edge-highlight-bottom {
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    height: var(--edge-size);
+    background: linear-gradient(to top, var(--edge-color), transparent);
+}
+
+.edge-highlight-left {
+    top: 0;
+    left: 0;
+    width: var(--edge-size);
+    height: 100vh;
+    background: linear-gradient(to right, var(--edge-color), transparent);
 }
