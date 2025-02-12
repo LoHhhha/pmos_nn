@@ -32,6 +32,9 @@
  *
  */
 
+const NAVIGATOR_MOVE_FRAME_QUEUE_WEIGHT = 0;
+const NAVIGATOR_FRAME_QUEUE_WEIGHT = 4;
+
 const NAVIGATOR_MIN_SCALE = 0.1;
 const NAVIGATOR_MAX_SCALE = 3.0;
 const NAVIGATOR_INTERVAL_SCALE = 0.1;
@@ -380,7 +383,8 @@ class Navigator {
                         Math.max(0, Math.min(window.innerHeight, currentY))
                     );
                     if (this.selectBoxUpdateHandler) {
-                        window.requestAnimationFrame(
+                        CALL_BEFORE_NEXT_FRAME(
+                            NAVIGATOR_MOVE_FRAME_QUEUE_WEIGHT,
                             this.selectBoxUpdateHandler
                         );
                     } else {
@@ -400,7 +404,8 @@ class Navigator {
 
                     if (firstMove) {
                         this.viewportEle.setPointerCapture(moveEvent.pointerId);
-                        window.requestAnimationFrame(
+                        CALL_BEFORE_NEXT_FRAME(
+                            NAVIGATOR_MOVE_FRAME_QUEUE_WEIGHT,
                             this.selectBoxUpdateHandler
                         );
                         firstMove = false;
@@ -503,22 +508,19 @@ class Navigator {
         } else {
             this.moveSpeedAtEdge = 0;
         }
-        if (!this.isDisposed) {
-            this.setRefreshHandle = window.requestAnimationFrame(() =>
-                this.refresh()
-            );
-        }
     }
+    refreshHandler = this.refresh.bind(this);
 
     startAnimationFrame() {
-        this.refresh();
+        CALL_BEFORE_EVERY_FRAME(
+            NAVIGATOR_FRAME_QUEUE_WEIGHT,
+            this.refreshHandler
+        );
     }
 
     stopAnimationFrame() {
         this.canvasTransform = undefined;
-        if (this.setRefreshHandle) {
-            window.cancelAnimationFrame(this.setRefreshHandle);
-        }
+        DELETE_FRAME_HANDLER(NAVIGATOR_FRAME_QUEUE_WEIGHT, this.refreshHandler);
     }
 
     getCanvasScale() {

@@ -27,6 +27,7 @@ COVERING.className = "covering";
 
     MESSAGE_HANDLER(MESSAGE_TYPE.CoveringShowCustom, (event) => {
         if (COVERING.style.height === "100%") {
+            console.error("[Covering] More than one want to show covering!");
             return;
         }
         let coveringContainerEle = document.createElement("div");

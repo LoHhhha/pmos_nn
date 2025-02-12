@@ -1268,7 +1268,7 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
         let top = 0,
             left = -TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL;
         for (const node of uselessNodes) {
-            node.redraw(left, top);
+            node.redraw(left, top, true);
             top += node.element.offsetHeight;
         }
     }
@@ -1576,8 +1576,8 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
             pushShape(event.detail.node);
         });
 
-        MESSAGE_HANDLER(MESSAGE_TYPE.TidyNodes, (event) => {
-            MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
+        MESSAGE_HANDLER(MESSAGE_TYPE.TidyNodes, () => {
+            MESSAGE_CALL(MESSAGE_TYPE.CoveringShowCustom, {
                 title: "Tiding Nodes...",
             });
             setTimeout(() => {
@@ -1593,8 +1593,10 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
                         timeout: 5000,
                     });
                 }
-                jsPlumbNavigator.viewAllFit();
                 MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose);
+                CALL_BEFORE_NEXT_FRAME(CALL_QUEUE_AMOUNT - 1, () => {
+                    MESSAGE_PUSH(MESSAGE_TYPE.NavigatorViewAllFit);
+                });
             }, 500);
         });
     };

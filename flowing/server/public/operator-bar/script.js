@@ -16,6 +16,8 @@
  *
  */
 
+const NODE_FRAME_QUEUE_WEIGHT = 1;
+
 let MAX_Z_INDEX = 16; // reserve 0-15
 let CREATE_NODE_COUNT = 0;
 let ENDPOINT_COUNT = 0;
@@ -340,12 +342,12 @@ class Node {
     redrawPlanned = false;
     nextLeft;
     nextTop;
-    #redraw() {
+    #redraw(focus) {
         this.element.style.left = `${this.nextLeft}px`;
         this.element.style.top = `${this.nextTop}px`;
         Node.jsPlumbInstance.revalidate(this.element);
-        this.updateNavigator();
-        this.redrawMiniMapNode();
+        this.updateNavigator(focus);
+        this.redrawMiniMapNode(focus);
         this.redrawPlanned = false;
     }
     redraw(left, top, force) {
@@ -353,25 +355,42 @@ class Node {
         this.nextLeft = L;
         this.nextTop = T;
         if (force) {
-            this.#redraw();
+            this.#redraw(focus);
         } else if (!this.redrawPlanned) {
             this.redrawPlanned = true;
-            window.requestAnimationFrame(this.#redraw.bind(this));
+            CALL_BEFORE_NEXT_FRAME(
+                NODE_FRAME_QUEUE_WEIGHT,
+                this.#redraw.bind(this)
+            );
         }
     }
 
-    updateNavigator() {
-        MESSAGE_PUSH(MESSAGE_TYPE.NavigatorUpdateNode, { node: this });
+    updateNavigator(focus) {
+        if (focus) {
+            MESSAGE_CALL(MESSAGE_TYPE.NavigatorUpdateNode, { node: this });
+        } else {
+            MESSAGE_PUSH(MESSAGE_TYPE.NavigatorUpdateNode, { node: this });
+        }
     }
 
-    redrawMiniMapNode() {
-        MESSAGE_PUSH(MESSAGE_TYPE.RedrawMapNode, {
-            id: this.id,
-            left: this.element.offsetLeft,
-            top: this.element.offsetTop,
-            width: this.element.offsetWidth,
-            height: this.element.offsetHeight,
-        });
+    redrawMiniMapNode(focus) {
+        if (focus) {
+            MESSAGE_CALL(MESSAGE_TYPE.RedrawMapNode, {
+                id: this.id,
+                left: this.element.offsetLeft,
+                top: this.element.offsetTop,
+                width: this.element.offsetWidth,
+                height: this.element.offsetHeight,
+            });
+        } else {
+            MESSAGE_PUSH(MESSAGE_TYPE.RedrawMapNode, {
+                id: this.id,
+                left: this.element.offsetLeft,
+                top: this.element.offsetTop,
+                width: this.element.offsetWidth,
+                height: this.element.offsetHeight,
+            });
+        }
     }
 
     hideOverview = null;
@@ -458,18 +477,9 @@ class Node {
         this.upZIndex();
 
         // jsPlumb
-        MESSAGE_PUSH(MESSAGE_TYPE.NavigatorManageNode, { node: this });
+        MESSAGE_CALL(MESSAGE_TYPE.NavigatorManageNode, { node: this });
 
-        // add to MiniMap
-        MESSAGE_PUSH(MESSAGE_TYPE.CreateMapNode, {
-            id: this.id,
-            left: this.element.offsetLeft,
-            top: this.element.offsetTop,
-            width: this.element.offsetWidth,
-            height: this.element.offsetHeight,
-        });
-
-        this.redraw(left, top);
+        this.redraw(left, top, true);
 
         // set outputEndpointConnection
         for (let idx = 0; idx < nodeConfig.outputEnd.length; idx++) {

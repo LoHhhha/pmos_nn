@@ -1,13 +1,13 @@
 /**
- * MESSAGE_TYPE.CreateMapNode
- *      <event.detail.id: str|int> <event.detail.left: int|float> <event.detail.top: int|float> <event.detail.width: int|float> <event.detail.height: int|float>
- *
  * MESSAGE_TYPE.DeleteMapNode
  *      <event.detail.id: str|int>
  *
  * MESSAGE_TYPE.RedrawMapNode
  *      <event.detail.id: str|int> <event.detail.left: int|float> <event.detail.top: int|float> <event.detail.width: int|float> <event.detail.height: int|float>
  */
+
+const MINIMAP_NODE_UPDATE_FRAME_QUEUE_WEIGHT = 2;
+const MINIMAP_FRAME_QUEUE_WEIGHT = 3;
 
 class MiniMap {
     navigator;
@@ -57,34 +57,6 @@ class MiniMap {
     }
 
     addHandler() {
-        MESSAGE_HANDLER(MESSAGE_TYPE.CreateMapNode, (event) => {
-            if (
-                event.detail?.id === undefined ||
-                event.detail?.left === undefined ||
-                event.detail?.top === undefined ||
-                event.detail?.width === undefined ||
-                event.detail?.height === undefined
-            ) {
-                console.error(
-                    "[MiniMap-CreateMapNode] get a unexpected event as",
-                    event
-                );
-                return;
-            }
-
-            if (this.miniMapNodeEleMap.has(event.detail.id)) {
-                console.warn(
-                    "[MiniMap-CreateMapNode] get a exist node id, going to redraw this node."
-                );
-                MESSAGE_PUSH(MESSAGE_TYPE.RedrawMapNode, event.detail);
-                return;
-            }
-            const node = this.createNodeOutlineEle(event.detail);
-            this.miniMapNodeEleMap.set(event.detail.id, node);
-            this.miniMapCanvasEle.appendChild(node);
-            this.layout();
-        });
-
         MESSAGE_HANDLER(MESSAGE_TYPE.DeleteMapNode, (event) => {
             if (event.detail?.id === undefined) {
                 console.error(
@@ -119,22 +91,30 @@ class MiniMap {
                 return;
             }
 
-            const node = this.miniMapNodeEleMap.get(event.detail.id);
+            let node = this.miniMapNodeEleMap.get(event.detail.id);
             if (node === undefined) {
-                console.warn(
-                    "[MiniMap-RedrawMapNode] get a not exist node id."
+                console.debug(
+                    "[MiniMap-RedrawMapNode] get a not exist node id, creating it."
                 );
-                return;
+                node = this.createNodeOutlineEle(event.detail.id, event.detail);
             }
 
-            window.requestAnimationFrame(() => {
-                node.style.left = `${event.detail.left}px`;
-                node.style.top = `${event.detail.top}px`;
-                node.style.width = `${event.detail.width}px`;
-                node.style.height = `${event.detail.height}px`;
-                this.layout();
-            });
+            CALL_BEFORE_NEXT_FRAME(
+                MINIMAP_NODE_UPDATE_FRAME_QUEUE_WEIGHT,
+                () => {
+                    node.style.left = `${event.detail.left}px`;
+                    node.style.top = `${event.detail.top}px`;
+                    node.style.width = `${event.detail.width}px`;
+                    node.style.height = `${event.detail.height}px`;
+                    this.layout();
+                }
+            );
         });
+
+        CALL_BEFORE_EVERY_FRAME(
+            MINIMAP_FRAME_QUEUE_WEIGHT,
+            this.refreshHandler
+        );
     }
 
     handleMiddleMouseZoom(e) {
@@ -251,13 +231,15 @@ class MiniMap {
         return ele;
     }
 
-    createNodeOutlineEle(bounds) {
+    createNodeOutlineEle(id, bounds) {
         const ele = document.createElement("div");
         ele.className = "minimap-node-outline";
         ele.style.left = `${bounds.left}px`;
         ele.style.top = `${bounds.top}px`;
         ele.style.width = `${bounds.width}px`;
         ele.style.height = `${bounds.height}px`;
+        this.miniMapNodeEleMap.set(id, ele);
+        this.miniMapCanvasEle.appendChild(ele);
         return ele;
     }
 
@@ -268,6 +250,7 @@ class MiniMap {
         const elements = this.navigator.jsPlumbInstance.getManagedElements();
         for (const key in elements) {
             const ele = elements[key].el;
+            const node = ele.origin;
 
             const bounds = {
                 left: ele.offsetLeft,
@@ -276,9 +259,7 @@ class MiniMap {
                 height: ele.offsetHeight,
             };
 
-            const node = this.createNodeOutlineEle(bounds);
-            this.miniMapCanvasEle.appendChild(node);
-            this.miniMapNodeEleMap.set(ele.id, node);
+            this.createNodeOutlineEle(node.id, bounds);
         }
     }
 
@@ -295,13 +276,9 @@ class MiniMap {
             if (force) {
                 this.redrawAllNodes();
             }
-            if (!this.isDisposed) {
-                this.animationFrameHandle = window.requestAnimationFrame(() =>
-                    this.refresh()
-                );
-            }
         }
     }
+    refreshHandler = this.refresh.bind(this);
 
     show() {
         this.miniMapEle.style.display = "block";
@@ -312,7 +289,7 @@ class MiniMap {
     }
 
     dispose() {
-        window.cancelAnimationFrame(this.animationFrameHandle);
+        DELETE_FRAME_HANDLER(MINIMAP_FRAME_QUEUE_WEIGHT, this.refreshHandler);
         this.miniMapEle.onpointerdown = null;
         this.miniMapEle.onpointermove = null;
         this.miniMapEle.onpointerup = null;

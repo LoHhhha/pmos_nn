@@ -52,13 +52,15 @@
                     });
                     return;
                 }
-                MESSAGE_PUSH(MESSAGE_TYPE.TidyNodes);
+                setTimeout(() => {
+                    MESSAGE_PUSH(MESSAGE_TYPE.TidyNodes);
 
-                MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
-                    config: PROMPT_CONFIG.INFO,
-                    content: `[ImportGraph] Imported ${importObject.nodes.length} node(s), ${importObject.connections.length} edge(s).`,
-                    timeout: 1000,
-                });
+                    MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+                        config: PROMPT_CONFIG.INFO,
+                        content: `[ImportGraph] Imported ${importObject.nodes.length} node(s), ${importObject.connections.length} edge(s).`,
+                        timeout: 1000,
+                    });
+                }, 500);
             };
 
             MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {

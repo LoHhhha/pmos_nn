@@ -45,7 +45,6 @@ const MESSAGE_TYPE = {
     NodesPaste: "nodes-paste",
 
     // operator-bar-mini-map
-    CreateMapNode: "create-map-node",
     DeleteMapNode: "delete-map-node",
     RedrawMapNode: "redraw-map-node",
 
