@@ -9,9 +9,13 @@
  *
  * MESSAGE_TYPE.NavigatorManageNode
  *      <event.detail.node>
+ *      <event.detail.left>
+ *      <event.detail.top>
  *
  * MESSAGE_TYPE.NavigatorUpdateNode
  *      <event.detail.node>
+ *      <event.detail.left>
+ *      <event.detail.top>
  *
  * MESSAGE_TYPE.NavigatorRemoveNode
  *      <event.detail.node>
@@ -65,7 +69,7 @@ class Navigator {
     );
 
     moveWhenAtEdge = 0; // >=1 means true
-    moveSpeedAtEdge = 0;
+    moveSpeedAtEdge = NAVIGATOR_MOVE_BASE_INTERVAL_DISTANCE;
     edgeStatus = 0; // bit [bottom, top, right, left]
     edgeHighlight;
 
@@ -118,29 +122,32 @@ class Navigator {
 
     #addHandler() {
         MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorManageNode, (event) => {
-            const node = event.detail?.node;
-            if (node == undefined) {
-                console.error("[NavigatorManageNode] not node provided!");
+            const { node, left, top } = event.detail ?? {};
+            if (node == undefined || left == undefined || top == undefined) {
+                console.error("[NavigatorManageNode] params not provided!");
                 return;
             }
-            this.addNode(node);
+
+            this.addNode(node, left, top);
         });
 
         MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorUpdateNode, (event) => {
-            const node = event.detail?.node;
-            if (node == undefined) {
-                console.error("[NavigatorManageNode] not node provided!");
+            const { node, left, top } = event.detail ?? {};
+            if (node == undefined || left == undefined || top == undefined) {
+                console.error("[NavigatorUpdateNode] params not provided!");
                 return;
             }
-            this.updateNode(node);
+
+            this.updateNode(node, left, top);
         });
 
         MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorRemoveNode, (event) => {
             const node = event.detail?.node;
             if (node == undefined) {
-                console.error("[NavigatorManageNode] not node provided!");
+                console.error("[NavigatorRemoveNode] not node provided!");
                 return;
             }
+
             this.removeNode(node);
         });
 
@@ -158,7 +165,7 @@ class Navigator {
         MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorMoveWhenAtEdge, () => {
             if (this.moveWhenAtEdge++ > 0) {
                 console.warn(
-                    "[NavigatorCancelMoveWhenAtEdge] more than one setting MoveWhenAtEdge!"
+                    "[NavigatorMoveWhenAtEdge] more than one setting MoveWhenAtEdge!"
                 );
             }
         });
@@ -211,13 +218,12 @@ class Navigator {
         });
     }
 
-    addNode(node) {
+    addNode(node, left, top) {
         if (node.element) {
             this.canvasEle.appendChild(node.element);
             this.jsPlumbInstance.manage(node.element, node.id);
         }
 
-        const { left, top } = node.getCoordinates();
         if (!this.nodeTree.insert(left, top, node)) {
             console.error("[Navigator] detect error in addNode.");
             MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
@@ -229,8 +235,7 @@ class Navigator {
         }
     }
 
-    updateNode(node) {
-        const { left, top } = node.getCoordinates();
+    updateNode(node, left, top) {
         if (!this.nodeTree.update(left, top, node)) {
             console.error("[Navigator] detect error in updateNode.");
             MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
@@ -506,7 +511,7 @@ class Navigator {
                 this.moveSpeedAtEdge + NAVIGATOR_MOVE_ADD_INTERVAL_DISTANCE
             );
         } else {
-            this.moveSpeedAtEdge = 0;
+            this.moveSpeedAtEdge = NAVIGATOR_MOVE_BASE_INTERVAL_DISTANCE;
         }
     }
     refreshHandler = this.refresh.bind(this);
@@ -751,7 +756,6 @@ class Navigator {
             "mousewheel",
             this.middleMouseZoomHandle
         );
-        this.isDisposed = true;
     }
 }
 

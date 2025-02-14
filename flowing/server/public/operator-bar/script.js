@@ -271,6 +271,53 @@ class Node {
         }
     }
 
+    static createEndpoint(
+        element,
+        anchorType,
+        index,
+        total,
+        labelText,
+        style,
+        initNow = true
+    ) {
+        const placeRate = (index + 1) / (total + 1);
+        const endpoint = Node.jsPlumbInstance.addEndpoint(element, {
+            uuid: getNextEndpointId(),
+            anchors: [placeRate, ...anchorType],
+            ...style,
+        });
+
+        const pushLabel = () => {
+            const label = document.createElement("div");
+            label.className = "node-endpoint-label";
+            label.textContent = labelText;
+            element.appendChild(label);
+
+            const positionStyle =
+                anchorType[0] === 1
+                    ? {
+                          top: `${label.offsetHeight / 2}px`,
+                      }
+                    : {
+                          bottom: `${(label.offsetHeight * 4) / 7}px`,
+                      };
+            Object.assign(label.style, {
+                left: `${
+                    element.offsetWidth * placeRate - label.offsetWidth / 2
+                }px`,
+                ...positionStyle,
+            });
+        };
+
+        if (initNow) {
+            pushLabel();
+        } else {
+            CALL_BEFORE_NEXT_FRAME(NODE_FRAME_QUEUE_WEIGHT, pushLabel);
+        }
+
+        return endpoint;
+    }
+
     update() {
         // outline
         let outlineText = "";
@@ -346,7 +393,7 @@ class Node {
         this.element.style.left = `${this.nextLeft}px`;
         this.element.style.top = `${this.nextTop}px`;
         Node.jsPlumbInstance.revalidate(this.element);
-        this.updateNavigator(focus);
+        this.updateNavigator(focus, this.nextLeft, this.nextTop);
         this.redrawMiniMapNode(focus);
         this.redrawPlanned = false;
     }
@@ -365,11 +412,19 @@ class Node {
         }
     }
 
-    updateNavigator(focus) {
+    updateNavigator(focus, left, top) {
         if (focus) {
-            MESSAGE_CALL(MESSAGE_TYPE.NavigatorUpdateNode, { node: this });
+            MESSAGE_CALL(MESSAGE_TYPE.NavigatorUpdateNode, {
+                node: this,
+                left: left,
+                top: top,
+            });
         } else {
-            MESSAGE_PUSH(MESSAGE_TYPE.NavigatorUpdateNode, { node: this });
+            MESSAGE_PUSH(MESSAGE_TYPE.NavigatorUpdateNode, {
+                node: this,
+                left: left,
+                top: top,
+            });
         }
     }
 
@@ -441,7 +496,30 @@ class Node {
         };
     }
 
-    constructor(nodeConfig, left, top, jsPlumbNavigator) {
+    #init(left, top) {
+        this.redraw(left, top, true);
+
+        // set outline
+        const outline = document.createElement("span");
+        outline.classList.add("node-outline");
+        this.element.appendChild(outline);
+        this.outline = outline;
+
+        this.update();
+
+        this.setHandle();
+
+        CURRENT_NODES_COUNT++;
+    }
+
+    constructor(
+        nodeConfig,
+        left,
+        top,
+        jsPlumbNavigator,
+        content = undefined,
+        initNow = true
+    ) {
         this.id = getNextNodeId();
         this.config = nodeConfig;
         Node.jsPlumbInstance = jsPlumbNavigator.jsPlumbInstance;
@@ -466,20 +544,46 @@ class Node {
         this.element.id = this.id;
         this.element.origin = this;
 
+        // set content
+        if (content) {
+            for (const arg of this.config.args) {
+                // check containing this arg
+                if (!content.hasOwnProperty(arg.name)) {
+                    throw "node don't have enough args";
+                }
+
+                this.content[arg.name] = content[arg.name];
+
+                // check the value is valid
+                if (
+                    !operatorBarNamespace.argsValueCheck(
+                        arg.type,
+                        this.content[arg.name]
+                    )
+                ) {
+                    throw "node have unexpected args value";
+                }
+            }
+        } else {
+            for (const arg of this.config.args) {
+                this.content[arg.name] = arg.default;
+            }
+        }
+
         // place
-        const canvasBounds = jsPlumbNavigator.getCanvasBounds();
         this.element.style.position = "absolute";
+        const canvasBounds = jsPlumbNavigator.getCanvasBounds();
         left -= canvasBounds.left;
         top -= canvasBounds.top;
-        this.element.style.left = `${left}px`;
-        this.element.style.top = `${top}px`;
 
         this.upZIndex();
 
         // jsPlumb
-        MESSAGE_CALL(MESSAGE_TYPE.NavigatorManageNode, { node: this });
-
-        this.redraw(left, top, true);
+        MESSAGE_CALL(MESSAGE_TYPE.NavigatorManageNode, {
+            node: this,
+            left: left,
+            top: top,
+        });
 
         // set outputEndpointConnection
         for (let idx = 0; idx < nodeConfig.outputEnd.length; idx++) {
@@ -488,73 +592,36 @@ class Node {
 
         // set endpoint
         for (let ptr = 0; ptr < nodeConfig.outputEnd.length; ptr++) {
-            const endpointId = getNextEndpointId();
-            const placeRate = (ptr + 1) / (nodeConfig.outputEnd.length + 1);
-
-            // endpoint
-            this.outputEndpoint[ptr] = Node.jsPlumbInstance.addEndpoint(
+            this.outputEndpoint[ptr] = Node.createEndpoint(
                 this.element,
-                {
-                    uuid: endpointId,
-                    anchors: [placeRate, 1, 0, 1],
-                    ...operatorBarNamespace.outputEndpointDefaultStyle,
-                }
+                [1, 0, 1],
+                ptr,
+                nodeConfig.outputEnd.length,
+                nodeConfig.outputEnd[ptr],
+                operatorBarNamespace.outputEndpointDefaultStyle,
+                initNow
             );
-
-            // endpoint label
-            const endpointLabel = document.createElement("div");
-            endpointLabel.classList.add("node-endpoint-label");
-            endpointLabel.textContent = nodeConfig.outputEnd[ptr];
-            this.element.appendChild(endpointLabel);
-            endpointLabel.style.top = `${endpointLabel.offsetHeight / 2}px`;
-            endpointLabel.style.left = `${
-                this.element.offsetWidth * placeRate -
-                endpointLabel.offsetWidth / 2
-            }px`;
         }
         for (let ptr = 0; ptr < nodeConfig.inputEnd.length; ptr++) {
-            const endpointId = getNextEndpointId();
-            const placeRate = (ptr + 1) / (nodeConfig.inputEnd.length + 1);
-
-            this.inputEndpoint[ptr] = Node.jsPlumbInstance.addEndpoint(
+            this.inputEndpoint[ptr] = Node.createEndpoint(
                 this.element,
-                {
-                    uuid: endpointId,
-                    anchors: [placeRate, 0, 0, -1],
-                    ...operatorBarNamespace.inputEndpointDefaultStyle,
-                }
+                [0, 0, -1],
+                ptr,
+                nodeConfig.inputEnd.length,
+                nodeConfig.inputEnd[ptr],
+                operatorBarNamespace.inputEndpointDefaultStyle,
+                initNow
             );
-
-            // endpoint label
-            const endpointLabel = document.createElement("div");
-            endpointLabel.classList.add("node-endpoint-label");
-            endpointLabel.textContent = nodeConfig.inputEnd[ptr];
-            this.element.appendChild(endpointLabel);
-            endpointLabel.style.bottom = `${
-                (endpointLabel.offsetHeight * 4) / 7
-            }px`;
-            endpointLabel.style.left = `${
-                this.element.offsetWidth * placeRate -
-                endpointLabel.offsetWidth / 2
-            }px`;
         }
 
-        // set content
-        for (const arg of this.config.args) {
-            this.content[arg.name] = arg.default;
+        if (initNow) {
+            this.#init(left, top);
+        } else {
+            CALL_BEFORE_NEXT_FRAME(
+                NODE_FRAME_QUEUE_WEIGHT,
+                this.#init.bind(this, left, top)
+            );
         }
-
-        // set outline
-        const outline = document.createElement("span");
-        outline.classList.add("node-outline");
-        this.element.appendChild(outline);
-        this.outline = outline;
-
-        this.update();
-
-        this.setHandle();
-
-        CURRENT_NODES_COUNT++;
     }
 
     select(showOverview) {
@@ -1059,42 +1126,20 @@ class OperatorBar {
                 left = left === undefined ? 0 : left;
                 top = top === undefined ? 0 : top;
 
-                const node = new Node(
-                    config,
-                    left + offsetLeft,
-                    top + offsetTop,
-                    jsPlumbNavigator
-                );
-                if (content !== undefined) {
-                    for (const arg of config.args) {
-                        // check containing this arg
-                        if (!content.hasOwnProperty(arg.name)) {
-                            console.error(
-                                "[CreateNodes] get unexpected node, don't have enough args",
-                                event
-                            );
-                            return false;
-                        }
-
-                        node.content[arg.name] = content[arg.name];
-
-                        // check the value is valid
-                        if (
-                            !operatorBarNamespace.argsValueCheck(
-                                arg.type,
-                                node.content[arg.name]
-                            )
-                        ) {
-                            console.error(
-                                "[CreateNodes] get unexpected node, have unexpected args value",
-                                event
-                            );
-                            return false;
-                        }
-                    }
-                    node.update();
+                try {
+                    const node = new Node(
+                        config,
+                        left + offsetLeft,
+                        top + offsetTop,
+                        jsPlumbNavigator,
+                        content,
+                        false
+                    );
+                    addNodes.push(node);
+                } catch (err) {
+                    console.error("[CreateNodes]", err, event);
+                    return false;
                 }
-                addNodes.push(node);
             }
 
             if (!event.detail?.noSelectNodes) {

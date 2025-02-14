@@ -5,6 +5,7 @@
  *      <event.detail.node: Node>
  *
  * MESSAGE_TYPE.TidyNodes
+ *      <event.detail.notNeedCovering>
  */
 
 const SHAPE_CONNECTION_OVERLAY_ID = "shape-overlay";
@@ -1268,7 +1269,7 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
         let top = 0,
             left = -TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL;
         for (const node of uselessNodes) {
-            node.redraw(left, top, true);
+            node.redraw(left, top);
             top += node.element.offsetHeight;
         }
     }
@@ -1490,78 +1491,81 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
 
             add2Logger("Calculating network construction...");
 
+            const calc = () => {
+                const graph = calculate(canvasEle);
+                if (
+                    graph === null ||
+                    graph.input_nodes.length === 0 ||
+                    graph.net_nodes.length === 0 ||
+                    graph.output_nodes.length === 0
+                ) {
+                    add2Logger(
+                        "Found an impossible network construction, please check and try a again."
+                    );
+                    return;
+                } else {
+                    add2Logger("Calculation finished!");
+                }
+
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", "/model/calculate/pytorch", true);
+                xhr.setRequestHeader("Content-Type", "application/json");
+                xhr.onreadystatechange = () => {
+                    if (xhr.readyState !== XMLHttpRequest.DONE) {
+                        return;
+                    }
+
+                    if (xhr.status !== 200) {
+                        switch (xhr.status) {
+                            case 0:
+                                add2Logger(
+                                    `Server connect error, please contact us.`
+                                );
+                                break;
+                            default:
+                                add2Logger(
+                                    `Server internal error as ${
+                                        JSON.parse(xhr.responseText).msg
+                                    }, please contact us.`
+                                );
+                        }
+                        return;
+                    }
+
+                    const info = JSON.parse(xhr.responseText);
+                    add2Logger(`Analysis finished: ${info.msg}.`);
+
+                    if (info.fn) {
+                        const downloadLink = document.createElement("button");
+                        downloadLink.className = "download-button";
+                        downloadLink.textContent = "Download Code";
+                        downloadLink.onclick = () => {
+                            window.open(`/model/download/${info.fn}`, "_blank");
+                            return false;
+                        };
+                        loggerEle.appendChild(downloadLink);
+                    } else {
+                        add2Logger(
+                            "No file return from server, please contact us."
+                        );
+                    }
+                };
+                add2Logger("Trying to analyze via server...");
+                xhr.send(
+                    JSON.stringify({
+                        timestamp: new Date().getDate(),
+                        data: JSON.stringify(graph),
+                        name: null,
+                    })
+                );
+            };
+
             MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
                 title: "Calculate",
                 elements: [loggerEle],
                 buttonMode: COVERING_BUTTON_MODE.CloseButton,
+                afterInit: calc,
             });
-
-            const graph = calculate(canvasEle);
-            if (
-                graph === null ||
-                graph.input_nodes.length === 0 ||
-                graph.net_nodes.length === 0 ||
-                graph.output_nodes.length === 0
-            ) {
-                add2Logger(
-                    "Found an impossible network construction, please check and try a again."
-                );
-                return;
-            } else {
-                add2Logger("Calculation finished!");
-            }
-
-            const xhr = new XMLHttpRequest();
-            xhr.open("POST", "/model/calculate/pytorch", true);
-            xhr.setRequestHeader("Content-Type", "application/json");
-            xhr.onreadystatechange = () => {
-                if (xhr.readyState !== XMLHttpRequest.DONE) {
-                    return;
-                }
-
-                if (xhr.status !== 200) {
-                    switch (xhr.status) {
-                        case 0:
-                            add2Logger(
-                                `Server connect error, please contact us.`
-                            );
-                            break;
-                        default:
-                            add2Logger(
-                                `Server internal error as ${
-                                    JSON.parse(xhr.responseText).msg
-                                }, please contact us.`
-                            );
-                    }
-                    return;
-                }
-
-                const info = JSON.parse(xhr.responseText);
-                add2Logger(`Analysis finished: ${info.msg}.`);
-
-                if (info.fn) {
-                    const downloadLink = document.createElement("button");
-                    downloadLink.className = "download-button";
-                    downloadLink.textContent = "Download Code";
-                    downloadLink.onclick = () => {
-                        window.open(`/model/download/${info.fn}`, "_blank");
-                        return false;
-                    };
-                    loggerEle.appendChild(downloadLink);
-                } else {
-                    add2Logger(
-                        "No file return from server, please contact us."
-                    );
-                }
-            };
-            add2Logger("Trying to analyze via server...");
-            xhr.send(
-                JSON.stringify({
-                    timestamp: new Date().getDate(),
-                    data: JSON.stringify(graph),
-                    name: null,
-                })
-            );
         });
 
         MESSAGE_HANDLER(MESSAGE_TYPE.UpdateShape, (event) => {
@@ -1576,11 +1580,8 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
             pushShape(event.detail.node);
         });
 
-        MESSAGE_HANDLER(MESSAGE_TYPE.TidyNodes, () => {
-            MESSAGE_CALL(MESSAGE_TYPE.CoveringShowCustom, {
-                title: "Tiding Nodes...",
-            });
-            setTimeout(() => {
+        MESSAGE_HANDLER(MESSAGE_TYPE.TidyNodes, (event) => {
+            const tidy = (needCovering = true) => {
                 // in any case, do not crash.
                 try {
                     tidyNodes();
@@ -1593,11 +1594,22 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
                         timeout: 5000,
                     });
                 }
-                MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose);
-                CALL_BEFORE_NEXT_FRAME(CALL_QUEUE_AMOUNT - 1, () => {
+                setTimeout(() => {
+                    if (needCovering) {
+                        MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose);
+                    }
                     MESSAGE_PUSH(MESSAGE_TYPE.NavigatorViewAllFit);
+                }, 0);
+            };
+
+            if (event.detail?.notNeedCovering) {
+                tidy(false);
+            } else {
+                MESSAGE_CALL(MESSAGE_TYPE.CoveringShowCustom, {
+                    title: "Tiding Nodes...",
+                    afterInit: tidy,
                 });
-            }, 500);
+            }
         });
     };
 })();

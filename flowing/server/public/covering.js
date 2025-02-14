@@ -5,6 +5,7 @@
  *      push close button if <event.detail.buttonMode(COVERING_BUTTON_MODE))>.
  *          this will call <event.detail.buttonCallback.close>/<event.detail.buttonCallback.confirm>/<event.detail.buttonCallback.cancel>
  *      push <event.detail.elements(DOM-s)> to covering, and show.
+ *      call <event.detail.init>
  *      call <event.detail.afterInit>
  *
  * MESSAGE_TYPE.CoveringClose
@@ -24,6 +25,18 @@ COVERING.className = "covering";
     window.addEventListener("load", () => {
         document.body.appendChild(COVERING);
     });
+
+    const callWhenTransitionEnd = (...callbacks) => {
+        const animationendCallback = () => {
+            for (const callback of callbacks) {
+                if (callback) {
+                    callback();
+                }
+            }
+            COVERING.removeEventListener("transitionend", animationendCallback);
+        };
+        COVERING.addEventListener("transitionend", animationendCallback);
+    };
 
     MESSAGE_HANDLER(MESSAGE_TYPE.CoveringShowCustom, (event) => {
         if (COVERING.style.height === "100%") {
@@ -58,9 +71,7 @@ COVERING.className = "covering";
                 closeButtonEle.title = "Close";
                 closeButtonEle.innerHTML = ICONS.cross;
                 closeButtonEle.onclick = () => {
-                    if (event.detail?.buttonCallback?.close) {
-                        event.detail.buttonCallback.close();
-                    }
+                    callWhenTransitionEnd(event.detail?.buttonCallback?.close);
                     MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose);
                 };
                 buttonBar.appendChild(closeButtonEle);
@@ -71,9 +82,9 @@ COVERING.className = "covering";
                 confirmButtonEle.title = "Confirm";
                 confirmButtonEle.innerHTML = ICONS.check;
                 confirmButtonEle.onclick = () => {
-                    if (event.detail?.buttonCallback?.confirm) {
-                        event.detail.buttonCallback.confirm();
-                    }
+                    callWhenTransitionEnd(
+                        event.detail?.buttonCallback?.confirm
+                    );
                     MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose);
                 };
                 buttonBar.appendChild(confirmButtonEle);
@@ -83,9 +94,7 @@ COVERING.className = "covering";
                 cancelButtonEle.title = "Cancel";
                 cancelButtonEle.innerHTML = ICONS.cross;
                 cancelButtonEle.onclick = () => {
-                    if (event.detail?.buttonCallback?.cancel) {
-                        event.detail.buttonCallback.cancel();
-                    }
+                    callWhenTransitionEnd(event.detail?.buttonCallback?.cancel);
                     MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose);
                 };
                 buttonBar.appendChild(cancelButtonEle);
@@ -98,11 +107,14 @@ COVERING.className = "covering";
         } else {
             buttonBar.remove();
         }
-        COVERING.style.height = "100%";
 
-        if (event.detail?.afterInit) {
-            event.detail.afterInit();
+        if (event.detail?.init) {
+            event.detail?.init();
         }
+
+        callWhenTransitionEnd(event.detail?.afterInit);
+
+        COVERING.style.height = "100%";
     });
 
     MESSAGE_HANDLER(MESSAGE_TYPE.CoveringClose, () => {

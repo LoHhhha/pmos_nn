@@ -13,7 +13,7 @@
             jsonTextEle.placeholder =
                 "Enter graph code here, and cover previous graph.";
 
-            const pushGraph = () => {
+            const importNodesFromJsonTextEle = () => {
                 const jsonText = jsonTextEle.value;
                 let importObject;
                 try {
@@ -53,14 +53,26 @@
                     return;
                 }
                 setTimeout(() => {
-                    MESSAGE_PUSH(MESSAGE_TYPE.TidyNodes);
+                    MESSAGE_CALL(MESSAGE_TYPE.TidyNodes, {
+                        notNeedCovering: true,
+                    });
 
                     MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
                         config: PROMPT_CONFIG.INFO,
                         content: `[ImportGraph] Imported ${importObject.nodes.length} node(s), ${importObject.connections.length} edge(s).`,
                         timeout: 1000,
                     });
-                }, 500);
+                }, 0);
+            };
+
+            const pushGraph = () => {
+                MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
+                    title: "Importing Nodes...",
+                    afterInit: () => {
+                        importNodesFromJsonTextEle();
+                        MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose);
+                    },
+                });
             };
 
             MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
@@ -70,7 +82,7 @@
                 buttonCallback: {
                     confirm: pushGraph,
                 },
-                afterInit: () => jsonTextEle.focus(),
+                init: () => jsonTextEle.focus(),
             });
         });
 
@@ -152,7 +164,7 @@
                 title: "Export Graph",
                 elements: [exportJsonTextEle, exportCopyEle],
                 buttonMode: COVERING_BUTTON_MODE.CloseButton,
-                afterInit: () => exportJsonTextEle.focus(),
+                init: () => exportJsonTextEle.focus(),
             });
         });
     };
