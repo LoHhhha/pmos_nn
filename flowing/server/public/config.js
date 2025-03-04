@@ -2,6 +2,13 @@ const PMoS_REP_HREF = "https://github.com/LoHhhha/pmos_nn";
 const PMoS_FLOWING_INSTRUCTION_HREF =
     "https://github.com/LoHhhha/pmos_nn/blob/master/doc/help/flowing-instruction.md";
 const JS_PLUMB_REP_HREF = "https://github.com/jsplumb/community-edition";
+const MARKED_REP_HREF = "https://github.com/markedjs/marked";
+const LINKS = [
+    { title: "Instruction", url: PMoS_FLOWING_INSTRUCTION_HREF },
+    { title: "PMoS-nn Code Repository", url: PMoS_REP_HREF },
+    { title: "JsPlumb Code Repository", url: JS_PLUMB_REP_HREF },
+    { title: "Marked Code Repository", url: MARKED_REP_HREF },
+];
 
 const rootStyle = getComputedStyle(document.querySelector(":root"));
 rootStyle.var = (key) => rootStyle.getPropertyValue(key);

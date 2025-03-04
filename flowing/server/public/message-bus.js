@@ -5,13 +5,13 @@ const MESSAGE_TYPE = {
     ChangeChecksBackground: "change-checks-background",
 
     // graph
-    CalculateGraph: "calculate-graph",
+    CalculateGraph: "calculate-graph", // menu
     UpdateShape: "update-shape",
     TidyNodes: "tidy-nodes",
 
     // operator-bar
-    ClearNode: "clear-node",
-    CreateNodes: "create-nodes",
+    ClearNode: "clear-node", // menu
+    CreateNodes: "create-nodes", // return
     DeleteNodes: "delete-nodes",
     SelectNodes: "select-nodes",
 
@@ -52,8 +52,12 @@ const MESSAGE_TYPE = {
     ShowDefaultPrompt: "show-default-prompt",
 
     // port
-    ImportGraph: "import-graph",
-    ExportGraph: "export-graph",
+    ImportGraph: "import-graph", // menu
+    ExportGraph: "export-graph", // menu
+    CheckImportGraph: "check-import-graph", // return
+
+    // llm-code-generator
+    LLMCodeGenerator: "llm-code-generator", // menu
 };
 
 const MESSAGE_HANDLER_MAP = new Map();
@@ -64,7 +68,7 @@ const MESSAGE_PUSH = (msgType, detail) => {
 
 const MESSAGE_CALL = (msgType, detail) => {
     const result = [];
-    if (MESSAGE_HANDLER_MAP.get(msgType) == undefined) {
+    if (MESSAGE_HANDLER_MAP.get(msgType) === undefined) {
         return result;
     }
     for (const handler of MESSAGE_HANDLER_MAP.get(msgType)) {

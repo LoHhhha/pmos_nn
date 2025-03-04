@@ -6,7 +6,6 @@
     --port-copy-button-background-color: var(--content-background-color);
     --port-copy-button-hover-background-color: var(--content-outline-color);
     --port-copy-button-height: var(--node-height);
-    --port-copy-button-width: var(--node-width);
 }
 
 .port-textarea {
@@ -16,7 +15,6 @@
     background-color: var(--port-textarea-background-color);
     backdrop-filter: var(--blur);
     color: var(--default-color);
-    margin: var(--margin) auto;
     border: none;
     max-width: 60vw;
     max-height: 50vh;
@@ -30,7 +28,7 @@
     width: 100%;
     text-align: center;
     border-radius: var(--radius);
-    margin: var(--margin) auto;
+    margin-top: var(--margin);
     user-select: none;
     border: none;
     outline: var(--border-width) solid var(--port-copy-button-outline-color);

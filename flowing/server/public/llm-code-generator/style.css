@@ -1,0 +1,142 @@
+:root {
+    --generator-width: 60vw;
+    --generator-input-outline-color: var(--container-outline-color);
+    --generator-input-background-color: var(--container-background-color);
+
+    --generator-button-outline-color: var(--container-outline-color);
+    --generator-button-height: var(--node-height);
+    --generator-button-default-background-color: var(--container-outline-color);
+    --generator-button-confirm-background-color: var(--lucency-greenish);
+    --generator-button-confirm-hover-background-color: var(--lucency-green);
+    --generator-button-cancel-background-color: var(--lucency-yellowish);
+    --generator-button-cancel-hover-background-color: var(--lucency-yellow);
+
+    --generator-answer-block-border-color: var(--content-outline-color);
+    --generator-answer-block-outline-color: var(--content-outline-color);
+    --generator-answer-block-background-color: var(--content-background-color);
+}
+
+.generator-block {
+    width: var(--generator-width);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--margin);
+}
+
+.generator-combo-column {
+    width: var(--generator-width);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.generator-combo-row {
+    width: var(--generator-width);
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: var(--margin);
+}
+
+.generator-input-title {
+    font-size: medium;
+    font-weight: bold;
+    user-select: none;
+    pointer-events: none;
+}
+
+.generator-input {
+    font-size: medium;
+    border-radius: var(--radius);
+    border: none;
+    height: auto;
+    outline: var(--border-width) solid var(--generator-input-outline-color);
+    backdrop-filter: var(--blur);
+    background-color: var(--generator-input-background-color);
+}
+
+#generator-input-prompt {
+    resize: vertical;
+}
+
+#generator-input-query {
+    resize: none;
+    max-height: 15em;
+}
+
+.generator-button {
+    font-size: medium;
+    width: 100%;
+    height: var(--generator-button-height);
+    text-align: center;
+    border-radius: var(--radius);
+    margin-top: var(--margin);
+    user-select: none;
+    border: none;
+    outline: var(--border-width) solid var(--generator-button-outline-color);
+    cursor: pointer;
+}
+
+#generator-button-default {
+    background-color: var(--generator-button-default-background-color);
+    cursor: not-allowed;
+}
+
+#generator-button-confirm {
+    background-color: var(--generator-button-confirm-background-color);
+}
+
+#generator-button-confirm:hover {
+    background-color: var(--generator-button-confirm-hover-background-color);
+}
+
+#generator-button-cancel {
+    background-color: var(--generator-button-cancel-background-color);
+}
+
+#generator-button-cancel:hover {
+    background-color: var(--generator-button-cancel-hover-background-color);
+}
+
+.generator-answer-block * {
+    white-space: initial;
+    user-select: text;
+    margin: var(--border-width);
+}
+
+.generator-answer-block pre {
+    outline: var(--border-width) solid
+        var(--generator-answer-block-outline-color);
+    background-color: var(--generator-answer-block-background-color);
+    overflow-x: auto;
+    padding: var(--margin);
+    border-radius: var(--radius);
+}
+
+.generator-answer-block code {
+    word-break: keep-all;
+    white-space: pre-wrap;
+    margin: 0;
+}
+
+.generator-answer-block th {
+    border-bottom: var(--border-width) solid
+        var(--generator-answer-block-border-color);
+    text-align: center;
+}
+
+.generator-answer-block td {
+    text-align: center;
+}
+
+.generator-answer-block blockquote {
+    padding-left: var(--margin);
+    border-left: calc(2 * var(--border-width)) solid
+        var(--generator-answer-block-border-color);
+}
+
+.generator-error-message-block {
+    white-space: pre-wrap;
+    color: var(--lucency-red);
+}

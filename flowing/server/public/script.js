@@ -39,4 +39,6 @@ jsPlumb.ready(() => {
     window.addNodesCopyHelper(jsPlumbNavigator);
 
     window.addPortHelper();
+
+    window.addLLMCodeGenerator();
 });

@@ -338,25 +338,19 @@ class Toolbar {
         this.toolbarEle.appendChild(this.createThemeButton());
         this.toolbarEle.appendChild(
             this.createTool("Help", Toolbar.helpSvg, () => {
-                const readmeLinkEle = document.createElement("a");
-                readmeLinkEle.innerHTML = "Instruction";
-                readmeLinkEle.href = PMoS_FLOWING_INSTRUCTION_HREF;
-                readmeLinkEle.target = "_blank";
-
-                const repLinkEle = document.createElement("a");
-                repLinkEle.innerHTML = "PMoS-nn Code Repository";
-                repLinkEle.href = PMoS_REP_HREF;
-                repLinkEle.target = "_blank";
-
-                const jsPlumbLinkEle = document.createElement("a");
-                jsPlumbLinkEle.innerHTML = "JsPlumb Code Repository";
-                jsPlumbLinkEle.href = JS_PLUMB_REP_HREF;
-                jsPlumbLinkEle.target = "_blank";
+                const linkElements = [];
+                for (const { title, url } of LINKS) {
+                    const linkEle = document.createElement("a");
+                    linkEle.innerHTML = title;
+                    linkEle.href = url;
+                    linkEle.target = "_blank";
+                    linkElements.push(linkEle);
+                }
 
                 MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
                     title: "PMoS",
                     text: "Have a good time :)<br>Learn more about PMoS at the follow links.<br>What's more, welcome to report any issue to us!",
-                    elements: [readmeLinkEle, repLinkEle, jsPlumbLinkEle],
+                    elements: linkElements,
                     buttonMode: COVERING_BUTTON_MODE.CloseButton,
                 });
             })
@@ -522,10 +516,7 @@ class ControlBarBuilder {
         generateButton.className = "bar-button";
         generateButton.textContent = "Generate Network";
         generateButton.addEventListener("click", () => {
-            MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
-                title: "Not Implemented",
-                buttonMode: COVERING_BUTTON_MODE.CloseButton,
-            });
+            MESSAGE_PUSH(MESSAGE_TYPE.LLMCodeGenerator); // todo: add codeType
         });
         AIBarEle.appendChild(generateButton);
 

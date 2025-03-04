@@ -1019,6 +1019,15 @@ class OperatorBar {
 }
 
 (function () {
+    // add info to share
+    MEMORY_SET("node-information",{
+        "argsInputType":operatorBarNamespace.argsInputType,
+        "argsType":operatorBarNamespace.argsType,
+        "argsValueCheck":operatorBarNamespace.argsValueCheck,
+        "connectionRule":operatorBarNamespace.connectionRule,
+        "operators":operatorBarNamespace.operators,
+    });
+
     window.createOperatorBar = (jsPlumbNavigator, options) => {
         const defaultOptions = {
             barWidth: null,

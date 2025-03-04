@@ -43,9 +43,11 @@ COVERING.className = "covering";
             console.error("[Covering] More than one want to show covering!");
             return;
         }
-        let coveringContainerEle = document.createElement("div");
+
+        const coveringContainerEle = document.createElement("div");
         coveringContainerEle.className = "covering-container";
         COVERING.appendChild(coveringContainerEle);
+
         if (event.detail?.title) {
             const titleEle = document.createElement("h1");
             titleEle.textContent = event.detail.title;
@@ -57,8 +59,12 @@ COVERING.className = "covering";
             coveringContainerEle.appendChild(textEle);
         }
         if (event.detail?.elements) {
+            const coveringElementsContainerEle = document.createElement("div");
+            coveringElementsContainerEle.className =
+                "covering-elements-container";
+            coveringContainerEle.appendChild(coveringElementsContainerEle);
             for (const ele of event.detail.elements) {
-                coveringContainerEle.appendChild(ele);
+                coveringElementsContainerEle.appendChild(ele);
             }
         }
 

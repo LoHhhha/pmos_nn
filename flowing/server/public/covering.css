@@ -15,37 +15,44 @@
     background-color: var(--covering-background-color);
     transition: height 0.5s ease 0s;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    user-select: none;
 }
 
 .covering-container {
-    max-height: 80vh;
     display: flex;
     flex-direction: column;
     border-radius: var(--radius);
-    padding: 5%;
-    justify-content: center;
+}
+
+.covering-elements-container {
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    padding: var(--border-width);
+    border-radius: var(--radius);
     overflow: auto;
 }
 
 .covering-button-bar {
+    margin-top: var(--margin);
     display: flex;
     flex-direction: row;
     justify-content: center;
+    gap: var(--covering-button-selected-size);
     height: var(--covering-button-selected-size);
 }
 
 .covering-button {
-    margin: 5%;
     display: inline-block;
-    width: var(--covering-button-size);
+    width: var(--covering-button-selected-size);
     height: var(--covering-button-size);
     align-self: center;
 }
 
 .covering-button:hover {
-    width: var(--covering-button-selected-size);
     height: var(--covering-button-selected-size);
     cursor: pointer;
 }
