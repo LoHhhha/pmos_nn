@@ -440,8 +440,8 @@ class NavigatorBarBuilder {
 
     updateInfoEle(info) {
         this.infoEle.innerHTML = `${info.scale.toFixed(2)}x<br>(${Math.floor(
-            info.left
-        )}, ${Math.floor(info.top)})`;
+            -info.left
+        )}, ${Math.floor(-info.top)})`;
     }
 
     updateModeEle(moveMode) {

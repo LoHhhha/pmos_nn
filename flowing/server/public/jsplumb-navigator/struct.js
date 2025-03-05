@@ -2,6 +2,7 @@ class QuadTree {
     /**
      * Constraint:
      *      1. 'node' need have 'element'(DOM) and 'id' property
+     *      2. left/top as same as html's, bottom=top+height, right=left+width.
      */
     static NOT_SUBTREE = null;
     static INF = Number.MAX_SAFE_INTEGER;
@@ -13,7 +14,7 @@ class QuadTree {
     boundary;
     capacity;
     data = []; //{left, top, node}
-    subtree = QuadTree.NOT_SUBTREE; // [quadrant 1 2 3 4]
+    subtree = QuadTree.NOT_SUBTREE; // unordered
     dataBoundary = {
         topLeft: {
             left: QuadTree.INF,
@@ -39,7 +40,7 @@ class QuadTree {
         const bB = bT + bH;
 
         // aL<aR bL<bR
-        // aL<=bL<aR || aL<bR<aR
+        // aT<aB bT<bB
 
         return !(aL >= bR || aR <= bL || aT >= bB || aB <= bT);
     }
@@ -208,13 +209,13 @@ class QuadTree {
 
         this.subtree = [
             new QuadTree({
-                left: left + subWidth,
+                left: left,
                 top: top,
                 width: subWidth,
                 height: subHeight,
             }),
             new QuadTree({
-                left: left,
+                left: left + subWidth,
                 top: top,
                 width: subWidth,
                 height: subHeight,
@@ -240,8 +241,8 @@ class QuadTree {
                 this.onMiddleLine(
                     left,
                     top,
-                    node.offsetWidth,
-                    node.offsetHeight
+                    node.element.offsetWidth,
+                    node.element.offsetHeight
                 )
             ) {
                 this.data.push({
@@ -364,14 +365,11 @@ class QuadTree {
             console.error("[QuadTree] node not found, cannot update!", node);
             return false;
         }
-        if (!this.remove(node) || !this.insert(left, top, node)) {
-            return false;
-        }
-        return true;
+        return !(!this.remove(node) || !this.insert(left, top, node));
     }
 
     query(left, top, width, height, res = []) {
-        if (!this.intersects(left, top, width, height)) return [];
+        if (!this.intersects(left, top, width, height)) return res;
 
         if (this.subtree !== QuadTree.NOT_SUBTREE) {
             this.subtree.forEach((sub) =>
@@ -443,7 +441,7 @@ class EdgeHighlighter {
     setEdges(mask) {
         const needChange = mask ^ this.currentMask;
         for (let i = 0; i < 4; i++) {
-            if (((needChange >> i) & 1) == 0) continue;
+            if (((needChange >> i) & 1) === 0) continue;
             this.#elementChange(
                 this.edges[EdgeHighlighter.BIT_TO_DIR[i]],
                 (mask >> i) & 1
