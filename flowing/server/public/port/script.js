@@ -192,11 +192,10 @@
             try {
                 object = JSON.parse(data);
             } catch (err) {
-                console.error(
-                    "[CheckImportGraph] json parse failed!",
+                console.error("[CheckImportGraph] json parse failed!", {
                     data,
-                    err
-                );
+                    err,
+                });
                 return "JSON grammar check failed";
             }
 
@@ -205,33 +204,51 @@
                 !(object.nodes instanceof Array) ||
                 !(object.connections instanceof Array)
             ) {
-                console.error(
-                    "[CheckImportGraph] json scheme check failed!",
-                    data
-                );
+                console.error("[CheckImportGraph] json scheme check failed!", {
+                    data,
+                });
                 return "JSON scheme check failed";
             }
 
             const nodeConfigs = [];
 
             // check nodes
-            for (const node of object.nodes) {
+            for (const [idx, node] of object.nodes.entries()) {
                 const apiName = node.apiName;
                 const content = node.content;
 
+                if (apiName == undefined) {
+                    console.error(
+                        `[CheckImportGraph] node${idx} apiName not found!`,
+                        { data }
+                    );
+                    return `Operator${idx}'s apiName not found`;
+                }
+
+                if (content == undefined) {
+                    console.error(
+                        `[CheckImportGraph] node${idx} content not found!`,
+                        { data }
+                    );
+                    return `Operator${idx}'s content not found`;
+                }
+
                 const nodeConfig = apiName2operators.get(apiName);
                 if (nodeConfig === undefined) {
-                    console.error("[CheckImportGraph] node not found!", data);
-                    return `Operator ${apiName} not found`;
+                    console.error(
+                        `[CheckImportGraph] node${idx} ${apiName} not supported!`,
+                        { data }
+                    );
+                    return `Operator${idx}-${apiName} unsupported!`;
                 }
 
                 for (const arg of nodeConfig.args) {
                     if (!content.hasOwnProperty(arg.name)) {
                         console.error(
-                            "[CheckImportGraph] node's param not enough!",
-                            data
+                            `[CheckImportGraph] node${idx} param-${arg.name} not found!`,
+                            { data }
                         );
-                        return "Operator's parameters not enough";
+                        return `Operator${idx}'s parameter(${arg.name}) not found`;
                     }
 
                     // check the value is valid
@@ -242,10 +259,10 @@
                         )
                     ) {
                         console.error(
-                            "[CheckImportGraph] node's param invalid!",
-                            data
+                            `[CheckImportGraph] node${idx} param-${arg.name} invalid!`,
+                            { data }
                         );
-                        return "Operator's parameters invalid";
+                        return `Operator${idx}'s parameter(${arg.name}) invalid`;
                     }
                 }
 
@@ -253,47 +270,53 @@
             }
 
             // check connection
-            try {
-                for (const {
+            for (const [idx, connection] of object.connections.entries()) {
+                const {
                     srcNodeIdx,
                     srcEndpointIdx,
                     tarNodeIdx,
                     tarEndpointIdx,
-                } of object.connections) {
-                    if (
-                        srcNodeIdx < 0 ||
-                        srcNodeIdx >= nodeConfigs.length ||
-                        tarNodeIdx < 0 ||
-                        tarNodeIdx >= nodeConfigs.length
-                    ) {
-                        console.error(
-                            "[CheckImportGraph] invalid node index!",
-                            data
-                        );
-                        return "Found invalid operator index";
-                    }
+                } = connection;
 
-                    if (
-                        srcEndpointIdx < 0 ||
-                        srcEndpointIdx >=
-                            nodeConfigs[srcNodeIdx].outputEnd.length ||
-                        tarEndpointIdx < 0 ||
-                        tarEndpointIdx >=
-                            nodeConfigs[tarNodeIdx].inputEnd.length
-                    ) {
-                        console.error(
-                            "[CheckImportGraph] invalid endpoint index!",
-                            data
-                        );
-                        return "Found invalid endpoint index";
-                    }
+                if (
+                    !Number.isInteger(srcNodeIdx) ||
+                    !Number.isInteger(srcEndpointIdx) ||
+                    !Number.isInteger(tarNodeIdx) ||
+                    !Number.isInteger(tarEndpointIdx)
+                ) {
+                    console.error(
+                        `[CheckImportGraph] missing some indexes in connection${idx}!`,
+                        { data }
+                    );
+                    return `Connection${idx} missing some indexes`;
                 }
-            } catch {
-                console.error(
-                    "[CheckImportGraph] unexpected connections!",
-                    data
-                );
-                return "Connection information check failed";
+
+                if (
+                    srcNodeIdx < 0 ||
+                    srcNodeIdx >= nodeConfigs.length ||
+                    tarNodeIdx < 0 ||
+                    tarNodeIdx >= nodeConfigs.length
+                ) {
+                    console.error(
+                        `[CheckImportGraph] invalid node index in connection${idx}!`,
+                        { data }
+                    );
+                    return `Connection${idx} found invalid operator index`;
+                }
+
+                if (
+                    srcEndpointIdx < 0 ||
+                    srcEndpointIdx >=
+                        nodeConfigs[srcNodeIdx].outputEnd.length ||
+                    tarEndpointIdx < 0 ||
+                    tarEndpointIdx >= nodeConfigs[tarNodeIdx].inputEnd.length
+                ) {
+                    console.error(
+                        `[CheckImportGraph] invalid endpoint index in connection${idx}!`,
+                        { data }
+                    );
+                    return `Connection${idx} found invalid endpoint index`;
+                }
             }
             return null;
         });

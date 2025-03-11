@@ -7,6 +7,7 @@
  *      push <event.detail.elements(DOM-s)> to covering, and show.
  *      call <event.detail.init>
  *      call <event.detail.afterInit>
+ *      if <event.detail.autoElementsContainerScroll> auto scroll CoveringElementsContainerEle
  *
  * MESSAGE_TYPE.CoveringClose
  *      close covering page
@@ -20,6 +21,16 @@ const COVERING_BUTTON_MODE = {
 
 const COVERING = document.createElement("div");
 COVERING.className = "covering";
+// .containerEle
+// .elementsContainerEle?
+//      .selfObserver?
+//      .autoScrolling?
+//      .userScrolling?
+//      .autoScrollingTarget?
+//      .scrollTimeout?
+
+const COVERING_AUTO_SCROLL_EPS = 10;
+const COVERING_USER_SCROLL_TIMEOUT = 100;
 
 (function () {
     window.addEventListener("load", () => {
@@ -38,6 +49,59 @@ COVERING.className = "covering";
         COVERING.addEventListener("transitionend", animationendCallback);
     };
 
+    const addAutoScroll = (ele) => {
+        ele.autoScrolling = true;
+        ele.userScrolling = false;
+        ele.autoScrollingTarget = null;
+        const updateAutoScrolling = () => {
+            ele.autoScrolling = ele.scrollHeight
+                ? ele.scrollHeight - ele.scrollTop <=
+                  ele.clientHeight + COVERING_AUTO_SCROLL_EPS
+                : true;
+            if (!ele.autoScrolling) {
+                ele.autoScrollingTarget = null;
+            }
+        };
+        ele.selfObserver = new MutationObserver(() => {
+            console.log(ele.autoScrolling);
+            if (ele.autoScrolling && !ele.userScrolling) {
+                requestAnimationFrame(() => {
+                    ele.autoScrollingTarget = ele.scrollHeight;
+                    ele.scrollTo({
+                        top: ele.scrollHeight,
+                    });
+                });
+            }
+            if (!ele.autoScrolling) {
+                updateAutoScrolling();
+            }
+        });
+        ele.addEventListener("scroll", () => {
+            if (ele.autoScrollingTarget === ele.scrollHeight) {
+                ele.autoScrollingTarget = null;
+                return;
+            }
+
+            ele.userScrolling = true;
+            clearTimeout(ele.scrollTimeout);
+
+            updateAutoScrolling();
+
+            ele.scrollTimeout = setTimeout(() => {
+                ele.userScrolling = false;
+            }, COVERING_USER_SCROLL_TIMEOUT);
+        });
+        ele.selfObserver.observe(ele, {
+            childList: true,
+            subtree: true,
+            characterData: true,
+        });
+    };
+
+    const deleteAutoScroll = (ele) => {
+        ele?.selfObserver?.disconnect();
+    };
+
     MESSAGE_HANDLER(MESSAGE_TYPE.CoveringShowCustom, (event) => {
         if (COVERING.style.height === "100%") {
             console.error("[Covering] More than one want to show covering!");
@@ -47,14 +111,17 @@ COVERING.className = "covering";
         const coveringContainerEle = document.createElement("div");
         coveringContainerEle.className = "covering-container";
         COVERING.appendChild(coveringContainerEle);
+        COVERING.containerEle = coveringContainerEle;
 
         if (event.detail?.title) {
             const titleEle = document.createElement("h1");
+            titleEle.id = "covering-title";
             titleEle.textContent = event.detail.title;
             coveringContainerEle.appendChild(titleEle);
         }
         if (event.detail?.text) {
             const textEle = document.createElement("p");
+            textEle.id = "covering-text";
             textEle.innerHTML = event.detail.text;
             coveringContainerEle.appendChild(textEle);
         }
@@ -63,8 +130,14 @@ COVERING.className = "covering";
             coveringElementsContainerEle.className =
                 "covering-elements-container";
             coveringContainerEle.appendChild(coveringElementsContainerEle);
+            COVERING.elementsContainerEle = coveringElementsContainerEle;
+
             for (const ele of event.detail.elements) {
                 coveringElementsContainerEle.appendChild(ele);
+            }
+
+            if (event.detail?.autoElementsContainerScroll) {
+                addAutoScroll(coveringElementsContainerEle);
             }
         }
 
@@ -125,6 +198,7 @@ COVERING.className = "covering";
 
     MESSAGE_HANDLER(MESSAGE_TYPE.CoveringClose, () => {
         COVERING.style.height = "0";
+        deleteAutoScroll(COVERING.elementsContainerEle);
         while (COVERING.firstChild) {
             COVERING.removeChild(COVERING.firstChild);
         }

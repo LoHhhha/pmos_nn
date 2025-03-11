@@ -27,17 +27,27 @@
     border-radius: var(--radius);
 }
 
+#covering-title {
+    padding-left: var(--margin);
+    padding-right: var(--margin);
+}
+
+#covering-text {
+    margin: 0;
+    padding: var(--margin);
+}
+
 .covering-elements-container {
     max-height: 80vh;
     display: flex;
     flex-direction: column;
-    padding: var(--border-width);
+    padding: var(--margin);
     border-radius: var(--radius);
     overflow: auto;
 }
 
 .covering-button-bar {
-    margin-top: var(--margin);
+    padding: var(--margin);
     display: flex;
     flex-direction: row;
     justify-content: center;

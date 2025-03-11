@@ -20,6 +20,7 @@ class CodeGenerator {
     thinkingAnswerEle;
     answerEle;
     errorMessageEle;
+    loadingIconEle;
     copyButton;
     copyButtonType;
     block;
@@ -329,9 +330,22 @@ class CodeGenerator {
         }
 
         const code = codes[0];
-        const result = MESSAGE_CALL(MESSAGE_TYPE.CheckImportGraph, {
-            data: code,
-        });
+        let result;
+        try {
+            result = MESSAGE_CALL(MESSAGE_TYPE.CheckImportGraph, {
+                data: code,
+            });
+        } catch (error) {
+            console.error(
+                "[CodeGenerator] MESSAGE_TYPE.CheckImportGraph throw error!",
+                error
+            );
+            this.#setCopyButton(
+                this.copyButtonTypeConfig.errorCode,
+                `Unexpected error: ${error}`
+            );
+            return;
+        }
 
         if (result.length === 0) {
             console.error(
@@ -340,11 +354,11 @@ class CodeGenerator {
             return;
         }
 
-        const error = result[0];
-        if (error) {
+        const msg = result[0];
+        if (msg) {
             this.#setCopyButton(
                 this.copyButtonTypeConfig.errorCode,
-                `Code invalid: ${error}`
+                `Code invalid: ${msg}`
             );
             return;
         }
@@ -386,6 +400,25 @@ class CodeGenerator {
         this.errorMessageEle.textContent += content;
     }
 
+    #showLoadingIcon() {
+        this.loadingIconEle.style.display = "initial";
+    }
+
+    #hideLoadingIcon() {
+        this.loadingIconEle.style.display = "none";
+    }
+
+    #initLoadingElements() {
+        const loadingIconEle = document.createElement("div");
+        loadingIconEle.className = "generator-loading-icon";
+        loadingIconEle.innerHTML = ICONS.loading;
+        this.block.appendChild(loadingIconEle);
+
+        this.loadingIconEle = loadingIconEle;
+
+        this.#hideLoadingIcon();
+    }
+
     #setCopyButton(type, text) {
         this.copyButton.id = type.id;
         this.copyButton.onclick = type.onclick;
@@ -407,10 +440,19 @@ class CodeGenerator {
         this.#initInputElements();
         this.#initSendButtonElements();
         this.#initMessageElements();
+        this.#initLoadingElements();
         this.#initCopyButtonElements();
     }
 
-    async #chat(baseUrl, apiKey, module, prompt, query) {
+    #chatBegin() {
+        this.#clearAnswer();
+        this.#clearErrorMessage();
+        this.#setSendButton(this.sendButtonTypeConfig.stopReady);
+        this.#setCopyButton(this.copyButtonTypeConfig.hide);
+        this.#showLoadingIcon();
+    }
+
+    async #chatDoing(baseUrl, apiKey, module, prompt, query) {
         this.#sendAbortController = new AbortController();
         const requestBody = {
             model: module,
@@ -419,15 +461,14 @@ class CodeGenerator {
                 { role: "user", content: query },
             ],
             stream: true,
+            stream_options: {
+                include_usage: true,
+            },
         };
 
-        this.#clearAnswer();
-        this.#clearErrorMessage();
-        this.#setSendButton(this.sendButtonTypeConfig.stopReady);
-        this.#setCopyButton(this.copyButtonTypeConfig.hide);
-
+        let response, reader, decoder;
         try {
-            const response = await fetch(baseUrl, {
+            response = await fetch(baseUrl, {
                 method: "POST",
                 mode: "cors",
                 headers: {
@@ -437,81 +478,139 @@ class CodeGenerator {
                 body: JSON.stringify(requestBody),
                 signal: this.#sendAbortController.signal,
             });
-
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-
-            let thinkingIsEnd = false;
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                const chunk = decoder.decode(value);
-                const lines = chunk
-                    .split("\n")
-                    .filter((line) => line.trim() !== "");
-
-                for (const line of lines) {
-                    const message = line.replace(/^data: /, "");
-                    if (message === "[DONE]") break;
-
-                    try {
-                        const parsed = JSON.parse(message);
-
-                        const delta = parsed.choices[0].delta;
-
-                        let thinkingContent = delta?.reasoning_content || "";
-                        let content = delta?.content || "";
-
-                        if (thinkingContent === "" && content === "") {
-                            continue;
-                        }
-
-                        if (thinkingContent === "") {
-                            if (!thinkingIsEnd) {
-                                thinkingIsEnd = true;
-                                this.#buildAnswer(true);
-                            }
-                        } else if (thinkingIsEnd) {
-                            console.warn(
-                                "[CodeGenerator] More than one thinking content, dropped!"
-                            );
-                            thinkingContent = "";
-                        }
-
-                        this.#addAnswer(thinkingContent, true);
-                        this.#addAnswer(content);
-                    } catch (error) {
-                        console.error(
-                            "[CodeGenerator] JSON parse error!",
-                            requestBody,
-                            error
-                        );
-                        this.#addErrorMessage(
-                            "Unexpect package, please check if 'ApiKey' is correct and 'Module' existed!"
-                        );
-                    }
-                }
-            }
-            this.#checkAnswer();
-            this.#buildAnswer();
         } catch (error) {
-            if (error.name === "AbortError") {
-                console.info("[CodeGenerator] Request canceled.", requestBody);
-                this.#addErrorMessage("Request cancel!");
-            } else {
-                console.error(
-                    "[CodeGenerator] Request error!",
-                    requestBody,
-                    error
-                );
-                this.#addErrorMessage(
-                    "Request failed, please check if 'BaseURL' is correct!"
-                );
-            }
-        } finally {
-            this.#setSendButton(this.sendButtonTypeConfig.sendReady);
+            console.error("[CodeGenerator] Request error!", {
+                requestBody,
+                error,
+            });
+            this.#addErrorMessage(
+                "Request failed, please check if 'BaseURL' is correct!"
+            );
+            return;
         }
+
+        reader = response.body.getReader();
+        decoder = new TextDecoder();
+
+        let thinkingIsEnd = false;
+        for (;;) {
+            let data;
+            try {
+                data = await reader.read();
+            } catch (error) {
+                if (error.name === "AbortError") {
+                    console.info("[CodeGenerator] Request canceled.", {
+                        requestBody,
+                    });
+                    this.#addErrorMessage("Request cancel!");
+                } else {
+                    console.error("[CodeGenerator] Fail to read data!", {
+                        requestBody,
+                        error,
+                    });
+                    this.#addErrorMessage(
+                        "Read stream failed, please check your network!"
+                    );
+                }
+                return;
+            }
+            const { done, value } = data;
+            if (done) break;
+
+            const chunk = decoder.decode(value);
+            const lines = chunk
+                .split("\n")
+                .filter((line) => line.trim() !== "");
+
+            for (const line of lines) {
+                const message = line.replace(/^data: /, "");
+                if (message === "[DONE]") break;
+
+                let object;
+                try {
+                    object = JSON.parse(message);
+                } catch (error) {
+                    console.error("[CodeGenerator] JSON parse error!", {
+                        message,
+                        requestBody,
+                        error,
+                    });
+                    this.#addErrorMessage("Fail to parse a package, skipping!");
+                    continue;
+                }
+
+                if (!(object.choices instanceof Array)) {
+                    console.error("[CodeGenerator] Unexpect package!", {
+                        object,
+                        requestBody,
+                    });
+                    this.#addErrorMessage(
+                        `Detect an unexpected package as '${JSON.stringify(
+                            object
+                        )}'!`
+                    );
+                    continue;
+                }
+
+                if (object.choices.length === 0) {
+                    if (object.usage) {
+                        console.info("[CodeGenerator] Get usage", object.usage);
+                        this.#addAnswer(
+                            `\n\n---\n\nCompletion Tokens: ${object.usage.completion_tokens}\n\nPrompt Tokens: ${object.usage.prompt_tokens}\n\nTotal Tokens: ${object.usage.total_tokens}`
+                        );
+                        break;
+                    }
+                    console.error(
+                        "[CodeGenerator] Unexpect package, empty choices and not usage!",
+                        {
+                            object,
+                            requestBody,
+                        }
+                    );
+                    continue;
+                }
+
+                const delta = object.choices[0].delta;
+
+                let thinkingContent = delta?.reasoning_content || "";
+                let content = delta?.content || "";
+
+                if (thinkingContent === "" && content === "") {
+                    continue;
+                }
+
+                if (thinkingContent === "") {
+                    if (!thinkingIsEnd) {
+                        thinkingIsEnd = true;
+                        this.#buildAnswer(true);
+                    }
+                } else if (thinkingIsEnd) {
+                    console.warn(
+                        "[CodeGenerator] more than one thinking content, dropping!"
+                    );
+                    this.#addErrorMessage(
+                        "More than one thinking content, dropping!"
+                    );
+                    thinkingContent = "";
+                }
+
+                this.#addAnswer(thinkingContent, true);
+                this.#addAnswer(content);
+            }
+        }
+    }
+
+    #chatFinally() {
+        this.#setSendButton(this.sendButtonTypeConfig.sendReady);
+        this.#checkAnswer();
+        this.#buildAnswer();
+        this.#hideLoadingIcon();
+    }
+
+    async #chat(baseUrl, apiKey, module, prompt, query) {
+        this.#chatBegin();
+        await this.#chatDoing(baseUrl, apiKey, module, prompt, query);
+        this.#chatFinally();
     }
 
     show() {
@@ -525,6 +624,7 @@ class CodeGenerator {
             init: () => {
                 this.queryInputEle.focus();
             },
+            autoElementsContainerScroll: true,
         });
     }
 }

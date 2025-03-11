@@ -9,7 +9,13 @@ LLMCodeGeneratorNamespace.baseUrlsDatalistInfo = {
 };
 LLMCodeGeneratorNamespace.modulesDatalistInfo = {
     id: "llm-code-generator-module-datalist",
-    values: ["qwen-max", "deepseek-r1", "deepseek-chat", "deepseek-reasoner"],
+    values: [
+        "qwen-max",
+        "qwq-plus",
+        "deepseek-r1",
+        "deepseek-chat",
+        "deepseek-reasoner",
+    ],
 };
 LLMCodeGeneratorNamespace.nodeInformation = JSON.stringify(
     MEMORY_GET("node-information")
@@ -62,10 +68,11 @@ Processing Workflow:
 Critical Notes:
 1. Node indices must be 0-based
 2. Remember the endpoints of a node are recorded in config, and distinguish between inputs and outputs carefully
-3. **Please output the complete, unobserved, conforming JSON code. Always prioritize generating directly executable code for PMoS parser**
-4. **Ensure your answer contains and only one markdown format JSON block**
-5. **The format of the operator params needs to match the regular expression in the config**
-6. Carefully read and analyze config before analyzing user requirements
+3. Please output the complete, unobserved, conforming JSON code. Always prioritize generating directly executable code for PMoS parser
+4. Ensure your answer has one and only one markdown format JSON block, and you can output some explanation without breaking the JSON format
+5. The format of the operator params needs to match the regular expression in the config.
+6. All parameters mentioned in config must be filled in nodes[].content, even if they are consistent with the default values.
+7. Carefully read and analyze config before analyzing user requirements
 
 Config:
 ${LLMCodeGeneratorNamespace.nodeInformation}`;
