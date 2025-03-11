@@ -27,7 +27,7 @@ how to use this?
 
 setup(
     name="flowing",
-    version="0.1.202502",
+    version="0.1.202503",
     author="0x4c48",
     author_email="lohhhha@qq.com",
     description="PMoS-flowing",
