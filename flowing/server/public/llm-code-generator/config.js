@@ -1,5 +1,7 @@
 const LLMCodeGeneratorNamespace = {};
+
 LLMCodeGeneratorNamespace.blockReg = /(?<=```json\n)[^]*?(?=\n```)/gi;
+
 LLMCodeGeneratorNamespace.baseUrlsDatalistInfo = {
     id: "llm-code-generator-base-url-datalist",
     values: [
@@ -7,6 +9,7 @@ LLMCodeGeneratorNamespace.baseUrlsDatalistInfo = {
         "https://api.deepseek.com/v1",
     ],
 };
+
 LLMCodeGeneratorNamespace.modulesDatalistInfo = {
     id: "llm-code-generator-module-datalist",
     values: [
@@ -17,9 +20,39 @@ LLMCodeGeneratorNamespace.modulesDatalistInfo = {
         "deepseek-reasoner",
     ],
 };
-LLMCodeGeneratorNamespace.nodeInformation = JSON.stringify(
-    MEMORY_GET("node-information")
-); // readonly
+
+LLMCodeGeneratorNamespace.nodeInformation = MEMORY_GET("node-information"); // readonly
+
+LLMCodeGeneratorNamespace.promptConfig = {
+    operators: LLMCodeGeneratorNamespace.nodeInformation?.operators?.map(
+        (op) => {
+            return {
+                apiName: op.apiName,
+                args: op.args.map((arg) => {
+                    return {
+                        key: arg.name,
+                        validPatterns: arg?.type?.reg
+                            ? arg?.type?.reg?.toString()
+                            : arg?.type?.values,
+                        defaultValue: arg.default,
+                    };
+                }),
+                framework: op.framework,
+                link: op.link,
+            };
+        }
+    ),
+    connectRules:
+        LLMCodeGeneratorNamespace.nodeInformation?.connectionRule?.map(
+            (rule) => {
+                return {
+                    name: rule.name,
+                    tip: rule.tip,
+                };
+            }
+        ),
+};
+
 LLMCodeGeneratorNamespace.prompt = `Role: You are a professional PMoS code generation expert
 Core Function: Generate PMoS-compliant code based on neural network flowchart descriptions
 IO: Accept natural language/existing code, output strictly schema-compliant JSON
@@ -75,4 +108,4 @@ Critical Notes:
 7. Carefully read and analyze config before analyzing user requirements
 
 Config:
-${LLMCodeGeneratorNamespace.nodeInformation}`;
+${JSON.stringify(LLMCodeGeneratorNamespace.promptConfig, null, 2)}`;

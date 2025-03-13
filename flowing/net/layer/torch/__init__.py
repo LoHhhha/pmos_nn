@@ -7,7 +7,6 @@ from flowing.net.layer.torch.dataX_like import *
 from flowing.net.layer.torch.dropoutX import *
 from flowing.net.layer.torch.flatten import *
 from flowing.net.layer.torch.group_norm import *
-from flowing.net.layer.torch.identity import *
 from flowing.net.layer.torch.layer_norm import *
 from flowing.net.layer.torch.linear import *
 from flowing.net.layer.torch.max_poolX import *

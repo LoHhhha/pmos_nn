@@ -1,6 +1,6 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
 
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 
 from flowing.net.layer import Layer
 
@@ -19,7 +19,7 @@ class _Operation(Layer):
 
     layer_name = "Useless"
 
-    def __init__(self, data_amount: int | None = None):
+    def __init__(self, data_amount: Optional[int] = None):
         super().__init__(data_amount=data_amount)
 
     @Layer.named_check

@@ -1,7 +1,7 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
 
 from functools import reduce
-from typing import Tuple, List, Annotated
+from typing import Tuple, List, Annotated, Optional
 
 from flowing.net.layer import Layer
 
@@ -20,7 +20,7 @@ class Flatten(Layer):
     data_amount = 1
     output_amount = 1
 
-    def __init__(self, start_dim: int = 1, end_dim: int = -1, data_amount: int | None = None):
+    def __init__(self, start_dim: int = 1, end_dim: int = -1, data_amount: Optional[int] = None):
         super().__init__(data_amount=data_amount)
         self.start_dim = start_dim
         self.end_dim = end_dim
@@ -75,7 +75,7 @@ class Unflatten(Layer):
     data_amount = 1
     output_amount = 1
 
-    def __init__(self, dim: int, unflattened_size: Tuple[int, ...], data_amount: int | None = None):
+    def __init__(self, dim: int, unflattened_size: Tuple[int, ...], data_amount: Optional[int] = None):
         super().__init__(data_amount=data_amount)
         self.dim = dim
         self.unflattened_size = unflattened_size

@@ -1,7 +1,7 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
 
 from functools import reduce
-from typing import Tuple, List, Annotated
+from typing import Tuple, List, Annotated, Optional
 
 from flowing.net.layer import Layer
 
@@ -20,7 +20,7 @@ class Reshape(Layer):
     data_amount = 1
     output_amount = 1
 
-    def __init__(self, output_shape, data_amount: int | None = None):
+    def __init__(self, output_shape, data_amount: Optional[int] = None):
         super().__init__(data_amount=data_amount)
         self.shape = output_shape
         self.__shape_mul = reduce(lambda x, y: x * y, self.shape)

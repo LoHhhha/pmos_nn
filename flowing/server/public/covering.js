@@ -63,7 +63,6 @@ const COVERING_USER_SCROLL_TIMEOUT = 100;
             }
         };
         ele.selfObserver = new MutationObserver(() => {
-            console.log(ele.autoScrolling);
             if (ele.autoScrolling && !ele.userScrolling) {
                 requestAnimationFrame(() => {
                     ele.autoScrollingTarget = ele.scrollHeight;

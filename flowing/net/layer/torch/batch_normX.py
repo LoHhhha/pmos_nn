@@ -30,7 +30,7 @@ class _BatchNorm(Layer):
             momentum: Optional[float] = 0.1,
             affine: bool = True,
             track_running_stats: bool = True,
-            data_amount: int | None = None
+            data_amount: Optional[int] = None
     ):
         super().__init__(data_amount=data_amount)
         self.num_features = num_features

@@ -1,5 +1,7 @@
 const operatorBarNamespace = {};
+
 operatorBarNamespace.baseNodeCssClass = "node";
+
 operatorBarNamespace.outputEndpointDefaultStyle = {
     endpoint: {
         type: "Rectangle",
@@ -18,6 +20,7 @@ operatorBarNamespace.outputEndpointDefaultStyle = {
     maxConnections: -1,
     source: true,
 };
+
 operatorBarNamespace.inputEndpointDefaultStyle = {
     endpoint: {
         type: "Rectangle",
@@ -28,6 +31,7 @@ operatorBarNamespace.inputEndpointDefaultStyle = {
     },
     target: true,
 };
+
 operatorBarNamespace.argsInputType = {
     text: {
         element: "input",
@@ -38,6 +42,7 @@ operatorBarNamespace.argsInputType = {
         type: null,
     },
 };
+
 operatorBarNamespace.argsType = {
     strVar: {
         reg: /^[_a-zA-Z][_a-zA-Z0-9]*$/,
@@ -143,6 +148,15 @@ operatorBarNamespace.argsType = {
         values: ["zeros", "reflect", "replicate", "circular"],
         note: null,
     },
+    pytorchApproximate: {
+        reg: null,
+        input: operatorBarNamespace.argsInputType.select,
+        getValue: (value) => {
+            return value;
+        },
+        values: ["none", "tanh"],
+        note: null,
+    },
     pytorchDevice: {
         reg: null,
         input: operatorBarNamespace.argsInputType.select,
@@ -178,45 +192,68 @@ operatorBarNamespace.argsType = {
         note: null,
     },
 };
+
 operatorBarNamespace.argsValueCheck = (type, value) => {
     if (type.reg) {
         return type.reg.test(value);
     }
     return type.values.includes(value);
 };
+
 operatorBarNamespace.framework = {
     all: "all",
     pytorch: "PyTorch",
     tensorflow: "TensorFlow",
 };
+
 operatorBarNamespace.frameworkOrder = {
     all: 0,
     PyTorch: 1,
     TensorFlow: 2,
 };
+
 operatorBarNamespace.typeCode = {
     IO: 0,
     math: 1,
     data: 2,
     transform: 3,
     activation: 4,
-    convolution: 5,
-    pool: 6,
-    linear: 7,
-    normalization: 8,
+    drop: 5,
+    convolution: 6,
+    pool: 7,
+    linear: 8,
+    normalization: 9,
 };
+
 operatorBarNamespace.typeInfo = {};
 for (const key in operatorBarNamespace.typeCode) {
     const name = key.charAt(0).toUpperCase() + key.slice(1);
     operatorBarNamespace.typeInfo[operatorBarNamespace.typeCode[key]] = {
         name: name,
+        key: key,
         code: operatorBarNamespace.typeCode[key],
     };
 }
+
+// [r, g, b, diff_r, diff_g, diff_b]
+operatorBarNamespace.typeColorInfo = {
+    IO: [0, 0, 0, 0, 0, 0], // manual
+    math: [60, 120, 140, -4, -3, 5],
+    data: [88, 148, 116, -3, -5, 4],
+    transform: [160, 120, 180, -5, 2, 4],
+    activation: [200, 100, 90, -2, -1, 1],
+    drop: [180, 140, 80, -4, -4, 4],
+    convolution: [80, 160, 200, 3, -5, 4],
+    pool: [120, 180, 140, -3, -6, 3],
+    linear: [200, 180, 60, -5, -4, 4],
+    normalization: [170, 120, 160, -4, -3, 5],
+};
+
 /**
  * operator(
  *      apiName:String
  *      extendCssClass:Array<String>
+ *      backgroundColor:String (auto padding if null)
  *      typeCode:operatorBarNamespace.typeCode
  *      inputEnd(Name):Array<String>
  *      outputEnd(Name):Array<String>
@@ -232,7 +269,8 @@ for (const key in operatorBarNamespace.typeCode) {
 operatorBarNamespace.operators = [
     {
         apiName: "Input",
-        extendCssClass: ["Input"],
+        extendCssClass: [],
+        backgroundColor: "rgb(192, 128, 0)",
         typeCode: operatorBarNamespace.typeCode.IO,
         inputEnd: [],
         outputEnd: ["data"],
@@ -255,7 +293,8 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Output",
-        extendCssClass: ["Output"],
+        extendCssClass: [],
+        backgroundColor: "rgb(0, 128, 192)",
         typeCode: operatorBarNamespace.typeCode.IO,
         inputEnd: ["data"],
         outputEnd: [],
@@ -272,7 +311,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Add",
-        extendCssClass: ["Add"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.math,
         inputEnd: ["input_0", "input_1"],
         outputEnd: ["output"],
@@ -283,7 +322,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Subtract",
-        extendCssClass: ["Subtract"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.math,
         inputEnd: ["input_0", "input_1"],
         outputEnd: ["output"],
@@ -294,7 +333,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Multiply",
-        extendCssClass: ["Multiply"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.math,
         inputEnd: ["input_0", "input_1"],
         outputEnd: ["output"],
@@ -305,7 +344,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Divide",
-        extendCssClass: ["Divide"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.math,
         inputEnd: ["input_0", "input_1"],
         outputEnd: ["output"],
@@ -316,7 +355,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Rand",
-        extendCssClass: ["Rand"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.data,
         inputEnd: [],
         outputEnd: ["data"],
@@ -349,7 +388,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "RandNormal",
-        extendCssClass: ["RandNormal"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.data,
         inputEnd: [],
         outputEnd: ["data"],
@@ -382,7 +421,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "RandInt",
-        extendCssClass: ["RandInt"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.data,
         inputEnd: [],
         outputEnd: ["data"],
@@ -428,7 +467,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Ones",
-        extendCssClass: ["Ones"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.data,
         inputEnd: [],
         outputEnd: ["data"],
@@ -461,7 +500,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Zeros",
-        extendCssClass: ["Zeros"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.data,
         inputEnd: [],
         outputEnd: ["data"],
@@ -494,7 +533,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Full",
-        extendCssClass: ["Full"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.data,
         inputEnd: [],
         outputEnd: ["data"],
@@ -532,7 +571,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Reshape",
-        extendCssClass: ["Reshape"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.transform,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -549,7 +588,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Flatten",
-        extendCssClass: ["Flatten"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.transform,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -574,7 +613,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Unflatten",
-        extendCssClass: ["Unflatten"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.transform,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -599,7 +638,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Cat",
-        extendCssClass: ["Cat"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.transform,
         inputEnd: ["input_0", "input_1"],
         outputEnd: ["output"],
@@ -616,7 +655,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Stack",
-        extendCssClass: ["Stack"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.transform,
         inputEnd: ["input_0", "input_1"],
         outputEnd: ["output"],
@@ -633,7 +672,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Squeeze",
-        extendCssClass: ["Squeeze"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.transform,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -650,7 +689,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Unsqueeze",
-        extendCssClass: ["Unsqueeze"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.transform,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -667,7 +706,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Permute",
-        extendCssClass: ["Permute"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.transform,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -684,7 +723,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Transpose",
-        extendCssClass: ["Transpose"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.transform,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -709,7 +748,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "RandLike",
-        extendCssClass: ["RandLike"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.transform,
         inputEnd: ["input"],
         outputEnd: ["data"],
@@ -726,7 +765,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "RandNormalLike",
-        extendCssClass: ["RandNormalLike"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.transform,
         inputEnd: ["input"],
         outputEnd: ["data"],
@@ -743,7 +782,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "RandNormalLike",
-        extendCssClass: ["RandNormalLike"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.transform,
         inputEnd: ["input"],
         outputEnd: ["data"],
@@ -773,7 +812,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "OnesLike",
-        extendCssClass: ["OnesLike"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.transform,
         inputEnd: ["input"],
         outputEnd: ["data"],
@@ -790,7 +829,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "ZerosLike",
-        extendCssClass: ["ZerosLike"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.transform,
         inputEnd: ["input"],
         outputEnd: ["data"],
@@ -807,7 +846,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "FullLike",
-        extendCssClass: ["FullLike"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.transform,
         inputEnd: ["input"],
         outputEnd: ["data"],
@@ -829,8 +868,8 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Dropout",
-        extendCssClass: ["Dropout"],
-        typeCode: operatorBarNamespace.typeCode.activation,
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.drop,
         inputEnd: ["input"],
         outputEnd: ["output"],
         outlines: [{ name: "p", short: "P" }],
@@ -851,8 +890,8 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Dropout1d",
-        extendCssClass: ["Dropout1d"],
-        typeCode: operatorBarNamespace.typeCode.activation,
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.drop,
         inputEnd: ["input"],
         outputEnd: ["output"],
         outlines: [{ name: "p", short: "P" }],
@@ -873,8 +912,8 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Dropout2d",
-        extendCssClass: ["Dropout2d"],
-        typeCode: operatorBarNamespace.typeCode.activation,
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.drop,
         inputEnd: ["input"],
         outputEnd: ["output"],
         outlines: [{ name: "p", short: "P" }],
@@ -895,8 +934,8 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Dropout3d",
-        extendCssClass: ["Dropout3d"],
-        typeCode: operatorBarNamespace.typeCode.activation,
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.drop,
         inputEnd: ["input"],
         outputEnd: ["output"],
         outlines: [{ name: "p", short: "P" }],
@@ -917,7 +956,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Identity",
-        extendCssClass: ["Identity"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.activation,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -928,7 +967,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "ReLU",
-        extendCssClass: ["ReLU"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.activation,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -945,7 +984,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "LeakyReLU",
-        extendCssClass: ["LeakyReLU"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.activation,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -967,7 +1006,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "SELU",
-        extendCssClass: ["SELU"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.activation,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -984,7 +1023,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "CELU",
-        extendCssClass: ["CELU"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.activation,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -1006,7 +1045,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Sigmoid",
-        extendCssClass: ["Sigmoid"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.activation,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -1017,7 +1056,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Softmax",
-        extendCssClass: ["Softmax"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.activation,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -1033,8 +1072,379 @@ operatorBarNamespace.operators = [
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Softmax.html#torch.nn.Softmax",
     },
     {
+        apiName: "PReLU",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "num_parameters", short: "N" }],
+        args: [
+            {
+                name: "num_parameters",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1",
+            },
+            {
+                name: "init",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "0.25",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.PReLU.html#torch.nn.PReLU",
+    },
+    {
+        apiName: "GELU",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [
+            {
+                name: "approximate",
+                type: operatorBarNamespace.argsType.pytorchApproximate,
+                default: "none",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.GELU.html#torch.nn.GELU",
+    },
+    {
+        apiName: "LogSigmoid",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LogSigmoid.html#torch.nn.LogSigmoid",
+    },
+    {
+        apiName: "Softplus",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "beta", short: "B" },
+            { name: "threshold", short: "T" },
+        ],
+        args: [
+            {
+                name: "beta",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1",
+            },
+            {
+                name: "threshold",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "20",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Softplus.html#torch.nn.Softplus",
+    },
+    {
+        apiName: "Tanh",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Tanh.html#torch.nn.Tanh",
+    },
+    {
+        apiName: "Tanhshrink",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Tanhshrink.html#torch.nn.Tanhshrink",
+    },
+    {
+        apiName: "Mish",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [
+            {
+                name: "inplace",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Mish.html#torch.nn.Mish",
+    },
+    {
+        apiName: "GLU",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "dim", short: "D" }],
+        args: [
+            {
+                name: "dim",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "-1",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.GLU.html#torch.nn.GLU",
+    },
+    {
+        apiName: "Softsign",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Softsign.html#torch.nn.Softsign",
+    },
+    {
+        apiName: "Softmax2d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Softmax2d.html#torch.nn.Softmax2d",
+    },
+    {
+        apiName: "ELU",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [
+            {
+                name: "alpha",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1",
+            },
+            {
+                name: "inplace",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.ELU.html#torch.nn.ELU",
+    },
+    {
+        apiName: "Threshold",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "threshold", short: "T" },
+            { name: "value", short: "V" },
+        ],
+        args: [
+            {
+                name: "threshold",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "0",
+            },
+            {
+                name: "value",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "0",
+            },
+            {
+                name: "inplace",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Threshold.html#torch.nn.Threshold",
+    },
+    {
+        apiName: "ReLU6",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [
+            {
+                name: "inplace",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.ReLU6.html#torch.nn.ReLU6",
+    },
+    {
+        apiName: "Hardsigmoid",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [
+            {
+                name: "inplace",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Hardsigmoid.html#torch.nn.Hardsigmoid",
+    },
+    {
+        apiName: "Hardtanh",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "min_val", short: "Mi" },
+            { name: "max_val", short: "Mx" },
+        ],
+        args: [
+            {
+                name: "min_val",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "-1",
+            },
+            {
+                name: "max_val",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1",
+            },
+            {
+                name: "inplace",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Hardtanh.html#torch.nn.Hardtanh",
+    },
+    {
+        apiName: "Hardswish",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [
+            {
+                name: "inplace",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Hardswish.html#torch.nn.Hardswish",
+    },
+    {
+        apiName: "SiLU",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [
+            {
+                name: "inplace",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.SiLU.html#torch.nn.SiLU",
+    },
+    {
+        apiName: "LogSoftmax",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "dim", short: "D" }],
+        args: [
+            {
+                name: "dim",
+                type: operatorBarNamespace.argsType.strIntOrNone,
+                default: "None",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LogSoftmax.html#torch.nn.LogSoftmax",
+    },
+    {
+        apiName: "Softmin",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "dim", short: "D" }],
+        args: [
+            {
+                name: "dim",
+                type: operatorBarNamespace.argsType.strIntOrNone,
+                default: "None",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Softmin.html#torch.nn.Softmin",
+    },
+    {
+        apiName: "Softshrink",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "lambd", short: "L" }],
+        args: [
+            {
+                name: "lambd",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "0.5",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Softshrink.html#torch.nn.Softshrink",
+    },
+    {
+        apiName: "Hardshrink",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "lambd", short: "L" }],
+        args: [
+            {
+                name: "lambd",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "0.5",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Hardshrink.html#torch.nn.Hardshrink",
+    },
+    {
         apiName: "Conv1d",
-        extendCssClass: ["Conv1d"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.convolution,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -1097,7 +1507,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Conv2d",
-        extendCssClass: ["Conv2d"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.convolution,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -1160,7 +1570,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Conv3d",
-        extendCssClass: ["Conv3d"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.convolution,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -1223,7 +1633,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "LazyConv1d",
-        extendCssClass: ["LazyConv1d"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.convolution,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -1280,7 +1690,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "LazyConv2d",
-        extendCssClass: ["LazyConv2d"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.convolution,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -1337,7 +1747,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "LazyConv3d",
-        extendCssClass: ["LazyConv3d"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.convolution,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -1394,7 +1804,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "ConvTranspose1d",
-        extendCssClass: ["ConvTranspose1d"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.convolution,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -1457,7 +1867,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "ConvTranspose2d",
-        extendCssClass: ["ConvTranspose2d"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.convolution,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -1520,7 +1930,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "ConvTranspose3d",
-        extendCssClass: ["ConvTranspose3d"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.convolution,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -1583,7 +1993,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "LazyConvTranspose1d",
-        extendCssClass: ["LazyConvTranspose1d"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.convolution,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -1640,7 +2050,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "LazyConvTranspose2d",
-        extendCssClass: ["LazyConvTranspose2d"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.convolution,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -1697,7 +2107,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "LazyConvTranspose3d",
-        extendCssClass: ["LazyConvTranspose3d"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.convolution,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -1754,7 +2164,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "MaxPool1d",
-        extendCssClass: ["MaxPool1d"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.pool,
         inputEnd: ["input"],
         outputEnd: ["output", "indices"],
@@ -1814,7 +2224,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "MaxPool2d",
-        extendCssClass: ["MaxPool2d"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.pool,
         inputEnd: ["input"],
         outputEnd: ["output", "indices"],
@@ -1874,7 +2284,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "MaxPool3d",
-        extendCssClass: ["MaxPool3d"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.pool,
         inputEnd: ["input"],
         outputEnd: ["output", "indices"],
@@ -1934,7 +2344,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "MaxUnpool1d",
-        extendCssClass: ["MaxUnpool1d"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.pool,
         inputEnd: ["input", "indices"],
         outputEnd: ["output"],
@@ -1966,7 +2376,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "MaxUnpool2d",
-        extendCssClass: ["MaxUnpool2d"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.pool,
         inputEnd: ["input", "indices"],
         outputEnd: ["output"],
@@ -1998,7 +2408,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "MaxUnpool3d",
-        extendCssClass: ["MaxUnpool3d"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.pool,
         inputEnd: ["input", "indices"],
         outputEnd: ["output"],
@@ -2030,7 +2440,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "Linear",
-        extendCssClass: ["Linear"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.linear,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -2060,7 +2470,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "LayerLinear",
-        extendCssClass: ["LayerLinear"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.linear,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -2082,7 +2492,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "BatchNorm1d",
-        extendCssClass: ["BatchNorm1d"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.normalization,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -2119,7 +2529,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "BatchNorm2d",
-        extendCssClass: ["BatchNorm2d"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.normalization,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -2156,7 +2566,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "BatchNorm3d",
-        extendCssClass: ["BatchNorm3d"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.normalization,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -2193,7 +2603,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "GroupNorm",
-        extendCssClass: ["GroupNorm"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.normalization,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -2228,7 +2638,7 @@ operatorBarNamespace.operators = [
     },
     {
         apiName: "LayerNorm",
-        extendCssClass: ["LayerNorm"],
+        extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.normalization,
         inputEnd: ["input"],
         outputEnd: ["output"],
@@ -2259,19 +2669,44 @@ operatorBarNamespace.operators = [
         link: "https://pytorch.org/docs/stable/generated/torch.nn.LayerNorm.html#layernorm",
     },
 ];
+
 operatorBarNamespace.operators.sort(function (a, b) {
+    if (a.typeCode !== b.typeCode) return a.typeCode < b.typeCode ? -1 : 1;
     if (a.framework !== b.framework)
         return operatorBarNamespace.frameworkOrder[a.framework] <
             operatorBarNamespace.frameworkOrder[b.framework]
             ? -1
             : 1;
-    if (a.typeCode === b.typeCode) return 0;
-    return a.typeCode < b.typeCode ? -1 : 1;
+    if (a.apiName !== b.apiName) return a.apiName < b.apiName ? -1 : 1;
+    return 0;
 });
+
+// set backColor
+{
+    let preTypeCode = -1;
+    let r, g, b;
+    let diffR, diffG, diffB;
+    for (const operator of operatorBarNamespace.operators) {
+        if (operator.backgroundColor !== undefined) continue;
+        if (operator.typeCode !== preTypeCode) {
+            const operatorType =
+                operatorBarNamespace.typeInfo[operator.typeCode];
+            [r, g, b, diffR, diffG, diffB] =
+                operatorBarNamespace.typeColorInfo[operatorType.key];
+            preTypeCode = operator.typeCode;
+        }
+        operator.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+        r += diffR;
+        g += diffG;
+        b += diffB;
+    }
+}
+
 operatorBarNamespace.apiName2operators = new Map();
 for (const operator of operatorBarNamespace.operators) {
     operatorBarNamespace.apiName2operators.set(operator.apiName, operator);
 }
+
 // call(srcNode, tarNode, srcEndpointIdx, tarEndpointIdx)
 operatorBarNamespace.connectionRule = [
     {

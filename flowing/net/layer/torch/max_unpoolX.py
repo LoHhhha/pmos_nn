@@ -26,7 +26,7 @@ class _MaxUnpool(Layer):
             kernel_size: int | Tuple[int, ...],
             stride: Optional[int | Tuple[int, ...]] = None,  # default: stride = kernel_size
             padding: int | Tuple[int, ...] = 0,
-            data_amount: int | None = None,
+            data_amount: Optional[int] = None,
     ):
         super().__init__(data_amount=data_amount)
         self.kernel_size = kernel_size

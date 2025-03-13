@@ -45,6 +45,7 @@ function getNodeElement(config) {
         node.classList.add(x);
     }
     node.textContent = config.apiName;
+    node.style.backgroundColor = config.backgroundColor;
     return node;
 }
 
@@ -1020,12 +1021,12 @@ class OperatorBar {
 
 (function () {
     // add info to share
-    MEMORY_SET("node-information",{
-        "argsInputType":operatorBarNamespace.argsInputType,
-        "argsType":operatorBarNamespace.argsType,
-        "argsValueCheck":operatorBarNamespace.argsValueCheck,
-        "connectionRule":operatorBarNamespace.connectionRule,
-        "operators":operatorBarNamespace.operators,
+    MEMORY_SET("node-information", {
+        argsInputType: operatorBarNamespace.argsInputType,
+        argsType: operatorBarNamespace.argsType,
+        argsValueCheck: operatorBarNamespace.argsValueCheck,
+        connectionRule: operatorBarNamespace.connectionRule,
+        operators: operatorBarNamespace.operators,
     });
 
     window.createOperatorBar = (jsPlumbNavigator, options) => {

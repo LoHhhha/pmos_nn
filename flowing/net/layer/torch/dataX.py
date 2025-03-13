@@ -32,7 +32,7 @@ class _DataX(Layer):
             device: Optional[str] = None,
             dtype: Optional[str] = None,
             requires_grad: bool = False,
-            data_amount: int | None = None
+            data_amount: Optional[int] = None
     ):
         super().__init__(data_amount=data_amount)
         self.size = size

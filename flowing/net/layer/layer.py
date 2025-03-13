@@ -1,7 +1,7 @@
-# Copyright © 2024 PMoS. All rights reserved.
+# Copyright © 2024-2025 PMoS. All rights reserved.
 
 from functools import wraps
-from typing import List, Tuple, Annotated
+from typing import List, Tuple, Annotated, Optional
 from abc import ABC, abstractmethod
 
 __all__ = [
@@ -30,7 +30,7 @@ class Layer(ABC):
     output_name: str = ...  # through it maybe a tuple but also use one name.
     output_amount: int = ...  # when output_size == 1 means output_name is a var, or it is a tuple.
 
-    def __init__(self, data_amount: int | None = None):
+    def __init__(self, data_amount: Optional[int] = None):
         """
         Unless data_amount is setting error, don't verify the params and raise another exception in here.
         Ensure users can generate their own modules in their way.
@@ -131,7 +131,7 @@ class Layer(ABC):
         package_name = f"{package}." if package and not package.endswith(".") else package
         return f"{"self." if add_self else ""}{self.layer_name} = {package_name}{self._api_name}({init_params_str})",
 
-    # using @Layer.injected_check on the circumstances
+    @injected_check
     def forward_code(self, add_self: bool = True) -> Tuple[str, ...]:
         return f"{self.output_name} = {"self." if add_self else ""}{self.layer_name}({self.get_forward_args()})",
 

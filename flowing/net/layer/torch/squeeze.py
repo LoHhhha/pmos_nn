@@ -22,7 +22,7 @@ class Squeeze(Layer):
     def __init__(
             self,
             dim: Optional[int | Tuple[int, ...]] = None,
-            data_amount: int | None = None
+            data_amount: Optional[int] = None
     ):
         super().__init__(data_amount=data_amount)
         self.dim = dim
@@ -84,7 +84,7 @@ class Unsqueeze(Layer):
     def __init__(
             self,
             dim: int,
-            data_amount: int | None = None
+            data_amount: Optional[int] = None
     ):
         super().__init__(data_amount=data_amount)
         self.dim = dim

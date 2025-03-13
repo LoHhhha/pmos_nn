@@ -1,6 +1,6 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
 
-from typing import Tuple, List, Annotated
+from typing import Tuple, List, Annotated, Optional
 
 from flowing.net.layer import Layer
 
@@ -20,7 +20,7 @@ class Permute(Layer):
     def __init__(
             self,
             dims: Tuple[int, ...],
-            data_amount: int | None = None
+            data_amount: Optional[int] = None
     ):
         super().__init__(data_amount=data_amount)
         self.dims = dims
