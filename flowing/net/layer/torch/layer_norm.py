@@ -22,14 +22,17 @@ class LayerNorm(Layer):
 
     def __init__(
             self,
-            normalized_shape: List[int] | Tuple[int, ...],
+            normalized_shape: int | List[int] | Tuple[int, ...],
             eps: float = 1e-5,
             elementwise_affine: bool = True,
             bias: bool = True,
             data_amount: Optional[int] = None
     ):
         super().__init__(data_amount=data_amount)
-        self.normalized_shape = list(normalized_shape)
+        if isinstance(normalized_shape, int):
+            self.normalized_shape = [normalized_shape]
+        else:
+            self.normalized_shape = list(normalized_shape)
         self.eps = eps
         self.elementwise_affine = elementwise_affine
         self.bias = bias
@@ -37,22 +40,24 @@ class LayerNorm(Layer):
     def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
         return super().init_code(package=package, add_self=add_self)
 
+    def _is_bad_data_shape(self, data_shape: List[int]) -> bool:
+        if len(data_shape) < len(self.normalized_shape):
+            return True
+
+        for idx in range(len(self.normalized_shape)):
+            if self.normalized_shape[-idx - 1] != data_shape[-idx - 1]:
+                return True
+
+        return False
+
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         data_shape = list(input_shape[0])
 
-        if len(data_shape) != 1 + len(self.normalized_shape):
+        if self._is_bad_data_shape(data_shape):
             raise ValueError(
                 f"detect an unexpected data_shape as {data_shape}, "
-                f"expected data_shape must have {1 + len(self.normalized_shape)} dimensions"
-            )
-
-        # all are List
-        allowed_shape = list(data_shape[:1] + self.normalized_shape)
-        if allowed_shape != data_shape:
-            raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
-                f"expected data_shape must be {allowed_shape}"
+                f"expected data_shape with shape [*] + {self.normalized_shape}"
             )
 
         return tuple(data_shape),

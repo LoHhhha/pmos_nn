@@ -93,7 +93,7 @@ operatorBarNamespace.argsType = {
                 return parseInt(item, 10);
             });
         },
-        note: "Please input a tuple containing integer like string which divided by ',' and included by '(' and ')' such as '(-1,3,64,64)'.",
+        note: "Please input a tuple containing integers like string which divided by ',' and included by '(' and ')' such as '(-1,3,64,64)'.",
     },
     strNotNegTuple: {
         reg: /^\(\s*\d+\s*(,\s*\d+\s*)*\)$/,
@@ -103,7 +103,7 @@ operatorBarNamespace.argsType = {
                 return parseInt(item, 10);
             });
         },
-        note: "Please input a tuple containing nonnegative integer like string which divided by ',' and included by '(' and ')' such as '(1,3,64,64)'.",
+        note: "Please input a tuple containing nonnegative integers like string which divided by ',' and included by '(' and ')' such as '(1,3,64,64)'.",
     },
     strIntOrTuple: {
         reg: /^((\(\s*[-+]?\d+\s*(,\s*[-+]?\d+\s*)*\))|([-+]?\d+))$/,
@@ -115,7 +115,19 @@ operatorBarNamespace.argsType = {
             if (ret.length === 1) return ret[0];
             return ret;
         },
-        note: "Please input a integer or a list like string which divided by ',' and included by '(' and ')' such as '(1,3,64,64)'.",
+        note: "Please input a integer or a tuple containing integers like string which divided by ',' and included by '(' and ')' such as '(-1,3,64,64)'.",
+    },
+    strNotNegIntOrNotNegTuple: {
+        reg: /^((\(\s*\d+\s*(,\s*\d+\s*)*\))|(\s*\d+\s*))$/,
+        input: operatorBarNamespace.argsInputType.text,
+        getValue: (value) => {
+            const ret = value.match(/\d+/g).map((item) => {
+                return parseInt(item, 10);
+            });
+            if (ret.length === 1) return ret[0];
+            return ret;
+        },
+        note: "Please input a nonnegative integer or a tuple containing nonnegative integers like string which divided by ',' and included by '(' and ')' such as '(1,3,64,64)'.",
     },
     strIntOrTupleOrNone: {
         reg: /^((\(\s*[-+]?\d+\s*(,\s*[-+]?\d+\s*)*\))|([-+]?\d+)|(None))$/,
@@ -128,7 +140,7 @@ operatorBarNamespace.argsType = {
             if (ret.length === 1) return ret[0];
             return ret;
         },
-        note: "Please input 'None', a integer or a list like string which divided by ',' and included by '(' and ')' such as '(1,3,64,64)'.",
+        note: "Please input 'None', a integer or a tuple containing integers like string which divided by ',' and included by '(' and ')' such as '(-1,3,64,64)'.",
     },
     bool: {
         reg: null,
@@ -781,7 +793,7 @@ operatorBarNamespace.operators = [
         link: "https://pytorch.org/docs/stable/generated/torch.randn_like.html#torch.randn_like",
     },
     {
-        apiName: "RandNormalLike",
+        apiName: "RandIntLike",
         extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.transform,
         inputEnd: ["input"],
@@ -2646,8 +2658,8 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "normalized_shape",
-                type: operatorBarNamespace.argsType.strNotNegTuple,
-                default: "(3,64,64)",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "768",
             },
             {
                 name: "eps",
