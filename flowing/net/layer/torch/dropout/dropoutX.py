@@ -9,6 +9,8 @@ __all__ = [
     'Dropout1d',
     'Dropout2d',
     'Dropout3d',
+    'AlphaDropout',
+    'FeatureAlphaDropout',
 ]
 
 
@@ -32,9 +34,16 @@ class _Dropout(Layer):
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         # need dim and output_padding as args.
-        dim = kwargs['dim']
+        dim = kwargs.get('dim', -1)
+        at_least_two = kwargs.get('at_least_two', False)
 
         data_shape = input_shape[0]
+
+        if at_least_two and len(data_shape) < 2:
+            raise ValueError(
+                f"detect an unexpected data_shape as {data_shape}, "
+                f"expected data_shape at least 2 dimension"
+            )
 
         size = len(data_shape)
         if dim != -1 and size != dim + 1 and size != dim + 2:
@@ -50,7 +59,7 @@ class Dropout(_Dropout):
     _api_name = 'Dropout'
 
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        return super().output_shape(*input_shape, dim=-1, **kwargs)
+        return super().output_shape(*input_shape, **kwargs)
 
 
 class Dropout1d(_Dropout):
@@ -72,3 +81,17 @@ class Dropout3d(_Dropout):
 
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         return super().output_shape(*input_shape, dim=3, **kwargs)
+
+
+class AlphaDropout(_Dropout):
+    _api_name = 'AlphaDropout'
+
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        return super().output_shape(*input_shape, **kwargs)
+
+
+class FeatureAlphaDropout(_Dropout):
+    _api_name = 'FeatureAlphaDropout'
+
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        return super().output_shape(*input_shape, at_least_two=True, **kwargs)

@@ -33,14 +33,24 @@ class _Operation(Layer):
     @Layer.input_shape_check
     @Layer.data_amount_not_zero_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        prev = tuple(input_shape[0])
+        input_shape: List[Tuple[int, ...] | List[int]] = sorted(input_shape, key=lambda item: len(item), reverse=True)
+
+        prev: List[int] = list(input_shape[0])
         for shape in input_shape:
-            if tuple(shape) != prev:
-                raise ValueError(
-                    f"detect an unexpected input_shape as {input_shape}, "
-                    f"has different shapes"
-                )
-        return prev,
+            shape: List[int]
+            for idx in range(len(shape)):
+                if shape[-idx - 1] != prev[-idx - 1]:
+                    if shape[-idx - 1] == 1 or prev[-idx - 1] == 1:
+                        prev[-idx - 1] = max(shape[-idx - 1], prev[-idx - 1])
+                    else:
+                        prev[-idx - 1] = -1
+                # detect <=0 or not in (1, X)/(X, 1)/(X,X)
+                if prev[-idx - 1] <= 0:
+                    raise ValueError(
+                        f"detect an unexpected input_shape as {input_shape}, "
+                        f"has different postfix shapes"
+                    )
+        return tuple(prev),
 
 
 class Add(_Operation):

@@ -95,7 +95,8 @@ class Layer(ABC):
         def wrapped_function(instance, *input_shape: Tuple[int, ...] | List[int], **kwargs):
             if instance.data_amount == 0:
                 raise ValueError(
-                    f"detect an unexpected empty input_shape as {input_shape}"
+                    f"detect an unexpected empty input_shape as {input_shape}, "
+                    f"expected at least 1 item"
                 )
             return output_shape(instance, *input_shape, **kwargs)
 

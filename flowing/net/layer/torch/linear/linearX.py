@@ -7,6 +7,7 @@ from flowing.net.layer import Layer
 __all__ = [
     'LayerLinear',
     'Linear',
+    'Bilinear',
 ]
 
 
@@ -62,3 +63,44 @@ class Linear(LayerLinear):
             )
 
         return output_shape
+
+
+class Bilinear(LayerLinear):
+    _api_name = "Bilinear"
+
+    data_amount = 2
+    output_amount = 1
+
+    in1_features: Annotated[int, Layer.LayerContent]
+    in2_features: Annotated[int, Layer.LayerContent]
+
+    def __init__(self, in1_features: int, in2_features: int, **kwargs):
+        super().__init__(**kwargs)
+
+        self.in1_features = in1_features
+        self.in2_features = in2_features
+
+    @Layer.input_shape_check
+    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
+        data1_shape = list(input_shape[0])
+        data2_shape = list(input_shape[1])
+
+        if data1_shape[-1] != self.in1_features:
+            raise ValueError(
+                f"detect an unexpected data1_shape as {data1_shape}, "
+                f"expected data1_shape -1 dimension is equal to out_features as {self.in1_features}"
+            )
+
+        if data2_shape[-1] != self.in2_features:
+            raise ValueError(
+                f"detect an unexpected data2_shape as {data2_shape}, "
+                f"expected data2_shape -1 dimension is equal to out_features as {self.in2_features}"
+            )
+
+        if data1_shape[:-1] != data2_shape[:-1]:
+            raise ValueError(
+                f"detect an unexpected data1_shape as {data1_shape} and data2_shape as {data2_shape}, "
+                f"expected data1_shape[:-1] to be equal to data2_shape[:-1]"
+            )
+
+        return tuple(data1_shape[:-1] + [self.out_features]),

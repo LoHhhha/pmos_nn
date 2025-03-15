@@ -329,7 +329,7 @@ operatorBarNamespace.operators = [
         outputEnd: ["output"],
         outlines: [],
         args: [],
-        framework: operatorBarNamespace.framework.all,
+        framework: operatorBarNamespace.framework.pytorch,
         link: null,
     },
     {
@@ -340,7 +340,7 @@ operatorBarNamespace.operators = [
         outputEnd: ["output"],
         outlines: [],
         args: [],
-        framework: operatorBarNamespace.framework.all,
+        framework: operatorBarNamespace.framework.pytorch,
         link: null,
     },
     {
@@ -351,7 +351,7 @@ operatorBarNamespace.operators = [
         outputEnd: ["output"],
         outlines: [],
         args: [],
-        framework: operatorBarNamespace.framework.all,
+        framework: operatorBarNamespace.framework.pytorch,
         link: null,
     },
     {
@@ -362,7 +362,7 @@ operatorBarNamespace.operators = [
         outputEnd: ["output"],
         outlines: [],
         args: [],
-        framework: operatorBarNamespace.framework.all,
+        framework: operatorBarNamespace.framework.pytorch,
         link: null,
     },
     {
@@ -395,7 +395,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.rand.html#torch.rand",
+        link: "https://pytorch.org/docs/stable/generated/torch.rand.html",
         outputShapeComeFromArg: "size",
     },
     {
@@ -428,7 +428,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.randn.html#torch.randn",
+        link: "https://pytorch.org/docs/stable/generated/torch.randn.html",
         outputShapeComeFromArg: "size",
     },
     {
@@ -474,7 +474,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.randint.html#torch.randint",
+        link: "https://pytorch.org/docs/stable/generated/torch.randint.html",
         outputShapeComeFromArg: "size",
     },
     {
@@ -507,7 +507,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.ones.html#torch.ones",
+        link: "https://pytorch.org/docs/stable/generated/torch.ones.html",
         outputShapeComeFromArg: "size",
     },
     {
@@ -540,7 +540,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.zeros.html#torch.zeros",
+        link: "https://pytorch.org/docs/stable/generated/torch.zeros.html",
         outputShapeComeFromArg: "size",
     },
     {
@@ -578,7 +578,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.full.html#torch.full",
+        link: "https://pytorch.org/docs/stable/generated/torch.full.html",
         outputShapeComeFromArg: "size",
     },
     {
@@ -621,7 +621,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Flatten.html#torch.nn.Flatten",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Flatten.html",
     },
     {
         apiName: "Unflatten",
@@ -646,7 +646,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Unflatten.html#torch.nn.Unflatten",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Unflatten.html",
     },
     {
         apiName: "Cat",
@@ -663,7 +663,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.cat.html#torch.cat",
+        link: "https://pytorch.org/docs/stable/generated/torch.cat.html",
     },
     {
         apiName: "Stack",
@@ -680,7 +680,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.stack.html#torch.stack",
+        link: "https://pytorch.org/docs/stable/generated/torch.stack.html",
     },
     {
         apiName: "Squeeze",
@@ -697,7 +697,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.squeeze.html#torch-squeeze",
+        link: "https://pytorch.org/docs/stable/generated/torch.squeeze.html",
     },
     {
         apiName: "Unsqueeze",
@@ -714,7 +714,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.unsqueeze.html#torch-unsqueeze",
+        link: "https://pytorch.org/docs/stable/generated/torch.unsqueeze.html",
     },
     {
         apiName: "Permute",
@@ -731,7 +731,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.permute.html#torch-permute",
+        link: "https://pytorch.org/docs/stable/generated/torch.permute.html",
     },
     {
         apiName: "Transpose",
@@ -773,7 +773,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.rand_like.html#torch.rand_like",
+        link: "https://pytorch.org/docs/stable/generated/torch.rand_like.html",
     },
     {
         apiName: "RandNormalLike",
@@ -790,7 +790,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.randn_like.html#torch.randn_like",
+        link: "https://pytorch.org/docs/stable/generated/torch.randn_like.html",
     },
     {
         apiName: "RandIntLike",
@@ -820,7 +820,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.randint_like.html#torch.randint_like",
+        link: "https://pytorch.org/docs/stable/generated/torch.randint_like.html",
     },
     {
         apiName: "OnesLike",
@@ -837,7 +837,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.ones_like.html#torch.ones_like",
+        link: "https://pytorch.org/docs/stable/generated/torch.ones_like.html",
     },
     {
         apiName: "ZerosLike",
@@ -854,7 +854,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.zeros_like.html#torch.zeros_like",
+        link: "https://pytorch.org/docs/stable/generated/torch.zeros_like.html",
     },
     {
         apiName: "FullLike",
@@ -876,7 +876,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.full_like.html#torch.full_like",
+        link: "https://pytorch.org/docs/stable/generated/torch.full_like.html",
     },
     {
         apiName: "Dropout",
@@ -898,7 +898,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Dropout.html#torch.nn.Dropout",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Dropout.html",
     },
     {
         apiName: "Dropout1d",
@@ -920,7 +920,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Dropout1d.html#torch.nn.Dropout1d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Dropout1d.html",
     },
     {
         apiName: "Dropout2d",
@@ -942,7 +942,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Dropout2d.html#torch.nn.Dropout2d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Dropout2d.html",
     },
     {
         apiName: "Dropout3d",
@@ -964,7 +964,51 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Dropout3d.html#torch.nn.Dropout3d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Dropout3d.html",
+    },
+    {
+        apiName: "AlphaDropout",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.drop,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "p", short: "P" }],
+        args: [
+            {
+                name: "p",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "0.5",
+            },
+            {
+                name: "inplace",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.AlphaDropout.html",
+    },
+    {
+        apiName: "FeatureAlphaDropout",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.drop,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "p", short: "P" }],
+        args: [
+            {
+                name: "p",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "0.5",
+            },
+            {
+                name: "inplace",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.FeatureAlphaDropout.html",
     },
     {
         apiName: "Identity",
@@ -975,7 +1019,7 @@ operatorBarNamespace.operators = [
         outlines: [],
         args: [],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Identity.html#torch.nn.Identity",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Identity.html",
     },
     {
         apiName: "ReLU",
@@ -992,7 +1036,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.ReLU.html#torch.nn.ReLU",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.ReLU.html",
     },
     {
         apiName: "LeakyReLU",
@@ -1014,7 +1058,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.LeakyReLU.html#torch.nn.LeakyReLU",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LeakyReLU.html",
     },
     {
         apiName: "SELU",
@@ -1031,7 +1075,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.SELU.html#torch.nn.SELU",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.SELU.html",
     },
     {
         apiName: "CELU",
@@ -1053,7 +1097,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.CELU.html#torch.nn.CELU",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.CELU.html",
     },
     {
         apiName: "Sigmoid",
@@ -1064,7 +1108,7 @@ operatorBarNamespace.operators = [
         outlines: [],
         args: [],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Sigmoid.html#torch.nn.Sigmoid",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Sigmoid.html",
     },
     {
         apiName: "Softmax",
@@ -1081,7 +1125,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Softmax.html#torch.nn.Softmax",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Softmax.html",
     },
     {
         apiName: "PReLU",
@@ -1103,7 +1147,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.PReLU.html#torch.nn.PReLU",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.PReLU.html",
     },
     {
         apiName: "GELU",
@@ -1120,7 +1164,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.GELU.html#torch.nn.GELU",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.GELU.html",
     },
     {
         apiName: "LogSigmoid",
@@ -1131,7 +1175,7 @@ operatorBarNamespace.operators = [
         outlines: [],
         args: [],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.LogSigmoid.html#torch.nn.LogSigmoid",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LogSigmoid.html",
     },
     {
         apiName: "Softplus",
@@ -1156,7 +1200,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Softplus.html#torch.nn.Softplus",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Softplus.html",
     },
     {
         apiName: "Tanh",
@@ -1167,7 +1211,7 @@ operatorBarNamespace.operators = [
         outlines: [],
         args: [],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Tanh.html#torch.nn.Tanh",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Tanh.html",
     },
     {
         apiName: "Tanhshrink",
@@ -1178,7 +1222,7 @@ operatorBarNamespace.operators = [
         outlines: [],
         args: [],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Tanhshrink.html#torch.nn.Tanhshrink",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Tanhshrink.html",
     },
     {
         apiName: "Mish",
@@ -1195,7 +1239,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Mish.html#torch.nn.Mish",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Mish.html",
     },
     {
         apiName: "GLU",
@@ -1212,7 +1256,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.GLU.html#torch.nn.GLU",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.GLU.html",
     },
     {
         apiName: "Softsign",
@@ -1223,7 +1267,7 @@ operatorBarNamespace.operators = [
         outlines: [],
         args: [],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Softsign.html#torch.nn.Softsign",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Softsign.html",
     },
     {
         apiName: "Softmax2d",
@@ -1234,7 +1278,7 @@ operatorBarNamespace.operators = [
         outlines: [],
         args: [],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Softmax2d.html#torch.nn.Softmax2d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Softmax2d.html",
     },
     {
         apiName: "ELU",
@@ -1256,7 +1300,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.ELU.html#torch.nn.ELU",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.ELU.html",
     },
     {
         apiName: "Threshold",
@@ -1286,7 +1330,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Threshold.html#torch.nn.Threshold",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Threshold.html",
     },
     {
         apiName: "ReLU6",
@@ -1303,7 +1347,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.ReLU6.html#torch.nn.ReLU6",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.ReLU6.html",
     },
     {
         apiName: "Hardsigmoid",
@@ -1320,7 +1364,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Hardsigmoid.html#torch.nn.Hardsigmoid",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Hardsigmoid.html",
     },
     {
         apiName: "Hardtanh",
@@ -1350,7 +1394,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Hardtanh.html#torch.nn.Hardtanh",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Hardtanh.html",
     },
     {
         apiName: "Hardswish",
@@ -1367,7 +1411,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Hardswish.html#torch.nn.Hardswish",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Hardswish.html",
     },
     {
         apiName: "SiLU",
@@ -1384,7 +1428,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.SiLU.html#torch.nn.SiLU",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.SiLU.html",
     },
     {
         apiName: "LogSoftmax",
@@ -1401,7 +1445,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.LogSoftmax.html#torch.nn.LogSoftmax",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LogSoftmax.html",
     },
     {
         apiName: "Softmin",
@@ -1418,7 +1462,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Softmin.html#torch.nn.Softmin",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Softmin.html",
     },
     {
         apiName: "Softshrink",
@@ -1435,7 +1479,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Softshrink.html#torch.nn.Softshrink",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Softshrink.html",
     },
     {
         apiName: "Hardshrink",
@@ -1452,7 +1496,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Hardshrink.html#torch.nn.Hardshrink",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Hardshrink.html",
     },
     {
         apiName: "Conv1d",
@@ -1515,7 +1559,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Conv1d.html#torch.nn.Conv1d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Conv1d.html",
     },
     {
         apiName: "Conv2d",
@@ -1578,7 +1622,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html#torch.nn.Conv2d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html",
     },
     {
         apiName: "Conv3d",
@@ -1641,7 +1685,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Conv3d.html#torch.nn.Conv3d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Conv3d.html",
     },
     {
         apiName: "LazyConv1d",
@@ -1698,7 +1742,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyConv1d.html#torch.nn.LazyConv1d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyConv1d.html",
     },
     {
         apiName: "LazyConv2d",
@@ -1755,7 +1799,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyConv2d.html#torch.nn.LazyConv2d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyConv2d.html",
     },
     {
         apiName: "LazyConv3d",
@@ -1812,7 +1856,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyConv3d.html#torch.nn.LazyConv3d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyConv3d.html",
     },
     {
         apiName: "ConvTranspose1d",
@@ -1875,7 +1919,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.ConvTranspose1d.html#torch.nn.ConvTranspose1d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.ConvTranspose1d.html",
     },
     {
         apiName: "ConvTranspose2d",
@@ -1938,7 +1982,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.ConvTranspose2d.html#torch.nn.ConvTranspose2d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.ConvTranspose2d.html",
     },
     {
         apiName: "ConvTranspose3d",
@@ -2001,7 +2045,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.ConvTranspose3d.html#torch.nn.ConvTranspose3d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.ConvTranspose3d.html",
     },
     {
         apiName: "LazyConvTranspose1d",
@@ -2058,7 +2102,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyConvTranspose1d.html#torch.nn.LazyConvTranspose1d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyConvTranspose1d.html",
     },
     {
         apiName: "LazyConvTranspose2d",
@@ -2115,7 +2159,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyConvTranspose2d.html#torch.nn.LazyConvTranspose2d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyConvTranspose2d.html",
     },
     {
         apiName: "LazyConvTranspose3d",
@@ -2172,7 +2216,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyConvTranspose3d.html#torch.nn.LazyConvTranspose3d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyConvTranspose3d.html",
     },
     {
         apiName: "MaxPool1d",
@@ -2219,7 +2263,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.MaxPool1d.html#torch.nn.MaxPool1d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.MaxPool1d.html",
         changeCallBack: (node) => {
             if (
                 !operatorBarNamespace.argsType.bool.getValue(
@@ -2279,7 +2323,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.MaxPool2d.html#torch.nn.MaxPool2d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.MaxPool2d.html",
         changeCallBack: (node) => {
             if (
                 !operatorBarNamespace.argsType.bool.getValue(
@@ -2339,7 +2383,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.MaxPool3d.html#torch.nn.MaxPool3d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.MaxPool3d.html",
         changeCallBack: (node) => {
             if (
                 !operatorBarNamespace.argsType.bool.getValue(
@@ -2384,7 +2428,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.MaxUnpool1d.html#torch.nn.MaxUnpool1d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.MaxUnpool1d.html",
     },
     {
         apiName: "MaxUnpool2d",
@@ -2416,7 +2460,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.MaxUnpool2d.html#torch.nn.MaxUnpool2d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.MaxUnpool2d.html",
     },
     {
         apiName: "MaxUnpool3d",
@@ -2448,7 +2492,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.MaxUnpool3d.html#torch.nn.MaxUnpool3d",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.MaxUnpool3d.html",
     },
     {
         apiName: "Linear",
@@ -2478,7 +2522,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.Linear.html#torch.nn.Linear",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Linear.html",
     },
     {
         apiName: "LayerLinear",
@@ -2500,7 +2544,43 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyLinear.html#torch.nn.LazyLinear",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyLinear.html",
+    },
+    {
+        apiName: "Bilinear",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.linear,
+        inputEnd: ["input1", "input2"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "in1_features", short: "I1" },
+            { name: "in2_features", short: "I2" },
+            { name: "out_features", short: "O" },
+        ],
+        args: [
+            {
+                name: "in1_features",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "64",
+            },
+            {
+                name: "in2_features",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "64",
+            },
+            {
+                name: "out_features",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "64",
+            },
+            {
+                name: "bias",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Bilinear.html",
     },
     {
         apiName: "BatchNorm1d",
@@ -2523,7 +2603,7 @@ operatorBarNamespace.operators = [
             {
                 name: "momentum",
                 type: operatorBarNamespace.argsType.strFloatOrNone,
-                default: "None",
+                default: "0.1",
             },
             {
                 name: "affine",
@@ -2560,7 +2640,7 @@ operatorBarNamespace.operators = [
             {
                 name: "momentum",
                 type: operatorBarNamespace.argsType.strFloatOrNone,
-                default: "None",
+                default: "0.1",
             },
             {
                 name: "affine",
@@ -2597,7 +2677,7 @@ operatorBarNamespace.operators = [
             {
                 name: "momentum",
                 type: operatorBarNamespace.argsType.strFloatOrNone,
-                default: "None",
+                default: "0.1",
             },
             {
                 name: "affine",
@@ -2612,6 +2692,309 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.BatchNorm3d.html",
+    },
+    {
+        apiName: "LazyBatchNorm1d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.normalization,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [
+            {
+                name: "eps",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1e-5",
+            },
+            {
+                name: "momentum",
+                type: operatorBarNamespace.argsType.strFloatOrNone,
+                default: "0.1",
+            },
+            {
+                name: "affine",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+            {
+                name: "track_running_stats",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyBatchNorm1d.html",
+    },
+    {
+        apiName: "LazyBatchNorm2d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.normalization,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [
+            {
+                name: "eps",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1e-5",
+            },
+            {
+                name: "momentum",
+                type: operatorBarNamespace.argsType.strFloatOrNone,
+                default: "0.1",
+            },
+            {
+                name: "affine",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+            {
+                name: "track_running_stats",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyBatchNorm2d.html",
+    },
+    {
+        apiName: "LazyBatchNorm3d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.normalization,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [
+            {
+                name: "eps",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1e-5",
+            },
+            {
+                name: "momentum",
+                type: operatorBarNamespace.argsType.strFloatOrNone,
+                default: "0.1",
+            },
+            {
+                name: "affine",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+            {
+                name: "track_running_stats",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyBatchNorm3d.html",
+    },
+    {
+        apiName: "InstanceNorm1d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.normalization,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "num_features", short: "NF" }],
+        args: [
+            {
+                name: "num_features",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "64",
+            },
+            {
+                name: "eps",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1e-5",
+            },
+            {
+                name: "momentum",
+                type: operatorBarNamespace.argsType.strFloatOrNone,
+                default: "0.1",
+            },
+            {
+                name: "affine",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+            {
+                name: "track_running_stats",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.InstanceNorm1d.html",
+    },
+    {
+        apiName: "InstanceNorm2d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.normalization,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "num_features", short: "NF" }],
+        args: [
+            {
+                name: "num_features",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "64",
+            },
+            {
+                name: "eps",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1e-5",
+            },
+            {
+                name: "momentum",
+                type: operatorBarNamespace.argsType.strFloatOrNone,
+                default: "0.1",
+            },
+            {
+                name: "affine",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+            {
+                name: "track_running_stats",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.InstanceNorm2d.html",
+    },
+    {
+        apiName: "InstanceNorm3d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.normalization,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "num_features", short: "NF" }],
+        args: [
+            {
+                name: "num_features",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "64",
+            },
+            {
+                name: "eps",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1e-5",
+            },
+            {
+                name: "momentum",
+                type: operatorBarNamespace.argsType.strFloatOrNone,
+                default: "0.1",
+            },
+            {
+                name: "affine",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+            {
+                name: "track_running_stats",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.InstanceNorm3d.html",
+    },
+    {
+        apiName: "LazyInstanceNorm1d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.normalization,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [
+            {
+                name: "eps",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1e-5",
+            },
+            {
+                name: "momentum",
+                type: operatorBarNamespace.argsType.strFloatOrNone,
+                default: "0.1",
+            },
+            {
+                name: "affine",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+            {
+                name: "track_running_stats",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyInstanceNorm1d.html",
+    },
+    {
+        apiName: "LazyInstanceNorm2d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.normalization,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [
+            {
+                name: "eps",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1e-5",
+            },
+            {
+                name: "momentum",
+                type: operatorBarNamespace.argsType.strFloatOrNone,
+                default: "0.1",
+            },
+            {
+                name: "affine",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+            {
+                name: "track_running_stats",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyInstanceNorm2d.html",
+    },
+    {
+        apiName: "LazyInstanceNorm3d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.normalization,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [
+            {
+                name: "eps",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1e-5",
+            },
+            {
+                name: "momentum",
+                type: operatorBarNamespace.argsType.strFloatOrNone,
+                default: "0.1",
+            },
+            {
+                name: "affine",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+            {
+                name: "track_running_stats",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyInstanceNorm3d.html",
     },
     {
         apiName: "GroupNorm",
@@ -2646,7 +3029,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.GroupNorm.html#groupnorm",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.GroupNorm.html",
     },
     {
         apiName: "LayerNorm",
@@ -2678,7 +3061,7 @@ operatorBarNamespace.operators = [
             },
         ],
         framework: operatorBarNamespace.framework.pytorch,
-        link: "https://pytorch.org/docs/stable/generated/torch.nn.LayerNorm.html#layernorm",
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.LayerNorm.html",
     },
 ];
 

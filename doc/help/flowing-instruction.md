@@ -113,9 +113,11 @@ Note: Because the project is in continuous iteration, this instruction may conta
 | torch.cat/torch.concat       | Cat                   | >=0.1.a202501             |
 | torch.full                   | Full                  | >=0.1.a202501             |
 | torch.full_like              | FullLike              | >=0.1.a202501             |
+| torch.nn.AlphaDropout        | AlphaDropout          | >=0.1.a202503             |
 | torch.nn.BatchNorm1d         | BatchNorm1d           | >=0.1.a202501             |
 | torch.nn.BatchNorm2d         | BatchNorm2d           | >=0.1.a202501             |
 | torch.nn.BatchNorm3d         | BatchNorm3d           | >=0.1.a202501             |
+| torch.nn.Bilinear            | Bilinear              | >=0.1.a202503             |
 | torch.nn.CELU                | CELU                  | >=0.1.a202501             |
 | torch.nn.Conv1d              | Conv1d                | >=0.1.a202501             |
 | torch.nn.Conv2d              | Conv2d                | >=0.1.a202501             |
@@ -135,6 +137,9 @@ Note: Because the project is in continuous iteration, this instruction may conta
 | torch.nn.Hardtanh            | Hardtanh              | >=0.1.a202503             |
 | torch.nn.Identity            | Identity              | >=0.1.a202503             |
 | torch.nn.LayerNorm           | LayerNorm             | >=0.1.a202501             |
+| torch.nn.LazyBatchNorm1d     | LazyBatchNorm1d       | >=0.1.a202503             |
+| torch.nn.LazyBatchNorm2d     | LazyBatchNorm2d       | >=0.1.a202503             |
+| torch.nn.LazyBatchNorm3d     | LazyBatchNorm3d       | >=0.1.a202503             |
 | torch.nn.LazyConv1d          | LazyConv1d            | >=0.1.a202501             |
 | torch.nn.LazyConv2d          | LazyConv2d            | >=0.1.a202501             |
 | torch.nn.LazyConv3d          | LazyConv3d            | >=0.1.a202501             |
@@ -168,8 +173,9 @@ Note: Because the project is in continuous iteration, this instruction may conta
 | torch.nn.Tanh                | Tanh                  | >=0.1.a202503             |
 | torch.nn.Tanhshrink          | Tanhshrink            | >=0.1.a202503             |
 | torch.nn.Threshold           | Threshold             | >=0.1.a202503             |
-| torch.nn.flatten             | Flatten               | >=0.1.a202501             |
-| torch.nn.unflatten           | Unflatten             | >=0.1.a202501             |
+| torch.nn.FeatureAlphaDropout | FeatureAlphaDropout   | >=0.1.a202503             |
+| torch.nn.Flatten             | Flatten               | >=0.1.a202501             |
+| torch.nn.Unflatten           | Unflatten             | >=0.1.a202501             |
 | torch.ones                   | Ones                  | >=0.1.a202501             |
 | torch.ones_like              | OnesLike              | >=0.1.a202501             |
 | torch.permute                | Permute               | >=0.1.a202501             |

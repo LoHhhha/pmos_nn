@@ -257,7 +257,7 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
         // shape === ERROR_RESULT_SHAPE mean error shape
         const errorMode = shape === ERROR_RESULT_SHAPE;
         const shapeShow = errorMode
-            ? "Error!\nClick to learn more."
+            ? "Error!\nClick here to learn more."
             : shape.join("*");
         const overlayCssClass = errorMode
             ? CONNECTION_OVERLAY_ERROR_CSS_CLASS
