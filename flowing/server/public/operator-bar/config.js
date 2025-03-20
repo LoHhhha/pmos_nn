@@ -2495,6 +2495,129 @@ operatorBarNamespace.operators = [
         link: "https://pytorch.org/docs/stable/generated/torch.nn.MaxUnpool3d.html",
     },
     {
+        apiName: "AvgPool1d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.pool,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
+            { name: "padding", short: "P" },
+        ],
+        args: [
+            {
+                name: "kernel_size",
+                type: operatorBarNamespace.argsType.strIntOrTuple,
+                default: "2",
+            },
+            {
+                name: "stride",
+                type: operatorBarNamespace.argsType.strIntOrTupleOrNone,
+                default: "None",
+            },
+            {
+                name: "padding",
+                type: operatorBarNamespace.argsType.strIntOrTuple,
+                default: "0",
+            },
+            {
+                name: "ceil_mode",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+            {
+                name: "count_include_pad",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.AvgPool1d.html",
+    },
+    {
+        apiName: "AvgPool2d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.pool,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
+            { name: "padding", short: "P" },
+        ],
+        args: [
+            {
+                name: "kernel_size",
+                type: operatorBarNamespace.argsType.strIntOrTuple,
+                default: "2",
+            },
+            {
+                name: "stride",
+                type: operatorBarNamespace.argsType.strIntOrTupleOrNone,
+                default: "None",
+            },
+            {
+                name: "padding",
+                type: operatorBarNamespace.argsType.strIntOrTuple,
+                default: "0",
+            },
+            {
+                name: "ceil_mode",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+            {
+                name: "count_include_pad",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.AvgPool2d.html",
+    },
+    {
+        apiName: "AvgPool3d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.pool,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
+            { name: "padding", short: "P" },
+        ],
+        args: [
+            {
+                name: "kernel_size",
+                type: operatorBarNamespace.argsType.strIntOrTuple,
+                default: "2",
+            },
+            {
+                name: "stride",
+                type: operatorBarNamespace.argsType.strIntOrTupleOrNone,
+                default: "None",
+            },
+            {
+                name: "padding",
+                type: operatorBarNamespace.argsType.strIntOrTuple,
+                default: "0",
+            },
+            {
+                name: "ceil_mode",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+            {
+                name: "count_include_pad",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.AvgPool3d.html",
+    },
+    {
         apiName: "Linear",
         extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.linear,

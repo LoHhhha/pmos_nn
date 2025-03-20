@@ -114,6 +114,9 @@ Note: Because the project is in continuous iteration, this instruction may conta
 | torch.full                   | Full                  | >=0.1.a202501             |
 | torch.full_like              | FullLike              | >=0.1.a202501             |
 | torch.nn.AlphaDropout        | AlphaDropout          | >=0.1.a202503             |
+| torch.nn.AvgPool1d           | AvgPool1d             | >=0.1.a202503             |
+| torch.nn.AvgPool2d           | AvgPool2d             | >=0.1.a202503             |
+| torch.nn.AvgPool3d           | AvgPool3d             | >=0.1.a202503             |
 | torch.nn.BatchNorm1d         | BatchNorm1d           | >=0.1.a202501             |
 | torch.nn.BatchNorm2d         | BatchNorm2d           | >=0.1.a202501             |
 | torch.nn.BatchNorm3d         | BatchNorm3d           | >=0.1.a202501             |

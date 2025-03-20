@@ -4,6 +4,7 @@ import math
 from typing import Tuple, List, Annotated, Optional
 
 from flowing.net.layer import Layer
+from flowing.net.layer.torch.utils import get_and_check_target_dim_param
 
 __all__ = [
     'Conv1d',
@@ -75,25 +76,10 @@ class _LazyConv(Layer):
                 f"expected {dim + 1} dimensions(unbatched) or {dim + 2} dimensions(batched) input"
             )
 
-        if isinstance(self.kernel_size, int):
-            kernel_size = (self.kernel_size,) * dim
-        else:
-            kernel_size = self.kernel_size
-
-        if isinstance(self.padding, int):
-            padding = (self.padding,) * dim
-        else:
-            padding = self.padding
-
-        if isinstance(self.stride, int):
-            stride = (self.stride,) * dim
-        else:
-            stride = self.stride
-
-        if isinstance(self.dilation, int):
-            dilation = (self.dilation,) * dim
-        else:
-            dilation = self.dilation
+        kernel_size = get_and_check_target_dim_param(self.kernel_size, dim, "kernel_size")
+        padding = get_and_check_target_dim_param(self.padding, dim, "padding")
+        stride = get_and_check_target_dim_param(self.stride, dim, "stride")
+        dilation = get_and_check_target_dim_param(self.dilation, dim, "dilation")
 
         output_shape = [data_shape[0]] * len(data_shape)
         # this maybe out_channels or N

@@ -14,10 +14,9 @@ Automatic generated code, powered by PMoS Network Parser.
 {more_information}
 
 import torch
-from torch import nn
 {other_import}
 
-class {net_name}(nn.Module):
+class {net_name}(torch.nn.Module):
     def __init__({init_args}, *args, **kwargs):
         super({net_name}, self).__init__(*args, **kwargs)
         {init_code}

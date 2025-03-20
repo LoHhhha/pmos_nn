@@ -1,4 +1,4 @@
-# Copyright © 2024-2025 PMoS. All rights reserved.
+# Copyright © 2025 PMoS. All rights reserved.
 
 import math
 from typing import Tuple, List, Optional, Annotated
@@ -8,46 +8,40 @@ from flowing.net.layer.torch.pool.utils import padding_and_kernel_size_check
 from flowing.net.layer.torch.utils import get_and_check_target_dim_param
 
 __all__ = [
-    'MaxPool1d',
-    'MaxPool2d',
-    'MaxPool3d',
+    'AvgPool1d',
+    'AvgPool2d',
+    'AvgPool3d',
 ]
 
 
-class _MaxPool(Layer):
+class _AvgPool(Layer):
     _api_name = ...
+
+    data_amount = 1
+    output_amount = 1
 
     kernel_size: Annotated[int | Tuple[int, ...], Layer.LayerContent]
     stride: Annotated[Optional[int | Tuple[int, ...]], Layer.LayerContent]
     padding: Annotated[int | Tuple[int, ...], Layer.LayerContent]
-    dilation: Annotated[int | Tuple[int, ...], Layer.LayerContent]
-    return_indices: Annotated[bool, Layer.LayerContent]
     ceil_mode: Annotated[bool, Layer.LayerContent]
-
-    data_amount = 1
+    count_include_pad: Annotated[bool, Layer.LayerContent]
 
     def __init__(
             self,
             kernel_size: int | Tuple[int, ...],
-            stride: Optional[int | Tuple[int, ...]] = None,  # default: stride = kernel_size
+            stride: Optional[int | Tuple[int, ...]] = None,
             padding: int | Tuple[int, ...] = 0,
-            dilation: int | Tuple[int, ...] = 1,
-            return_indices: bool = False,
             ceil_mode: bool = False,
-            data_amount: Optional[int] = None,
+            count_include_pad: bool = True,
+            data_amount: Optional[int] = None
     ):
         super().__init__(data_amount=data_amount)
+
         self.kernel_size = kernel_size
         self.stride = stride
         self.padding = padding
-        self.dilation = dilation
-        self.return_indices = return_indices
         self.ceil_mode = ceil_mode
-
-        if self.return_indices is True:
-            self.output_amount = 2
-        else:
-            self.output_amount = 1
+        self.count_include_pad = count_include_pad
 
     def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
         return super().init_code(package=package, add_self=add_self)
@@ -57,7 +51,7 @@ class _MaxPool(Layer):
         # need dim as args.
         dim = kwargs['dim']
 
-        data_shape = input_shape[0]
+        data_shape = list(input_shape[0])
 
         if len(data_shape) not in (dim + 1, dim + 2):
             raise ValueError(
@@ -70,38 +64,32 @@ class _MaxPool(Layer):
         stride = get_and_check_target_dim_param(
             self.kernel_size if self.stride is None else self.stride, dim, "stride"
         )
-        dilation = get_and_check_target_dim_param(self.dilation, dim, "dilation")
 
         padding_and_kernel_size_check(padding=padding, kernel_size=kernel_size)
 
-        result_shape = list(data_shape)
-        for i in range(dim):
-            result_shape[-dim + i] = math.floor(
-                (data_shape[-dim + i] + 2 * padding[i] - dilation[i] * (kernel_size[i] - 1) - 1) / stride[i] + 1
+        for idx in range(dim):
+            data_shape[-dim + idx] = math.floor(
+                (data_shape[-dim + idx] + 2 * padding[-dim + idx] - kernel_size[-dim + idx]) / stride[-dim + idx] + 1
             )
-
-        if self.return_indices:
-            info_shape = list(result_shape)
-            return tuple(result_shape), tuple(info_shape)
-        return tuple(result_shape),
+        return tuple(data_shape),
 
 
-class MaxPool1d(_MaxPool):
-    _api_name = "MaxPool1d"
+class AvgPool1d(_AvgPool):
+    _api_name = "AvgPool1d"
 
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         return super().output_shape(*input_shape, dim=1)
 
 
-class MaxPool2d(_MaxPool):
-    _api_name = "MaxPool2d"
+class AvgPool2d(_AvgPool):
+    _api_name = "AvgPool2d"
 
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         return super().output_shape(*input_shape, dim=2)
 
 
-class MaxPool3d(_MaxPool):
-    _api_name = "MaxPool3d"
+class AvgPool3d(_AvgPool):
+    _api_name = "AvgPool3d"
 
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         return super().output_shape(*input_shape, dim=3)
