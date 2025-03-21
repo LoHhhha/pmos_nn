@@ -113,6 +113,12 @@ Note: Because the project is in continuous iteration, this instruction may conta
 | torch.cat/torch.concat       | Cat                   | >=0.1.a202501             |
 | torch.full                   | Full                  | >=0.1.a202501             |
 | torch.full_like              | FullLike              | >=0.1.a202501             |
+| torch.AdaptiveAvgPool1d      | AdaptiveAvgPool1d     | >=0.1.a202503             |
+| torch.AdaptiveAvgPool2d      | AdaptiveAvgPool2d     | >=0.1.a202503             |
+| torch.AdaptiveAvgPool3d      | AdaptiveAvgPool3d     | >=0.1.a202503             |
+| torch.AdaptiveMaxPool1d      | AdaptiveMaxPool1d     | >=0.1.a202503             |
+| torch.AdaptiveMaxPool2d      | AdaptiveMaxPool2d     | >=0.1.a202503             |
+| torch.AdaptiveMaxPool3d      | AdaptiveMaxPool3d     | >=0.1.a202503             |
 | torch.nn.AlphaDropout        | AlphaDropout          | >=0.1.a202503             |
 | torch.nn.AvgPool1d           | AvgPool1d             | >=0.1.a202503             |
 | torch.nn.AvgPool2d           | AvgPool2d             | >=0.1.a202503             |

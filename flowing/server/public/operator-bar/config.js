@@ -105,6 +105,23 @@ operatorBarNamespace.argsType = {
         },
         note: "Please input a tuple containing nonnegative integers like string which divided by ',' and included by '(' and ')' such as '(1,3,64,64)'.",
     },
+    strNotNegIntOrCanNoneNotNegTuple: {
+        reg: /^((\d+)|(\(\s*((\d+)|None)\s*(,\s*((\d+)|None)\s*)*\)))$/,
+        input: operatorBarNamespace.argsInputType.text,
+        getValue: (value) => {
+            const values = value.match(/(\d+)|None/g).map((item) => {
+                if (item === "None") {
+                    return null;
+                }
+                return parseInt(item, 10);
+            });
+            if (values.length === 1) {
+                return values[0];
+            }
+            return values;
+        },
+        note: "Please input a nonnegative integers or tuple containing nonnegative integers or None like string which divided by ',' and included by '(' and ')' such as '(1,3,None,64)'.",
+    },
     strIntOrTuple: {
         reg: /^((\(\s*[-+]?\d+\s*(,\s*[-+]?\d+\s*)*\))|([-+]?\d+))$/,
         input: operatorBarNamespace.argsInputType.text,
@@ -115,7 +132,7 @@ operatorBarNamespace.argsType = {
             if (ret.length === 1) return ret[0];
             return ret;
         },
-        note: "Please input a integer or a tuple containing integers like string which divided by ',' and included by '(' and ')' such as '(-1,3,64,64)'.",
+        note: "Please input 'None',  a integer or a tuple containing integers like string which divided by ',' and included by '(' and ')' such as '(-1,3,64,64)'.",
     },
     strNotNegIntOrNotNegTuple: {
         reg: /^((\(\s*\d+\s*(,\s*\d+\s*)*\))|(\s*\d+\s*))$/,
@@ -2273,7 +2290,7 @@ operatorBarNamespace.operators = [
                 const indicesEndpoint = node.outputEndpoint[1];
                 const connections = indicesEndpoint.connections;
                 for (let ptr = connections.length - 1; ptr >= 0; ptr--) {
-                    node.jsPlumbInstance.deleteConnection(connections[ptr]);
+                    Node.jsPlumbInstance.deleteConnection(connections[ptr]);
                 }
             }
         },
@@ -2333,7 +2350,7 @@ operatorBarNamespace.operators = [
                 const indicesEndpoint = node.outputEndpoint[1];
                 const connections = indicesEndpoint.connections;
                 for (let ptr = connections.length - 1; ptr >= 0; ptr--) {
-                    node.jsPlumbInstance.deleteConnection(connections[ptr]);
+                    Node.jsPlumbInstance.deleteConnection(connections[ptr]);
                 }
             }
         },
@@ -2393,10 +2410,181 @@ operatorBarNamespace.operators = [
                 const indicesEndpoint = node.outputEndpoint[1];
                 const connections = indicesEndpoint.connections;
                 for (let ptr = connections.length - 1; ptr >= 0; ptr--) {
-                    node.jsPlumbInstance.deleteConnection(connections[ptr]);
+                    Node.jsPlumbInstance.deleteConnection(connections[ptr]);
                 }
             }
         },
+    },
+    {
+        apiName: "AdaptiveMaxPool1d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.pool,
+        inputEnd: ["input"],
+        outputEnd: ["output", "indices"],
+        outlines: [
+            { name: "output_size", short: "O" },
+            { name: "return_indices", short: "I" },
+        ],
+        args: [
+            {
+                name: "output_size",
+                type: operatorBarNamespace.argsType
+                    .strNotNegIntOrCanNoneNotNegTuple,
+                default: "(32)",
+            },
+            {
+                name: "return_indices",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.AdaptiveMaxPool1d.html",
+        changeCallBack: (node) => {
+            if (
+                !operatorBarNamespace.argsType.bool.getValue(
+                    node.content["return_indices"]
+                )
+            ) {
+                const indicesEndpoint = node.outputEndpoint[1];
+                const connections = indicesEndpoint.connections;
+                for (let ptr = connections.length - 1; ptr >= 0; ptr--) {
+                    Node.jsPlumbInstance.deleteConnection(connections[ptr]);
+                }
+            }
+        },
+    },
+    {
+        apiName: "AdaptiveMaxPool2d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.pool,
+        inputEnd: ["input"],
+        outputEnd: ["output", "indices"],
+        outlines: [
+            { name: "output_size", short: "O" },
+            { name: "return_indices", short: "I" },
+        ],
+        args: [
+            {
+                name: "output_size",
+                type: operatorBarNamespace.argsType
+                    .strNotNegIntOrCanNoneNotNegTuple,
+                default: "(32,32)",
+            },
+            {
+                name: "return_indices",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.AdaptiveMaxPool2d.html",
+        changeCallBack: (node) => {
+            if (
+                !operatorBarNamespace.argsType.bool.getValue(
+                    node.content["return_indices"]
+                )
+            ) {
+                const indicesEndpoint = node.outputEndpoint[1];
+                const connections = indicesEndpoint.connections;
+                for (let ptr = connections.length - 1; ptr >= 0; ptr--) {
+                    Node.jsPlumbInstance.deleteConnection(connections[ptr]);
+                }
+            }
+        },
+    },
+    {
+        apiName: "AdaptiveMaxPool3d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.pool,
+        inputEnd: ["input"],
+        outputEnd: ["output", "indices"],
+        outlines: [
+            { name: "output_size", short: "O" },
+            { name: "return_indices", short: "I" },
+        ],
+        args: [
+            {
+                name: "output_size",
+                type: operatorBarNamespace.argsType
+                    .strNotNegIntOrCanNoneNotNegTuple,
+                default: "(32,32,32)",
+            },
+            {
+                name: "return_indices",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.AdaptiveMaxPool3d.html",
+        changeCallBack: (node) => {
+            if (
+                !operatorBarNamespace.argsType.bool.getValue(
+                    node.content["return_indices"]
+                )
+            ) {
+                const indicesEndpoint = node.outputEndpoint[1];
+                const connections = indicesEndpoint.connections;
+                for (let ptr = connections.length - 1; ptr >= 0; ptr--) {
+                    Node.jsPlumbInstance.deleteConnection(connections[ptr]);
+                }
+            }
+        },
+    },
+    {
+        apiName: "AdaptiveAvgPool1d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.pool,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "output_size", short: "O" }],
+        args: [
+            {
+                name: "output_size",
+                type: operatorBarNamespace.argsType
+                    .strNotNegIntOrCanNoneNotNegTuple,
+                default: "(32)",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.AdaptiveAvgPool1d.html",
+    },
+    {
+        apiName: "AdaptiveAvgPool2d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.pool,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "output_size", short: "O" }],
+        args: [
+            {
+                name: "output_size",
+                type: operatorBarNamespace.argsType
+                    .strNotNegIntOrCanNoneNotNegTuple,
+                default: "(32,32)",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.AdaptiveAvgPool2d.html",
+    },
+    {
+        apiName: "AdaptiveAvgPool3d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.pool,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "output_size", short: "O" }],
+        args: [
+            {
+                name: "output_size",
+                type: operatorBarNamespace.argsType
+                    .strNotNegIntOrCanNoneNotNegTuple,
+                default: "(32,32,32)",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.AdaptiveAvgPool3d.html",
     },
     {
         apiName: "MaxUnpool1d",
