@@ -43,7 +43,7 @@ const NAVIGATOR_MIN_SCALE = 0.1;
 const NAVIGATOR_MAX_SCALE = 3.0;
 const NAVIGATOR_INTERVAL_SCALE = 0.1;
 const NAVIGATOR_DEFAULT_SCALE = 1.0;
-const NAVIGATOR_SCROLL_INTERVAL_DISTANCE = 50;
+const NAVIGATOR_CHANGE_INTERVAL_DISTANCE = 50;
 const NAVIGATOR_MOVE_BASE_INTERVAL_DISTANCE = 0;
 const NAVIGATOR_MOVE_ADD_INTERVAL_DISTANCE = 1;
 const NAVIGATOR_MOVE_MAX_INTERVAL_DISTANCE = 16;
@@ -186,13 +186,53 @@ class Navigator {
             this.zoomOut();
         });
 
-        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorZoomTo100, () => {
-            this.zoomTo100();
-        });
+        MESSAGE_HANDLER(
+            MESSAGE_TYPE.NavigatorZoomTo100,
+            this.zoomTo100.bind(this)
+        );
 
-        MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorViewAllFit, () => {
-            this.viewAllFit();
-        });
+        MESSAGE_HANDLER(
+            MESSAGE_TYPE.NavigatorViewAllFit,
+            this.viewAllFit.bind(this)
+        );
+
+        ADD_KEY_HANDLER(DEFAULT_KEY_NAMESPACE, "+", [], this.zoomIn.bind(this));
+        ADD_KEY_HANDLER(DEFAULT_KEY_NAMESPACE, "=", [], this.zoomIn.bind(this)); // =+ button
+
+        ADD_KEY_HANDLER(
+            DEFAULT_KEY_NAMESPACE,
+            "-",
+            [],
+            this.zoomOut.bind(this)
+        );
+
+        ADD_KEY_HANDLER(
+            DEFAULT_KEY_NAMESPACE,
+            "ArrowUp",
+            [],
+            this.toUp.bind(this)
+        );
+
+        ADD_KEY_HANDLER(
+            DEFAULT_KEY_NAMESPACE,
+            "ArrowDown",
+            [],
+            this.toDown.bind(this)
+        );
+
+        ADD_KEY_HANDLER(
+            DEFAULT_KEY_NAMESPACE,
+            "ArrowLeft",
+            [],
+            this.toLeft.bind(this)
+        );
+
+        ADD_KEY_HANDLER(
+            DEFAULT_KEY_NAMESPACE,
+            "ArrowRight",
+            [],
+            this.toRight.bind(this)
+        );
 
         document.documentElement.addEventListener("mousemove", (event) => {
             this.edgeStatus = 0;
@@ -328,9 +368,9 @@ class Navigator {
                 // scroll
                 let { left, top } = this.getCanvasBounds();
                 if (e.wheelDeltaY > 0) {
-                    top += NAVIGATOR_SCROLL_INTERVAL_DISTANCE / scale;
+                    top += NAVIGATOR_CHANGE_INTERVAL_DISTANCE / scale;
                 } else {
-                    top -= NAVIGATOR_SCROLL_INTERVAL_DISTANCE / scale;
+                    top -= NAVIGATOR_CHANGE_INTERVAL_DISTANCE / scale;
                 }
                 this.setCanvasLocationAndScale(left, top, scale);
             }
@@ -745,6 +785,39 @@ class Navigator {
         });
 
         return scale;
+    }
+
+    addCanvasLocation(diffLeft, diffTop) {
+        const info = this.getCanvasBounds();
+        this.setCanvasLocation(info.left + diffLeft, info.top + diffTop);
+    }
+
+    toUp() {
+        this.addCanvasLocation(
+            0,
+            NAVIGATOR_CHANGE_INTERVAL_DISTANCE / this.getCanvasScale()
+        );
+    }
+
+    toDown() {
+        this.addCanvasLocation(
+            0,
+            -NAVIGATOR_CHANGE_INTERVAL_DISTANCE / this.getCanvasScale()
+        );
+    }
+
+    toLeft() {
+        this.addCanvasLocation(
+            NAVIGATOR_CHANGE_INTERVAL_DISTANCE / this.getCanvasScale(),
+            0
+        );
+    }
+
+    toRight() {
+        this.addCanvasLocation(
+            -NAVIGATOR_CHANGE_INTERVAL_DISTANCE / this.getCanvasScale(),
+            0
+        );
     }
 
     dispose() {

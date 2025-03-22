@@ -2,6 +2,7 @@
  * MESSAGE_TYPE.ClearNode
  *
  * MESSAGE_TYPE.CreateNodes
+ *      (window left, top)
  *      <event.detail.nodesInfo: Array> <event.detail.connectionsInfo: Array> [<event.detail.offsetLeft: int> <event.detail.offsetTop: int>]
  *          <event.detail.nodesInfo>: [{apiName?, config?, left?, top?, content}] apiName or config require at least one, apiName preferential
  *          <event.detail.connectionsInfo> [{srcNodeIdx, srcEndpointIdx, tarNodeIdx, tarEndpointIdx}]
@@ -1280,6 +1281,26 @@ class OperatorBar {
                 }
 
                 dragMovePayload.el.origin.redrawMiniMapNode();
+            }
+        );
+
+        ADD_KEY_HANDLER(
+            DEFAULT_KEY_NAMESPACE,
+            "c",
+            [MODIFIER_KEY_CODE.ctrl],
+            () => {
+                MESSAGE_PUSH(MESSAGE_TYPE.NodesCopy, {
+                    nodes: Node.SELECTED_NODES_SET,
+                });
+            }
+        );
+
+        ADD_KEY_HANDLER(
+            DEFAULT_KEY_NAMESPACE,
+            "v",
+            [MODIFIER_KEY_CODE.ctrl],
+            () => {
+                MESSAGE_PUSH(MESSAGE_TYPE.NodesPaste);
             }
         );
 

@@ -3,12 +3,22 @@
  *      <event.detail.nodes: Array<Node>|Set<Node> -> NODES_COPY_DATA
  *
  * MESSAGE_TYPE.NodesPaste
+ *      (window left, top)
  *      <event.detail.left> <event.detail.top> -> MESSAGE_TYPE.CreateNode
  *
  */
 
 const NODES_COPY_DATA = new Array(0);
+const NODES_COPY_POSITION = {
+    left: 0,
+    top: 0,
+};
 const CONNECTION_COPY_DATA = new Array(0);
+
+const NO_OFFSET_PASTE_EXCURSION = {
+    left: 50,
+    top: 50,
+};
 
 (function () {
     window.addNodesCopyHelper = (jsPlumbNavigator) => {
@@ -38,6 +48,9 @@ const CONNECTION_COPY_DATA = new Array(0);
             }
             midLeft /= len;
             midTop /= len;
+
+            NODES_COPY_POSITION.left = midLeft;
+            NODES_COPY_POSITION.top = midTop;
 
             NODES_COPY_DATA.length = len;
             let id2idx = new Map();
@@ -91,22 +104,31 @@ const CONNECTION_COPY_DATA = new Array(0);
         });
 
         MESSAGE_HANDLER(MESSAGE_TYPE.NodesPaste, (event) => {
-            if (
-                event.detail?.left === undefined ||
-                event.detail?.top === undefined
-            ) {
-                console.error(
-                    "[NodesCopyHelper-NodesPaste] get an unexpected event as",
-                    event
-                );
-                return;
+            const navigatorInfo = jsPlumbNavigator.getCanvasBoundsAndScale();
+
+            let offsetLeft = event.detail?.left,
+                offsetTop = event.detail?.top;
+            if (offsetLeft === undefined || offsetTop === undefined) {
+                // element left,top -> window left,top
+                offsetLeft =
+                    NODES_COPY_POSITION.left +
+                    navigatorInfo.left +
+                    NO_OFFSET_PASTE_EXCURSION.left;
+                offsetTop =
+                    NODES_COPY_POSITION.top +
+                    navigatorInfo.top +
+                    NO_OFFSET_PASTE_EXCURSION.top;
+            } else {
+                // window left,top
+                offsetLeft /= navigatorInfo.scale;
+                offsetTop /= navigatorInfo.scale;
             }
-            const scale = jsPlumbNavigator.getCanvasScale();
+
             MESSAGE_PUSH(MESSAGE_TYPE.CreateNodes, {
                 nodesInfo: NODES_COPY_DATA,
                 connectionsInfo: CONNECTION_COPY_DATA,
-                offsetLeft: event.detail.left / scale,
-                offsetTop: event.detail.top / scale,
+                offsetLeft: offsetLeft,
+                offsetTop: offsetTop,
             });
 
             console.info(

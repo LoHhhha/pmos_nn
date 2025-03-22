@@ -19,6 +19,8 @@ const COVERING_BUTTON_MODE = {
     ConfirmAndCancelButton: 1,
 };
 
+const COVERING_KEY_NAMESPACE = "COVERING";
+
 const COVERING = document.createElement("div");
 COVERING.className = "covering";
 // .containerEle
@@ -28,6 +30,7 @@ COVERING.className = "covering";
 //      .userScrolling?
 //      .autoScrollingTarget?
 //      .scrollTimeout?
+// .closeCallBack
 
 const COVERING_AUTO_SCROLL_EPS = 10;
 const COVERING_USER_SCROLL_TIMEOUT = 100;
@@ -35,6 +38,7 @@ const COVERING_USER_SCROLL_TIMEOUT = 100;
 (function () {
     window.addEventListener("load", () => {
         document.body.appendChild(COVERING);
+        COVERING.closeCallBack = new Array();
     });
 
     const callWhenTransitionEnd = (...callbacks) => {
@@ -95,10 +99,19 @@ const COVERING_USER_SCROLL_TIMEOUT = 100;
             subtree: true,
             characterData: true,
         });
+        COVERING.closeCallBack.push(() => ele.selfObserver.disconnect());
     };
 
-    const deleteAutoScroll = (ele) => {
-        ele?.selfObserver?.disconnect();
+    const callWhenKeyDown = (keyCode, modifierKeyCodes, callback) => {
+        const key = ADD_KEY_HANDLER(
+            COVERING_KEY_NAMESPACE,
+            keyCode,
+            modifierKeyCodes,
+            callback
+        );
+        COVERING.closeCallBack.push(() =>
+            DELETE_KEY_HANDLER(COVERING_KEY_NAMESPACE, key, callback)
+        );
     };
 
     MESSAGE_HANDLER(MESSAGE_TYPE.CoveringShowCustom, (event) => {
@@ -106,6 +119,8 @@ const COVERING_USER_SCROLL_TIMEOUT = 100;
             console.error("[Covering] More than one want to show covering!");
             return;
         }
+
+        ENTER_NEW_KEY_NAMESPACE(COVERING_KEY_NAMESPACE);
 
         const coveringContainerEle = document.createElement("div");
         coveringContainerEle.className = "covering-container";
@@ -153,6 +168,8 @@ const COVERING_USER_SCROLL_TIMEOUT = 100;
                     MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose);
                 };
                 buttonBar.appendChild(closeButtonEle);
+
+                callWhenKeyDown("Escape", [], closeButtonEle.onclick);
                 break;
             case COVERING_BUTTON_MODE.ConfirmAndCancelButton:
                 const confirmButtonEle = document.createElement("div");
@@ -176,6 +193,8 @@ const COVERING_USER_SCROLL_TIMEOUT = 100;
                     MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose);
                 };
                 buttonBar.appendChild(cancelButtonEle);
+
+                callWhenKeyDown("Escape", [], cancelButtonEle.onclick);
                 break;
             default:
                 break;
@@ -186,6 +205,7 @@ const COVERING_USER_SCROLL_TIMEOUT = 100;
             buttonBar.remove();
         }
 
+        document.activeElement.blur();
         if (event.detail?.init) {
             event.detail?.init();
         }
@@ -197,9 +217,15 @@ const COVERING_USER_SCROLL_TIMEOUT = 100;
 
     MESSAGE_HANDLER(MESSAGE_TYPE.CoveringClose, () => {
         COVERING.style.height = "0";
-        deleteAutoScroll(COVERING.elementsContainerEle);
+
         while (COVERING.firstChild) {
             COVERING.removeChild(COVERING.firstChild);
         }
+
+        while (COVERING.closeCallBack.length) {
+            COVERING.closeCallBack.pop()();
+        }
+
+        EXIT_KEY_NAMESPACE(COVERING_KEY_NAMESPACE);
     });
 })();
