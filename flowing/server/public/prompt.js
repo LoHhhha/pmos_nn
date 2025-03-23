@@ -11,9 +11,7 @@ const PROMPT_CONFIG = {
     INFO: {
         name: "prompt-info",
         iconSvg: ICONS.info,
-        onclick: (promptItem) => {
-            promptItem.dispose();
-        },
+        onclick: undefined,
         closeCallback: undefined,
         timeout: 5000,
         // color: rootStyle.var("--prompt-item-info-background-color"),
@@ -21,9 +19,7 @@ const PROMPT_CONFIG = {
     WARNING: {
         name: "prompt-warning",
         iconSvg: ICONS.warning,
-        onclick: (promptItem) => {
-            promptItem.dispose();
-        },
+        onclick: undefined,
         closeCallback: undefined,
         timeout: undefined,
         color: rootStyle.var("--prompt-item-warning-background-color"),
@@ -53,6 +49,7 @@ const PROMPT_QUEUE = new Array(0);
 class PromptItem {
     icon;
     content;
+    closeIcon;
     element;
 
     container;
@@ -67,7 +64,6 @@ class PromptItem {
         text,
         onclick = undefined,
         closeCallback = undefined,
-        defaultCloseCallback = undefined,
         color = undefined,
         timeout = undefined
     ) {
@@ -82,20 +78,27 @@ class PromptItem {
         this.content.className = "prompt-item-content";
         this.content.textContent = text;
 
+        this.closeIcon = document.createElement("div");
+        this.closeIcon.className = "prompt-item-close";
+        this.closeIcon.innerHTML = ICONS.cross;
+        this.closeIcon.onclick = this.dispose.bind(this);
+
         this.element.appendChild(this.icon);
         this.element.appendChild(this.content);
+        this.element.appendChild(this.closeIcon);
 
         if (color) {
             this.element.style.backgroundColor = color;
         }
 
         if (onclick) {
-            this.element.onclick = onclick.bind(this, this);
+            this.content.onclick = onclick.bind(this);
+            this.content.style.cursor = "pointer";
         }
 
         this.container = container;
         this.closeCallback = closeCallback;
-        this.defaultCloseCallback = defaultCloseCallback;
+
         this.timeout = timeout;
         this.text = text;
     }
@@ -119,13 +122,45 @@ class PromptItem {
             }
             this.isDispose = true;
             this.element.remove();
-            this.defaultCloseCallback();
+            PromptItem.defaultCloseCallback();
+        }
+    }
+
+    static defaultCloseCallback() {
+        PROMPT_QUEUE.shift();
+        if (PROMPT_QUEUE.length) {
+            PROMPT_QUEUE[0].activate();
+            updatePromptMoreDisplay();
         }
     }
 }
 
-function updateMoreIconDisplay() {
-    PROMPT_MORE.style.display = PROMPT_QUEUE.length > 1 ? "inline" : "none";
+function updatePromptMoreDisplay() {
+    let showText = "";
+    const addText = (text) => {
+        if (showText === "") {
+            showText += text;
+        } else {
+            showText += `\n${text}`;
+        }
+    };
+
+    // have prompts waiting
+    if (PROMPT_QUEUE.length > 1) {
+        addText(`${PROMPT_QUEUE.length - 1}+`);
+    }
+
+    // this prompts will not timeout
+    if (PROMPT_QUEUE.length >= 1 && PROMPT_QUEUE[0].timeout === undefined) {
+        addText("Attention!");
+    }
+
+    if (showText !== "") {
+        PROMPT_MORE.style.display = "inline";
+        PROMPT_MORE.textContent = showText;
+    } else {
+        PROMPT_MORE.style.display = "none";
+    }
 }
 
 function addPrompt(prompt) {
@@ -133,15 +168,7 @@ function addPrompt(prompt) {
         prompt.activate();
     }
     PROMPT_QUEUE.push(prompt);
-    updateMoreIconDisplay();
-}
-
-function defaultCloseCallback() {
-    PROMPT_QUEUE.shift();
-    if (PROMPT_QUEUE.length) {
-        PROMPT_QUEUE[0].activate();
-        updateMoreIconDisplay();
-    }
+    updatePromptMoreDisplay();
 }
 
 (function () {
@@ -176,7 +203,6 @@ function defaultCloseCallback() {
                     event.detail.closeCallback
                         ? event.detail.closeCallback
                         : event.detail.config.closeCallback,
-                    defaultCloseCallback,
                     event.detail.config.color,
                     event.detail.timeout
                         ? event.detail.timeout

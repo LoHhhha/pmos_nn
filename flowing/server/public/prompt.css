@@ -1,11 +1,13 @@
 :root {
     --prompt-item-height: 40px;
     --prompt-item-icon-width: var(--prompt-item-height);
+    --prompt-item-close-width: var(--prompt-item-height);
     --prompt-item-margin: 8px;
 
     --prompt-item-background-color: var(--container-background-color);
     --prompt-item-background-hover-color: var(--container-outline-color);
     --prompt-item-outline-color: var(--container-outline-color);
+    --prompt-item-shadow-color: var(--content-background-color);
     --prompt-item-hover-outline-color: var(--default-color);
     --prompt-item-hover-outline-width: calc(var(--border-width) * 2);
 
@@ -22,29 +24,35 @@
     justify-content: center;
     overflow: visible;
     display: grid;
-    grid-template-rows: auto auto;
+    grid-template-columns: auto auto auto;
+    user-select: none;
 }
 
 .prompt-item {
-    margin: var(--margin) 0 0 0;
+    margin-top: var(--margin);
     border-radius: var(--radius);
     backdrop-filter: var(--blur);
     background-color: var(--prompt-item-background-color);
     outline: var(--border-width) solid var(--prompt-item-outline-color);
     display: grid;
-    grid-template-columns: var(--prompt-item-icon-width) auto;
+    grid-template-columns: var(--prompt-item-icon-width) auto var(
+            --prompt-item-close-width
+        );
     grid-row: 1;
     grid-column: 1;
+    box-shadow: var(--shadow) var(--prompt-item-shadow-color);
 }
 
 .prompt-more {
-    width: calc(var(--prompt-item-height) / 2);
-    height: calc(var(--prompt-item-height) / 2);
-    grid-row: 2;
-    grid-column: 1;
+    margin-top: var(--margin);
+    margin-left: var(--margin);
+    grid-row: 1;
+    grid-column: 2;
     display: none;
     pointer-events: none;
-    place-self: center;
+    font-size: small;
+    font-weight: bold;
+    white-space: pre-wrap;
 }
 
 .prompt-item:hover {
@@ -62,10 +70,19 @@
 }
 
 .prompt-item-content {
-    text-align: left;
-    user-select: none;
+    text-align: center;
     grid-row: 1;
     grid-column: 2;
     line-height: var(--prompt-item-height);
     margin: 0 var(--prompt-item-margin) 0 0;
+}
+
+.prompt-item-close {
+    grid-row: 1;
+    grid-column: 3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: var(--prompt-item-margin);
+    cursor: pointer;
 }

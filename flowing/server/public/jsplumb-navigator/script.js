@@ -234,6 +234,13 @@ class Navigator {
             this.toRight.bind(this)
         );
 
+        ADD_KEY_HANDLER(
+            DEFAULT_KEY_NAMESPACE,
+            "Home",
+            [],
+            this.backToOrigin.bind(this)
+        );
+
         document.documentElement.addEventListener("mousemove", (event) => {
             this.edgeStatus = 0;
             if (!this.moveWhenAtEdge) {
@@ -478,6 +485,8 @@ class Navigator {
             items: [
                 {
                     title: "Paste",
+                    keyTips: "Ctrl+V",
+                    icon: ICONS.paste,
                     callback: MEMORY_GET(MEMORY_KEYS.CanPasteNodes, false)
                         ? () => {
                               MESSAGE_PUSH(MESSAGE_TYPE.NodesPaste, {
@@ -489,22 +498,30 @@ class Navigator {
                 },
                 {
                     title: "Zoom In",
+                    keyTips: "+/=",
+                    icon: ICONS.zoomIn,
                     callback: this.zoomIn.bind(this),
                 },
                 {
                     title: "Zoom Out",
+                    keyTips: "-",
+                    icon: ICONS.zoomOut,
                     callback: this.zoomOut.bind(this),
                 },
                 {
-                    title: "zoom to 100%",
+                    title: "Zoom to 100%",
+                    icon: ICONS.zoomTo100,
                     callback: this.zoomTo100.bind(this),
                 },
                 {
                     title: "Back to Origin",
+                    keyTips: "Home",
+                    icon: ICONS.backToOrigin,
                     callback: this.backToOrigin.bind(this),
                 },
                 {
                     title: "View All",
+                    icon: ICONS.viewAllFit,
                     callback: this.viewAllFit.bind(this),
                 },
                 {

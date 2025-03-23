@@ -9,7 +9,7 @@
  *          [<event.detail.noSelectNodes: bool>]
  *          -> node
  *
- * MESSAGE_TYPE.SelectNodes
+ * MESSAGE_TYPE.DeleteNodes
  *      <event.detail.nodes: Array<node>|Set<node>>
  *
  * MESSAGE_TYPE.SelectNodes
@@ -472,6 +472,8 @@ class Node {
                 items: [
                     {
                         title: "Copy",
+                        keyTips: "Ctrl+C",
+                        icon: ICONS.copy,
                         callback: () => {
                             // if not selected nodes using this node
                             MESSAGE_PUSH(MESSAGE_TYPE.NodesCopy, {
@@ -483,6 +485,8 @@ class Node {
                     },
                     {
                         title: "Delete",
+                        keyTips: "Backspace",
+                        icon: ICONS.delete,
                         callback: () => {
                             // if not selected nodes using this node
                             MESSAGE_PUSH(MESSAGE_TYPE.DeleteNodes, {
@@ -1303,6 +1307,12 @@ class OperatorBar {
                 MESSAGE_PUSH(MESSAGE_TYPE.NodesPaste);
             }
         );
+
+        ADD_KEY_HANDLER(DEFAULT_KEY_NAMESPACE, "Backspace", [], () => {
+            MESSAGE_PUSH(MESSAGE_TYPE.DeleteNodes, {
+                nodes: Node.SELECTED_NODES_SET,
+            });
+        });
 
         return new OperatorBar(jsPlumbNavigator, {
             ...defaultOptions,

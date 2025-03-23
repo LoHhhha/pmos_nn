@@ -46,13 +46,37 @@ RIGHT_KEY_MENU.className = "right-key-menu";
             return;
         }
 
-        for (const { title, callback, disabled } of event.detail.items) {
+        for (const info of event.detail.items) {
+            const { title, callback, disabled, icon, keyTips } = info;
+
+            const isDisabled = callback === undefined || disabled === true;
+
             const item = document.createElement("div");
             item.className = "right-key-menu-item";
-            if (callback === undefined || disabled === true) {
+
+            const iconEle = document.createElement("div");
+            iconEle.className = "right-key-menu-item-icon";
+            if (icon) {
+                iconEle.innerHTML = icon;
+            }
+            item.appendChild(iconEle);
+
+            const titleEle = document.createElement("div");
+            titleEle.className = "right-key-menu-item-title";
+            titleEle.textContent = title;
+            item.appendChild(titleEle);
+
+            const keyTipsEle = document.createElement("div");
+            keyTipsEle.className = "right-key-menu-item-key-tips";
+            if (keyTips) {
+                keyTipsEle.textContent = keyTips;
+            }
+            item.appendChild(keyTipsEle);
+
+            if (isDisabled) {
                 item.classList.add("item-disabled");
             }
-            item.textContent = title;
+
             item.onclick = () => {
                 if (callback) {
                     callback();

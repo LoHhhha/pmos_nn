@@ -1,6 +1,7 @@
 :root {
     --operator-bar-background-color: var(--container-background-color);
     --operator-bar-outline-color: var(--container-outline-color);
+    --operator-bar-shadow-color: var(--content-background-color);
     --operator-bar-margin: var(--margin);
 
     --operator-bar-search-bar-background-color: var(--content-background-color);
@@ -26,6 +27,7 @@
     --node-end-point-label-font-size: var(--label-font-size);
 
     --node-overview-background-color: var(--container-background-color);
+    --node-overview-shadow-color: var(--content-background-color);
     --node-overview-width: 300px;
     --node-overview-container-max-height: 250px;
     --node-overview-margin: var(--margin);
@@ -99,6 +101,7 @@
     border-radius: var(--radius);
     user-select: none;
     margin: var(--operator-bar-margin);
+    box-shadow: var(--shadow) var(--operator-bar-shadow-color);
 }
 
 .operator-bar-sep {
@@ -180,6 +183,7 @@
     flex-direction: column;
     line-height: var(--node-height);
     border-radius: var(--radius);
+    box-shadow: var(--shadow) var(--node-overview-shadow-color);
 }
 
 .overview-args-container {

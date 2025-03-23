@@ -1,6 +1,7 @@
 :root {
     --right-key-menu-background-color: var(--container-background-color);
     --right-key-menu-outline-color: var(--container-outline-color);
+    --right-key-menu-shadow-color: var(--content-background-color);
     --right-key-menu-max-width: 300px;
     --right-key-menu-min-width: 100px;
 
@@ -21,23 +22,53 @@
     border-radius: var(--radius);
     outline: var(--border-width) solid var(--right-key-menu-outline-color);
     backdrop-filter: var(--blur);
+    box-shadow: var(--shadow) var(--right-key-menu-shadow-color);
 }
 
 .right-key-menu-item {
-    text-align: left;
+    display: grid;
+    grid-template-columns: 1em 2fr 1fr;
+    gap: var(--margin);
     user-select: none;
     border-radius: var(--radius);
-    padding: 0 5px 0 5px;
+    padding: 0 calc(var(--margin) / 2) 0 calc(var(--margin) / 2);
     width: auto;
     font-size: medium;
-    margin: 4px;
+    margin: calc(var(--margin) / 2);
+    color: var(--default-color);
 }
 
 .right-key-menu-item:hover {
     background-color: var(--right-key-menu-item-select-background-color);
 }
 
+.right-key-menu-item-icon {
+    width: 1em;
+    color: inherit;
+    grid-column: 1;
+}
+
+.right-key-menu-item-title {
+    text-align: left;
+    width: 100%;
+    color: inherit;
+    grid-column: 2;
+    word-wrap: break-word;
+}
+
+.right-key-menu-item-key-tips {
+    text-align: right;
+    width: auto;
+    color: inherit;
+    grid-column: 3;
+    font-weight: lighter;
+}
+
 .item-disabled {
     pointer-events: none;
+}
+
+.item-disabled * {
     color: var(--disabled-color);
+    fill: var(--disabled-color);
 }
