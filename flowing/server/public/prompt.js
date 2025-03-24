@@ -54,9 +54,10 @@ class PromptItem {
 
     container;
     closeCallback;
-    defaultCloseCallback;
     timeout;
     text;
+
+    progressAnimationFrame;
 
     constructor(
         container,
@@ -69,6 +70,9 @@ class PromptItem {
     ) {
         this.element = document.createElement("div");
         this.element.className = "prompt-item";
+
+        this.progress = document.createElement("div");
+        this.progress.className = "prompt-item-progress";
 
         this.icon = document.createElement("div");
         this.icon.className = "prompt-item-icon";
@@ -83,6 +87,7 @@ class PromptItem {
         this.closeIcon.innerHTML = ICONS.cross;
         this.closeIcon.onclick = this.dispose.bind(this);
 
+        this.element.appendChild(this.progress);
         this.element.appendChild(this.icon);
         this.element.appendChild(this.content);
         this.element.appendChild(this.closeIcon);
@@ -92,7 +97,7 @@ class PromptItem {
         }
 
         if (onclick) {
-            this.content.onclick = onclick.bind(this);
+            this.content.onclick = onclick.bind(this, this);
             this.content.style.cursor = "pointer";
         }
 
@@ -101,15 +106,38 @@ class PromptItem {
 
         this.timeout = timeout;
         this.text = text;
+
+        this.element.addEventListener("mouseenter", () => {
+            this.stopProgress();
+        });
+        this.element.addEventListener("mouseleave", () => {
+            this.startProgress();
+        });
+    }
+
+    stopProgress() {
+        cancelAnimationFrame(this.progressAnimationFrame);
+        this.progress.style.transition = "none";
+        this.progress.style.width = 0;
+    }
+
+    startProgress() {
+        this.stopProgress();
+        if (this.timeout === undefined) return;
+
+        this.progressAnimationFrame = requestAnimationFrame(() => {
+            this.progress.style.transition = `width ${this.timeout}ms linear`;
+            this.progress.style.width = "100%";
+        });
     }
 
     activate() {
-        if (this.timeout) {
-            setTimeout(() => {
-                this.dispose();
-            }, this.timeout);
-        }
+        this.progress.addEventListener(
+            "transitionend",
+            this.dispose.bind(this)
+        );
         this.container.appendChild(this.element);
+        this.startProgress();
     }
 
     isDispose = false;
@@ -121,8 +149,10 @@ class PromptItem {
                 }
             }
             this.isDispose = true;
-            this.element.remove();
-            PromptItem.defaultCloseCallback();
+            CALL_BEFORE_NEXT_FRAME(CALL_QUEUE_AMOUNT - 1, () => {
+                this.element.remove();
+                PromptItem.defaultCloseCallback();
+            });
         }
     }
 
@@ -130,45 +160,32 @@ class PromptItem {
         PROMPT_QUEUE.shift();
         if (PROMPT_QUEUE.length) {
             PROMPT_QUEUE[0].activate();
-            updatePromptMoreDisplay();
+            PromptItem.updatePromptMoreDisplay();
         }
     }
-}
 
-function updatePromptMoreDisplay() {
-    let showText = "";
-    const addText = (text) => {
-        if (showText === "") {
-            showText += text;
+    static addPrompt(prompt) {
+        if (!PROMPT_QUEUE.length) {
+            prompt.activate();
+        }
+        PROMPT_QUEUE.push(prompt);
+        PromptItem.updatePromptMoreDisplay();
+    }
+
+    static updatePromptMoreDisplay() {
+        let showText = "";
+        // have prompts waiting
+        if (PROMPT_QUEUE.length > 1) {
+            showText = `${PROMPT_QUEUE.length - 1}+`;
+        }
+
+        if (showText !== "") {
+            PROMPT_MORE.style.display = "inline";
+            PROMPT_MORE.textContent = showText;
         } else {
-            showText += `\n${text}`;
+            PROMPT_MORE.style.display = "none";
         }
-    };
-
-    // have prompts waiting
-    if (PROMPT_QUEUE.length > 1) {
-        addText(`${PROMPT_QUEUE.length - 1}+`);
     }
-
-    // this prompts will not timeout
-    if (PROMPT_QUEUE.length >= 1 && PROMPT_QUEUE[0].timeout === undefined) {
-        addText("Attention!");
-    }
-
-    if (showText !== "") {
-        PROMPT_MORE.style.display = "inline";
-        PROMPT_MORE.textContent = showText;
-    } else {
-        PROMPT_MORE.style.display = "none";
-    }
-}
-
-function addPrompt(prompt) {
-    if (!PROMPT_QUEUE.length) {
-        prompt.activate();
-    }
-    PROMPT_QUEUE.push(prompt);
-    updatePromptMoreDisplay();
 }
 
 (function () {
@@ -192,7 +209,7 @@ function addPrompt(prompt) {
                 return;
             }
 
-            addPrompt(
+            PromptItem.addPrompt(
                 new PromptItem(
                     PROMPT,
                     event.detail.config.iconSvg,

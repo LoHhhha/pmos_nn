@@ -2,7 +2,6 @@
     --prompt-item-height: 40px;
     --prompt-item-icon-width: var(--prompt-item-height);
     --prompt-item-close-width: var(--prompt-item-height);
-    --prompt-item-margin: 8px;
 
     --prompt-item-background-color: var(--container-background-color);
     --prompt-item-background-hover-color: var(--container-outline-color);
@@ -11,12 +10,15 @@
     --prompt-item-hover-outline-color: var(--default-color);
     --prompt-item-hover-outline-width: calc(var(--border-width) * 2);
 
+    --prompt-item-progress-color: var(--prompt-item-outline-color);
+
     --prompt-item-info-background-color: var(--prompt-item-background-color);
     --prompt-item-warning-background-color: var(--lucency-yellowish);
     --prompt-item-error-background-color: var(--lucency-reddish);
 }
 
 #prompt-container {
+    margin-top: var(--margin);
     position: absolute;
     left: 50%;
     top: 0;
@@ -24,12 +26,21 @@
     justify-content: center;
     overflow: visible;
     display: grid;
-    grid-template-columns: auto auto auto;
+    grid-template-columns: auto auto;
     user-select: none;
 }
 
+.prompt-more {
+    margin-left: var(--margin);
+    grid-row: 1;
+    grid-column: 2;
+    display: none;
+    pointer-events: none;
+    font-size: small;
+    white-space: pre-wrap;
+}
+
 .prompt-item {
-    margin-top: var(--margin);
     border-radius: var(--radius);
     backdrop-filter: var(--blur);
     background-color: var(--prompt-item-background-color);
@@ -43,21 +54,19 @@
     box-shadow: var(--shadow) var(--prompt-item-shadow-color);
 }
 
-.prompt-more {
-    margin-top: var(--margin);
-    margin-left: var(--margin);
-    grid-row: 1;
-    grid-column: 2;
-    display: none;
-    pointer-events: none;
-    font-size: small;
-    font-weight: bold;
-    white-space: pre-wrap;
-}
-
 .prompt-item:hover {
     outline: var(--prompt-item-hover-outline-width) solid
         var(--prompt-item-hover-outline-color);
+}
+
+.prompt-item-progress {
+    border-radius: var(--radius);
+    grid-row: 1;
+    grid-column: 1/4;
+    height: 100%;
+    background-color: var(--prompt-item-progress-color);
+    align-self: end;
+    width: 0;
 }
 
 .prompt-item-icon {
@@ -66,7 +75,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: var(--prompt-item-margin);
+    margin: var(--margin);
 }
 
 .prompt-item-content {
@@ -74,7 +83,6 @@
     grid-row: 1;
     grid-column: 2;
     line-height: var(--prompt-item-height);
-    margin: 0 var(--prompt-item-margin) 0 0;
 }
 
 .prompt-item-close {
@@ -83,6 +91,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: var(--prompt-item-margin);
+    margin: var(--margin);
     cursor: pointer;
 }
