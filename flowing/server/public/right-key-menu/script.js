@@ -1,5 +1,6 @@
 /**
  * MESSAGE_TYPE.RightKeyMenuShow
+ *      <event.detail.items[x].isSeparator> === true => separator
  *      <event.detail.items[x].title> + <event.detail.items[x].callback> => item
  *      <event.detail.items[x].disabled> === true or <event.detail.items[x].callback> is undefined -> item will be disabled.
  *      <event.detail.showLeft> + <event.detail.showTop> => where to show
@@ -47,7 +48,15 @@ RIGHT_KEY_MENU.className = "right-key-menu";
         }
 
         for (const info of event.detail.items) {
-            const { title, callback, disabled, icon, keyTips } = info;
+            const { isSeparator, title, callback, disabled, icon, keyTips } =
+                info;
+
+            if (isSeparator) {
+                const sep = document.createElement("div");
+                sep.className = "right-key-menu-separator";
+                RIGHT_KEY_MENU.appendChild(sep);
+                continue;
+            }
 
             const isDisabled = callback === undefined || disabled === true;
 
@@ -74,7 +83,7 @@ RIGHT_KEY_MENU.className = "right-key-menu";
             item.appendChild(keyTipsEle);
 
             if (isDisabled) {
-                item.classList.add("item-disabled");
+                item.classList.add("right-key-menu-item-disabled");
             }
 
             item.onclick = () => {

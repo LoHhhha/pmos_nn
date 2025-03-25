@@ -5,6 +5,8 @@
     --right-key-menu-max-width: 300px;
     --right-key-menu-min-width: 100px;
 
+    --right-key-menu-separator-color: var(--content-outline-color);
+
     --right-key-menu-item-select-background-color: var(
         --sub-content-background-color
     );
@@ -23,13 +25,13 @@
     outline: var(--border-width) solid var(--right-key-menu-outline-color);
     backdrop-filter: var(--blur);
     box-shadow: var(--shadow) var(--right-key-menu-shadow-color);
+    user-select: none;
 }
 
 .right-key-menu-item {
     display: grid;
     grid-template-columns: 1em 2fr 1fr;
     gap: var(--margin);
-    user-select: none;
     border-radius: var(--radius);
     padding: 0 calc(var(--margin) / 2) 0 calc(var(--margin) / 2);
     width: auto;
@@ -64,11 +66,17 @@
     font-weight: lighter;
 }
 
-.item-disabled {
+.right-key-menu-separator {
+    height: var(--border-width);
+    background-color: var(--right-key-menu-separator-color);
     pointer-events: none;
 }
 
-.item-disabled * {
+.right-key-menu-item-disabled {
+    pointer-events: none;
+}
+
+.right-key-menu-item-disabled * {
     color: var(--disabled-color);
     fill: var(--disabled-color);
 }

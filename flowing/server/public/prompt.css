@@ -4,7 +4,6 @@
     --prompt-item-close-width: var(--prompt-item-height);
 
     --prompt-item-background-color: var(--container-background-color);
-    --prompt-item-background-hover-color: var(--container-outline-color);
     --prompt-item-outline-color: var(--container-outline-color);
     --prompt-item-shadow-color: var(--content-background-color);
     --prompt-item-hover-outline-color: var(--default-color);

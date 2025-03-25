@@ -1,12 +1,12 @@
 /**
- * MESSAGE_TYPE.CoveringShowCustom
+ * MESSAGE_TYPE.CoveringShow
  *      push <event.detail.title(str)> to covering.
  *      push <event.detail.text(str)> to covering.
  *      push close button if <event.detail.buttonMode(COVERING_BUTTON_MODE))>.
  *          this will call <event.detail.buttonCallback.close>/<event.detail.buttonCallback.confirm>/<event.detail.buttonCallback.cancel>
  *      push <event.detail.elements(DOM-s)> to covering, and show.
  *      call <event.detail.init>
- *      call <event.detail.afterInit>
+ *      call <event.detail.afterInit> call when transition ends
  *      if <event.detail.autoElementsContainerScroll> auto scroll CoveringElementsContainerEle
  *
  * MESSAGE_TYPE.CoveringClose
@@ -114,7 +114,7 @@ const COVERING_USER_SCROLL_TIMEOUT = 100;
         );
     };
 
-    MESSAGE_HANDLER(MESSAGE_TYPE.CoveringShowCustom, (event) => {
+    MESSAGE_HANDLER(MESSAGE_TYPE.CoveringShow, (event) => {
         if (COVERING.style.height === "100%") {
             console.error("[Covering] More than one want to show covering!");
             return;

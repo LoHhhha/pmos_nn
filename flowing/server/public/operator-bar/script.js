@@ -1,5 +1,5 @@
 /**
- * MESSAGE_TYPE.ClearNode
+ * MESSAGE_TYPE.ClearNodes
  *
  * MESSAGE_TYPE.CreateNodes
  *      (window left, top)
@@ -26,6 +26,8 @@ let ENDPOINT_COUNT = 0;
 let PERFORMANCE_ACTION_NODES_COUNT = 200;
 let PERFORMANCE_ACTION_SELECT_NODES_COUNT = 20;
 let CURRENT_NODES_COUNT = 0;
+
+const DELETE_ICON = ICONS.delete;
 
 function getNextZIndex() {
     return ++MAX_Z_INDEX;
@@ -101,7 +103,7 @@ class Overview {
         const link = document.createElement("div");
         if (node.config.link) {
             link.onclick = () => {
-                MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
+                MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
                     title: "Page Jump!",
                     text: `Go to introduction for ${node.config.apiName} page?`,
                     buttonMode: COVERING_BUTTON_MODE.ConfirmAndCancelButton,
@@ -154,7 +156,7 @@ class Overview {
                         ) {
                             node.content[arg.name] = itemInput.value;
                         } else {
-                            MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
+                            MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
                                 title: "Warning!",
                                 text: arg.type.note,
                                 buttonMode: COVERING_BUTTON_MODE.CloseButton,
@@ -182,7 +184,7 @@ class Overview {
                     console.error(
                         "[operator-bar] get a nonsupport input type: ${arg.type.input}."
                     );
-                    MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
+                    MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
                         title: "Error!",
                         text: `Found nonsupport input type: ${arg.type.input}, please report to us.`,
                         buttonMode: COVERING_BUTTON_MODE.CloseButton,
@@ -496,6 +498,21 @@ class Node {
                             });
                         },
                     },
+                    {
+                        isSeparator: true,
+                    },
+                    {
+                        title: "Export Selected",
+                        icon: ICONS.export,
+                        callback: () => {
+                            // if not selected nodes using this node
+                            MESSAGE_PUSH(MESSAGE_TYPE.ExportGraph, {
+                                nodes: Node.SELECTED_NODES_SET.has(this)
+                                    ? Node.SELECTED_NODES_SET
+                                    : [this],
+                            });
+                        },
+                    },
                 ],
             });
             return false;
@@ -800,9 +817,9 @@ class OperatorNode {
         });
 
         if (result.includes(false)) {
-            MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+            MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                 config: PROMPT_CONFIG.ERROR,
-                content: "[AddNode] add node failed, please contact us!",
+                content: "Add node failed, please contact us!",
                 timeout: 5000,
             });
         }
@@ -1081,7 +1098,7 @@ class OperatorBar {
                         tarEndpointIdx
                     )
                 ) {
-                    MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
+                    MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
                         title: "Error",
                         text: rule.tip,
                         buttonMode: COVERING_BUTTON_MODE.CloseButton,
@@ -1093,7 +1110,7 @@ class OperatorBar {
             return true;
         });
 
-        MESSAGE_HANDLER(MESSAGE_TYPE.ClearNode, () => {
+        MESSAGE_HANDLER(MESSAGE_TYPE.ClearNodes, () => {
             const canvasEle = document.getElementById("canvas");
 
             for (let ptr = canvasEle.children.length - 1; ptr >= 0; ptr--) {
@@ -1216,8 +1233,9 @@ class OperatorBar {
             }
 
             console.info(`[DeleteNodes] delete ${len} node(s).`);
-            MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+            MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                 config: PROMPT_CONFIG.INFO,
+                iconSvg: DELETE_ICON,
                 content: `Delete ${len} node(s)`,
                 timeout: 1000,
             });

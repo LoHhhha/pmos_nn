@@ -10,13 +10,13 @@ const MESSAGE_TYPE = {
     TidyNodes: "tidy-nodes",
 
     // operator-bar
-    ClearNode: "clear-node", // menu
+    ClearNodes: "clear-nodes", // menu
     CreateNodes: "create-nodes", // return
     DeleteNodes: "delete-nodes",
     SelectNodes: "select-nodes",
 
     // covering
-    CoveringShowCustom: "covering-show-custom",
+    CoveringShow: "covering-show",
     CoveringClose: "covering-close",
 
     // jsplumb-navigator
@@ -49,7 +49,7 @@ const MESSAGE_TYPE = {
     RedrawMapNode: "redraw-map-node",
 
     // prompt
-    ShowDefaultPrompt: "show-default-prompt",
+    PromptShow: "prompt-show",
 
     // port
     ImportGraph: "import-graph", // menu

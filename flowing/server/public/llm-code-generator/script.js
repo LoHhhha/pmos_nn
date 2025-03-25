@@ -614,7 +614,7 @@ class CodeGenerator {
     }
 
     show() {
-        MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
+        MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
             title: "Generation",
             elements: [this.block],
             buttonMode: COVERING_BUTTON_MODE.CloseButton,

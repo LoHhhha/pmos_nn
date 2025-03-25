@@ -1,7 +1,8 @@
 /**
- * MESSAGE_TYPE.ShowDefaultPrompt
- *      <event.detail.config: ShowDefaultPrompt.xxx>
+ * MESSAGE_TYPE.PromptShow
+ *      <event.detail.config: PROMPT_CONFIG.xxx>
  *      <event.detail.content>
+ *      [<event.detail.iconSvg: SVG-DOM>]
  *      [<event.detail.closeCallback: Func> return true will not close.]
  *      [<event.detail.onclick: Func>]
  *      [<event.detail.timeout>]
@@ -14,7 +15,7 @@ const PROMPT_CONFIG = {
         onclick: undefined,
         closeCallback: undefined,
         timeout: 5000,
-        // color: rootStyle.var("--prompt-item-info-background-color"),
+        color: "var(--prompt-item-info-background-color)",
     },
     WARNING: {
         name: "prompt-warning",
@@ -22,13 +23,13 @@ const PROMPT_CONFIG = {
         onclick: undefined,
         closeCallback: undefined,
         timeout: undefined,
-        color: rootStyle.var("--prompt-item-warning-background-color"),
+        color: "var(--prompt-item-warning-background-color)",
     },
     ERROR: {
         name: "prompt-error",
         iconSvg: ICONS.error,
         onclick: (promptItem) => {
-            MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
+            MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
                 title: "Error",
                 text: promptItem.text,
                 buttonMode: COVERING_BUTTON_MODE.CloseButton,
@@ -37,7 +38,7 @@ const PROMPT_CONFIG = {
         },
         closeCallback: undefined,
         timeout: undefined,
-        color: rootStyle.var("--prompt-item-error-background-color"),
+        color: "var(--prompt-item-error-background-color)",
     },
 };
 
@@ -46,21 +47,19 @@ const PROMPT_MORE = document.createElement("div");
 const PROMPT_MORE_SVG = ICONS.more;
 const PROMPT_QUEUE = new Array(0);
 
+const PROMPT_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
+
 class PromptItem {
     icon;
     content;
     closeIcon;
     element;
 
-    container;
     closeCallback;
     timeout;
     text;
 
-    progressAnimationFrame;
-
     constructor(
-        container,
         iconSvg,
         text,
         onclick = undefined,
@@ -85,7 +84,7 @@ class PromptItem {
         this.closeIcon = document.createElement("div");
         this.closeIcon.className = "prompt-item-close";
         this.closeIcon.innerHTML = ICONS.cross;
-        this.closeIcon.onclick = this.dispose.bind(this);
+        this.closeIcon.onclick = this.disposeFunc;
 
         this.element.appendChild(this.progress);
         this.element.appendChild(this.icon);
@@ -101,46 +100,43 @@ class PromptItem {
             this.content.style.cursor = "pointer";
         }
 
-        this.container = container;
         this.closeCallback = closeCallback;
 
         this.timeout = timeout;
         this.text = text;
 
-        this.element.addEventListener("mouseenter", () => {
-            this.stopProgress();
-        });
-        this.element.addEventListener("mouseleave", () => {
-            this.startProgress();
-        });
+        this.element.addEventListener("mouseenter", this.stopProgressFunc);
+        this.element.addEventListener("mouseleave", this.startProgressFunc);
     }
 
+    stopProgressFunc = this.stopProgress.bind(this);
     stopProgress() {
-        cancelAnimationFrame(this.progressAnimationFrame);
-        this.progress.style.transition = "none";
-        this.progress.style.width = 0;
+        this.progress.removeEventListener("transitionend", this.disposeFunc);
+        CALL_BEFORE_NEXT_FRAME(PROMPT_FRAME_QUEUE_WEIGHT, () => {
+            this.progress.style.transition = "none";
+            this.progress.style.width = "0px";
+        });
     }
 
+    startProgressFunc = this.startProgress.bind(this);
     startProgress() {
         this.stopProgress();
         if (this.timeout === undefined) return;
 
-        this.progressAnimationFrame = requestAnimationFrame(() => {
+        this.progress.addEventListener("transitionend", this.disposeFunc);
+        CALL_BEFORE_NEXT_FRAME(PROMPT_FRAME_QUEUE_WEIGHT, () => {
             this.progress.style.transition = `width ${this.timeout}ms linear`;
             this.progress.style.width = "100%";
         });
     }
 
     activate() {
-        this.progress.addEventListener(
-            "transitionend",
-            this.dispose.bind(this)
-        );
-        this.container.appendChild(this.element);
+        PROMPT.appendChild(this.element);
         this.startProgress();
     }
 
     isDispose = false;
+    disposeFunc = this.dispose.bind(this);
     dispose() {
         if (!this.isDispose) {
             if (this.closeCallback instanceof Function) {
@@ -148,25 +144,31 @@ class PromptItem {
                     return;
                 }
             }
+
             this.isDispose = true;
-            CALL_BEFORE_NEXT_FRAME(CALL_QUEUE_AMOUNT - 1, () => {
-                this.element.remove();
-                PromptItem.defaultCloseCallback();
-            });
+            this.stopProgress();
+            this.element.remove();
+            CALL_BEFORE_NEXT_FRAME(
+                PROMPT_FRAME_QUEUE_WEIGHT,
+                PromptItem.defaultCloseCallback
+            );
         }
     }
 
     static defaultCloseCallback() {
         PROMPT_QUEUE.shift();
         if (PROMPT_QUEUE.length) {
-            PROMPT_QUEUE[0].activate();
+            PROMPT_QUEUE.at(0).activate();
             PromptItem.updatePromptMoreDisplay();
         }
     }
 
     static addPrompt(prompt) {
         if (!PROMPT_QUEUE.length) {
-            prompt.activate();
+            CALL_BEFORE_NEXT_FRAME(
+                PROMPT_FRAME_QUEUE_WEIGHT,
+                prompt.activate.bind(prompt)
+            );
         }
         PROMPT_QUEUE.push(prompt);
         PromptItem.updatePromptMoreDisplay();
@@ -197,22 +199,20 @@ class PromptItem {
         PROMPT_MORE.innerHTML = PROMPT_MORE_SVG;
         PROMPT.appendChild(PROMPT_MORE);
 
-        MESSAGE_HANDLER(MESSAGE_TYPE.ShowDefaultPrompt, (event) => {
+        MESSAGE_HANDLER(MESSAGE_TYPE.PromptShow, (event) => {
             if (
                 event.detail?.config === undefined ||
                 event.detail?.content === undefined
             ) {
-                console.error(
-                    "[ShowDefaultPrompt] get a unexpected event as",
-                    event
-                );
+                console.error("[PromptShow] get a unexpected event as", event);
                 return;
             }
 
             PromptItem.addPrompt(
                 new PromptItem(
-                    PROMPT,
-                    event.detail.config.iconSvg,
+                    event.detail.iconSvg
+                        ? event.detail.iconSvg
+                        : event.detail.config.iconSvg,
                     event.detail.content,
                     event.detail.onclick
                         ? event.detail.onclick

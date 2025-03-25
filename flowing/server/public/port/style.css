@@ -2,10 +2,10 @@
     --port-textarea-outline-color: var(--container-outline-color);
     --port-textarea-background-color: var(--container-background-color);
 
-    --port-copy-button-outline-color: var(--content-outline-color);
-    --port-copy-button-background-color: var(--content-background-color);
-    --port-copy-button-hover-background-color: var(--content-outline-color);
-    --port-copy-button-height: var(--node-height);
+    --port-button-outline-color: var(--content-outline-color);
+    --port-button-background-color: var(--content-background-color);
+    --port-button-hover-background-color: var(--content-outline-color);
+    --port-button-height: var(--node-height);
 }
 
 .port-textarea {
@@ -22,20 +22,20 @@
     min-height: 20vh;
 }
 
-.port-copy-button {
+.port-button {
     font-size: medium;
-    height: var(--port-copy-button-height);
+    height: var(--port-button-height);
     width: 100%;
     text-align: center;
     border-radius: var(--radius);
     margin-top: var(--margin);
     user-select: none;
     border: none;
-    outline: var(--border-width) solid var(--port-copy-button-outline-color);
-    background-color: var(--port-copy-button-background-color);
+    outline: var(--border-width) solid var(--port-button-outline-color);
+    background-color: var(--port-button-background-color);
     cursor: pointer;
 }
 
-.port-copy-button:hover {
-    background-color: var(--port-copy-button-hover-background-color);
+.port-button:hover {
+    background-color: var(--port-button-hover-background-color);
 }

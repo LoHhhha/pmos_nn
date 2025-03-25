@@ -96,8 +96,9 @@ const NO_OFFSET_PASTE_EXCURSION = {
             console.info(
                 `[NodesCopyHelper-NodesCopy] copy ${NODES_COPY_DATA.length} node(s) and ${CONNECTION_COPY_DATA.length} edge(s).`
             );
-            MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+            MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                 config: PROMPT_CONFIG.INFO,
+                iconSvg: ICONS.copy,
                 content: `Copy ${NODES_COPY_DATA.length} node(s) and ${CONNECTION_COPY_DATA.length} edge(s)`,
                 timeout: 1000,
             });
@@ -134,8 +135,9 @@ const NO_OFFSET_PASTE_EXCURSION = {
             console.info(
                 `[NodesCopyHelper-NodesPaste] paste ${NODES_COPY_DATA.length} node(s) and ${CONNECTION_COPY_DATA.length} edge(s).`
             );
-            MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+            MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                 config: PROMPT_CONFIG.INFO,
+                iconSvg: ICONS.paste,
                 content: `Pasted ${NODES_COPY_DATA.length} node(s) and ${CONNECTION_COPY_DATA.length} edge(s)`,
                 timeout: 1000,
             });

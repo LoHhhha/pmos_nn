@@ -1,5 +1,5 @@
 jsPlumb.ready(() => {
-    MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+    MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
         config: PROMPT_CONFIG.INFO,
         content: "Welcome to PMoS, click me to know more about PMoS!",
         onclick: (promptItem) => {

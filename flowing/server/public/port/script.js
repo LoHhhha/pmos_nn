@@ -12,6 +12,9 @@
  *      <event.detail.data:object> => return null when ok, return "error_reason" when error
  */
 
+const IMPORT_ICON = ICONS.import;
+const EXPORT_ICON = ICONS.export;
+
 (function () {
     window.addPortHelper = () => {
         MESSAGE_HANDLER(MESSAGE_TYPE.ImportGraph, () => {
@@ -30,16 +33,16 @@
                         `[ImportGraph] json '${jsonText}' parse failed!`,
                         err
                     );
-                    MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+                    MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                         config: PROMPT_CONFIG.ERROR,
-                        content:
-                            "[ImportGraph] Json parse failed, check your code!",
+                        iconSvg: IMPORT_ICON,
+                        content: "Json parse failed, check your code!",
                         timeout: 5000,
                     });
                     return;
                 }
 
-                MESSAGE_CALL(MESSAGE_TYPE.ClearNode);
+                MESSAGE_CALL(MESSAGE_TYPE.ClearNodes);
                 const result = MESSAGE_CALL(MESSAGE_TYPE.CreateNodes, {
                     nodesInfo: importObject.nodes,
                     connectionsInfo: importObject.connections,
@@ -50,11 +53,11 @@
                         `[ImportGraph] graph create failed!`,
                         importObject
                     );
-                    MESSAGE_CALL(MESSAGE_TYPE.ClearNode);
-                    MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+                    MESSAGE_CALL(MESSAGE_TYPE.ClearNodes);
+                    MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                         config: PROMPT_CONFIG.ERROR,
-                        content:
-                            "[ImportGraph] Graph create failed, check your code!",
+                        iconSvg: IMPORT_ICON,
+                        content: "Graph create failed, check your code!",
                         timeout: 5000,
                     });
                     return;
@@ -64,16 +67,17 @@
                         notNeedCovering: true,
                     });
 
-                    MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+                    MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                         config: PROMPT_CONFIG.INFO,
-                        content: `[ImportGraph] Imported ${importObject.nodes.length} node(s), ${importObject.connections.length} edge(s).`,
+                        iconSvg: IMPORT_ICON,
+                        content: `Imported ${importObject.nodes.length} node(s), ${importObject.connections.length} edge(s).`,
                         timeout: 1000,
                     });
                 }, 0);
             };
 
             const pushGraph = () => {
-                MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
+                MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
                     title: "Importing Nodes...",
                     afterInit: () => {
                         importNodesFromJsonTextEle();
@@ -82,7 +86,7 @@
                 });
             };
 
-            MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
+            MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
                 title: "Import Graph",
                 elements: [jsonTextEle],
                 buttonMode: COVERING_BUTTON_MODE.ConfirmAndCancelButton,
@@ -93,14 +97,20 @@
             });
         });
 
-        MESSAGE_HANDLER(MESSAGE_TYPE.ExportGraph, () => {
+        MESSAGE_HANDLER(MESSAGE_TYPE.ExportGraph, (event) => {
             // base on node.inputEndpointPrev
             const allNodes = [];
-            const canvasEle = document.getElementById("canvas");
-            for (const element of canvasEle.children) {
-                const elementClassName = String(element?.className);
-                if (!elementClassName.includes("node")) continue;
-                allNodes.push(element.origin);
+            if (event.detail?.nodes[Symbol.iterator] === undefined) {
+                const canvasEle = document.getElementById("canvas");
+                for (const element of canvasEle.children) {
+                    const elementClassName = String(element?.className);
+                    if (!elementClassName.includes("node")) continue;
+                    allNodes.push(element.origin);
+                }
+            } else {
+                for (const node of event.detail.nodes) {
+                    allNodes.push(node);
+                }
             }
 
             const nodeId2Index = new Map();
@@ -133,6 +143,9 @@
                         point.endpointIdx,
                     ];
                     const sourceIdx = nodeId2Index.get(sourceId);
+                    if (sourceIdx === undefined) {
+                        continue;
+                    }
 
                     exportObject.connections.push({
                         srcNodeIdx: sourceIdx,
@@ -151,7 +164,7 @@
             exportJsonTextEle.value = exportJsonStr;
 
             const exportCopyEle = document.createElement("button");
-            exportCopyEle.className = "port-copy-button";
+            exportCopyEle.className = "port-button";
             exportCopyEle.textContent = "Copy to Clipboard";
             exportCopyEle.onclick = () => {
                 navigator.clipboard.writeText(exportJsonStr);
@@ -167,7 +180,7 @@
                 }, 1000);
             };
 
-            MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
+            MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
                 title: "Export Graph",
                 elements: [exportJsonTextEle, exportCopyEle],
                 buttonMode: COVERING_BUTTON_MODE.CloseButton,

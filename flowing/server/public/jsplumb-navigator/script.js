@@ -49,6 +49,8 @@ const NAVIGATOR_MOVE_ADD_INTERVAL_DISTANCE = 1;
 const NAVIGATOR_MOVE_MAX_INTERVAL_DISTANCE = 16;
 const NAVIGATOR_EDGE_WIDTH = 16;
 
+const NAVIGATOR_ICON = ICONS.map;
+
 class Navigator {
     jsPlumbInstance;
     canvasEle;
@@ -101,7 +103,7 @@ class Navigator {
         this.viewAllFit();
     }
 
-    changeMoveMode(moveMode, showPrompt = true) {
+    changeMoveMode(moveMode, PromptShow = true) {
         if (moveMode) {
             this.hideSelectBox();
         }
@@ -109,10 +111,11 @@ class Navigator {
         MESSAGE_PUSH(MESSAGE_TYPE.NavigatorMoveModeChanged, {
             moveMode: moveMode,
         });
-        if (showPrompt) {
-            MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+        if (PromptShow) {
+            MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                 config: PROMPT_CONFIG.INFO,
-                content: `[Navigator] Change to "${
+                iconSvg: NAVIGATOR_ICON,
+                content: `Change to "${
                     moveMode ? "Move" : "Select"
                 }" viewport drag mode.`,
                 timeout: 2000,
@@ -273,10 +276,10 @@ class Navigator {
 
         if (!this.nodeTree.insert(left, top, node)) {
             console.error("[Navigator] detect error in addNode.");
-            MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+            MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                 config: PROMPT_CONFIG.ERROR,
-                content:
-                    "[Navigator] Detect error during adding node, please contact us!",
+                iconSvg: NAVIGATOR_ICON,
+                content: "Detect error during adding node, please contact us!",
                 timeout: 2000,
             });
         }
@@ -285,10 +288,11 @@ class Navigator {
     updateNode(node, left, top) {
         if (!this.nodeTree.update(left, top, node)) {
             console.error("[Navigator] detect error in updateNode.");
-            MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+            MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                 config: PROMPT_CONFIG.ERROR,
+                iconSvg: NAVIGATOR_ICON,
                 content:
-                    "[Navigator] Detect error during updating node, please contact us!",
+                    "Detect error during updating node, please contact us!",
                 timeout: 2000,
             });
         }
@@ -302,10 +306,11 @@ class Navigator {
 
         if (!this.nodeTree.remove(node)) {
             console.error("[Navigator] detect error in deleteNode.");
-            MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+            MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                 config: PROMPT_CONFIG.ERROR,
+                iconSvg: NAVIGATOR_ICON,
                 content:
-                    "[Navigator] Detect error during deleting node, please contact us!",
+                    "Detect error during deleting node, please contact us!",
                 timeout: 2000,
             });
         }
@@ -497,6 +502,9 @@ class Navigator {
                         : undefined,
                 },
                 {
+                    isSeparator: true,
+                },
+                {
                     title: "Zoom In",
                     keyTips: "+/=",
                     icon: ICONS.zoomIn,
@@ -525,8 +533,27 @@ class Navigator {
                     callback: this.viewAllFit.bind(this),
                 },
                 {
-                    title: "Tidy Nodes",
+                    isSeparator: true,
+                },
+                {
+                    title: "Import",
+                    icon: ICONS.import,
+                    callback: () => MESSAGE_PUSH(MESSAGE_TYPE.ImportGraph),
+                },
+                {
+                    title: "Export",
+                    icon: ICONS.export,
+                    callback: () => MESSAGE_PUSH(MESSAGE_TYPE.ExportGraph),
+                },
+                {
+                    title: "Tidy",
+                    icon: ICONS.tidy,
                     callback: () => MESSAGE_PUSH(MESSAGE_TYPE.TidyNodes),
+                },
+                {
+                    title: "Graph",
+                    icon: ICONS.graph,
+                    callback: () => MESSAGE_PUSH(MESSAGE_TYPE.CalculateGraph),
                 },
             ],
         });
@@ -795,9 +822,10 @@ class Navigator {
         this.setCanvasLocationAndScale(left / scale, top / scale, scale, true);
         this.jsPlumbInstance.setZoom(scale);
 
-        MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+        MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
             config: PROMPT_CONFIG.INFO,
-            content: "[Navigator] View all nodes",
+            iconSvg: NAVIGATOR_ICON,
+            content: "View all nodes.",
             timeout: 1000,
         });
 

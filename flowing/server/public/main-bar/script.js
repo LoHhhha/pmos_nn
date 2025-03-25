@@ -347,7 +347,7 @@ class Toolbar {
                     linkElements.push(linkEle);
                 }
 
-                MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
+                MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
                     title: "PMoS",
                     text: "Have a good time :)<br>Learn more about PMoS at the follow links.<br>What's more, welcome to report any issue to us!",
                     elements: linkElements,
@@ -568,12 +568,12 @@ class ControlBarBuilder {
         clearButton.className = "bar-button";
         clearButton.textContent = "Clear";
         clearButton.addEventListener("click", () => {
-            MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
+            MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
                 title: "Clear all node?",
                 buttonMode: COVERING_BUTTON_MODE.ConfirmAndCancelButton,
                 buttonCallback: {
                     confirm: () => {
-                        MESSAGE_PUSH(MESSAGE_TYPE.ClearNode);
+                        MESSAGE_PUSH(MESSAGE_TYPE.ClearNodes);
                     },
                 },
             });

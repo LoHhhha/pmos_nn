@@ -10,6 +10,8 @@ const THEME_STYLE = {
 const THEME_ELEMENT = document.createElement("div");
 THEME_ELEMENT.id = "theme-helper";
 
+const THEME_ICON = ICONS.theme;
+
 (function () {
     window.addEventListener("load", () => {
         THEME_ELEMENT.style.display = "none";
@@ -33,8 +35,9 @@ THEME_ELEMENT.id = "theme-helper";
             );
         }
         console.info("[ThemeHelper] witch theme to", themeStyle);
-        MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+        MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
             config: PROMPT_CONFIG.INFO,
+            iconSvg: THEME_ICON,
             content: `Switch to "${
                 themeStyle.charAt(0).toUpperCase() + themeStyle.slice(1)
             }" theme.`,

@@ -11,6 +11,7 @@
 const SHAPE_CONNECTION_OVERLAY_ID = "shape-overlay";
 const ERROR_RESULT_SHAPE = undefined;
 const NOT_SHAPE = null;
+const SHAPE_ICON = ICONS.shape;
 
 const CONNECTION_OVERLAY_CSS_CLASS = "connection-overlay";
 const CONNECTION_OVERLAY_ERROR_CSS_CLASS = "connection-overlay-error";
@@ -24,6 +25,7 @@ const TIDY_NODES_MAX_ENDPOINT_COUNT = 10;
 const TIDY_NODES_ROOT_NODE_TOP_PLACE_INTERVAL = 270;
 const TIDY_NODES_ROOT_NODE_SUB_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH;
 const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
+const TIDY_NODES_ICON = ICONS.tidy;
 
 (function () {
     function calculate(canvas) {
@@ -458,17 +460,19 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
                 if (xhr.status !== 200) {
                     switch (xhr.status) {
                         case 0:
-                            MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+                            MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                                 config: PROMPT_CONFIG.ERROR,
+                                iconSvg: SHAPE_ICON,
                                 content:
-                                    "[ShapeCalculate] Disconnect from server, please contact us!",
+                                    "Disconnect from server, please contact us!",
                                 timeout: 5000,
                             });
                             break;
                         default:
-                            MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+                            MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                                 config: PROMPT_CONFIG.ERROR,
-                                content: `[ShapeCalculate] Server internal error, return '${
+                                iconSvg: SHAPE_ICON,
+                                content: `Server internal error, return '${
                                     JSON.parse(xhr.responseText).msg
                                 }', please contact us.`,
                                 timeout: 5000,
@@ -479,9 +483,10 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
 
                 const info = JSON.parse(xhr.responseText);
                 if (info.net_nodes_shape === undefined) {
-                    MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+                    MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                         config: PROMPT_CONFIG.ERROR,
-                        content: `[ShapeCalculate] Found error result from sever, please contact us!`,
+                        iconSvg: SHAPE_ICON,
+                        content: `Found error result from sever, please contact us!`,
                         timeout: 5000,
                     });
                     return;
@@ -668,10 +673,11 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
         for (const u of graphNodes) {
             if (existLoop(u)) {
                 console.warn("[TidyNodes] loop found!", graphNodes);
-                MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+                MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                     config: PROMPT_CONFIG.WARNING,
+                    iconSvg: TIDY_NODES_ICON,
                     content:
-                        "[TidyNodes] Loop has been found, so we can not tidy this graph!",
+                        "Loop has been found, so we can not tidy this graph!",
                     timeout: 5000,
                 });
                 return;
@@ -701,10 +707,11 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
                 "[TidyNodes] can't calculate the rank of nodes!",
                 graphNodes
             );
-            MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+            MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                 config: PROMPT_CONFIG.WARNING,
+                iconSvg: TIDY_NODES_ICON,
                 content:
-                    "[TidyNodes] Can't calculate the rank of nodes, please contact us!",
+                    "Can't calculate the rank of nodes, please contact us!",
                 timeout: 5000,
             });
             return;
@@ -1462,7 +1469,7 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
             }
 
             if (canArrive(sourceNode)) {
-                MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
+                MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
                     title: "Error",
                     text: "This connection will introduce a loop!",
                     buttonMode: COVERING_BUTTON_MODE.CloseButton,
@@ -1560,7 +1567,7 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
                 );
             };
 
-            MESSAGE_PUSH(MESSAGE_TYPE.CoveringShowCustom, {
+            MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
                 title: "Calculate",
                 elements: [loggerEle],
                 buttonMode: COVERING_BUTTON_MODE.CloseButton,
@@ -1587,10 +1594,10 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
                     tidyNodes();
                 } catch (err) {
                     console.error("[TidyNodes] failed.", err);
-                    MESSAGE_PUSH(MESSAGE_TYPE.ShowDefaultPrompt, {
+                    MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                         config: PROMPT_CONFIG.ERROR,
-                        content:
-                            "[TidyNodes] Tidy node failed, please contact us!",
+                        iconSvg: TIDY_NODES_ICON,
+                        content: "Tidy node failed, please contact us!",
                         timeout: 5000,
                     });
                 }
@@ -1605,7 +1612,7 @@ const TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL = TIDY_NODES_NODE_WIDTH * 2;
             if (event.detail?.notNeedCovering) {
                 tidy(false);
             } else {
-                MESSAGE_CALL(MESSAGE_TYPE.CoveringShowCustom, {
+                MESSAGE_CALL(MESSAGE_TYPE.CoveringShow, {
                     title: "Tiding Nodes...",
                     afterInit: tidy,
                 });
