@@ -11,7 +11,7 @@
  *
  * MESSAGE_TYPE.CoveringClose
  *      close covering page
- *
+ *      call <event.detail.afterClose> call when transition ends
  */
 
 const COVERING_BUTTON_MODE = {
@@ -215,7 +215,9 @@ const COVERING_USER_SCROLL_TIMEOUT = 100;
         COVERING.style.height = "100%";
     });
 
-    MESSAGE_HANDLER(MESSAGE_TYPE.CoveringClose, () => {
+    MESSAGE_HANDLER(MESSAGE_TYPE.CoveringClose, (event) => {
+        callWhenTransitionEnd(event.detail?.afterClose);
+
         COVERING.style.height = "0";
 
         while (COVERING.firstChild) {

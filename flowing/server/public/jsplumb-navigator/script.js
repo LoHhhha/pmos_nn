@@ -502,6 +502,29 @@ class Navigator {
                         : undefined,
                 },
                 {
+                    title: "Paste from Clipboard",
+                    icon: ICONS.import,
+                    callback: async () => {
+                        try {
+                            const clipboardData =
+                                await navigator.clipboard.readText();
+                            MESSAGE_PUSH(MESSAGE_TYPE.ImportGraph, {
+                                default: clipboardData,
+                            });
+                        } catch (err) {
+                            console.warn("[Navigator] read clipboard fail!", {
+                                err: err,
+                            });
+                            MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
+                                config: PROMPT_CONFIG.WARNING,
+                                content:
+                                    'Read clipboard fail, please using "Import" to paste!',
+                                timeout: 2000,
+                            });
+                        }
+                    },
+                },
+                {
                     isSeparator: true,
                 },
                 {

@@ -5,6 +5,7 @@
     --port-button-outline-color: var(--content-outline-color);
     --port-button-background-color: var(--content-background-color);
     --port-button-hover-background-color: var(--content-outline-color);
+    --port-button-disable-background-color: var(--lucency-yellowish);
     --port-button-height: var(--node-height);
 }
 
@@ -38,4 +39,13 @@
 
 .port-button:hover {
     background-color: var(--port-button-hover-background-color);
+}
+
+.port-button-disable {
+    background-color: var(--port-button-disable-background-color);
+    cursor: not-allowed;
+}
+
+.port-button-disable:hover {
+    background-color: var(--port-button-disable-background-color);
 }

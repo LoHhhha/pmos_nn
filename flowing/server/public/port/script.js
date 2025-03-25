@@ -5,8 +5,10 @@
  * }
  *
  * MESSAGE_TYPE.ImportGraph
+ *      [<event.detail.default string>]
  *
  * MESSAGE_TYPE.ExportGraph
+ *      [<event.detail.nodes Set<Node>|Array<Node>>]
  *
  * MESSAGE_TYPE.CheckImportGraph
  *      <event.detail.data:object> => return null when ok, return "error_reason" when error
@@ -17,11 +19,14 @@ const EXPORT_ICON = ICONS.export;
 
 (function () {
     window.addPortHelper = () => {
-        MESSAGE_HANDLER(MESSAGE_TYPE.ImportGraph, () => {
+        MESSAGE_HANDLER(MESSAGE_TYPE.ImportGraph, (event) => {
             const jsonTextEle = document.createElement("textarea");
             jsonTextEle.className = "port-textarea";
             jsonTextEle.placeholder =
                 "Enter graph code here, and cover previous graph.";
+            if (event.detail?.default) {
+                jsonTextEle.value = event.detail.default;
+            }
 
             const importNodesFromJsonTextEle = () => {
                 const jsonText = jsonTextEle.value;
@@ -76,23 +81,58 @@ const EXPORT_ICON = ICONS.export;
                 }, 0);
             };
 
-            const pushGraph = () => {
-                MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
-                    title: "Importing Nodes...",
-                    afterInit: () => {
-                        importNodesFromJsonTextEle();
-                        MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose);
+            const importCheckButton = document.createElement("button");
+            importCheckButton.className = "port-button";
+
+            jsonTextEle.onchange = () => {
+                let checkResult;
+                try {
+                    checkResult = MESSAGE_CALL(MESSAGE_TYPE.CheckImportGraph, {
+                        data: jsonTextEle.value,
+                    });
+                    if (checkResult.length === 0) {
+                        throw "Not check result";
+                    }
+                } catch (err) {
+                    console.error(`[ImportGraph] import check failed!`, {
+                        err: err,
+                        value: jsonTextEle.value,
+                    });
+                    checkResult = ["Unexpected error, please contact us!"];
+                }
+
+                checkResult = checkResult[0];
+                if (checkResult !== null) {
+                    importCheckButton.classList.add("port-button-disable");
+                    importCheckButton.textContent = checkResult;
+                } else {
+                    importCheckButton.classList.remove("port-button-disable");
+                    importCheckButton.textContent = "Import to Graph";
+                }
+            };
+            jsonTextEle.onchange();
+
+            importCheckButton.onclick = () => {
+                if (importCheckButton.classList.contains("port-button-disable"))
+                    return;
+
+                MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose, {
+                    afterClose: () => {
+                        MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
+                            title: "Importing Nodes...",
+                            afterInit: () => {
+                                importNodesFromJsonTextEle();
+                                MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose);
+                            },
+                        });
                     },
                 });
             };
 
             MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
                 title: "Import Graph",
-                elements: [jsonTextEle],
-                buttonMode: COVERING_BUTTON_MODE.ConfirmAndCancelButton,
-                buttonCallback: {
-                    confirm: pushGraph,
-                },
+                elements: [jsonTextEle, importCheckButton],
+                buttonMode: COVERING_BUTTON_MODE.CloseButton,
                 init: () => jsonTextEle.focus(),
             });
         });
