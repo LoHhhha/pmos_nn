@@ -58,6 +58,11 @@ const MESSAGE_TYPE = {
 
     // llm-code-generator
     LLMCodeGenerator: "llm-code-generator", // menu
+
+    // undo-helper
+    OperationSave: "operation-save",
+    OperationUndo: "operation-undo",
+    OperationRecordReset: "operation-record-reset",
 };
 
 const MESSAGE_HANDLER_MAP = new Map();
@@ -69,6 +74,7 @@ const MESSAGE_PUSH = (msgType, detail) => {
 const MESSAGE_CALL = (msgType, detail) => {
     const result = [];
     if (MESSAGE_HANDLER_MAP.get(msgType) === undefined) {
+        console.warn(`[MessageBus] ${msgType} handler not found!`);
         return result;
     }
     for (const handler of MESSAGE_HANDLER_MAP.get(msgType)) {

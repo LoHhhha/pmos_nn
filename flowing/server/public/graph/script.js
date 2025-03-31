@@ -5,7 +5,7 @@
  *      <event.detail.node: Node>
  *
  * MESSAGE_TYPE.TidyNodes
- *      <event.detail.notNeedCovering>
+ *      [<event.detail.notNeedCovering>]
  */
 
 const SHAPE_CONNECTION_OVERLAY_ID = "shape-overlay";
@@ -1285,9 +1285,12 @@ const TIDY_NODES_ICON = ICONS.tidy;
         /**
          * using to:
          *      1. update targetNode.inputEndpointPrev
-         *      2. update outputEndpointConnection.outputEndpointConnection
+         *      2. update sourceNode.outputEndpointConnection
          *      3. push shape
          *      4. update targetNode.prevNodes
+         *      5. update sourceNode.connections
+         *      6. update targetNode.connections
+         *      7. call undo-helper
          */
         jsPlumbInstance.bind("connection", (info) => {
             const sourceNode = info.source.origin;
@@ -1330,6 +1333,26 @@ const TIDY_NODES_ICON = ICONS.tidy;
             );
             sourceNode.outputEndpointConnection[srcEndpointIdx].add(connection);
             targetNode.prevNodes.add(sourceNode);
+            const connectionKey = getConnectionKey(
+                sourceNode.id,
+                srcEndpointIdx,
+                targetNode.id,
+                tarEndpointIdx
+            );
+            sourceNode.connections.set(connectionKey, {
+                connection: connection,
+                src: sourceNode,
+                tar: targetNode,
+                srcEndpointIdx,
+                tarEndpointIdx,
+            });
+            targetNode.connections.set(connectionKey, {
+                connection: connection,
+                src: sourceNode,
+                tar: targetNode,
+                srcEndpointIdx,
+                tarEndpointIdx,
+            });
 
             // push shape if current node is ready or error
             if (sourceNode.outputEndpointShape[srcEndpointIdx] !== NOT_SHAPE) {
@@ -1349,6 +1372,22 @@ const TIDY_NODES_ICON = ICONS.tidy;
             }
             pushShape(targetNode);
 
+            const ignores = MEMORY_GET(MEMORY_KEYS.ConnectionCreateIgnore);
+            if (ignores?.has(connectionKey)) {
+                ignores.delete(connectionKey);
+            } else {
+                MESSAGE_CALL(MESSAGE_TYPE.OperationSave, {
+                    createConnections: [
+                        {
+                            src: sourceNode,
+                            srcEndpointIdx,
+                            tar: targetNode,
+                            tarEndpointIdx,
+                        },
+                    ],
+                });
+            }
+
             console.info(
                 `[Connection] node${sourceNode.id}@out${srcEndpointIdx} -> node${targetNode.id}@in${tarEndpointIdx}`
             );
@@ -1360,6 +1399,9 @@ const TIDY_NODES_ICON = ICONS.tidy;
          *      2. delete targetNode.inputEndpointShape
          *      3. clear shape
          *      4. update targetNode.prevNodes
+         *      5. update sourceNode.connections
+         *      6. update targetNode.connections
+         *      7. call undo-helper
          */
         const deleteConnection = (info) => {
             // info {
@@ -1418,6 +1460,14 @@ const TIDY_NODES_ICON = ICONS.tidy;
                     targetNode
                 );
             }
+            const connectionKey = getConnectionKey(
+                sourceNode.id,
+                srcEndpointIdx,
+                targetNode.id,
+                tarEndpointIdx
+            );
+            sourceNode.connections.delete(connectionKey);
+            targetNode.connections.delete(connectionKey);
 
             if (
                 !sourceNode.outputEndpointConnection[srcEndpointIdx].delete(
@@ -1430,6 +1480,23 @@ const TIDY_NODES_ICON = ICONS.tidy;
                 );
             }
             pushShape(targetNode);
+
+            const ignores = MEMORY_GET(MEMORY_KEYS.ConnectionDeleteIgnore);
+            if (ignores?.has(connectionKey)) {
+                ignores.delete(connectionKey);
+            } else {
+                MESSAGE_CALL(MESSAGE_TYPE.OperationSave, {
+                    deleteConnections: [
+                        {
+                            src: sourceNode,
+                            srcEndpointIdx,
+                            tar: targetNode,
+                            tarEndpointIdx,
+                        },
+                    ],
+                });
+            }
+
             console.info(
                 `[Connection] node${sourceNode.id}@out${srcEndpointIdx} -X-> node${targetNode.id}@in${tarEndpointIdx}`
             );

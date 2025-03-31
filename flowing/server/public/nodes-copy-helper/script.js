@@ -28,6 +28,7 @@ const NO_OFFSET_PASTE_EXCURSION = {
             const nodes = event.detail?.nodes;
             const len = nodes.length !== undefined ? nodes.length : nodes.size;
             if (
+                nodes === undefined ||
                 nodes[Symbol.iterator] === undefined ||
                 len === undefined ||
                 len === 0

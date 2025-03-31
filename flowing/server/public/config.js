@@ -13,6 +13,10 @@ const LINKS = [
 const rootStyle = getComputedStyle(document.querySelector(":root"));
 rootStyle.var = (key) => rootStyle.getPropertyValue(key);
 
+function getConnectionKey(srcId, srcEndpointIdx, tarId, tarEndpointIdx) {
+    return `${srcId}@${srcEndpointIdx}-${tarId}@${tarEndpointIdx}`;
+}
+
 const ICONS = {
     check: '<svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><path d="m9.55 18l-5.7-5.7l1.425-1.425L9.55 15.15l9.175-9.175L20.15 7.4z"/></svg>',
     cross: '<svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12z"/></svg>',
@@ -55,6 +59,11 @@ const ICONS = {
     import: '<svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><path fill="currentColor" d="m14 12l-4-4v3H2v2h8v3m10 2V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3h2V6h12v12H6v-3H4v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2"/></svg>',
     export: '<svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><path fill="currentColor" d="m23 12l-4-4v3h-9v2h9v3M1 18V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3h-2V6H3v12h12v-3h2v3a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2"/></svg>',
     graph: '<svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><path fill="currentColor" d="M16 20q-.425 0-.712-.288T15 19v-1h-3q-.425 0-.712-.288T11 17v-4H9v1q0 .425-.288.713T8 15H3q-.425 0-.712-.288T2 14v-4q0-.425.288-.712T3 9h5q.425 0 .713.288T9 10v1h2V7q0-.425.288-.712T12 6h3V5q0-.425.288-.712T16 4h5q.425 0 .713.288T22 5v4q0 .425-.288.713T21 10h-5q-.425 0-.712-.288T15 9V8h-2v8h2v-1q0-.425.288-.712T16 14h5q.425 0 .713.288T22 15v4q0 .425-.288.713T21 20zm1-2h3v-2h-3zM4 13h3v-2H4zm13-5h3V6h-3zm0 10v-2zM7 13v-2zm10-5V6z"/></svg>',
+    selectAll:
+        '<svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><path fill="currentColor" d="M7 17V7h10v10zm2-2h6V9H9zm-4 4v2q-.825 0-1.412-.587T3 19zm-2-2v-2h2v2zm0-4v-2h2v2zm0-4V7h2v2zm2-4H3q0-.825.588-1.412T5 3zm2 16v-2h2v2zM7 5V3h2v2zm4 16v-2h2v2zm0-16V3h2v2zm4 16v-2h2v2zm0-16V3h2v2zm4 16v-2h2q0 .825-.587 1.413T19 21m0-4v-2h2v2zm0-4v-2h2v2zm0-4V7h2v2zm0-4V3q.825 0 1.413.588T21 5z"/></svg>',
+    undo: '<svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><path fill="currentColor" d="M8 19q-.425 0-.712-.288T7 18t.288-.712T8 17h6.1q1.575 0 2.738-1T18 13.5T16.838 11T14.1 10H7.8l1.9 1.9q.275.275.275.7t-.275.7t-.7.275t-.7-.275L4.7 9.7q-.15-.15-.213-.325T4.426 9t.063-.375T4.7 8.3l3.6-3.6q.275-.275.7-.275t.7.275t.275.7t-.275.7L7.8 8h6.3q2.425 0 4.163 1.575T20 13.5t-1.737 3.925T14.1 19z"/></svg>',
+    disconnect:
+        '<svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><g fill="none"><path d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"/><path fill="currentColor" d="M10.232 10.231a5 5 0 0 1 6.89-.172l.181.172l2.828 2.829a5 5 0 0 1-6.89 7.243l-.18-.172l-2.122-2.122a1 1 0 0 1 1.32-1.497l.094.083l2.122 2.122a3 3 0 0 0 4.377-4.1l-.135-.143l-2.828-2.828a3 3 0 0 0-4.243 0a1 1 0 0 1-1.414-1.415M8 17a1 1 0 0 1 .993.883L9 18v2a1 1 0 0 1-1.993.117L7 20v-2a1 1 0 0 1 1-1m-3-2a1 1 0 0 1 .117 1.993L5 17H4a1 1 0 0 1-.117-1.993L4 15zM3.868 3.867a5 5 0 0 1 6.89-.172l.181.172L13.06 5.99a1 1 0 0 1-1.32 1.497l-.094-.083l-2.121-2.121A3 3 0 0 0 5.147 9.38l.135.144l2.829 2.829a3 3 0 0 0 4.242 0a1 1 0 1 1 1.415 1.414a5 5 0 0 1-6.89.172l-.182-.172l-2.828-2.829a5 5 0 0 1 0-7.07ZM20 7a1 1 0 1 1 0 2h-1a1 1 0 1 1 0-2zm-4-4a1 1 0 0 1 .993.883L17 4v2a1 1 0 0 1-1.993.117L15 6V4a1 1 0 0 1 1-1"/></g></svg>',
 };
 
 const CANVAS_MAX_LEFT = 1e5;

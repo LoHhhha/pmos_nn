@@ -140,7 +140,10 @@ const EXPORT_ICON = ICONS.export;
         MESSAGE_HANDLER(MESSAGE_TYPE.ExportGraph, (event) => {
             // base on node.inputEndpointPrev
             const allNodes = [];
-            if (event.detail?.nodes[Symbol.iterator] === undefined) {
+            if (
+                event.detail?.nodes === undefined ||
+                event.detail.nodes[Symbol.iterator] === undefined
+            ) {
                 const canvasEle = document.getElementById("canvas");
                 for (const element of canvasEle.children) {
                     const elementClassName = String(element?.className);
@@ -228,7 +231,7 @@ const EXPORT_ICON = ICONS.export;
             });
         });
 
-        const nodeInformation = MEMORY_GET("node-information"); // readonly
+        const nodeInformation = MEMORY_GET(MEMORY_KEYS.NodeInformation); // readonly
         const apiName2operators = new Map();
         for (const operator of nodeInformation.operators) {
             apiName2operators.set(operator.apiName, operator);

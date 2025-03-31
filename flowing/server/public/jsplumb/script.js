@@ -4,6 +4,7 @@
             container: container,
             paintStyle: {
                 stroke: "var(--jsplumb-connection-color)",
+                strokeWidth: 3,
             },
             endpointStyle: { fill: "var(--jsplumb-endpoint-color)" },
         });

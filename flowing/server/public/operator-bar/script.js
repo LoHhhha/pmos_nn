@@ -3,14 +3,19 @@
  *
  * MESSAGE_TYPE.CreateNodes
  *      (window left, top)
- *      <event.detail.nodesInfo: Array> <event.detail.connectionsInfo: Array> [<event.detail.offsetLeft: int> <event.detail.offsetTop: int>]
- *          <event.detail.nodesInfo>: [{apiName?, config?, left?, top?, content}] apiName or config require at least one, apiName preferential
- *          <event.detail.connectionsInfo> [{srcNodeIdx, srcEndpointIdx, tarNodeIdx, tarEndpointIdx}]
- *          [<event.detail.noSelectNodes: bool>]
- *          -> node
+ *      <event.detail.nodesInfo: Array>
+ *          [{apiName?, config?, left?, top?, content,id?}] apiName or config require at least one, apiName preferential, id not need to get if not necessary
+ *      <event.detail.connectionsInfo: Array>
+ *          [{srcNodeIdx, srcEndpointIdx, tarNodeIdx, tarEndpointIdx}]
+ *      [<event.detail.offsetLeft: int> <event.detail.offsetTop: int>]
+ *      [<event.detail.undoHelperCall:bool>]
+ *      [<event.detail.noSelectNodes: bool>]
+ *      [<event.detail.viewportCoordinate:bool>]
  *
  * MESSAGE_TYPE.DeleteNodes
  *      <event.detail.nodes: Array<node>|Set<node>>
+ *      [<event.detail.undoHelperCall:bool>]
+ *      [<event.detail.quiet:bool>]
  *
  * MESSAGE_TYPE.SelectNodes
  *      <event.detail.nodes: Array<node>|Set<node>>
@@ -235,7 +240,8 @@ class Node {
     inputEndpointShape; // update at graph, array[array|null|undefined]
     outputEndpointShape; // update at graph, array[array|null|undefined]
     outputEndpointShapeInfo; // update at graph, array[str|null]
-    prevNodes; // update at graph
+    prevNodes; // update at graph, set<Node>
+    connections; // update at graph, map<string,{connection:connection,src:Node,tar:Node,srcEndpointIdx:int,tarEndpointIdx:int}>
     outline;
     canvas;
     viewport;
@@ -468,33 +474,33 @@ class Node {
 
         // right-key-menu
         this.element.oncontextmenu = (e) => {
+            // if not selected nodes using this node
+            const nodes = Node.SELECTED_NODES_SET.has(this)
+                ? Node.SELECTED_NODES_SET
+                : [this];
+            const nodesLength =
+                nodes instanceof Set ? nodes.size : nodes.length;
             MESSAGE_PUSH(MESSAGE_TYPE.RightKeyMenuShow, {
                 showLeft: e.clientX,
                 showTop: e.clientY,
                 items: [
                     {
-                        title: "Copy",
+                        title: `Copy ${nodesLength} Nodes`,
                         keyTips: "Ctrl+C",
                         icon: ICONS.copy,
                         callback: () => {
-                            // if not selected nodes using this node
                             MESSAGE_PUSH(MESSAGE_TYPE.NodesCopy, {
-                                nodes: Node.SELECTED_NODES_SET.has(this)
-                                    ? Node.SELECTED_NODES_SET
-                                    : [this],
+                                nodes: nodes,
                             });
                         },
                     },
                     {
-                        title: "Delete",
+                        title: `Delete ${nodesLength} Nodes`,
                         keyTips: "Backspace",
                         icon: ICONS.delete,
                         callback: () => {
-                            // if not selected nodes using this node
                             MESSAGE_PUSH(MESSAGE_TYPE.DeleteNodes, {
-                                nodes: Node.SELECTED_NODES_SET.has(this)
-                                    ? Node.SELECTED_NODES_SET
-                                    : [this],
+                                nodes: nodes,
                             });
                         },
                     },
@@ -505,11 +511,8 @@ class Node {
                         title: "Export Selected",
                         icon: ICONS.export,
                         callback: () => {
-                            // if not selected nodes using this node
                             MESSAGE_PUSH(MESSAGE_TYPE.ExportGraph, {
-                                nodes: Node.SELECTED_NODES_SET.has(this)
-                                    ? Node.SELECTED_NODES_SET
-                                    : [this],
+                                nodes: nodes,
                             });
                         },
                     },
@@ -541,9 +544,13 @@ class Node {
         top,
         jsPlumbNavigator,
         content = undefined,
-        initNow = true
+        initNow = true,
+        id = undefined // warning: do not push a id >= getNextNodeId(), and it must be exist prev.
     ) {
-        this.id = getNextNodeId();
+        if (id === undefined) {
+            id = getNextNodeId();
+        }
+        this.id = id;
         this.config = nodeConfig;
         Node.jsPlumbInstance = jsPlumbNavigator.jsPlumbInstance;
         this.canvas = jsPlumbNavigator.canvasEle;
@@ -562,6 +569,7 @@ class Node {
             null
         );
         this.prevNodes = new Set();
+        this.connections = new Map();
 
         this.element = getNodeElement(nodeConfig);
         this.element.id = this.id;
@@ -645,6 +653,9 @@ class Node {
                 this.#init.bind(this, left, top)
             );
         }
+
+        // add to Id2Node
+        MEMORY_GET(MEMORY_KEYS.Id2Node).set(id, this);
     }
 
     select(showOverview) {
@@ -680,6 +691,8 @@ class Node {
             );
             this.element.oncontextmenu = null;
             this.element.remove();
+            // delete from Id2Node
+            MEMORY_GET(MEMORY_KEYS.Id2Node).delete(this.id);
             CURRENT_NODES_COUNT--;
         }
         // delete from MiniMap
@@ -1043,7 +1056,7 @@ class OperatorBar {
 
 (function () {
     // add info to share
-    MEMORY_SET("node-information", {
+    MEMORY_SET(MEMORY_KEYS.NodeInformation, {
         argsInputType: operatorBarNamespace.argsInputType,
         argsType: operatorBarNamespace.argsType,
         argsValueCheck: operatorBarNamespace.argsValueCheck,
@@ -1058,6 +1071,9 @@ class OperatorBar {
             nodeOverviewPosition: "right-bottom", // [top / bottom]-[left / right]
             needSearch: true,
         };
+
+        // init Id2Node
+        MEMORY_SET(MEMORY_KEYS.Id2Node, new Map());
 
         /**
          * using to:
@@ -1120,7 +1136,9 @@ class OperatorBar {
 
                 element.origin.dispose();
             }
+
             MESSAGE_PUSH(MESSAGE_TYPE.NavigatorViewAllFit);
+            MESSAGE_PUSH(MESSAGE_TYPE.OperationRecordReset);
         });
 
         MESSAGE_HANDLER(MESSAGE_TYPE.CreateNodes, (event) => {
@@ -1140,8 +1158,11 @@ class OperatorBar {
             offsetLeft = offsetLeft === undefined ? 0 : offsetLeft;
             offsetTop = offsetTop === undefined ? 0 : offsetTop;
 
-            const addNodes = Array(0);
-            for (let { apiName, config, left, top, content } of event.detail
+            const isViewportCoordinate = event.detail?.viewportCoordinate;
+            const canvasBounds = jsPlumbNavigator.getCanvasBounds();
+
+            const addNodes = [];
+            for (let { id, apiName, config, left, top, content } of event.detail
                 .nodesInfo) {
                 if (apiName !== undefined) {
                     config =
@@ -1158,18 +1179,31 @@ class OperatorBar {
                 left = left === undefined ? 0 : left;
                 top = top === undefined ? 0 : top;
 
+                left += offsetLeft;
+                top += offsetTop;
+
+                if (isViewportCoordinate) {
+                    left += canvasBounds.left;
+                    top += canvasBounds.top;
+                }
+
                 try {
                     const node = new Node(
                         config,
-                        left + offsetLeft,
-                        top + offsetTop,
+                        left,
+                        top,
                         jsPlumbNavigator,
                         content,
-                        false
+                        false,
+                        id
                     );
                     addNodes.push(node);
                 } catch (err) {
-                    console.error("[CreateNodes]", err, event);
+                    console.error("[CreateNodes] create node error", {
+                        err,
+                        event,
+                        apiName,
+                    });
                     return false;
                 }
             }
@@ -1178,13 +1212,14 @@ class OperatorBar {
                 MESSAGE_PUSH(MESSAGE_TYPE.SelectNodes, { nodes: addNodes });
             }
 
-            try {
-                for (const {
-                    srcNodeIdx,
-                    srcEndpointIdx,
-                    tarNodeIdx,
-                    tarEndpointIdx,
-                } of event.detail.connectionsInfo) {
+            const createConnections = [];
+            for (const {
+                srcNodeIdx,
+                srcEndpointIdx,
+                tarNodeIdx,
+                tarEndpointIdx,
+            } of event.detail.connectionsInfo) {
+                try {
                     if (
                         addNodes[srcNodeIdx].outputEndpoint[srcEndpointIdx] ==
                             undefined ||
@@ -1193,6 +1228,16 @@ class OperatorBar {
                     ) {
                         throw "endpoint not found";
                     }
+
+                    MEMORY_GET(MEMORY_KEYS.ConnectionCreateIgnore).add(
+                        getConnectionKey(
+                            addNodes[srcNodeIdx].id,
+                            srcEndpointIdx,
+                            addNodes[tarNodeIdx].id,
+                            tarEndpointIdx
+                        )
+                    );
+
                     jsPlumbNavigator.jsPlumbInstance.connect({
                         source: addNodes[srcNodeIdx].outputEndpoint[
                             srcEndpointIdx
@@ -1201,21 +1246,41 @@ class OperatorBar {
                             tarEndpointIdx
                         ],
                     });
+
+                    createConnections.push({
+                        src: addNodes[srcNodeIdx],
+                        tar: addNodes[tarNodeIdx],
+                        srcEndpointIdx,
+                        tarEndpointIdx,
+                    });
+                } catch (err) {
+                    console.error("[CreateNodes] can't connect some of nodes", {
+                        err,
+                        event,
+                        src: addNodes[srcNodeIdx],
+                        tar: addNodes[tarNodeIdx],
+                        srcEndpointIdx,
+                        tarEndpointIdx,
+                    });
+                    return false;
                 }
-            } catch (err) {
-                console.error(
-                    "[CreateNodes] can't connect some of nodes",
-                    err,
-                    event
-                );
-                return false;
+            }
+
+            if (!event.detail?.undoHelperCall) {
+                MESSAGE_CALL(MESSAGE_TYPE.OperationSave, {
+                    createNodes: addNodes,
+                    createConnections,
+                });
             }
 
             return true;
         });
 
         MESSAGE_HANDLER(MESSAGE_TYPE.DeleteNodes, (event) => {
-            if (event.detail.nodes[Symbol.iterator] === undefined) {
+            if (
+                event.detail?.nodes === undefined ||
+                event.detail.nodes[Symbol.iterator] === undefined
+            ) {
                 console.error(
                     "[DeleteNodes] get an unexpected event as",
                     event
@@ -1228,21 +1293,80 @@ class OperatorBar {
                     ? event.detail.nodes.length
                     : event.detail.nodes.size;
 
+            if (len === 0) {
+                console.warn("[DeleteNodes] not nodes need to delete.", event);
+                return;
+            }
+
+            // unique
+            const deleteConnectionsMap = new Map();
+            for (const node of event.detail.nodes) {
+                for (const [key, info] of node.connections) {
+                    deleteConnectionsMap.set(key, info);
+                }
+            }
+
+            if (!event.detail?.undoHelperCall) {
+                const deleteConnections = [];
+                for (const [_, info] of deleteConnectionsMap) {
+                    deleteConnections.push({
+                        src: info.src,
+                        srcEndpointIdx: info.srcEndpointIdx,
+                        tar: info.tar,
+                        tarEndpointIdx: info.tarEndpointIdx,
+                    });
+
+                    MEMORY_GET(MEMORY_KEYS.ConnectionDeleteIgnore).add(
+                        getConnectionKey(
+                            info.src.id,
+                            info.srcEndpointIdx,
+                            info.tar.id,
+                            info.tarEndpointIdx
+                        )
+                    );
+                }
+                MESSAGE_CALL(MESSAGE_TYPE.OperationSave, {
+                    deleteNodes: event.detail.nodes,
+                    deleteConnections,
+                });
+            }
+
+            if (!event.detail?.quiet) {
+                MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
+                    config: PROMPT_CONFIG.INFO,
+                    iconSvg: DELETE_ICON,
+                    content: `Delete ${len} node(s) and ${deleteConnectionsMap.size} connection(s)`,
+                    timeout: 1000,
+                });
+            }
+
+            // delete
             for (const node of event.detail.nodes) {
                 node.dispose();
             }
 
-            console.info(`[DeleteNodes] delete ${len} node(s).`);
-            MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
-                config: PROMPT_CONFIG.INFO,
-                iconSvg: DELETE_ICON,
-                content: `Delete ${len} node(s)`,
-                timeout: 1000,
-            });
+            console.info(
+                `[DeleteNodes] delete ${len} node(s) and ${deleteConnectionsMap.size} connection(s).`
+            );
         });
 
         MESSAGE_HANDLER(MESSAGE_TYPE.SelectNodes, (event) => {
-            if (event.detail.nodes[Symbol.iterator] === undefined) {
+            // select all when event.detail.nodes === undefined
+            let nodes = event.detail?.nodes;
+            if (nodes === undefined) {
+                nodes = [];
+
+                const canvasEle = document.getElementById("canvas");
+                for (const element of canvasEle.children) {
+                    const elementClassName = String(element?.className);
+                    if (!elementClassName.includes("node")) continue;
+
+                    nodes.push(element.origin);
+                }
+            }
+
+            // event.detail?.nodes !== undefined
+            if (nodes[Symbol.iterator] === undefined) {
                 console.error(
                     "[SelectNodes] get an unexpected event as",
                     event
@@ -1250,7 +1374,7 @@ class OperatorBar {
                 return;
             }
 
-            Node.setSelectNodes(event.detail.nodes);
+            Node.setSelectNodes(nodes);
         });
 
         // init overview
@@ -1306,6 +1430,44 @@ class OperatorBar {
             }
         );
 
+        /**
+         * right-key-menu for connections
+         */
+        jsPlumbNavigator.jsPlumbInstance.bind(
+            "connection:contextmenu",
+            (connection) => {
+                const displayCoordinate = MEMORY_GET(
+                    MEMORY_KEYS.PrevMouseRightButtonCoordinate
+                );
+                MESSAGE_PUSH(MESSAGE_TYPE.RightKeyMenuShow, {
+                    showLeft: displayCoordinate.left,
+                    showTop: displayCoordinate.top,
+                    items: [
+                        {
+                            title: "Disconnect",
+                            keyTips: "Drag",
+                            icon: ICONS.disconnect,
+                            callback: () => {
+                                jsPlumbNavigator.jsPlumbInstance.deleteConnection(
+                                    connection
+                                );
+                            },
+                        },
+                    ],
+                });
+                return false;
+            }
+        );
+
+        ADD_KEY_HANDLER(
+            DEFAULT_KEY_NAMESPACE,
+            "a",
+            [MODIFIER_KEY_CODE.ctrl],
+            () => {
+                MESSAGE_PUSH(MESSAGE_TYPE.SelectNodes);
+            }
+        );
+
         ADD_KEY_HANDLER(
             DEFAULT_KEY_NAMESPACE,
             "c",
@@ -1323,6 +1485,15 @@ class OperatorBar {
             [MODIFIER_KEY_CODE.ctrl],
             () => {
                 MESSAGE_PUSH(MESSAGE_TYPE.NodesPaste);
+            }
+        );
+
+        ADD_KEY_HANDLER(
+            DEFAULT_KEY_NAMESPACE,
+            "z",
+            [MODIFIER_KEY_CODE.ctrl],
+            () => {
+                MESSAGE_PUSH(MESSAGE_TYPE.OperationUndo);
             }
         );
 

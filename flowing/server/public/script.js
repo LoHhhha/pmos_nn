@@ -14,6 +14,22 @@ jsPlumb.ready(() => {
     const viewportEle = document.getElementById("viewport");
     const canvasEle = document.getElementById("canvas");
 
+    // record the mouse button coordinate
+    window.document.addEventListener("mouseup", (event) => {
+        const memKey =
+            event.button === 0
+                ? MEMORY_KEYS.PrevMouseLeftButtonCoordinate
+                : event.button === 1
+                ? MEMORY_KEYS.PrevMouseMiddleButtonCoordinate
+                : MEMORY_KEYS.PrevMouseRightButtonCoordinate;
+        MEMORY_SET(memKey, {
+            left: event.clientX,
+            top: event.clientY,
+        });
+    });
+    // disable default contextmenu
+    window.document.oncontextmenu = () => false;
+
     window.addChecksBackgroundTo(viewportEle);
 
     const jsPlumbInstance = window.createJsPlumbInstance(canvasEle);
@@ -41,4 +57,6 @@ jsPlumb.ready(() => {
     window.addPortHelper();
 
     window.addLLMCodeGenerator();
+
+    window.addUndoHelper(jsPlumbInstance);
 });

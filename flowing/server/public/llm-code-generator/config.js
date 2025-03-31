@@ -21,7 +21,9 @@ LLMCodeGeneratorNamespace.modulesDatalistInfo = {
     ],
 };
 
-LLMCodeGeneratorNamespace.nodeInformation = MEMORY_GET("node-information"); // readonly
+LLMCodeGeneratorNamespace.nodeInformation = MEMORY_GET(
+    MEMORY_KEYS.NodeInformation
+); // readonly
 
 LLMCodeGeneratorNamespace.promptConfig = {
     operators: LLMCodeGeneratorNamespace.nodeInformation?.operators?.map(

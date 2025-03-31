@@ -525,6 +525,23 @@ class Navigator {
                     },
                 },
                 {
+                    title: "Select All",
+                    keyTips: "Ctrl+A",
+                    icon: ICONS.selectAll,
+                    callback: () => {
+                        MESSAGE_PUSH(MESSAGE_TYPE.SelectNodes);
+                    },
+                },
+                {
+                    title: "Undo",
+                    keyTips: "Ctrl+Z",
+                    icon: ICONS.undo,
+                    callback: () => {
+                        MESSAGE_PUSH(MESSAGE_TYPE.OperationUndo);
+                    },
+                    disabled: !MEMORY_GET(MEMORY_KEYS.CanUndoOperation, false),
+                },
+                {
                     isSeparator: true,
                 },
                 {
