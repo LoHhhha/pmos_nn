@@ -1,8 +1,8 @@
 # `flowing` 使用说明<br>`flowing` Instruction
 
-注意：由于项目正在不断迭代，本说明可能包含过时的演示动画，请以实际呈现为准。
-<br>
-Note: Because the project is in continuous iteration, this instruction may contain outdated demonstration animations, please refer to the actual presentation.
+> 注意：由于项目正在不断迭代，本说明可能包含过时的演示动画，请以实际呈现为准。
+> <br>
+> Warning: Because the project is in continuous iteration, this instruction may contain outdated demonstration animations, please refer to the actual presentation.
 
 ## 设计网络结构<br>Build Network Structure
 
@@ -89,8 +89,18 @@ Note: Because the project is in continuous iteration, this instruction may conta
 ## 更多进阶技巧<br>More Advanced Tricks
 
 - 单击鼠标右键点击画布中的节点/单击鼠标右键点击画布空白位置，弹出右键菜单。<br>Click the right mouse button on the node in the canvas or the blank area of the canvas to pop up the right-click menu.
+  > 提示：当前支持对算子、画布、连接线唤出右键菜单。
+  > <br>
+  > Note: Currently supports calling up right-click menus for operators, canvas, and connections.
 
   ![right-key-menu](../gif/right-key-menu.gif)
+
+- 发生误操作时，可以通过`Undo`功能完成撤消。<br>In the event of misoperation, undoing can be accomplished with the `Undo` function.
+  > 提示：目前支持算子间连接、算子新建、算子删除的撤消。
+  > <br>
+  > Note: The undoing of inter-operators connections, operator creation, and operators deletion is currently supported.
+
+  ![undo](../gif/undo.gif)
 
 - 按住键盘Ctrl键并单击鼠标左键点击画布中的节点，可多选节点。<br>Hold down the Ctrl key on the keyboard and click the left mouse button on the node in the canvas to multi-select nodes.
 
@@ -105,6 +115,32 @@ Note: Because the project is in continuous iteration, this instruction may conta
   您可以在[这里](../example/flowing/web/)找到一些示例。<br>You can find some examples in [here](../example/flowing/web/).
 
   ![import_nodes](../gif/import_nodes.gif)
+
+## 快捷操作<br>Shortcut Operations
+
+> 注意：只有在对应的响应区域按下快捷键才能触发对应功能，焦点在输入类控件时也无法触发。
+> <br>
+> Warning: The function can only be triggered by pressing the shortcut key in the corresponding response area, and it cannot be triggered when the focus is on the input controls.
+
+> 提示：使用快捷操作调用功能可能与在右键菜单调用对应功能的效果有所差异。
+> <br>
+> Note: The function called from shortcut key may have a different effect from the corresponding function called from the right-click menu.
+
+| 功能名称Name                          | 快捷键Shortcut key      | 响应区域Response Area     | 描述Description                                                                                                                                                                                                                                                              |
+| ------------------------------------- | ----------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 全选<br>Select All                    | `Ctrl`+`A`              | 设计视图<br>Design View   | 框选画布上的所有算子。<br>Select all operators in the canvas.                                                                                                                                                                                                                |
+| 撤消<br>Undo                          | `Ctrl`+`Z`              | 设计视图<br>Design View   | 取消上一次操作带来的修改。<br>Undo the modifications brought about by the previous operation.                                                                                                                                                                                |
+| 复制<br>Copy                          | `Ctrl`+`C`              | 设计视图<br>Design View   | 复制被框选的算子到`PMoS`系统缓冲区，该操作不会改变系统剪贴板内容。<br>Copy the selected operators to the `PMoS` buffer which will not change the system clipboard.                                                                                                           |
+| 粘贴<br>Paste                         | `Ctrl`+`V`              | 设计视图<br>Design View   | 将`PMoS`系统缓冲区中的算子复制到原有位置附近。与此不同的是，右键菜单粘贴时算子会被粘贴在右键菜单附近。<br>Copy operators in the `PMoS` buffer near its original location. Unlike this, operators is pasted near the right-click menu when pasting from the right-click menu. |
+| 删除<br>Delete                        | `Backspace`             | 设计视图<br>Design View   | 删除被框选的算子。<br>Delete the selected operators.                                                                                                                                                                                                                         |
+| 放大画布<br>Zoom In                   | `+`, `Ctrl`+`WheelUp`   | 设计视图<br>Design View   | -                                                                                                                                                                                                                                                                            |
+| 缩小画布<br>Zoom Out                  | `-`, `Ctrl`+`WheelDown` | 设计视图<br>Design View   | -                                                                                                                                                                                                                                                                            |
+| 上移画布<br>Canvas Up                 | `↑`, `WheelUp`          | 设计视图<br>Design View   | -                                                                                                                                                                                                                                                                            |
+| 下移画布<br>Canvas Down               | `↓`, `WheelDown`        | 设计视图<br>Design View   | -                                                                                                                                                                                                                                                                            |
+| 左移画布<br>Canvas Left               | `←`                     | 设计视图<br>Design View   | -                                                                                                                                                                                                                                                                            |
+| 右移画布<br>Canvas Right              | `→`                     | 设计视图<br>Design View   | -                                                                                                                                                                                                                                                                            |
+| 返回画布原点<br>Back to Canvas Origin | `Home`                  | 设计视图<br>Design View   | -                                                                                                                                                                                                                                                                            |
+| 退出<br>Exit                          | `Esc`                   | 覆盖视图<br>Covering View | 如果当前覆盖视图可退出，则退出当前覆盖视图。<br>Exits the current covering view if permissible.                                                                                                                                                                              |
 
 ## 支持的算子<br>Supported Operators
 
