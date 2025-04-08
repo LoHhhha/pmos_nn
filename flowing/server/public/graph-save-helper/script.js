@@ -56,7 +56,13 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
                 };
             }
 
-            if (event.detail?.asNew || CURRENT_GRAPH_KEY === undefined) {
+            const memoryGraphInfo = GraphSaveUtils.getGraph(CURRENT_GRAPH_KEY);
+
+            if (
+                event.detail?.asNew ||
+                CURRENT_GRAPH_KEY === undefined ||
+                memoryGraphInfo === undefined
+            ) {
                 // as a new graph, change current graphKey
                 CURRENT_GRAPH_KEY = GraphSaveUtils.addGraph({
                     ...graphInfo,
