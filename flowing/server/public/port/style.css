@@ -49,3 +49,19 @@
 .port-button-disable:hover {
     background-color: var(--port-button-disable-background-color);
 }
+
+.port-setting-combo {
+    display: grid;
+    grid-template-columns: 1fr auto;
+}
+
+.port-setting-input {
+    margin-bottom: var(--margin);
+    border-radius: var(--radius);
+    border: none;
+    outline: var(--border-width) solid
+        var(--node-overview-item-input-outline-color);
+    backdrop-filter: var(--blur);
+    background-color: var(--node-overview-item-input-background-color);
+    width: 100%;
+}

@@ -26,8 +26,14 @@
 
     --bar-button-height: var(--node-height);
     --bar-button-outline-color: var(--container-outline-color);
+    --bar-button-outline-hover-color: var(--default-color);
     --bar-button-background-color: var(--container-background-color);
     --bar-button-background-hover-color: var(--container-outline-color);
+
+    --bar-input-height: var(--node-height);
+    --bar-input-outline-color: var(--content-outline-color);
+    --bar-input-outline-hover-color: var(--default-color);
+    --bar-input-background-color: var(--content-background-color);
 
     --mode-bar-button-height: calc(1.5 * var(--node-height));
     --mode-bar-button-icon-height: calc(var(--node-height));
@@ -36,6 +42,8 @@
 
     --clear-button-background-color: var(--lucency-reddish);
     --clear-button-background-hover-color: var(--lucency-red);
+
+    --bar-hide-button-height: var(--node-height);
 }
 
 .main-bar {
@@ -45,6 +53,8 @@
     gap: var(--main-bar-margin);
     width: var(--main-bar-width);
     user-select: none;
+    justify-content: center;
+    align-items: center;
 }
 
 .combo-bar {
@@ -144,6 +154,25 @@
 
 .bar-button:hover {
     background-color: var(--bar-button-background-hover-color);
+    outline: var(--hover-border-width) solid
+        var(--bar-button-outline-hover-color);
+}
+
+.bar-input {
+    flex: 1;
+    font-size: medium;
+    backdrop-filter: var(--blur);
+    background-color: var(--bar-input-background-color);
+    border-radius: var(--radius);
+    height: var(--bar-input-height);
+    border-style: none;
+    outline: var(--border-width) solid var(--bar-input-outline-color);
+    align-self: center;
+}
+
+.bar-input:hover {
+    outline: var(--hover-border-width) solid
+        var(--bar-input-outline-hover-color);
 }
 
 .bar-text {
@@ -183,4 +212,23 @@
 
 #clear-button:hover {
     background-color: var(--clear-button-background-hover-color);
+}
+
+#graph-save-bar-input {
+    width: 100%;
+    text-align: center;
+}
+
+.bar-hidden-mode {
+    overflow: hidden;
+    height: 0px;
+    padding: 0px;
+    margin: 0px;
+}
+
+.bar-hide-button {
+    width: var(--bar-hide-button-height);
+    height: var(--bar-hide-button-height);
+    cursor: pointer;
+    margin-top: calc(-1 * var(--margin));
 }

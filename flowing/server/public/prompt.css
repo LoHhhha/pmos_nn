@@ -7,7 +7,7 @@
     --prompt-item-outline-color: var(--container-outline-color);
     --prompt-item-shadow-color: var(--content-background-color);
     --prompt-item-hover-outline-color: var(--default-color);
-    --prompt-item-hover-outline-width: calc(var(--border-width) * 2);
+    --prompt-item-hover-outline-width: var(--hover-border-width);
 
     --prompt-item-progress-color: var(--prompt-item-outline-color);
 

@@ -4,6 +4,8 @@
     --operator-bar-shadow-color: var(--content-background-color);
     --operator-bar-margin: var(--margin);
 
+    --operator-bar-hide-button-width: var(--node-height);
+
     --operator-bar-search-bar-background-color: var(--content-background-color);
 
     --operator-bar-icon-margin: calc(var(--margin) / 2);
@@ -17,8 +19,8 @@
 
     --node-selected-outline-color: var(--default-color);
     --node-hover-outline-color: var(--default-color);
-    --node-selected-outline-width: calc(var(--border-width) * 2);
-    --node-hover-outline-width: calc(var(--border-width) * 2);
+    --node-selected-outline-width: var(--hover-border-width);
+    --node-hover-outline-width: var(--hover-border-width);
 
     --overview-title-hover-color: var(--lucency-bluish);
 
@@ -29,7 +31,7 @@
     --node-overview-background-color: var(--container-background-color);
     --node-overview-shadow-color: var(--content-background-color);
     --node-overview-width: 300px;
-    --node-overview-container-max-height: 250px;
+    --node-overview-container-max-height: 20vh;
     --node-overview-margin: var(--margin);
     --node-overview-outline-color: var(--container-outline-color);
     --node-overview-item-input-background-color: var(
@@ -84,14 +86,21 @@
     color: var(--node-end-point-overlays-label-color);
 }
 
+.operator-bar-container {
+    position: absolute;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
 .operator-bar {
     touch-action: pan-y;
-    position: absolute;
     backdrop-filter: var(--blur);
     background-color: var(--operator-bar-background-color);
     outline: var(--border-width) solid var(--operator-bar-outline-color);
     height: calc(100vh - 2 * var(--operator-bar-margin));
-    width: auto;
+    width: fit-content;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -102,6 +111,19 @@
     user-select: none;
     margin: var(--operator-bar-margin);
     box-shadow: var(--shadow) var(--operator-bar-shadow-color);
+}
+
+.operator-bar-hide-mode {
+    overflow: hidden;
+    width: 0px;
+    padding: 0px;
+}
+
+.operator-bar-hide-button {
+    margin-left: calc(-1 * var(--margin));
+    cursor: pointer;
+    width: var(--operator-bar-hide-button-width);
+    height: var(--operator-bar-hide-button-width);
 }
 
 .operator-bar-sep {
@@ -118,7 +140,7 @@
 
 .operator-bar-sep:hover {
     border-color: var(--operator-bar-sep-hover-border-color);
-    border-width: calc(2 * var(--border-width));
+    border-width: var(--hover-border-width);
     padding-bottom: 0;
     cursor: pointer;
 }

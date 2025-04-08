@@ -50,10 +50,12 @@ const MESSAGE_TYPE = {
 
     // prompt
     PromptShow: "prompt-show",
+    PromptStop: "prompt-stop",
+    PromptStart: "prompt-start",
 
     // port
     ImportGraph: "import-graph", // menu
-    ExportGraph: "export-graph", // menu
+    ExportGraph: "export-graph", // menu, return
     CheckImportGraph: "check-import-graph", // return
 
     // llm-code-generator
@@ -63,6 +65,11 @@ const MESSAGE_TYPE = {
     OperationSave: "operation-save",
     OperationUndo: "operation-undo",
     OperationRecordReset: "operation-record-reset",
+
+    // graph-save-helper
+    SaveGraph: "save-graph",
+    GraphSaved: "graph-saved", // out
+    ShowSaveGraphs: "show-save-graphs",
 };
 
 const MESSAGE_HANDLER_MAP = new Map();

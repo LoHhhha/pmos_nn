@@ -319,7 +319,6 @@ const TIDY_NODES_ICON = ICONS.tidy;
             node.inputEndpointShape.includes(NOT_SHAPE) ||
             node.inputEndpointShape.includes(ERROR_RESULT_SHAPE)
         ) {
-            console.debug("[PushShape] clear", node);
             // need to clear
 
             for (let idx = 0; idx < node.outputEndpoint.length; idx++) {
@@ -359,7 +358,6 @@ const TIDY_NODES_ICON = ICONS.tidy;
                 }
             }
         } else {
-            console.debug("[PushShape] calculate", node);
             // need to update
 
             // Output doesn't need to update

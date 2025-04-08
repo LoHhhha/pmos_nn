@@ -6,9 +6,14 @@
  *
  * MESSAGE_TYPE.ImportGraph
  *      [<event.detail.default string>]
+ *      [<event.detail.withoutConfirm bool>]
+ *      [<event.detail.callback>]
  *
  * MESSAGE_TYPE.ExportGraph
+ *      return the first time calculate result.
  *      [<event.detail.nodes Set<Node>|Array<Node>>]
+ *      [<event.detail.containCoordinate bool>]
+ *      [<event.detail.quiet bool>]
  *
  * MESSAGE_TYPE.CheckImportGraph
  *      <event.detail.data:object> => return null when ok, return "error_reason" when error
@@ -47,11 +52,20 @@ const EXPORT_ICON = ICONS.export;
                     return;
                 }
 
+                const containCoordinate =
+                    importObject.containCoordinate === true;
+
+                // step1: clear
                 MESSAGE_CALL(MESSAGE_TYPE.ClearNodes);
+
+                // step2.1: create
                 const result = MESSAGE_CALL(MESSAGE_TYPE.CreateNodes, {
                     nodesInfo: importObject.nodes,
                     connectionsInfo: importObject.connections,
+                    viewportCoordinate: true,
                 });
+
+                // step2.2: if create not success
                 if (result.includes(false)) {
                     // error
                     console.error(
@@ -67,11 +81,23 @@ const EXPORT_ICON = ICONS.export;
                     });
                     return;
                 }
-                setTimeout(() => {
-                    MESSAGE_CALL(MESSAGE_TYPE.TidyNodes, {
-                        notNeedCovering: true,
-                    });
 
+                // step3: clean
+                setTimeout(() => {
+                    // step3.1 tidy
+                    if (!containCoordinate) {
+                        MESSAGE_CALL(MESSAGE_TYPE.TidyNodes, {
+                            notNeedCovering: true,
+                        });
+                    } else {
+                        MESSAGE_PUSH(MESSAGE_TYPE.NavigatorViewAllFit);
+                    }
+
+                    if (event.detail?.callback) {
+                        event.detail.callback();
+                    }
+
+                    // step3.2 prompt
                     MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                         config: PROMPT_CONFIG.INFO,
                         iconSvg: IMPORT_ICON,
@@ -112,23 +138,29 @@ const EXPORT_ICON = ICONS.export;
             };
             jsonTextEle.onchange();
 
+            const importNodes = () => {
+                MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
+                    title: "Importing Nodes...",
+                    afterInit: () => {
+                        importNodesFromJsonTextEle();
+                        MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose);
+                    },
+                });
+            };
+
             importCheckButton.onclick = () => {
                 if (importCheckButton.classList.contains("port-button-disable"))
                     return;
 
                 MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose, {
-                    afterClose: () => {
-                        MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
-                            title: "Importing Nodes...",
-                            afterInit: () => {
-                                importNodesFromJsonTextEle();
-                                MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose);
-                            },
-                        });
-                    },
+                    afterClose: importNodes,
                 });
             };
 
+            if (event.detail?.withoutConfirm) {
+                importNodes();
+                return;
+            }
             MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
                 title: "Import Graph",
                 elements: [jsonTextEle, importCheckButton],
@@ -156,61 +188,39 @@ const EXPORT_ICON = ICONS.export;
                 }
             }
 
-            const nodeId2Index = new Map();
+            const exportProperty = {
+                containCoordinate: event.detail?.containCoordinate === true,
+                jsonStr: "",
+            };
 
-            const exportObject = {};
-            exportObject.nodes = [];
-            for (const [idx, node] of allNodes.entries()) {
-                const nodeObject = {};
-                nodeObject.apiName = node.config.apiName;
-                nodeObject.content = {};
-                for (const [k, v] of Object.entries(node.content)) {
-                    if (k === "default") continue;
-                    nodeObject.content[k] = v;
-                }
-                exportObject.nodes.push(nodeObject);
-
-                nodeId2Index.set(node.id, idx);
+            // elements
+            const exportCoordinateCombo = document.createElement("div");
+            exportCoordinateCombo.className = "port-setting-combo";
+            const exportCoordinateInputEle = document.createElement("select");
+            exportCoordinateInputEle.className = "port-setting-input";
+            for (const value of [false, true]) {
+                const optionEle = document.createElement("option");
+                optionEle.value = value;
+                optionEle.textContent =
+                    value.toString().charAt(0).toUpperCase() +
+                    value.toString().slice(1);
+                exportCoordinateInputEle.appendChild(optionEle);
             }
-
-            exportObject.connections = [];
-            for (const [targetIdx, node] of allNodes.entries()) {
-                for (const [
-                    targetEndpointIdx,
-                    point,
-                ] of node.inputEndpointPrev.entries()) {
-                    if (point == null) continue;
-
-                    const [sourceId, sourceEndpointIdx] = [
-                        point.nodeId,
-                        point.endpointIdx,
-                    ];
-                    const sourceIdx = nodeId2Index.get(sourceId);
-                    if (sourceIdx === undefined) {
-                        continue;
-                    }
-
-                    exportObject.connections.push({
-                        srcNodeIdx: sourceIdx,
-                        srcEndpointIdx: sourceEndpointIdx,
-                        tarNodeIdx: targetIdx,
-                        tarEndpointIdx: targetEndpointIdx,
-                    });
-                }
-            }
-
-            const exportJsonStr = JSON.stringify(exportObject);
+            exportCoordinateInputEle.value = exportProperty.containCoordinate;
+            const exportCoordinateTitleEle = document.createElement("label");
+            exportCoordinateTitleEle.textContent = "Export with coordinates";
+            exportCoordinateCombo.appendChild(exportCoordinateTitleEle);
+            exportCoordinateCombo.appendChild(exportCoordinateInputEle);
 
             const exportJsonTextEle = document.createElement("textarea");
             exportJsonTextEle.className = "port-textarea";
             exportJsonTextEle.readOnly = true;
-            exportJsonTextEle.value = exportJsonStr;
 
             const exportCopyEle = document.createElement("button");
             exportCopyEle.className = "port-button";
             exportCopyEle.textContent = "Copy to Clipboard";
             exportCopyEle.onclick = () => {
-                navigator.clipboard.writeText(exportJsonStr);
+                navigator.clipboard.writeText(exportProperty.jsonStr);
 
                 exportCopyEle.textContent = "Copied!";
                 if (exportCopyEle.timeoutId) {
@@ -223,12 +233,87 @@ const EXPORT_ICON = ICONS.export;
                 }, 1000);
             };
 
-            MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
-                title: "Export Graph",
-                elements: [exportJsonTextEle, exportCopyEle],
-                buttonMode: COVERING_BUTTON_MODE.CloseButton,
-                init: () => exportJsonTextEle.focus(),
-            });
+            const updateExportData = () => {
+                const nodeId2Index = new Map();
+
+                const exportObject = {};
+                if (exportProperty.containCoordinate) {
+                    exportObject.containCoordinate =
+                        exportProperty.containCoordinate;
+                }
+                exportObject.nodes = [];
+                for (const [idx, node] of allNodes.entries()) {
+                    const nodeObject = {};
+                    nodeObject.apiName = node.config.apiName;
+                    nodeObject.content = {};
+                    for (const [k, v] of Object.entries(node.content)) {
+                        if (k === "default") continue;
+                        nodeObject.content[k] = v;
+                    }
+                    if (exportProperty.containCoordinate) {
+                        const nodeCoordinate = node.getCoordinates();
+                        nodeObject.left = nodeCoordinate.left;
+                        nodeObject.top = nodeCoordinate.top;
+                    }
+                    exportObject.nodes.push(nodeObject);
+
+                    nodeId2Index.set(node.id, idx);
+                }
+
+                exportObject.connections = [];
+                for (const [targetIdx, node] of allNodes.entries()) {
+                    for (const [
+                        targetEndpointIdx,
+                        point,
+                    ] of node.inputEndpointPrev.entries()) {
+                        if (point == null) continue;
+
+                        const [sourceId, sourceEndpointIdx] = [
+                            point.nodeId,
+                            point.endpointIdx,
+                        ];
+                        const sourceIdx = nodeId2Index.get(sourceId);
+                        if (sourceIdx === undefined) {
+                            continue;
+                        }
+
+                        exportObject.connections.push({
+                            srcNodeIdx: sourceIdx,
+                            srcEndpointIdx: sourceEndpointIdx,
+                            tarNodeIdx: targetIdx,
+                            tarEndpointIdx: targetEndpointIdx,
+                        });
+                    }
+                }
+                exportProperty.jsonStr = JSON.stringify(exportObject);
+
+                exportJsonTextEle.value = exportProperty.jsonStr;
+            };
+            updateExportData();
+
+            exportCoordinateInputEle.onchange = () => {
+                const value =
+                    exportCoordinateInputEle.value.toLowerCase() === "true";
+                if (exportProperty.containCoordinate !== value) {
+                    exportProperty.containCoordinate = value;
+                    updateExportData();
+                }
+            };
+
+            if (!event.detail?.quiet) {
+                MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
+                    title: "Export Graph",
+                    elements: [
+                        exportCoordinateCombo,
+                        exportJsonTextEle,
+                        exportCopyEle,
+                    ],
+                    buttonMode: COVERING_BUTTON_MODE.CloseButton,
+                    init: () => exportJsonTextEle.focus(),
+                });
+            }
+
+            return exportProperty.jsonStr;
         });
 
         const nodeInformation = MEMORY_GET(MEMORY_KEYS.NodeInformation); // readonly

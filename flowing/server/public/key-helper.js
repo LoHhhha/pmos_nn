@@ -152,6 +152,16 @@ const DELETE_KEY_HANDLER = (namespace, key, callback) => {
     window.addEventListener("load", () => {
         ENTER_NEW_KEY_NAMESPACE(DEFAULT_KEY_NAMESPACE);
 
+        // disable default ctrl+'X'
+        window.document.addEventListener("keydown", function (event) {
+            if (!event.ctrlKey) return;
+            const focusedElement = document.activeElement;
+            if (KEY_HELPER_IGNORE_ELEMENTS.includes(focusedElement?.type)) {
+                return;
+            }
+            event.preventDefault();
+        });
+
         window.addEventListener("keyup", (event) => {
             const focusedElement = document.activeElement;
             if (KEY_HELPER_IGNORE_ELEMENTS.includes(focusedElement?.type)) {

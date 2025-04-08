@@ -134,7 +134,11 @@ class Slice {
         MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
             config: PROMPT_CONFIG.INFO,
             iconSvg: UNDO_ICON,
-            content: `Deleted ${needDeleteNodes.length} node(s) and ${this.createConnections.length} connection(s), created ${this.deleteNodes.length} node(s) and ${this.deleteConnections.length} connection(s)`,
+            content: `Changed ${
+                needDeleteNodes.length + this.deleteNodes.length
+            } node(s) and ${
+                this.createConnections.length + this.deleteConnections.length
+            } connection(s).`,
             timeout: 2000,
         });
         console.info(

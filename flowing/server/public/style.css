@@ -28,6 +28,7 @@
     --blur: blur(15px);
 
     --border-width: 1px;
+    --hover-border-width: calc(2 * var(--border-width));
 
     --label-font-size: xx-small;
 
@@ -64,6 +65,7 @@ body {
     color: var(--default-color);
     transition: background-color 0.5s ease, color 0.5s ease;
     touch-action: none;
+    text-overflow: ellipsis;
 }
 
 a,

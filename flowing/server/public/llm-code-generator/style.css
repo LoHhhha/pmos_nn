@@ -133,7 +133,7 @@
 
 .generator-answer-block blockquote {
     padding-left: var(--margin);
-    border-left: calc(2 * var(--border-width)) solid
+    border-left: var(--hover-border-width) solid
         var(--generator-answer-block-border-color);
 }
 

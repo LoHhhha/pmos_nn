@@ -542,6 +542,14 @@ class Navigator {
                     disabled: !MEMORY_GET(MEMORY_KEYS.CanUndoOperation, false),
                 },
                 {
+                    title: "Save",
+                    keyTips: "Ctrl+S",
+                    icon: ICONS.save,
+                    callback: () => {
+                        MESSAGE_PUSH(MESSAGE_TYPE.SaveGraph);
+                    },
+                },
+                {
                     isSeparator: true,
                 },
                 {

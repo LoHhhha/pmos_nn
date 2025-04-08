@@ -74,6 +74,7 @@ class MiniMap {
                 return;
             }
             node.remove();
+            this.miniMapNodeEleMap.delete(event.detail.id);
         });
 
         MESSAGE_HANDLER(MESSAGE_TYPE.RedrawMapNode, (event) => {
@@ -348,7 +349,7 @@ class Toolbar {
                 }
 
                 MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
-                    title: "PMoS",
+                    title: `PMoS\t${PMoS_VERSION}`,
                     text: "Have a good time :)<br>Learn more about PMoS at the follow links.<br>What's more, welcome to report any issue to us!",
                     elements: linkElements,
                     buttonMode: COVERING_BUTTON_MODE.CloseButton,
@@ -405,6 +406,108 @@ class Toolbar {
 
     hide() {
         this.toolbarEle.style.display = "none";
+    }
+}
+
+class GraphSaveBarBuilder {
+    ele;
+    prevSaveTimeEle;
+    saveNameEle;
+    saveButtonEle;
+    saveAsNewButtonEle;
+    archiveButtonEle;
+    constructor(ele) {
+        this.ele = ele;
+
+        this.prevSaveTimeEle = this.#createPrevSaveTimeEle();
+        this.saveNameEle = this.#createSaveNameEle();
+        this.saveButtonEle = this.#createSaveButtonEle();
+        this.saveAsNewButtonEle = this.#createSaveAsNewButtonEle();
+        this.archiveButtonEle = this.#createArchiveButtonEle();
+
+        const buttonsEle = document.createElement("div");
+        buttonsEle.className = "row-bar";
+        buttonsEle.appendChild(this.saveButtonEle);
+        buttonsEle.appendChild(this.saveAsNewButtonEle);
+        buttonsEle.appendChild(this.archiveButtonEle);
+
+        this.ele.appendChild(this.prevSaveTimeEle);
+        this.ele.appendChild(this.saveNameEle);
+        this.ele.appendChild(buttonsEle);
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.GraphSaved, (event) => {
+            this.prevSaveTimeEle.textContent = `Saved at ${new Date(
+                event.detail?.timestamp
+            ).toLocaleString()}`;
+            this.saveNameEle.value = event.detail?.name;
+        });
+    }
+
+    #createPrevSaveTimeEle() {
+        const ele = document.createElement("div");
+        ele.className = "bar-text";
+        ele.textContent = "Unsaved Yet";
+        return ele;
+    }
+
+    #createSaveNameEle() {
+        const ele = document.createElement("input");
+        ele.className = "bar-input";
+        ele.id = "graph-save-bar-input";
+        ele.value = "Unnamed-Graph";
+        ele.placeholder = "enter graph's name here";
+        ele.onchange = () => {
+            MEMORY_SET(MEMORY_KEYS.CurrentGraphSaveName, ele.value);
+        };
+        ele.onchange();
+        return ele;
+    }
+
+    static #createTextButtonEle(text) {
+        const ele = document.createElement("button");
+        ele.className = "bar-button";
+        ele.textContent = text;
+
+        return ele;
+    }
+
+    #createSaveButtonEle() {
+        const ele = GraphSaveBarBuilder.#createTextButtonEle("Save");
+        ele.onclick = () => {
+            MESSAGE_PUSH(MESSAGE_TYPE.SaveGraph, {
+                name: this.saveNameEle.value,
+            });
+        };
+        return ele;
+    }
+
+    #createSaveAsNewButtonEle() {
+        const ele = GraphSaveBarBuilder.#createTextButtonEle("Save-As");
+        ele.onclick = () => {
+            MESSAGE_PUSH(MESSAGE_TYPE.SaveGraph, {
+                name: this.saveNameEle.value,
+                asNew: true,
+            });
+        };
+        return ele;
+    }
+
+    #createArchiveButtonEle() {
+        const ele = GraphSaveBarBuilder.#createTextButtonEle("Archives");
+        ele.onclick = () => {
+            MESSAGE_PUSH(MESSAGE_TYPE.ShowSaveGraphs, {
+                closeText: "Continue",
+            });
+        };
+        return ele;
+    }
+
+    show() {
+        this.ele.classList.remove("bar-hidden-mode");
+    }
+
+    hide() {
+        this.ele.classList.add("bar-hidden-mode");
     }
 }
 
@@ -500,6 +603,14 @@ class NavigatorBarBuilder {
         MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorMoveModeChanged, (event) => {
             this.updateModeEle(event.detail?.moveMode);
         });
+    }
+
+    show() {
+        this.ele.classList.remove("bar-hidden-mode");
+    }
+
+    hide() {
+        this.ele.classList.add("bar-hidden-mode");
     }
 }
 
@@ -608,12 +719,12 @@ class ControlBarBuilder {
         this.ele.appendChild(this.#createCalcBar());
     }
 
-    hide() {
-        controlBarEle.style.display = "none";
+    show() {
+        this.ele.classList.remove("bar-hidden-mode");
     }
 
-    show() {
-        this.toolbarEle.style.display = "block";
+    hide() {
+        this.ele.classList.add("bar-hidden-mode");
     }
 }
 
@@ -644,6 +755,26 @@ class ControlBarBuilder {
         return mapBarEle;
     }
 
+    const hideCallbacks = [];
+    const showCallbacks = [];
+
+    function createGraphSaveBar(options) {
+        const graphSaveBarEle = document.createElement("div");
+        graphSaveBarEle.id = "graph-save-bar";
+        graphSaveBarEle.className = "combo-bar";
+
+        const graphSaveBar = new GraphSaveBarBuilder(graphSaveBarEle);
+
+        if (!options.showGraphSaveBar) {
+            graphSaveBar.hide();
+        } else {
+            hideCallbacks.push(graphSaveBar.hide.bind(graphSaveBar));
+            showCallbacks.push(graphSaveBar.show.bind(graphSaveBar));
+        }
+
+        return graphSaveBarEle;
+    }
+
     function createNavigatorBar(jsPlumbNavigator, options) {
         const navigatorBarEle = document.createElement("div");
         navigatorBarEle.id = "navigator-bar";
@@ -656,6 +787,9 @@ class ControlBarBuilder {
 
         if (!options.showNavigatorBar) {
             navigatorBar.hide();
+        } else {
+            hideCallbacks.push(navigatorBar.hide.bind(navigatorBar));
+            showCallbacks.push(navigatorBar.show.bind(navigatorBar));
         }
 
         return navigatorBarEle;
@@ -669,9 +803,36 @@ class ControlBarBuilder {
 
         if (!options.showControlBar) {
             controlBar.hide();
+        } else {
+            hideCallbacks.push(controlBar.hide.bind(controlBar));
+            showCallbacks.push(controlBar.show.bind(controlBar));
         }
 
         return controlBarEle;
+    }
+
+    function createHideButton() {
+        const hideButtonEle = document.createElement("div");
+        hideButtonEle.className = "bar-hide-button";
+
+        let hideMode = false;
+        hideButtonEle.innerHTML = ICONS.upTriangle;
+
+        hideButtonEle.onclick = () => {
+            if (hideMode) {
+                for (const callback of showCallbacks) {
+                    callback();
+                }
+                hideButtonEle.innerHTML = ICONS.upTriangle;
+            } else {
+                for (const callback of hideCallbacks) {
+                    callback();
+                }
+                hideButtonEle.innerHTML = ICONS.downTriangle;
+            }
+            hideMode = ~hideMode;
+        };
+        return hideButtonEle;
     }
 
     function createMainBar(jsPlumbNavigator, viewportEle, canvasEle, options) {
@@ -703,9 +864,13 @@ class ControlBarBuilder {
             createMapBar(jsPlumbNavigator, canvasEle, options)
         );
 
+        mainBarEle.appendChild(createGraphSaveBar(options));
+
         mainBarEle.appendChild(createNavigatorBar(jsPlumbNavigator, options));
 
         mainBarEle.appendChild(createControlBar(options));
+
+        mainBarEle.appendChild(createHideButton());
 
         return mainBarEle;
     }
@@ -720,6 +885,7 @@ class ControlBarBuilder {
             position: "top-right", // [top / bottom]-[left / right]
             toolbarPosition: "right", // left / right
             showMarBap: true,
+            showGraphSaveBar: true,
             showNavigatorBar: true,
             showControlBar: true,
         };

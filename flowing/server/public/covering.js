@@ -120,6 +120,8 @@ const COVERING_USER_SCROLL_TIMEOUT = 100;
             return;
         }
 
+        MESSAGE_CALL(MESSAGE_TYPE.PromptStop);
+
         ENTER_NEW_KEY_NAMESPACE(COVERING_KEY_NAMESPACE);
 
         const coveringContainerEle = document.createElement("div");
@@ -216,7 +218,9 @@ const COVERING_USER_SCROLL_TIMEOUT = 100;
     });
 
     MESSAGE_HANDLER(MESSAGE_TYPE.CoveringClose, (event) => {
-        callWhenTransitionEnd(event.detail?.afterClose);
+        callWhenTransitionEnd(() => {
+            MESSAGE_PUSH(MESSAGE_TYPE.PromptStart);
+        }, event.detail?.afterClose);
 
         COVERING.style.height = "0";
 

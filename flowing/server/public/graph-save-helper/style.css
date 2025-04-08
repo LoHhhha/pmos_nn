@@ -1,0 +1,151 @@
+:root {
+    --graph-save-unit: max(1vw, 2em);
+
+    --graph-save-width: 60vw;
+
+    --graph-save-directly-open-outline-color: var(--container-outline-color);
+    --graph-save-directly-open-background-color: var(
+        --container-background-color
+    );
+    --graph-save-directly-open-hover-outline-color: var(--default-color);
+    --graph-save-directly-open-hover-background-color: var(
+        --container-outline-color
+    );
+    --graph-save-directly-open-height: calc(2 * var(--graph-save-unit));
+
+    --graph-save-container-max-height: 40vh;
+
+    --graph-save-item-width: calc(10 * var(--graph-save-unit));
+    --graph-save-item-outline-color: var(--container-outline-color);
+    --graph-save-item-background-color: var(--container-background-color);
+    --graph-save-item-hover-outline-color: var(--default-color);
+    --graph-save-item-hover-background-color: var(--container-outline-color);
+}
+
+.graph-save-combo-template {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+}
+
+.graph-save-directly-open {
+    backdrop-filter: var(--blur);
+    background-color: var(--graph-save-directly-open-background-color);
+    outline: var(--border-width) solid
+        var(--graph-save-directly-open-outline-color);
+    border-radius: var(--radius);
+    margin: var(--hover-border-width);
+    height: var(--graph-save-directly-open-height);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    width: var(--graph-save-width);
+}
+
+.graph-save-directly-open:hover {
+    background-color: var(--graph-save-directly-open-hover-background-color);
+    outline: var(--hover-border-width) solid
+        var(--graph-save-directly-open-hover-outline-color);
+    cursor: pointer;
+}
+
+.graph-save-directly-open-text {
+    grid-row: 1;
+    grid-column: 1;
+    font-weight: bold;
+    font-size: x-large;
+    align-content: center;
+    padding: var(--margin);
+    padding-left: calc(2 * var(--margin));
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.graph-save-directly-open-icon {
+    grid-row: 1;
+    grid-column: 2;
+    height: var(--graph-save-directly-open-height);
+    margin-right: var(--margin);
+}
+
+.graph-save-h2-title {
+    margin-top: calc(2 * var(--margin));
+    margin-bottom: var(--margin);
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.graph-save-container {
+    display: grid;
+    width: var(--graph-save-width);
+    grid-template-columns: repeat(
+        auto-fill,
+        minmax(var(--graph-save-item-width), 1fr)
+    );
+    max-height: var(--graph-save-container-max-height);
+    gap: var(--margin);
+    padding: var(--hover-border-width);
+    overflow: auto;
+    color: var(--disabled-color);
+}
+
+.graph-save-item {
+    display: grid;
+    grid-template-columns: auto var(--graph-save-unit);
+    min-width: var(--graph-save-item-width);
+    backdrop-filter: var(--blur);
+    background-color: var(--graph-save-item-background-color);
+    outline: var(--border-width) solid var(--graph-save-item-outline-color);
+    border-radius: var(--radius);
+    padding: var(--margin);
+}
+
+.graph-save-item * {
+    align-content: center;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.graph-save-item:hover {
+    outline: var(--hover-border-width) solid
+        var(--graph-save-item-hover-outline-color);
+    background-color: var(--graph-save-item-hover-background-color);
+    cursor: pointer;
+}
+
+.graph-save-item-title {
+    grid-row: 1;
+    grid-column: 1;
+    font-weight: bold;
+    font-size: x-large;
+}
+
+.graph-save-item-detail {
+    grid-row: 2;
+    grid-column: 1;
+    justify-content: start;
+    gap: var(--margin);
+}
+
+.graph-save-item-create-time {
+    grid-row: 3;
+    grid-column: 1;
+    font-weight: lighter;
+}
+
+.graph-save-item-change-time {
+    grid-row: 4;
+    grid-column: 1;
+    font-weight: lighter;
+}
+
+.graph-save-item-delete-icon {
+    grid-row: 1;
+    grid-column: 2;
+    padding: 10%;
+}
+
+.graph-save-item-delete-icon:hover {
+    padding: 0;
+    cursor: pointer;
+}

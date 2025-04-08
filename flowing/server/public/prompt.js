@@ -6,6 +6,10 @@
  *      [<event.detail.closeCallback: Func> return true will not close.]
  *      [<event.detail.onclick: Func>]
  *      [<event.detail.timeout>]
+ *
+ * MESSAGE_TYPE.PromptStop
+ *
+ * MESSAGE_TYPE.PromptStart
  */
 
 const PROMPT_CONFIG = {
@@ -46,6 +50,8 @@ const PROMPT = document.createElement("div");
 const PROMPT_MORE = document.createElement("div");
 const PROMPT_MORE_SVG = ICONS.more;
 const PROMPT_QUEUE = new Array(0);
+
+let PROMPT_STOPPING = false;
 
 const PROMPT_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
 
@@ -120,7 +126,6 @@ class PromptItem {
 
     startProgressFunc = this.startProgress.bind(this);
     startProgress() {
-        this.stopProgress();
         if (this.timeout === undefined) return;
 
         this.progress.addEventListener("transitionend", this.disposeFunc);
@@ -131,8 +136,14 @@ class PromptItem {
     }
 
     activate() {
+        if (PROMPT_STOPPING) return;
+
         PROMPT.appendChild(this.element);
-        this.startProgress();
+        this.stopProgress();
+        CALL_BEFORE_NEXT_FRAME(
+            PROMPT_FRAME_QUEUE_WEIGHT,
+            this.startProgressFunc
+        );
     }
 
     isDispose = false;
@@ -155,16 +166,26 @@ class PromptItem {
         }
     }
 
-    static defaultCloseCallback() {
-        PROMPT_QUEUE.shift();
+    static stopCurrentPrompt() {
+        if (PROMPT_QUEUE.length) {
+            PROMPT_QUEUE.at(0).stopProgress();
+        }
+    }
+
+    static showNextPrompt() {
         if (PROMPT_QUEUE.length) {
             PROMPT_QUEUE.at(0).activate();
             PromptItem.updatePromptMoreDisplay();
         }
     }
 
+    static defaultCloseCallback() {
+        PROMPT_QUEUE.shift();
+        PromptItem.showNextPrompt();
+    }
+
     static addPrompt(prompt) {
-        if (!PROMPT_QUEUE.length) {
+        if (!PROMPT_QUEUE.length && !PROMPT_STOPPING) {
             CALL_BEFORE_NEXT_FRAME(
                 PROMPT_FRAME_QUEUE_WEIGHT,
                 prompt.activate.bind(prompt)
@@ -226,6 +247,20 @@ class PromptItem {
                         : event.detail.config.timeout
                 )
             );
+        });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.PromptStop, () => {
+            PROMPT_STOPPING = true;
+            PROMPT.style.display = "none";
+            PromptItem.stopCurrentPrompt();
+            console.info("[PromptStop] prompt stopped");
+        });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.PromptStart, () => {
+            PROMPT_STOPPING = false;
+            PROMPT.style.display = "grid";
+            PromptItem.showNextPrompt();
+            console.info("[PromptStart] prompt started");
         });
     });
 })();

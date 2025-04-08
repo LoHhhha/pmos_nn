@@ -863,7 +863,9 @@ class OperatorNode {
 class OperatorBar {
     options;
     jsPlumbNavigator;
+    containerEle;
     barEle;
+    hideButtonEle;
     searchEle;
 
     // using to chose operators need to show.
@@ -880,34 +882,66 @@ class OperatorBar {
         this.options = options;
         this.jsPlumbNavigator = jsPlumbNavigator;
 
-        this.barEle = this.#initBarEle();
+        [this.containerEle, this.barEle] = this.#initBarEle();
+
+        this.hideButtonEle = this.#initHideButtonEle();
+
+        this.containerEle.appendChild(this.hideButtonEle);
+
         this.searchEle = this.#initSearchEle();
         if (this.options.needSearch) {
             this.barEle.appendChild(this.searchEle);
         }
-        jsPlumbNavigator.viewportEle.appendChild(this.barEle);
+        jsPlumbNavigator.viewportEle.appendChild(this.containerEle);
         this.refresh();
     }
 
     #initBarEle() {
         const { barWidth, barPosition } = this.options;
-        const ele = document.createElement("div");
-        ele.className = "operator-bar";
+
+        const containerEle = document.createElement("div");
+        containerEle.className = "operator-bar-container";
+
+        const barEle = document.createElement("div");
+        barEle.className = "operator-bar";
         if (barWidth !== null) {
-            ele.style.width = `${barWidth}px`;
+            barEle.style.width = `${barWidth}px`;
         }
 
         switch (barPosition) {
             case "left":
-                ele.style.left = "0px";
+                containerEle.style.left = "0px";
                 break;
             case "right":
-                ele.style.right = "0px";
+                containerEle.style.right = "0px";
                 break;
             default:
-                ele.style.left = "0px";
+                containerEle.style.left = "0px";
                 break;
         }
+
+        containerEle.append(barEle);
+
+        return [containerEle, barEle];
+    }
+
+    #initHideButtonEle() {
+        const ele = document.createElement("div");
+        ele.className = "operator-bar-hide-button";
+        ele.innerHTML = ICONS.leftTriangle;
+
+        let hideMode = false;
+        ele.onclick = () => {
+            if (hideMode) {
+                this.show();
+                ele.innerHTML = ICONS.leftTriangle;
+            } else {
+                this.hide();
+                ele.innerHTML = ICONS.rightTriangle;
+            }
+            hideMode = ~hideMode;
+        };
+
         return ele;
     }
 
@@ -1052,6 +1086,14 @@ class OperatorBar {
             prevOperatorTypeSepEle.updateCount(prevOperatorTypeCount);
         }
     }
+
+    hide() {
+        this.barEle.classList.add("operator-bar-hide-mode");
+    }
+
+    show() {
+        this.barEle.classList.remove("operator-bar-hide-mode");
+    }
 }
 
 (function () {
@@ -1129,16 +1171,18 @@ class OperatorBar {
         MESSAGE_HANDLER(MESSAGE_TYPE.ClearNodes, () => {
             const canvasEle = document.getElementById("canvas");
 
+            const nodes = [];
+
             for (let ptr = canvasEle.children.length - 1; ptr >= 0; ptr--) {
                 const element = canvasEle.children[ptr];
                 const elementClassName = String(element?.className);
                 if (!elementClassName.includes("node")) continue;
 
-                element.origin.dispose();
+                nodes.push(element.origin);
             }
 
-            MESSAGE_PUSH(MESSAGE_TYPE.NavigatorViewAllFit);
-            MESSAGE_PUSH(MESSAGE_TYPE.OperationRecordReset);
+            MESSAGE_CALL(MESSAGE_TYPE.DeleteNodes, { nodes });
+            MESSAGE_CALL(MESSAGE_TYPE.NavigatorViewAllFit);
         });
 
         MESSAGE_HANDLER(MESSAGE_TYPE.CreateNodes, (event) => {

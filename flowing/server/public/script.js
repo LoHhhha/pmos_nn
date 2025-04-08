@@ -8,6 +8,10 @@ jsPlumb.ready(() => {
         },
     });
 
+    // set copyright
+    const copyrightEle = document.getElementById("copyright");
+    copyrightEle.innerHTML = `Powered by PMoS-nn<br>Version: ${PMoS_VERSION}<br>Copyright © 2024-2025 PMoS. All rights reserved.`;
+
     // initTheme set as null, because minimapBar will set.
     window.addThemeHelper(null);
 
@@ -59,4 +63,9 @@ jsPlumb.ready(() => {
     window.addLLMCodeGenerator();
 
     window.addUndoHelper(jsPlumbInstance);
+
+    window.addGraphSaveHelper();
+
+    // welcome page
+    MESSAGE_PUSH(MESSAGE_TYPE.ShowSaveGraphs);
 });
