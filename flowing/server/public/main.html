@@ -4,115 +4,196 @@
         <meta charset="UTF-8" />
         <title>PMoS</title>
 
-        <link rel="icon" href="./favicon.ico" type="image/x-icon" />
+        <!-- load-helper -->
+        <script>
+            function loaded(item) {
+                const url = item.src || item.href;
+                const key = url?.replace(
+                    `${window.location.protocol}//${window.location.host}/`,
+                    ""
+                );
+                window.parent.postMessage({ type: "loaded", key: key }, "*");
+            }
+        </script>
+        <!-- load-helper -->
+
+        <link
+            rel="icon"
+            href="./favicon.ico"
+            type="image/x-icon"
+            onload="loaded(this)"
+        />
 
         <!-- jsplumb -->
-        <script src="./jsplumb/jsplumb.browser-ui.umd.js"></script>
-        <link rel="stylesheet" href="./jsplumb/style.css" />
-        <script src="./jsplumb/script.js"></script>
+        <script
+            src="./jsplumb/jsplumb.browser-ui.umd.js"
+            onload="loaded(this)"
+        ></script>
+        <link
+            rel="stylesheet"
+            href="./jsplumb/style.css"
+            onload="loaded(this)"
+        />
+        <script src="./jsplumb/script.js" onload="loaded(this)"></script>
         <!-- jsplumb -->
 
         <!-- marked -->
-        <script src="./marked/markdown.js"></script>
+        <script src="./marked/markdown.js" onload="loaded(this)"></script>
         <!-- marked -->
 
         <!-- main-setting -->
-        <link rel="stylesheet" href="./style.css" />
-        <script src="./config.js"></script>
+        <link rel="stylesheet" href="./style.css" onload="loaded(this)" />
+        <script src="./config.js" onload="loaded(this)"></script>
         <!-- main-setting -->
 
         <!-- frame-handler -->
-        <script src="./frame-handler.js"></script>
+        <script src="./frame-handler.js" onload="loaded(this)"></script>
         <!-- frame-handler -->
 
         <!-- key-helper -->
-        <script src="./key-helper.js"></script>
+        <script src="./key-helper.js" onload="loaded(this)"></script>
         <!-- key-helper -->
 
         <!-- memory-helper -->
-        <script src="./memory-helper.js"></script>
+        <script src="./memory-helper.js" onload="loaded(this)"></script>
         <!-- memory-helper -->
 
         <!-- message-bus -->
-        <script src="./message-bus.js"></script>
+        <script src="./message-bus.js" onload="loaded(this)"></script>
         <!-- message-bus -->
 
         <!-- prompt -->
-        <link rel="stylesheet" href="./prompt.css" />
-        <script src="./prompt.js"></script>
+        <link rel="stylesheet" href="./prompt.css" onload="loaded(this)" />
+        <script src="./prompt.js" onload="loaded(this)"></script>
         <!-- prompt -->
 
         <!-- theme-helper -->
-        <link rel="stylesheet" href="./theme-helper/style.css" />
-        <script src="./theme-helper/config.js"></script>
-        <script src="./theme-helper/script.js"></script>
+        <link
+            rel="stylesheet"
+            href="./theme-helper/style.css"
+            onload="loaded(this)"
+        />
+        <script src="./theme-helper/config.js" onload="loaded(this)"></script>
+        <script src="./theme-helper/script.js" onload="loaded(this)"></script>
         <!-- theme-helper -->
 
         <!-- covering -->
-        <link rel="stylesheet" href="./covering.css" />
-        <script src="./covering.js"></script>
+        <link rel="stylesheet" href="./covering.css" onload="loaded(this)" />
+        <script src="./covering.js" onload="loaded(this)"></script>
         <!-- covering -->
 
         <!-- undo-helper -->
-        <script src="./undo-helper/script.js"></script>
+        <script src="./undo-helper/script.js" onload="loaded(this)"></script>
         <!-- undo-helper -->
 
         <!-- right-key-menu -->
-        <link rel="stylesheet" href="./right-key-menu/style.css" />
-        <script src="./right-key-menu/script.js"></script>
+        <link
+            rel="stylesheet"
+            href="./right-key-menu/style.css"
+            onload="loaded(this)"
+        />
+        <script src="./right-key-menu/script.js" onload="loaded(this)"></script>
         <!-- right-key-menu -->
 
         <!-- checks-background -->
-        <link rel="stylesheet" href="./checks-background/style.css" />
-        <script src="./checks-background/script.js"></script>
+        <link
+            rel="stylesheet"
+            href="./checks-background/style.css"
+            onload="loaded(this)"
+        />
+        <script
+            src="./checks-background/script.js"
+            onload="loaded(this)"
+        ></script>
         <!-- checks-background -->
 
         <!-- jsplumb-navigator -->
-        <link rel="stylesheet" href="./jsplumb-navigator/style.css" />
-        <script src="./jsplumb-navigator/struct.js"></script>
-        <script src="./jsplumb-navigator/script.js"></script>
+        <link
+            rel="stylesheet"
+            href="./jsplumb-navigator/style.css"
+            onload="loaded(this)"
+        />
+        <script
+            src="./jsplumb-navigator/struct.js"
+            onload="loaded(this)"
+        ></script>
+        <script
+            src="./jsplumb-navigator/script.js"
+            onload="loaded(this)"
+        ></script>
         <!-- jsplumb-navigator -->
 
         <!-- operator-bar -->
-        <link rel="stylesheet" href="./operator-bar/style.css" />
-        <script src="./operator-bar/config.js"></script>
-        <script src="./operator-bar/script.js"></script>
+        <link
+            rel="stylesheet"
+            href="./operator-bar/style.css"
+            onload="loaded(this)"
+        />
+        <script src="./operator-bar/config.js" onload="loaded(this)"></script>
+        <script src="./operator-bar/script.js" onload="loaded(this)"></script>
         <!-- operator-bar -->
 
         <!-- main-bar -->
-        <link rel="stylesheet" href="./main-bar/style.css" />
-        <script src="./main-bar/script.js"></script>
+        <link
+            rel="stylesheet"
+            href="./main-bar/style.css"
+            onload="loaded(this)"
+        />
+        <script src="./main-bar/script.js" onload="loaded(this)"></script>
         <!-- main-bar -->
 
         <!-- graph -->
-        <link rel="stylesheet" href="./graph/style.css" />
-        <script src="./graph/struct.js"></script>
-        <script src="./graph/script.js"></script>
+        <link rel="stylesheet" href="./graph/style.css" onload="loaded(this)" />
+        <script src="./graph/struct.js" onload="loaded(this)"></script>
+        <script src="./graph/script.js" onload="loaded(this)"></script>
         <!-- graph -->
 
         <!-- graph-save-helper -->
-        <link rel="stylesheet" href="./graph-save-helper/style.css" />
-        <script src="./graph-save-helper/struct.js"></script>
-        <script src="./graph-save-helper/script.js"></script>
+        <link
+            rel="stylesheet"
+            href="./graph-save-helper/style.css"
+            onload="loaded(this)"
+        />
+        <script
+            src="./graph-save-helper/struct.js"
+            onload="loaded(this)"
+        ></script>
+        <script
+            src="./graph-save-helper/script.js"
+            onload="loaded(this)"
+        ></script>
         <!-- graph-save-helper -->
 
         <!-- nodes-copy-helper -->
-        <script src="./nodes-copy-helper/script.js"></script>
+        <script
+            src="./nodes-copy-helper/script.js"
+            onload="loaded(this)"
+        ></script>
         <!-- nodes-copy-helper -->
 
         <!-- port -->
-        <link rel="stylesheet" href="./port/style.css" />
-        <script src="./port/script.js"></script>
+        <link rel="stylesheet" href="./port/style.css" onload="loaded(this)" />
+        <script src="./port/script.js" onload="loaded(this)"></script>
         <!-- port -->
 
         <!-- llm-code-generator -->
-        <link rel="stylesheet" href="./llm-code-generator/style.css" />
-        <script src="./llm-code-generator/config.js"></script>
-        <script src="./llm-code-generator/script.js"></script>
+        <link
+            rel="stylesheet"
+            href="./llm-code-generator/style.css"
+            onload="loaded(this)"
+        />
+        <script
+            src="./llm-code-generator/config.js"
+            onload="loaded(this)"
+        ></script>
+        <script
+            src="./llm-code-generator/script.js"
+            onload="loaded(this)"
+        ></script>
         <!-- llm-code-generator -->
 
         <!-- total -->
-        <script src="./script.js"></script>
+        <script src="./script.js" onload="loaded(this)"></script>
         <!-- total -->
     </head>
     <script>

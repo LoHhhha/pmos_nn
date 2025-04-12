@@ -43,7 +43,6 @@
         }
 
         #loading-tips {
-            display: none;
             font-size: 3vmin;
             font-family: "Microsoft YaHei", "sans serif", "serif";
         }
@@ -101,17 +100,17 @@
                 <div class="rect4"></div>
                 <div class="rect5"></div>
             </div>
-            <p id="loading-tips">Almost done...</p>
+            <p id="loading-tips"></p>
         </div>
         <iframe id="inner-frame" src="./main.html"></iframe>
     </body>
     <script>
-        setTimeout(() => {
-            const loadingTipsElement = document.getElementById("loading-tips");
-            if (loadingTipsElement) {
-                loadingTipsElement.style.display = "inline";
+        const loadingTips = document.getElementById("loading-tips");
+        window.addEventListener("message", (e) => {
+            if (e.data.type === "loaded") {
+                loadingTips.textContent = e.data.key;
             }
-        }, 5000);
+        });
 
         window.onload = () => {
             document.getElementById("loading").remove();
