@@ -34,6 +34,9 @@ setup(
     packages=[f"flowing.{package}" for package in find_packages("flowing")],
     install_requires=[
         'torch',
+        'torchvision',
+        'tabulate',
+        'tensorboard',
         'opencv-python',
         'matplotlib',
         'tqdm',
