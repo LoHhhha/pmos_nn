@@ -37,6 +37,7 @@ setup(
         'torchvision',
         'tabulate',
         'tensorboard',
+        'mpmath==1.3.0',
         'opencv-python',
         'matplotlib',
         'tqdm',
