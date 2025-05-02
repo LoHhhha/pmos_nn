@@ -202,10 +202,11 @@
             "touchstart",
             () => {
                 if (!window.hadHintTouchLimited) {
-                    MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
-                        title: "Warning",
-                        text: "Features will be limited in touch mode. Mouse and keyboard control is recommended.",
-                        buttonMode: COVERING_BUTTON_MODE.CloseButton,
+                    MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
+                        config: PROMPT_CONFIG.WARNING,
+                        content:
+                            "Features will be limited in touch mode. Mouse and keyboard control is recommended.",
+                        timeout: 10000,
                     });
                     window.hadHintTouchLimited = true;
                 }
