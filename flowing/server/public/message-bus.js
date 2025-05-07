@@ -14,6 +14,9 @@ const MESSAGE_TYPE = {
     CreateNodes: "create-nodes", // return
     DeleteNodes: "delete-nodes",
     SelectNodes: "select-nodes",
+    HideOperatorBar: "hide-operator-bar",
+    ShowOperatorBar: "show-operator-bar",
+    VisibleOperatorBar: "visible-operator-bar", // return
 
     // covering
     CoveringShow: "covering-show",
@@ -24,10 +27,12 @@ const MESSAGE_TYPE = {
     NavigatorZoomOut: "navigator-zoom-out",
     NavigatorZoomTo100: "navigator-zoom-to-100",
     NavigatorViewAllFit: "navigator-view-all-fit",
+    NavigatorBackToOrigin: "navigator-back-to-origin",
     NavigatorManageNode: "navigator-manage-node",
     NavigatorUpdateNode: "navigator-update-node",
     NavigatorRemoveNode: "navigator-remove-node",
     NavigatorChangeMoveMode: "navigator-change-move-mode",
+    NavigatorCurrentMoveMode: "navigator-current-move-mode",
     NavigationChanged: "navigator-changed", // out
     NavigatorMoveModeChanged: "navigator-move-mode-changed", // out
     NavigatorMoveWhenAtEdge: "navigator-move-when-at-edge",
@@ -39,14 +44,18 @@ const MESSAGE_TYPE = {
 
     // theme-helper
     ThemeChange: "theme-change",
+    ThemeCurrent: "theme-current", // return
 
     // nodes-copy-helper
     NodesCopy: "nodes-copy",
     NodesPaste: "nodes-paste",
 
-    // operator-bar-mini-map
+    // mini-map
     DeleteMapNode: "delete-map-node",
     RedrawMapNode: "redraw-map-node",
+    HideMiniMap: "hide-mini-map",
+    ShowMiniMap: "show-mini-map",
+    VisibleMiniMap: "visible-mini-map", // return
 
     // prompt
     PromptShow: "prompt-show",
@@ -65,11 +74,16 @@ const MESSAGE_TYPE = {
     OperationSave: "operation-save",
     OperationUndo: "operation-undo",
     OperationRecordReset: "operation-record-reset",
+    GraphChanged: "graph-changed",
 
     // graph-save-helper
     SaveGraph: "save-graph",
     GraphSaved: "graph-saved", // out
     ShowSaveGraphs: "show-save-graphs",
+
+    // general-pages
+    HelpPage: "help-page",
+    ClearGraphPage: "clear-graph-page",
 };
 
 const MESSAGE_HANDLER_MAP = new Map();

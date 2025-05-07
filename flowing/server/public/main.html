@@ -70,11 +70,10 @@
         <!-- theme-helper -->
         <link
             rel="stylesheet"
-            href="./theme-helper/style.css"
+            href="./theme-helper.css"
             onload="loaded(this)"
         />
-        <script src="./theme-helper/config.js" onload="loaded(this)"></script>
-        <script src="./theme-helper/script.js" onload="loaded(this)"></script>
+        <script src="./theme-helper.js" onload="loaded(this)"></script>
         <!-- theme-helper -->
 
         <!-- covering -->
@@ -82,18 +81,18 @@
         <script src="./covering.js" onload="loaded(this)"></script>
         <!-- covering -->
 
-        <!-- undo-helper -->
-        <script src="./undo-helper/script.js" onload="loaded(this)"></script>
-        <!-- undo-helper -->
-
         <!-- right-key-menu -->
         <link
             rel="stylesheet"
-            href="./right-key-menu/style.css"
+            href="./right-key-menu.css"
             onload="loaded(this)"
         />
-        <script src="./right-key-menu/script.js" onload="loaded(this)"></script>
+        <script src="./right-key-menu.js" onload="loaded(this)"></script>
         <!-- right-key-menu -->
+
+        <!-- undo-helper -->
+        <script src="./undo-helper/script.js" onload="loaded(this)"></script>
+        <!-- undo-helper -->
 
         <!-- checks-background -->
         <link
@@ -133,14 +132,14 @@
         <script src="./operator-bar/script.js" onload="loaded(this)"></script>
         <!-- operator-bar -->
 
-        <!-- main-bar -->
+        <!-- mini-map -->
         <link
             rel="stylesheet"
-            href="./main-bar/style.css"
+            href="./mini-map/style.css"
             onload="loaded(this)"
         />
-        <script src="./main-bar/script.js" onload="loaded(this)"></script>
-        <!-- main-bar -->
+        <script src="./mini-map/script.js" onload="loaded(this)"></script>
+        <!-- mini-map -->
 
         <!-- graph -->
         <link rel="stylesheet" href="./graph/style.css" onload="loaded(this)" />
@@ -192,6 +191,22 @@
         ></script>
         <!-- llm-code-generator -->
 
+        <!-- general-pages -->
+        <script src="./general-pages/script.js" onload="loaded(this)"></script>
+        <!-- general-pages -->
+
+        <!-- top-control-bar -->
+        <link
+            rel="stylesheet"
+            href="./top-control-bar/style.css"
+            onload="loaded(this)"
+        />
+        <script
+            src="./top-control-bar/script.js"
+            onload="loaded(this)"
+        ></script>
+        <!-- top-control-bar -->
+
         <!-- total -->
         <script src="./script.js" onload="loaded(this)"></script>
         <!-- total -->
@@ -215,9 +230,12 @@
         );
     </script>
     <body>
-        <div id="viewport">
-            <div id="canvas"></div>
+        <div id="main-window">
+            <div id="top-control-bar"></div>
+            <div id="viewport">
+                <div id="canvas"></div>
+            </div>
+            <div id="copyright"></div>
         </div>
-        <div id="copyright"></div>
     </body>
 </html>

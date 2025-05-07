@@ -37,7 +37,7 @@ const COVERING_USER_SCROLL_TIMEOUT = 100;
 
 (function () {
     window.addEventListener("load", () => {
-        document.body.appendChild(COVERING);
+        document.getElementById("main-window").appendChild(COVERING);
         COVERING.closeCallBack = new Array();
     });
 

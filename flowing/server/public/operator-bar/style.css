@@ -92,6 +92,8 @@
     flex-direction: row;
     justify-content: center;
     align-items: center;
+    height: calc(100% - calc(2 * var(--operator-bar-margin)));
+    margin: var(--operator-bar-margin);
 }
 
 .operator-bar {
@@ -99,7 +101,7 @@
     backdrop-filter: var(--blur);
     background-color: var(--operator-bar-background-color);
     outline: var(--border-width) solid var(--operator-bar-outline-color);
-    height: calc(100vh - 2 * var(--operator-bar-margin));
+    height: 100%;
     width: fit-content;
     display: flex;
     flex-direction: column;
@@ -109,21 +111,13 @@
     gap: var(--operator-bar-margin);
     border-radius: var(--radius);
     user-select: none;
-    margin: var(--operator-bar-margin);
     box-shadow: var(--shadow) var(--operator-bar-shadow-color);
 }
 
 .operator-bar-hide-mode {
     overflow: hidden;
-    width: 0px;
-    padding: 0px;
-}
-
-.operator-bar-hide-button {
-    margin-left: calc(-1 * var(--margin));
-    cursor: pointer;
-    width: var(--operator-bar-hide-button-width);
-    height: var(--operator-bar-hide-button-width);
+    width: 0;
+    padding: 0;
 }
 
 .operator-bar-sep {

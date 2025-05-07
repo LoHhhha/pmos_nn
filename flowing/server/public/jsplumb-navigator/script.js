@@ -30,6 +30,11 @@
  *          moveMode
  *      }
  *
+ * MESSAGE_TYPE.NavigatorChangeMoveMode
+ *      <event.detail.moveMode>
+ *
+ * MESSAGE_TYPE.NavigatorCurrentMoveMode -> bool
+ *
  * MESSAGE_TYPE.NavigatorMoveWhenAtEdge
  *
  * MESSAGE_TYPE.NavigatorCancelMoveWhenAtEdge
@@ -49,7 +54,7 @@ const NAVIGATOR_MOVE_ADD_INTERVAL_DISTANCE = 1;
 const NAVIGATOR_MOVE_MAX_INTERVAL_DISTANCE = 16;
 const NAVIGATOR_EDGE_WIDTH = 16;
 
-const NAVIGATOR_ICON = ICONS.map;
+const NAVIGATOR_ICON = ICONS.navigation;
 
 class Navigator {
     jsPlumbInstance;
@@ -165,6 +170,11 @@ class Navigator {
             this.changeMoveMode(event.detail.moveMode);
         });
 
+        MESSAGE_HANDLER(
+            MESSAGE_TYPE.NavigatorCurrentMoveMode,
+            () => this.moveMode
+        );
+
         MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorMoveWhenAtEdge, () => {
             if (this.moveWhenAtEdge++ > 0) {
                 console.warn(
@@ -197,6 +207,11 @@ class Navigator {
         MESSAGE_HANDLER(
             MESSAGE_TYPE.NavigatorViewAllFit,
             this.viewAllFit.bind(this)
+        );
+
+        MESSAGE_HANDLER(
+            MESSAGE_TYPE.NavigatorBackToOrigin,
+            this.backToOrigin.bind(this)
         );
 
         ADD_KEY_HANDLER(DEFAULT_KEY_NAMESPACE, "+", [], this.zoomIn.bind(this));
@@ -249,20 +264,21 @@ class Navigator {
             if (!this.moveWhenAtEdge) {
                 return;
             }
-            const clientX = event.clientX;
-            const clientY = event.clientY;
-            const windowWidth = window.innerWidth;
-            const windowHeight = window.innerHeight;
+            let clientX = event.clientX;
+            let clientY = event.clientY;
+            const viewportRect = viewportRectangle();
+            clientX -= viewportRect.left;
+            clientY -= viewportRect.top;
             if (clientX <= NAVIGATOR_EDGE_WIDTH) {
                 this.edgeStatus = this.edgeStatus ^ 1;
             }
-            if (windowWidth - clientX <= NAVIGATOR_EDGE_WIDTH) {
+            if (viewportRect.width - clientX <= NAVIGATOR_EDGE_WIDTH) {
                 this.edgeStatus = this.edgeStatus ^ 2;
             }
             if (clientY <= NAVIGATOR_EDGE_WIDTH) {
                 this.edgeStatus = this.edgeStatus ^ 4;
             }
-            if (windowHeight - clientY <= NAVIGATOR_EDGE_WIDTH) {
+            if (viewportRect.height - clientY <= NAVIGATOR_EDGE_WIDTH) {
                 this.edgeStatus = this.edgeStatus ^ 8;
             }
         });
@@ -423,10 +439,14 @@ class Navigator {
                 };
             } else {
                 // selectBox
-                let originX = e.clientX;
-                let originY = e.clientY;
-                let currentX = e.clientX;
-                let currentY = e.clientY;
+                const coordinates = coordinatesWindow2Viewport(
+                    e.clientX,
+                    e.clientY
+                );
+                let originX = coordinates.left;
+                let originY = coordinates.top;
+                let currentX = coordinates.left;
+                let currentY = coordinates.top;
                 const prevScale = this.getCanvasScale();
                 const { left: prevLeft, top: preTop } = this.getCanvasBounds();
 
@@ -456,8 +476,12 @@ class Navigator {
                         return;
                     }
 
-                    currentX = moveEvent.clientX;
-                    currentY = moveEvent.clientY;
+                    const newCoordinates = coordinatesWindow2Viewport(
+                        moveEvent.clientX,
+                        moveEvent.clientY
+                    );
+                    currentX = newCoordinates.left;
+                    currentY = newCoordinates.top;
 
                     if (firstMove) {
                         this.viewportEle.setPointerCapture(moveEvent.pointerId);
@@ -484,6 +508,7 @@ class Navigator {
 
     handleViewportRightKeyMenu(e) {
         if (e.target !== this.viewportEle) return true;
+        const coordinates = coordinatesWindow2Viewport(e.clientX, e.clientY);
         MESSAGE_PUSH(MESSAGE_TYPE.RightKeyMenuShow, {
             showLeft: e.clientX,
             showTop: e.clientY,
@@ -494,15 +519,78 @@ class Navigator {
                     icon: ICONS.paste,
                     callback: MEMORY_GET(MEMORY_KEYS.CanPasteNodes, false)
                         ? () => {
-                              MESSAGE_PUSH(MESSAGE_TYPE.NodesPaste, {
-                                  left: e.clientX,
-                                  top: e.clientY,
-                              });
+                              MESSAGE_PUSH(
+                                  MESSAGE_TYPE.NodesPaste,
+                                  coordinates
+                              );
                           }
                         : undefined,
                 },
                 {
-                    title: "Paste from Clipboard",
+                    isSeparator: true,
+                },
+                {
+                    title: "Undo",
+                    keyTips: "Ctrl+Z",
+                    icon: ICONS.undo,
+                    callback: () => {
+                        MESSAGE_PUSH(MESSAGE_TYPE.OperationUndo);
+                    },
+                    disabled: !MEMORY_GET(MEMORY_KEYS.CanUndoOperation, false),
+                },
+                {
+                    isSeparator: true,
+                },
+                {
+                    title: "Select All",
+                    keyTips: "Ctrl+A",
+                    icon: ICONS.selectAll,
+                    callback: () => {
+                        MESSAGE_PUSH(MESSAGE_TYPE.SelectNodes);
+                    },
+                },
+                {
+                    isSeparator: true,
+                },
+                {
+                    title: "View",
+                    icon: NAVIGATOR_ICON,
+                    subItems: [
+                        {
+                            title: "Zoom In",
+                            keyTips: "+/=",
+                            icon: ICONS.zoomIn,
+                            callback: this.zoomIn.bind(this),
+                        },
+                        {
+                            title: "Zoom Out",
+                            keyTips: "-",
+                            icon: ICONS.zoomOut,
+                            callback: this.zoomOut.bind(this),
+                        },
+                        {
+                            title: "Zoom to 100%",
+                            icon: ICONS.zoomTo100,
+                            callback: this.zoomTo100.bind(this),
+                        },
+                        {
+                            title: "View All",
+                            icon: ICONS.viewAllFit,
+                            callback: this.viewAllFit.bind(this),
+                        },
+                        {
+                            title: "Back to Origin",
+                            keyTips: "Home",
+                            icon: ICONS.backToOrigin,
+                            callback: this.backToOrigin.bind(this),
+                        },
+                    ],
+                },
+                {
+                    isSeparator: true,
+                },
+                {
+                    title: "Clipboard Import",
                     icon: ICONS.import,
                     callback: async () => {
                         try {
@@ -525,83 +613,12 @@ class Navigator {
                     },
                 },
                 {
-                    title: "Select All",
-                    keyTips: "Ctrl+A",
-                    icon: ICONS.selectAll,
-                    callback: () => {
-                        MESSAGE_PUSH(MESSAGE_TYPE.SelectNodes);
-                    },
-                },
-                {
-                    title: "Undo",
-                    keyTips: "Ctrl+Z",
-                    icon: ICONS.undo,
-                    callback: () => {
-                        MESSAGE_PUSH(MESSAGE_TYPE.OperationUndo);
-                    },
-                    disabled: !MEMORY_GET(MEMORY_KEYS.CanUndoOperation, false),
-                },
-                {
                     title: "Save",
                     keyTips: "Ctrl+S",
                     icon: ICONS.save,
                     callback: () => {
                         MESSAGE_PUSH(MESSAGE_TYPE.SaveGraph);
                     },
-                },
-                {
-                    isSeparator: true,
-                },
-                {
-                    title: "Zoom In",
-                    keyTips: "+/=",
-                    icon: ICONS.zoomIn,
-                    callback: this.zoomIn.bind(this),
-                },
-                {
-                    title: "Zoom Out",
-                    keyTips: "-",
-                    icon: ICONS.zoomOut,
-                    callback: this.zoomOut.bind(this),
-                },
-                {
-                    title: "Zoom to 100%",
-                    icon: ICONS.zoomTo100,
-                    callback: this.zoomTo100.bind(this),
-                },
-                {
-                    title: "Back to Origin",
-                    keyTips: "Home",
-                    icon: ICONS.backToOrigin,
-                    callback: this.backToOrigin.bind(this),
-                },
-                {
-                    title: "View All",
-                    icon: ICONS.viewAllFit,
-                    callback: this.viewAllFit.bind(this),
-                },
-                {
-                    isSeparator: true,
-                },
-                {
-                    title: "Import",
-                    icon: ICONS.import,
-                    callback: () => MESSAGE_PUSH(MESSAGE_TYPE.ImportGraph),
-                },
-                {
-                    title: "Export",
-                    icon: ICONS.export,
-                    callback: () => MESSAGE_PUSH(MESSAGE_TYPE.ExportGraph),
-                },
-                {
-                    title: "Tidy",
-                    icon: ICONS.tidy,
-                    callback: () => MESSAGE_PUSH(MESSAGE_TYPE.TidyNodes),
-                },
-                {
-                    title: "Graph",
-                    icon: ICONS.graph,
-                    callback: () => MESSAGE_PUSH(MESSAGE_TYPE.CalculateGraph),
                 },
             ],
         });

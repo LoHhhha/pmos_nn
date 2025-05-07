@@ -15,7 +15,7 @@
 }
 
 .edge-highlight {
-    position: fixed;
+    position: absolute;
     pointer-events: none;
     z-index: 0;
 }
@@ -23,7 +23,7 @@
 .edge-highlight-top {
     top: 0;
     left: 0;
-    width: 100vw;
+    width: 100%;
     height: var(--edge-size);
     background: linear-gradient(to bottom, var(--edge-color), transparent);
 }
@@ -32,14 +32,14 @@
     top: 0;
     right: 0;
     width: var(--edge-size);
-    height: 100vh;
+    height: 100%;
     background: linear-gradient(to left, var(--edge-color), transparent);
 }
 
 .edge-highlight-bottom {
     bottom: 0;
     left: 0;
-    width: 100vw;
+    width: 100%;
     height: var(--edge-size);
     background: linear-gradient(to top, var(--edge-color), transparent);
 }
@@ -48,6 +48,6 @@
     top: 0;
     left: 0;
     width: var(--edge-size);
-    height: 100vh;
+    height: 100%;
     background: linear-gradient(to right, var(--edge-color), transparent);
 }

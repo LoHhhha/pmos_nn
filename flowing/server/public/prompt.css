@@ -27,6 +27,7 @@
     display: grid;
     grid-template-columns: auto auto;
     user-select: none;
+    z-index: 4;
 }
 
 .prompt-more {

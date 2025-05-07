@@ -20,6 +20,11 @@
  * MESSAGE_TYPE.SelectNodes
  *      <event.detail.nodes: Array<node>|Set<node>>
  *
+ * MESSAGE_TYPE.HideOperatorBar
+ *
+ * MESSAGE_TYPE.ShowOperatorBar
+ *
+ * MESSAGE_TYPE.VisibleOperatorBar -> bool
  */
 
 const NODE_FRAME_QUEUE_WEIGHT = 1;
@@ -804,10 +809,14 @@ class OperatorNode {
             e.clientY > barMaxY ||
             e.clientY < barMinY
         ) {
+            const coordinates = coordinatesWindow2Viewport(
+                e.clientX,
+                e.clientY
+            );
             const scale = OperatorNode.jsPlumbNavigator.getCanvasScale();
             OperatorNode.pointFollowNode.origin.addNode(
-                e.clientX / scale - OperatorNode.pointFollowNode.offsetX,
-                e.clientY / scale - OperatorNode.pointFollowNode.offsetY
+                coordinates.left / scale - OperatorNode.pointFollowNode.offsetX,
+                coordinates.top / scale - OperatorNode.pointFollowNode.offsetY
             );
         }
 
@@ -865,7 +874,6 @@ class OperatorBar {
     jsPlumbNavigator;
     containerEle;
     barEle;
-    hideButtonEle;
     searchEle;
 
     // using to chose operators need to show.
@@ -884,14 +892,19 @@ class OperatorBar {
 
         [this.containerEle, this.barEle] = this.#initBarEle();
 
-        this.hideButtonEle = this.#initHideButtonEle();
-
-        this.containerEle.appendChild(this.hideButtonEle);
-
         this.searchEle = this.#initSearchEle();
         if (this.options.needSearch) {
             this.barEle.appendChild(this.searchEle);
         }
+
+        if (this.options.showAtFirst) {
+            this.show();
+        } else {
+            this.hide();
+        }
+
+        this.#initHandler();
+
         jsPlumbNavigator.viewportEle.appendChild(this.containerEle);
         this.refresh();
     }
@@ -923,26 +936,6 @@ class OperatorBar {
         containerEle.append(barEle);
 
         return [containerEle, barEle];
-    }
-
-    #initHideButtonEle() {
-        const ele = document.createElement("div");
-        ele.className = "operator-bar-hide-button";
-        ele.innerHTML = ICONS.leftTriangle;
-
-        let hideMode = false;
-        ele.onclick = () => {
-            if (hideMode) {
-                this.show();
-                ele.innerHTML = ICONS.leftTriangle;
-            } else {
-                this.hide();
-                ele.innerHTML = ICONS.rightTriangle;
-            }
-            hideMode = ~hideMode;
-        };
-
-        return ele;
     }
 
     #initSearchEle() {
@@ -981,6 +974,12 @@ class OperatorBar {
         ele.appendChild(closeIcon);
 
         return ele;
+    }
+
+    #initHandler() {
+        MESSAGE_HANDLER(MESSAGE_TYPE.ShowOperatorBar, this.show.bind(this));
+        MESSAGE_HANDLER(MESSAGE_TYPE.HideOperatorBar, this.hide.bind(this));
+        MESSAGE_HANDLER(MESSAGE_TYPE.VisibleOperatorBar, () => this.visible);
     }
 
     #createSeparation(typeInfo, isVisible) {
@@ -1087,12 +1086,14 @@ class OperatorBar {
         }
     }
 
+    visible;
     hide() {
         this.barEle.classList.add("operator-bar-hide-mode");
+        this.visible = false;
     }
-
     show() {
         this.barEle.classList.remove("operator-bar-hide-mode");
+        this.visible = true;
     }
 }
 
@@ -1112,6 +1113,7 @@ class OperatorBar {
             barPosition: "left",
             nodeOverviewPosition: "right-bottom", // [top / bottom]-[left / right]
             needSearch: true,
+            showAtFirst: true,
         };
 
         // init Id2Node

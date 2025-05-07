@@ -12,7 +12,7 @@ jsPlumb.ready(() => {
     const copyrightEle = document.getElementById("copyright");
     copyrightEle.innerHTML = `Powered by PMoS-nn<br>Version: ${PMoS_VERSION}<br>Copyright © 2024-2025 PMoS. All rights reserved.`;
 
-    // initTheme set as null, because minimapBar will set.
+    // initTheme set as null, set as local settings or 'auto'.
     window.addThemeHelper(null);
 
     const viewportEle = document.getElementById("viewport");
@@ -43,14 +43,9 @@ jsPlumb.ready(() => {
         viewportEle
     );
 
-    // todo 添加标签显示功能
-    const operatorBar = window.createOperatorBar(jsPlumbNavigator);
+    window.createOperatorBar(jsPlumbNavigator);
 
-    const minimapBar = window.createMainBar(
-        jsPlumbNavigator,
-        viewportEle,
-        canvasEle
-    );
+    window.createMiniMap(jsPlumbNavigator, viewportEle, canvasEle);
 
     window.createJsPlumbConnectionListener(jsPlumbInstance);
 

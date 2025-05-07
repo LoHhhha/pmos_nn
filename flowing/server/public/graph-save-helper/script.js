@@ -158,17 +158,15 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
                             withoutConfirm: true,
                             callback: () => {
                                 MESSAGE_PUSH(MESSAGE_TYPE.OperationRecordReset);
+                                MESSAGE_PUSH(MESSAGE_TYPE.GraphSaved, {
+                                    timestamp: graphInfo.timestamp,
+                                    name: graphInfo.name,
+                                });
                             },
                         });
+                        CURRENT_GRAPH_KEY = graphKey;
                     },
                 });
-                MESSAGE_PUSH(MESSAGE_TYPE.GraphSaved, {
-                    timestamp: graphInfo.timestamp,
-                    name: graphInfo.name,
-                });
-
-                CURRENT_GRAPH_KEY = graphKey;
-                MEMORY_SET(MEMORY_KEYS.CurrentGraphSaveName, graphInfo.name);
 
                 event.stopPropagation();
             };

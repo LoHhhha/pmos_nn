@@ -214,7 +214,7 @@ class PromptItem {
 (function () {
     window.addEventListener("load", () => {
         PROMPT.id = "prompt-container";
-        document.body.appendChild(PROMPT);
+        document.getElementById("viewport").appendChild(PROMPT);
 
         PROMPT_MORE.className = "prompt-more";
         PROMPT_MORE.innerHTML = PROMPT_MORE_SVG;

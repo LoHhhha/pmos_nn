@@ -7,9 +7,14 @@
 
     --right-key-menu-separator-color: var(--content-outline-color);
 
-    --right-key-menu-item-select-background-color: var(
-        --sub-content-background-color
+    --right-key-menu-item-selected-background-color: var(
+        --container-outline-color
     );
+    --right-key-menu-item-underline-background-color: var(
+        --content-background-color
+    );
+
+    --right-key-menu-margin: 4px;
 }
 
 .right-key-menu {
@@ -33,15 +38,15 @@
     grid-template-columns: 1em 2fr 1fr;
     gap: var(--margin);
     border-radius: var(--radius);
-    padding: 0 calc(var(--margin) / 2) 0 calc(var(--margin) / 2);
+    padding: 0 var(--right-key-menu-margin) 0 var(--right-key-menu-margin);
     width: auto;
     font-size: medium;
-    margin: calc(var(--margin) / 2);
+    margin: var(--right-key-menu-margin);
     color: var(--default-color);
 }
 
 .right-key-menu-item:hover {
-    background-color: var(--right-key-menu-item-select-background-color);
+    background-color: var(--right-key-menu-item-selected-background-color);
 }
 
 .right-key-menu-item-icon {
@@ -79,4 +84,12 @@
 .right-key-menu-item-disabled * {
     color: var(--disabled-color);
     fill: var(--disabled-color);
+}
+
+.right-key-menu-item-underline {
+    background-color: var(--right-key-menu-item-underline-background-color);
+}
+
+.right-key-menu-item-selected {
+    background-color: var(--right-key-menu-item-selected-background-color);
 }

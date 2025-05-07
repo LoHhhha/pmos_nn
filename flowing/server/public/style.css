@@ -83,16 +83,26 @@ a:hover {
     fill: var(--icon-color);
 }
 
+#main-window {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
 #viewport {
     position: relative;
     width: 100%;
     height: 100%;
     background-color: var(--viewport-background-color);
     overflow: hidden;
+    z-index: 0;
 }
 
 #canvas {
     position: absolute;
+    z-index: 0;
 }
 
 #copyright {
@@ -103,4 +113,5 @@ a:hover {
     user-select: none;
     pointer-events: none;
     color: var(--copyright-color);
+    z-index: 1;
 }

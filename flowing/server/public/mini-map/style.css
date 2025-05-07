@@ -1,0 +1,50 @@
+:root {
+    --minimap-width: 300px;
+    --minimap-height: 180px;
+
+    --minimap-background-color: var(--container-background-color);
+    --minimap-outline-color: var(--container-outline-color);
+    --minimap-shadow-color: var(--content-background-color);
+    --minimap-viewport-background-color: var(--content-background-color);
+    --minimap-viewport-outline-color: var(--content-outline-color);
+    --minimap-node-outline-background-color: var(--default-color);
+}
+
+.minimap {
+    position: absolute;
+    overflow: hidden;
+    backdrop-filter: var(--blur);
+    background-color: var(--minimap-background-color);
+    outline: var(--border-width) solid var(--minimap-outline-color);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow) var(--minimap-shadow-color);
+    user-select: none;
+    width: var(--minimap-width);
+    height: var(--minimap-height);
+}
+
+.minimap-viewport {
+    position: absolute;
+    transform-origin: left top;
+    background-color: var(--minimap-viewport-background-color);
+    outline: var(--border-width) solid var(--minimap-viewport-outline-color);
+    border-radius: var(--radius);
+    cursor: grab;
+}
+
+.minimap-canvas {
+    position: absolute;
+    transform-origin: left top;
+}
+
+.minimap-node-outline {
+    background-color: var(--minimap-node-outline-background-color);
+    position: absolute;
+    border-radius: var(--radius);
+}
+
+.minimap-hide-mode {
+    overflow: hidden;
+    height: 0;
+    padding: 0;
+}

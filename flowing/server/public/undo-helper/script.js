@@ -248,6 +248,7 @@ class Slice {
             }
             UNDO_OPERATION_STACK.push(slice);
             MEMORY_SET(MEMORY_KEYS.CanUndoOperation, true);
+            MESSAGE_PUSH(MESSAGE_TYPE.GraphChanged);
         });
 
         MESSAGE_HANDLER(MESSAGE_TYPE.OperationUndo, (event) => {
@@ -268,6 +269,8 @@ class Slice {
             if (UNDO_OPERATION_STACK.length === 0) {
                 undoClear();
             }
+
+            MESSAGE_PUSH(MESSAGE_TYPE.GraphChanged);
         });
 
         MESSAGE_HANDLER(MESSAGE_TYPE.OperationRecordReset, () => {
