@@ -68,6 +68,8 @@ const RIGHT_KEY_MENU_CLOSE_REASON = {
         ele.style.display = "inline";
         ele.style.height = "auto";
         ele.style.visibility = "hidden";
+        ele.style.left = "0px";
+        ele.style.top = "0px";
 
         // assumes that all menus will display continuously.
         let occupiedLeft = 0,

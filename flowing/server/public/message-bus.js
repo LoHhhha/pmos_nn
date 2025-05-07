@@ -84,6 +84,9 @@ const MESSAGE_TYPE = {
     // general-pages
     HelpPage: "help-page",
     ClearGraphPage: "clear-graph-page",
+
+    // tooltip
+    AddTooltip: "add-tooltip",
 };
 
 const MESSAGE_HANDLER_MAP = new Map();

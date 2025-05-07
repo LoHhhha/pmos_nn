@@ -1,0 +1,21 @@
+:root {
+    --tooltip-margin: 4px;
+    --tooltip-padding: var(--tooltip-margin);
+    --tooltip-background-color: var(--container-background-color);
+    --tooltip-shadow-color: var(--content-background-color);
+    --tooltip-border-color: var(--container-outline-color);
+}
+
+.tooltip {
+    position: absolute;
+    background-color: var(--tooltip-background-color);
+    border: var(--border-width) solid var(--tooltip-border-color);
+    border-radius: var(--radius);
+    backdrop-filter: var(--blur);
+    width: auto;
+    height: auto;
+    padding: var(--tooltip-padding);
+    white-space: nowrap;
+    box-shadow: var(--shadow) var(--tooltip-shadow-color);
+    user-select: none;
+}

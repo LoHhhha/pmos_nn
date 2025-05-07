@@ -604,7 +604,10 @@ class ToolBarBuilder {
         item.className = "tcb-tool-bar-item";
 
         item.innerHTML = icon;
-        item.title = tooltip;
+        MESSAGE_PUSH(MESSAGE_TYPE.AddTooltip, {
+            element: item,
+            textContent: tooltip,
+        });
         item.onclick = callback;
 
         this.barEle.appendChild(item);

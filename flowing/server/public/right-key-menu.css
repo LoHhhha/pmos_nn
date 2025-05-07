@@ -1,6 +1,6 @@
 :root {
     --right-key-menu-background-color: var(--container-background-color);
-    --right-key-menu-outline-color: var(--container-outline-color);
+    --right-key-menu-border-color: var(--container-outline-color);
     --right-key-menu-shadow-color: var(--content-background-color);
     --right-key-menu-max-width: 300px;
     --right-key-menu-min-width: 100px;
@@ -27,7 +27,7 @@
     display: none;
     background-color: var(--right-key-menu-background-color);
     border-radius: var(--radius);
-    outline: var(--border-width) solid var(--right-key-menu-outline-color);
+    border: var(--border-width) solid var(--right-key-menu-border-color);
     backdrop-filter: var(--blur);
     box-shadow: var(--shadow) var(--right-key-menu-shadow-color);
     user-select: none;
