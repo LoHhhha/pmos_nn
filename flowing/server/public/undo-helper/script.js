@@ -3,8 +3,9 @@
  * !! call before changing if changed, and using MESSAGE_CALL !!
  *      <event.detail.deleteConnections: Iter[{src:Node,srcEndpointIdx:int,tar:Node,tarEndpointIdx:int}]>
  *      <event.detail.createConnections: Iter[{src:Node,srcEndpointIdx:int,tar:Node,tarEndpointIdx:int}]>
- *      <event.detail.deleteNodes: Iter[Node]
- *      <event.detail.createNodes: Iter[Node]
+ *      <event.detail.deleteNodes: Iter[Node]>
+ *      <event.detail.createNodes: Iter[Node]>
+ *      <event.detail.moveNodes: Iter[{node:Node,prevX,prevY,curX,curY}]>
  *
  * MESSAGE_TYPE.OperationUndo
  *
@@ -12,7 +13,6 @@
  */
 
 const UNDO_OPERATION_STACK = new Array(); // Slices
-const UNDO_NOT_FOUND_MAPPING = undefined;
 const UNDO_ICON = ICONS.undo;
 
 class Slice {
@@ -22,6 +22,7 @@ class Slice {
     createConnections; // Array[{srcId:Node.id,srcEndpointIdx:int,tarId:Node.id,tarEndpointIdx:int}]
     deleteNodes; // Array[{id:Node.id,apiName,content,left,top}]
     createNodes; // Array[{id:Node.id}]
+    movedNodes; // Array[{id:Node.id,prevX,prevY,curX,curY}]
 
     static jsPlumbInstance;
     static getNodeById(id) {
@@ -130,12 +131,26 @@ class Slice {
             quiet: true,
         });
 
-        // step5. end
+        // step5. recover movement
+        for (const { id, prevX, prevY } of this.movedNodes) {
+            const node = Slice.getNodeById(id);
+            if (node === undefined) {
+                console.warn(
+                    `[OperationUndo] detect an unexpected node.id as ${id} in movedNodes`
+                );
+                continue;
+            }
+            node.redraw(prevX, prevY);
+        }
+
+        // step6. end
         MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
             config: PROMPT_CONFIG.INFO,
             iconSvg: UNDO_ICON,
             content: `Changed ${
-                needDeleteNodes.length + this.deleteNodes.length
+                needDeleteNodes.length +
+                this.deleteNodes.length +
+                this.movedNodes.length
             } node(s) and ${
                 this.createConnections.length + this.deleteConnections.length
             } connection(s).`,
@@ -148,6 +163,7 @@ class Slice {
                 createConnections: this.createConnections,
                 deleteNodes: this.deleteNodes,
                 createNodes: this.createNodes,
+                movedNodes: this.movedNodes,
             }
         );
     }
@@ -156,7 +172,8 @@ class Slice {
         deleteConnections, // Iter[{src:Node,srcEndpointIdx:int,tar:Node,tarEndpointIdx:int}]>
         createConnections, // Iter[{src:Node,srcEndpointIdx:int,tar:Node,tarEndpointIdx:int}]>
         deleteNodes, // Iter[Node]
-        createNodes // Iter[Node]
+        createNodes, // Iter[Node]
+        moveNodes // Iter[{node:Node,prevX,prevY,curX,curY}]>
     ) {
         this.deleteConnections = [];
         if (deleteConnections) {
@@ -218,6 +235,21 @@ class Slice {
                 this.isEmpty = false;
             }
         }
+
+        this.movedNodes = [];
+        if (moveNodes) {
+            for (const { node, prevX, prevY, curX, curY } of moveNodes) {
+                if (prevX === curX && prevY === curY) continue;
+                this.movedNodes.push({
+                    id: node.id,
+                    prevX,
+                    prevY,
+                    curX,
+                    curY,
+                });
+                this.isEmpty = false;
+            }
+        }
     }
 }
 
@@ -240,10 +272,11 @@ class Slice {
                 event.detail?.deleteConnections,
                 event.detail?.createConnections,
                 event.detail?.deleteNodes,
-                event.detail?.createNodes
+                event.detail?.createNodes,
+                event.detail?.moveNodes
             );
             if (slice.isEmpty) {
-                console.error("[OperationSave] not info found!", event);
+                console.warn("[OperationSave] not info found!", event);
                 return;
             }
             UNDO_OPERATION_STACK.push(slice);
@@ -276,5 +309,23 @@ class Slice {
         MESSAGE_HANDLER(MESSAGE_TYPE.OperationRecordReset, () => {
             undoClear();
         });
+
+        jsPlumbInstance.bind("drag:stop", (dragStopPayload) => {
+            MESSAGE_PUSH(MESSAGE_TYPE.OperationSave, {
+                moveNodes: dragStopPayload.elements.map((item) => {
+                    return {
+                        node: item.el.origin,
+                        prevX: item.originalPos.x,
+                        prevY: item.originalPos.y,
+                        curX: item.pos.x,
+                        curY: item.pos.y,
+                    };
+                }),
+            });
+        });
+
+        window.addUndoHelper = () => {
+            console.warn("Do not create UndoHelper more than once!");
+        };
     };
 })();

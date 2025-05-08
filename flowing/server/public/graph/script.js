@@ -1142,6 +1142,7 @@ const TIDY_NODES_ICON = ICONS.tidy;
 
         // step5.1: place graph nodes
         //      base on: each child tree is disjointed
+        const moveNodes = [];
         const nodeInDeg = new Map();
         for (const u of graphNodes) {
             for (const v of nextNodes.get(u.id)) {
@@ -1246,7 +1247,18 @@ const TIDY_NODES_ICON = ICONS.tidy;
 
             // step3: redraw
             for (const [node, coordinates] of nodeCoordinates) {
+                const prevCoordinates = node.getCoordinates?.();
                 node.redraw(...coordinates);
+                // fake nodes
+                if(prevCoordinates){
+                    moveNodes.push({
+                        node,
+                        prevX: prevCoordinates.left,
+                        prevY: prevCoordinates.top,
+                        curX: coordinates[0],
+                        curY: coordinates[1],
+                    });
+                }
             }
 
             // step4: get width
@@ -1274,9 +1286,20 @@ const TIDY_NODES_ICON = ICONS.tidy;
         let top = 0,
             left = -TIDY_NODES_ROOT_NODE_GRAPH_INTERVAL;
         for (const node of uselessNodes) {
+            const prevCoordinates = node.getCoordinates();
             node.redraw(left, top);
+            moveNodes.push({
+                node,
+                prevX: prevCoordinates.left,
+                prevY: prevCoordinates.top,
+                curX: left,
+                curY: top,
+            });
             top += node.element.offsetHeight;
         }
+
+        // step5.3: record move operation
+        MESSAGE_PUSH(MESSAGE_TYPE.OperationSave, { moveNodes });
     }
 
     window.createJsPlumbConnectionListener = (jsPlumbInstance) => {
