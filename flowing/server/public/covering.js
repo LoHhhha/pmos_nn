@@ -4,6 +4,8 @@
  *      push <event.detail.text(str)> to covering.
  *      push close button if <event.detail.buttonMode(COVERING_BUTTON_MODE))>.
  *          this will call <event.detail.buttonCallback.close>/<event.detail.buttonCallback.confirm>/<event.detail.buttonCallback.cancel>
+ *          / this will call <event.detail.buttonCallback.beforeClose>/<event.detail.buttonCallback.beforeConfirm>/<event.detail.buttonCallback.beforeCancel>
+ *          xxx will call transitionEnd, beforeXxx will call before covering close.
  *      push <event.detail.elements(DOM-s)> to covering, and show.
  *      call <event.detail.init>
  *      call <event.detail.afterInit> call when transition ends
@@ -12,6 +14,7 @@
  * MESSAGE_TYPE.CoveringClose
  *      close covering page
  *      call <event.detail.afterClose> call when transition ends
+ *      call <event.detail.beforeClose> call before close
  */
 
 const COVERING_BUTTON_MODE = {
@@ -44,13 +47,26 @@ const COVERING_USER_SCROLL_TIMEOUT = 100;
     const callWhenTransitionEnd = (...callbacks) => {
         const animationendCallback = () => {
             for (const callback of callbacks) {
-                if (callback) {
-                    callback();
-                }
+                callback?.();
             }
             COVERING.removeEventListener("transitionend", animationendCallback);
         };
         COVERING.addEventListener("transitionend", animationendCallback);
+    };
+
+    const buttonOnclickBuilder = (ele, beforeCallback, afterCallback) => {
+        return () => {
+            callWhenTransitionEnd(afterCallback);
+
+            // change button icon to loading.
+            ele.innerHTML = ICONS.staticLoading;
+
+            setTimeout(() => {
+                MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose, {
+                    beforeClose: beforeCallback,
+                });
+            }, 0);
+        };
     };
 
     const addAutoScroll = (ele) => {
@@ -165,10 +181,11 @@ const COVERING_USER_SCROLL_TIMEOUT = 100;
                 closeButtonEle.className = "covering-button";
                 closeButtonEle.title = "Close";
                 closeButtonEle.innerHTML = ICONS.cross;
-                closeButtonEle.onclick = () => {
-                    callWhenTransitionEnd(event.detail?.buttonCallback?.close);
-                    MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose);
-                };
+                closeButtonEle.onclick = buttonOnclickBuilder(
+                    closeButtonEle,
+                    event.detail?.buttonCallback?.beforeClose,
+                    event.detail?.buttonCallback?.close
+                );
                 buttonBar.appendChild(closeButtonEle);
 
                 callWhenKeyDown("Escape", [], closeButtonEle.onclick);
@@ -178,22 +195,22 @@ const COVERING_USER_SCROLL_TIMEOUT = 100;
                 confirmButtonEle.className = "covering-button";
                 confirmButtonEle.title = "Confirm";
                 confirmButtonEle.innerHTML = ICONS.check;
-                confirmButtonEle.onclick = () => {
-                    callWhenTransitionEnd(
-                        event.detail?.buttonCallback?.confirm
-                    );
-                    MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose);
-                };
+                confirmButtonEle.onclick = buttonOnclickBuilder(
+                    confirmButtonEle,
+                    event.detail?.buttonCallback?.beforeConfirm,
+                    event.detail?.buttonCallback?.confirm
+                );
                 buttonBar.appendChild(confirmButtonEle);
 
                 const cancelButtonEle = document.createElement("div");
                 cancelButtonEle.className = "covering-button";
                 cancelButtonEle.title = "Cancel";
                 cancelButtonEle.innerHTML = ICONS.cross;
-                cancelButtonEle.onclick = () => {
-                    callWhenTransitionEnd(event.detail?.buttonCallback?.cancel);
-                    MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose);
-                };
+                cancelButtonEle.onclick = buttonOnclickBuilder(
+                    cancelButtonEle,
+                    event.detail?.buttonCallback?.beforeCancel,
+                    event.detail?.buttonCallback?.cancel
+                );
                 buttonBar.appendChild(cancelButtonEle);
 
                 callWhenKeyDown("Escape", [], cancelButtonEle.onclick);
@@ -218,6 +235,8 @@ const COVERING_USER_SCROLL_TIMEOUT = 100;
     });
 
     MESSAGE_HANDLER(MESSAGE_TYPE.CoveringClose, (event) => {
+        event.detail?.beforeClose?.();
+
         callWhenTransitionEnd(() => {
             MESSAGE_PUSH(MESSAGE_TYPE.PromptStart);
         }, event.detail?.afterClose);

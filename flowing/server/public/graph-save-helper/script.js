@@ -5,20 +5,48 @@
  *      [<event.detail.asNew:bool>]
  *
  * MESSAGE_TYPE.GraphSaved (out)
- *      <event.detail.timestamp>
+ *      [<event.detail.timestamp>]
  *      <event.detail.name>
  *
- * MESSAGE_TYPE.ShowSaveGraphs
- *      [<event.detail.closeText>]
+ * MESSAGE_TYPE.OpenGraphs
+ *      [<event.detail.continueText>]
+ *      [<event.detail.continueDisabled>]
+ *      [<event.detail.newGraphText>]
+ *      [<event.detail.newGraphDisabled>]
  */
 
 const GRAPH_SAVE_HELPER_ICON = ICONS.save;
-const GRAPH_SAVE_HELPER_DEFAULT_GRAPH_NAME = "UNNAMED";
+const GRAPH_SAVE_HELPER_DEFAULT_GRAPH_NAME = UNNAMED_GRAPH_NAME;
 let CURRENT_GRAPH_KEY = undefined;
 
 const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
 
 (function () {
+    const addTransverseItem = (
+        text,
+        defaultText,
+        callback,
+        transverseItems
+    ) => {
+        const ele = document.createElement("div");
+        ele.className = "graph-save-transverse-item";
+        const textEle = document.createElement("div");
+        textEle.className = "graph-save-transverse-item-text";
+        textEle.textContent = text || defaultText;
+        const iconEle = document.createElement("div");
+        iconEle.className = "graph-save-transverse-item-icon";
+        iconEle.innerHTML = ICONS.right;
+        ele.appendChild(textEle);
+        ele.appendChild(iconEle);
+        ele.onclick = callback;
+
+        if (transverseItems.length) {
+            ele.classList.add("graph-save-transverse-item-tail");
+        }
+
+        transverseItems.push(ele);
+    };
+
     window.addGraphSaveHelper = () => {
         MESSAGE_HANDLER(MESSAGE_TYPE.SaveGraph, (event) => {
             const callResult = MESSAGE_CALL(MESSAGE_TYPE.ExportGraph, {
@@ -100,27 +128,40 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
             });
         });
 
-        MESSAGE_HANDLER(MESSAGE_TYPE.ShowSaveGraphs, () => {
+        MESSAGE_HANDLER(MESSAGE_TYPE.OpenGraphs, (event) => {
             const localGraphs = GraphSaveUtils.getGraphs();
             localGraphs.sort((a, b) => {
                 return a.graphInfo.timestamp < b.graphInfo.timestamp ? 1 : -1;
             });
 
-            const directlyOpenEle = document.createElement("div");
-            directlyOpenEle.className = "graph-save-directly-open";
-            const directlyOpenTextEle = document.createElement("div");
-            directlyOpenTextEle.className = "graph-save-directly-open-text";
-            directlyOpenTextEle.textContent =
-                event.detail?.closeText ||
-                "Start the journey at PMoS from scratch";
-            const directlyOpenIconEle = document.createElement("div");
-            directlyOpenIconEle.className = "graph-save-directly-open-icon";
-            directlyOpenIconEle.innerHTML = ICONS.right;
-            directlyOpenEle.appendChild(directlyOpenTextEle);
-            directlyOpenEle.appendChild(directlyOpenIconEle);
-            directlyOpenEle.onclick = () => {
-                MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose);
-            };
+            const transverseItems = [];
+
+            if (!event.detail?.continueDisabled) {
+                addTransverseItem(
+                    event.detail?.continueText,
+                    "Continue",
+                    () => {
+                        MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose);
+                    },
+                    transverseItems
+                );
+            }
+            if (!event.detail?.newGraphDisabled) {
+                addTransverseItem(
+                    event.detail?.newGraphText,
+                    "Create new graph",
+                    () => {
+                        MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose, {
+                            afterClose: () => {
+                                MESSAGE_PUSH(MESSAGE_TYPE.RestartPage, {
+                                    title: "Create new graph",
+                                });
+                            },
+                        });
+                    },
+                    transverseItems
+                );
+            }
 
             const prevGraphItemTitleEle = document.createElement("h2");
             prevGraphItemTitleEle.className = "graph-save-h2-title";
@@ -187,7 +228,7 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
                 try {
                     graph = JSON.parse(data);
                 } catch (err) {
-                    console.error("[ShowSaveGraphs] detect an unexpect data", {
+                    console.error("[OpenGraphs] detect an unexpect data", {
                         data,
                         err,
                     });
@@ -260,7 +301,7 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
             MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
                 title: "What's next?",
                 elements: [
-                    directlyOpenEle,
+                    ...transverseItems,
                     prevGraphItemTitleEle,
                     localGraphItemContainer,
                     helpTitleEle,
@@ -268,6 +309,18 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
                     repositoryLinkEle,
                 ],
             });
+        });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.ResetCurrentSaveGraph, () => {
+            // reset graph key
+            CURRENT_GRAPH_KEY = undefined;
+            // reset graph name
+            MESSAGE_CALL(MESSAGE_TYPE.GraphSaved, {
+                timestamp: undefined,
+                name: UNNAMED_GRAPH_NAME,
+            });
+            // unsaved
+            MESSAGE_CALL(MESSAGE_TYPE.GraphChanged);
         });
 
         ADD_KEY_HANDLER(

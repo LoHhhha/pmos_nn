@@ -62,5 +62,8 @@ jsPlumb.ready(() => {
     window.addGraphSaveHelper();
 
     // welcome page
-    MESSAGE_PUSH(MESSAGE_TYPE.ShowSaveGraphs);
+    MESSAGE_PUSH(MESSAGE_TYPE.OpenGraphs, {
+        continueText: "Start the journey at PMoS from scratch",
+        newGraphDisabled: true,
+    });
 });

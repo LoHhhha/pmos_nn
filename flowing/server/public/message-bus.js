@@ -75,19 +75,24 @@ const MESSAGE_TYPE = {
     OperationUndo: "operation-undo",
     OperationRedo: "operation-redo",
     OperationRecordReset: "operation-record-reset",
-    GraphChanged: "graph-changed",
 
     // graph-save-helper
     SaveGraph: "save-graph",
     GraphSaved: "graph-saved", // out
-    ShowSaveGraphs: "show-save-graphs",
+    OpenGraphs: "open-graphs",
+    ResetCurrentSaveGraph: "reset-current-save-graph",
 
     // general-pages
     HelpPage: "help-page",
     ClearGraphPage: "clear-graph-page",
+    SaveAsPage: "save-as-page",
+    RestartPage: "restart-page",
 
     // tooltip
     AddTooltip: "add-tooltip",
+
+    // general
+    GraphChanged: "graph-changed",
 };
 
 const MESSAGE_HANDLER_MAP = new Map();

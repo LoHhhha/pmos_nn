@@ -1,6 +1,6 @@
 class GraphInfoBarBuilder {
     static unsavedText = "Unsaved changes! Click here to save.";
-    static defaultGraphName = "Unnamed-Graph";
+    static defaultGraphName = UNNAMED_GRAPH_NAME;
 
     ele;
     prevSaveTimeEle;
@@ -15,7 +15,7 @@ class GraphInfoBarBuilder {
         this.ele.appendChild(this.prevSaveTimeEle);
 
         MESSAGE_HANDLER(MESSAGE_TYPE.GraphSaved, (event) => {
-            this.savedMode(new Date(event.detail?.timestamp));
+            this.savedMode(event.detail?.timestamp);
             this.saveNameEle.changeValue(event.detail?.name);
         });
 
@@ -30,23 +30,27 @@ class GraphInfoBarBuilder {
         this.unSavedMode();
     }
 
-    prevSaveTime = null;
+    prevSaveTimestamp;
     unSavedMode() {
         this.prevSaveTimeEle.classList.remove("tcb-graph-saved-text");
         this.prevSaveTimeEle.classList.add("tcb-graph-unsaved-text");
         this.prevSaveTimeEle.textContent = GraphInfoBarBuilder.unsavedText;
-        if (this.prevSaveTime) {
-            this.prevSaveTimeEle.textContent += ` (Last saved at ${this.prevSaveTime.toLocaleString()})`;
+        if (this.prevSaveTimestamp) {
+            this.prevSaveTimeEle.textContent += ` (Last saved at ${new Date(
+                this.prevSaveTimestamp
+            ).toLocaleString()})`;
         }
         this.prevSaveTimeEle.onclick = () => {
             MESSAGE_PUSH(MESSAGE_TYPE.SaveGraph);
         };
     }
-    savedMode(time) {
+    savedMode(timestamp) {
         this.prevSaveTimeEle.classList.remove("tcb-graph-unsaved-text");
         this.prevSaveTimeEle.classList.add("tcb-graph-saved-text");
-        this.prevSaveTimeEle.textContent = `Saved at ${time.toLocaleString()}`;
-        this.prevSaveTime = time;
+        this.prevSaveTimeEle.textContent = `Saved at ${
+            timestamp && new Date(timestamp).toLocaleString()
+        }`;
+        this.prevSaveTimestamp = timestamp;
         this.prevSaveTimeEle.onclick = null;
     }
 
@@ -242,11 +246,10 @@ class MenuBarBuilder {
                     },
                 },
                 {
-                    title: "Save As",
+                    title: "Save As..",
+                    icon: ICONS.saveAsNew,
                     callback: () => {
-                        MESSAGE_PUSH(MESSAGE_TYPE.SaveGraph, {
-                            asNew: true,
-                        });
+                        MESSAGE_PUSH(MESSAGE_TYPE.SaveAsPage);
                     },
                 },
                 {
@@ -255,9 +258,7 @@ class MenuBarBuilder {
                 {
                     title: "Open...",
                     callback: () => {
-                        MESSAGE_PUSH(MESSAGE_TYPE.ShowSaveGraphs, {
-                            closeText: "Continue",
-                        });
+                        MESSAGE_PUSH(MESSAGE_TYPE.OpenGraphs);
                     },
                 },
                 {
@@ -572,6 +573,15 @@ class MenuBarBuilder {
                                 },
                             },
                         ],
+                    },
+                    {
+                        isSeparator: true,
+                    },
+                    {
+                        title: "Restart",
+                        callback: () => {
+                            MESSAGE_PUSH(MESSAGE_TYPE.RestartPage);
+                        },
                     },
                 ];
             },

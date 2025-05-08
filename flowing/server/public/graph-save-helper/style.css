@@ -3,15 +3,15 @@
 
     --graph-save-width: 60vw;
 
-    --graph-save-directly-open-outline-color: var(--container-outline-color);
-    --graph-save-directly-open-background-color: var(
+    --graph-save-transverse-item-outline-color: var(--container-outline-color);
+    --graph-save-transverse-item-background-color: var(
         --container-background-color
     );
-    --graph-save-directly-open-hover-outline-color: var(--default-color);
-    --graph-save-directly-open-hover-background-color: var(
+    --graph-save-transverse-item-hover-outline-color: var(--default-color);
+    --graph-save-transverse-item-hover-background-color: var(
         --container-outline-color
     );
-    --graph-save-directly-open-height: calc(2 * var(--graph-save-unit));
+    --graph-save-transverse-item-height: calc(2 * var(--graph-save-unit));
 
     --graph-save-container-max-height: 40vh;
 
@@ -29,27 +29,31 @@
     width: 100%;
 }
 
-.graph-save-directly-open {
+.graph-save-transverse-item {
     backdrop-filter: var(--blur);
-    background-color: var(--graph-save-directly-open-background-color);
+    background-color: var(--graph-save-transverse-item-background-color);
     outline: var(--border-width) solid
-        var(--graph-save-directly-open-outline-color);
+        var(--graph-save-transverse-item-outline-color);
     border-radius: var(--radius);
     margin: var(--hover-border-width);
-    height: var(--graph-save-directly-open-height);
+    height: var(--graph-save-transverse-item-height);
     display: grid;
     grid-template-columns: 1fr auto;
     width: var(--graph-save-width);
 }
 
-.graph-save-directly-open:hover {
-    background-color: var(--graph-save-directly-open-hover-background-color);
+.graph-save-transverse-item:hover {
+    background-color: var(--graph-save-transverse-item-hover-background-color);
     outline: var(--hover-border-width) solid
-        var(--graph-save-directly-open-hover-outline-color);
+        var(--graph-save-transverse-item-hover-outline-color);
     cursor: pointer;
 }
 
-.graph-save-directly-open-text {
+.graph-save-transverse-item-tail {
+    margin-top: calc(var(--hover-border-width) + var(--margin));
+}
+
+.graph-save-transverse-item-text {
     grid-row: 1;
     grid-column: 1;
     font-weight: bold;
@@ -61,10 +65,10 @@
     overflow: hidden;
 }
 
-.graph-save-directly-open-icon {
+.graph-save-transverse-item-icon {
     grid-row: 1;
     grid-column: 2;
-    height: var(--graph-save-directly-open-height);
+    height: var(--graph-save-transverse-item-height);
     margin-right: var(--margin);
 }
 

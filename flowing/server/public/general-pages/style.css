@@ -1,0 +1,17 @@
+:root {
+    --general-pages-input-background-color: var(--content-background-color);
+    --general-pages-input-outline-color: var(--content-outline-color);
+}
+
+.general-pages-input {
+    border-radius: var(--radius);
+    border: none;
+    backdrop-filter: var(--blur);
+    background-color: var(--general-pages-input-background-color);
+    outline: var(--border-width) solid var(--general-pages-input-outline-color);
+    font-size: large;
+}
+
+.general-pages-input:hover {
+    outline: var(--hover-border-width) solid var(--default-color);
+}
