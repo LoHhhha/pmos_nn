@@ -366,9 +366,15 @@ class Node {
     pointerDownHandlerFunc = this.pointerDownHandler.bind(this);
 
     getCoordinates() {
+        if (this.element.style.left && this.element.style.top) {
+            return {
+                left: this.element.offsetLeft,
+                top: this.element.offsetTop,
+            };
+        }
         return {
-            left: Number.parseFloat(this.element.style.left.slice(0, -2)),
-            top: Number.parseFloat(this.element.style.top.slice(0, -2)),
+            left: this.nextLeft,
+            top: this.nextTop,
         };
     }
 
@@ -620,6 +626,10 @@ class Node {
             left: left,
             top: top,
         });
+
+        // initNow = false, we use this to navigate node.
+        this.nextLeft = left;
+        this.nextTop = top;
 
         // set outputEndpointConnection
         for (let idx = 0; idx < nodeConfig.outputEnd.length; idx++) {
@@ -1511,35 +1521,6 @@ class OperatorBar {
             [MODIFIER_KEY_CODE.ctrl],
             () => {
                 MESSAGE_PUSH(MESSAGE_TYPE.SelectNodes);
-            }
-        );
-
-        ADD_KEY_HANDLER(
-            DEFAULT_KEY_NAMESPACE,
-            "c",
-            [MODIFIER_KEY_CODE.ctrl],
-            () => {
-                MESSAGE_PUSH(MESSAGE_TYPE.NodesCopy, {
-                    nodes: Node.SELECTED_NODES_SET,
-                });
-            }
-        );
-
-        ADD_KEY_HANDLER(
-            DEFAULT_KEY_NAMESPACE,
-            "v",
-            [MODIFIER_KEY_CODE.ctrl],
-            () => {
-                MESSAGE_PUSH(MESSAGE_TYPE.NodesPaste);
-            }
-        );
-
-        ADD_KEY_HANDLER(
-            DEFAULT_KEY_NAMESPACE,
-            "z",
-            [MODIFIER_KEY_CODE.ctrl],
-            () => {
-                MESSAGE_PUSH(MESSAGE_TYPE.OperationUndo);
             }
         );
 

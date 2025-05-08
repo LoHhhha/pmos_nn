@@ -1,6 +1,6 @@
 /**
  * MESSAGE_TYPE.OperationSave
- * !! call before changing if changed, and using MESSAGE_CALL !!
+ * !! call before changing, and using MESSAGE_CALL !!
  *      <event.detail.deleteConnections: Iter[{src:Node,srcEndpointIdx:int,tar:Node,tarEndpointIdx:int}]>
  *      <event.detail.createConnections: Iter[{src:Node,srcEndpointIdx:int,tar:Node,tarEndpointIdx:int}]>
  *      <event.detail.deleteNodes: Iter[Node]>
@@ -13,7 +13,9 @@
  */
 
 const UNDO_OPERATION_STACK = new Array(); // Slices
+const REDO_OPERATION_STACK = new Array(); // Slices
 const UNDO_ICON = ICONS.undo;
+const REDO_ICON = ICONS.redo;
 
 class Slice {
     isEmpty = true;
@@ -21,7 +23,7 @@ class Slice {
     deleteConnections; // Array[{srcId:Node.id,srcEndpointIdx:int,tarId:Node.id,tarEndpointIdx:int}]
     createConnections; // Array[{srcId:Node.id,srcEndpointIdx:int,tarId:Node.id,tarEndpointIdx:int}]
     deleteNodes; // Array[{id:Node.id,apiName,content,left,top}]
-    createNodes; // Array[{id:Node.id}]
+    createNodes; // Array[{id:Node.id,apiName,content,left,top}]
     movedNodes; // Array[{id:Node.id,prevX,prevY,curX,curY}]
 
     static jsPlumbInstance;
@@ -29,7 +31,7 @@ class Slice {
         return MEMORY_GET(MEMORY_KEYS.Id2Node)?.get(id);
     }
 
-    recover() {
+    recover(isUndo = true) {
         // step1. create deleteNodes
         // using the prev id, this id will always reserved
         MESSAGE_CALL(MESSAGE_TYPE.CreateNodes, {
@@ -146,7 +148,7 @@ class Slice {
         // step6. end
         MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
             config: PROMPT_CONFIG.INFO,
-            iconSvg: UNDO_ICON,
+            iconSvg: isUndo ? UNDO_ICON : REDO_ICON,
             content: `Changed ${
                 needDeleteNodes.length +
                 this.deleteNodes.length +
@@ -166,6 +168,33 @@ class Slice {
                 movedNodes: this.movedNodes,
             }
         );
+    }
+
+    reverse() {
+        const reversedSlice = new Slice();
+        reversedSlice.createNodes = JSON.parse(
+            JSON.stringify(this.deleteNodes)
+        );
+        reversedSlice.deleteNodes = JSON.parse(
+            JSON.stringify(this.createNodes)
+        );
+        reversedSlice.deleteConnections = JSON.parse(
+            JSON.stringify(this.createConnections)
+        );
+        reversedSlice.createConnections = JSON.parse(
+            JSON.stringify(this.deleteConnections)
+        );
+        for (const { id, prevX, prevY, curX, curY } of this.movedNodes) {
+            reversedSlice.movedNodes.push({
+                id,
+                prevX: curX,
+                prevY: curY,
+                curX: prevX,
+                curY: prevY,
+            });
+        }
+        reversedSlice.isEmpty = this.isEmpty;
+        return reversedSlice;
     }
 
     constructor(
@@ -229,8 +258,13 @@ class Slice {
         this.createNodes = [];
         if (createNodes) {
             for (const node of createNodes) {
+                const { left, top } = node.getCoordinates();
                 this.createNodes.push({
                     id: node.id,
+                    apiName: node.config.apiName,
+                    content: JSON.parse(JSON.stringify(node.content)),
+                    left: left,
+                    top: top,
                 });
                 this.isEmpty = false;
             }
@@ -258,7 +292,25 @@ class Slice {
         MEMORY_SET(MEMORY_KEYS.CanUndoOperation, false);
         UNDO_OPERATION_STACK.length = 0;
     };
-    undoClear();
+    const redoClear = () => {
+        MEMORY_SET(MEMORY_KEYS.CanRedoOperation, false);
+        REDO_OPERATION_STACK.length = 0;
+    };
+    const xdoClear = () => {
+        undoClear();
+        redoClear();
+    };
+    xdoClear();
+
+    const addUndo = (slice) => {
+        UNDO_OPERATION_STACK.push(slice);
+        MEMORY_SET(MEMORY_KEYS.CanUndoOperation, true);
+    };
+
+    const addRedo = (slice) => {
+        REDO_OPERATION_STACK.push(slice);
+        MEMORY_SET(MEMORY_KEYS.CanRedoOperation, true);
+    };
 
     window.addUndoHelper = (jsPlumbInstance) => {
         // init ignores
@@ -279,12 +331,17 @@ class Slice {
                 console.warn("[OperationSave] not info found!", event);
                 return;
             }
-            UNDO_OPERATION_STACK.push(slice);
-            MEMORY_SET(MEMORY_KEYS.CanUndoOperation, true);
+
+            addUndo(slice);
+
+            // if operation saved by message that means user change the graph
+            // so need to clear redo
+            redoClear();
+
             MESSAGE_PUSH(MESSAGE_TYPE.GraphChanged);
         });
 
-        MESSAGE_HANDLER(MESSAGE_TYPE.OperationUndo, (event) => {
+        MESSAGE_HANDLER(MESSAGE_TYPE.OperationUndo, () => {
             if (UNDO_OPERATION_STACK.length === 0) {
                 MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                     config: PROMPT_CONFIG.WARNING,
@@ -292,12 +349,15 @@ class Slice {
                     content: `Can not undo now!`,
                     timeout: 2000,
                 });
-                console.warn("[OperationUndo] can not undo now!", event);
+                console.warn("[OperationUndo] can not undo now!");
                 return;
             }
 
             const slice = UNDO_OPERATION_STACK.pop();
             slice.recover();
+
+            // need to add redo
+            addRedo(slice.reverse());
 
             if (UNDO_OPERATION_STACK.length === 0) {
                 undoClear();
@@ -306,8 +366,29 @@ class Slice {
             MESSAGE_PUSH(MESSAGE_TYPE.GraphChanged);
         });
 
-        MESSAGE_HANDLER(MESSAGE_TYPE.OperationRecordReset, () => {
-            undoClear();
+        MESSAGE_HANDLER(MESSAGE_TYPE.OperationRedo, () => {
+            if (REDO_OPERATION_STACK.length === 0) {
+                MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
+                    config: PROMPT_CONFIG.WARNING,
+                    iconSvg: UNDO_ICON,
+                    content: `Can not redo now!`,
+                    timeout: 2000,
+                });
+                console.warn("[OperationRedo] can not redo now!");
+                return;
+            }
+
+            const slice = REDO_OPERATION_STACK.pop();
+            slice.recover(false);
+
+            // need to add undo
+            addUndo(slice.reverse());
+
+            if (REDO_OPERATION_STACK.length === 0) {
+                redoClear();
+            }
+
+            MESSAGE_PUSH(MESSAGE_TYPE.GraphChanged);
         });
 
         jsPlumbInstance.bind("drag:stop", (dragStopPayload) => {
@@ -323,6 +404,24 @@ class Slice {
                 }),
             });
         });
+
+        ADD_KEY_HANDLER(
+            DEFAULT_KEY_NAMESPACE,
+            "z",
+            [MODIFIER_KEY_CODE.ctrl],
+            () => {
+                MESSAGE_PUSH(MESSAGE_TYPE.OperationUndo);
+            }
+        );
+
+        ADD_KEY_HANDLER(
+            DEFAULT_KEY_NAMESPACE,
+            "y",
+            [MODIFIER_KEY_CODE.ctrl],
+            () => {
+                MESSAGE_PUSH(MESSAGE_TYPE.OperationRedo);
+            }
+        );
 
         window.addUndoHelper = () => {
             console.warn("Do not create UndoHelper more than once!");

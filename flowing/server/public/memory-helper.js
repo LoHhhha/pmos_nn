@@ -6,6 +6,7 @@ const MEMORY_KEYS = {
     Id2Node: "id-to-node", // operator-bar
     NodeInformation: "node-information", // operator-bar
     CanUndoOperation: "can-undo-operation", // undo-helper
+    CanRedoOperation: "can-redo-operation", // undo-helper
     PrevMouseLeftButtonCoordinate: "prev-mouse-left-button-coordinate",
     PrevMouseRightButtonCoordinate: "prev-mouse-right-button-coordinate",
     PrevMouseMiddleButtonCoordinate: "prev-mouse-middle-button-coordinate",

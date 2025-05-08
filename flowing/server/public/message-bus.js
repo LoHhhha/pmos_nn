@@ -73,6 +73,7 @@ const MESSAGE_TYPE = {
     // undo-helper
     OperationSave: "operation-save",
     OperationUndo: "operation-undo",
+    OperationRedo: "operation-redo",
     OperationRecordReset: "operation-record-reset",
     GraphChanged: "graph-changed",
 

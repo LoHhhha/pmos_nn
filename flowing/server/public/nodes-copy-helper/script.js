@@ -143,5 +143,25 @@ const NO_OFFSET_PASTE_EXCURSION = {
                 timeout: 1000,
             });
         });
+
+        ADD_KEY_HANDLER(
+            DEFAULT_KEY_NAMESPACE,
+            "c",
+            [MODIFIER_KEY_CODE.ctrl],
+            () => {
+                MESSAGE_PUSH(MESSAGE_TYPE.NodesCopy, {
+                    nodes: Node.SELECTED_NODES_SET,
+                });
+            }
+        );
+
+        ADD_KEY_HANDLER(
+            DEFAULT_KEY_NAMESPACE,
+            "v",
+            [MODIFIER_KEY_CODE.ctrl],
+            () => {
+                MESSAGE_PUSH(MESSAGE_TYPE.NodesPaste);
+            }
+        );
     };
 })();

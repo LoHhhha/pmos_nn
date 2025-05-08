@@ -539,6 +539,15 @@ class Navigator {
                     disabled: !MEMORY_GET(MEMORY_KEYS.CanUndoOperation, false),
                 },
                 {
+                    title: "Redo",
+                    keyTips: "Ctrl+Y",
+                    icon: ICONS.redo,
+                    callback: () => {
+                        MESSAGE_PUSH(MESSAGE_TYPE.OperationRedo);
+                    },
+                    disabled: !MEMORY_GET(MEMORY_KEYS.CanRedoOperation, false),
+                },
+                {
                     isSeparator: true,
                 },
                 {
