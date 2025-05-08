@@ -96,9 +96,9 @@
   ![right-key-menu](../gif/right-key-menu.gif)
 
 - 发生误操作时，可以通过`Undo`功能完成撤消。<br>In the event of misoperation, undoing can be accomplished with the `Undo` function.
-  > 提示：目前支持算子间连接、算子新建、算子删除的撤消。
+  > 提示：目前支持算子间连接、算子移动、算子新建、算子删除的撤消。
   > <br>
-  > Note: The undoing of inter-operators connections, operator creation, and operators deletion is currently supported.
+  > Note: The undoing of inter-operators connections, operator movement, operator creation, and operators deletion is currently supported.
 
   ![undo](../gif/undo.gif)
 
@@ -130,6 +130,7 @@
 | ------------------------------------- | ----------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 全选<br>Select All                    | `Ctrl`+`A`              | 设计视图<br>Design View   | 框选画布上的所有算子。<br>Select all operators in the canvas.                                                                                                                                                                                                                |
 | 撤消<br>Undo                          | `Ctrl`+`Z`              | 设计视图<br>Design View   | 取消上一次操作带来的修改。<br>Undo the modifications brought about by the previous operation.                                                                                                                                                                                |
+| 恢复<br>Redo                          | `Ctrl`+`Y`              | 设计视图<br>Design View   | 取消上一次撤消带来的修改。<br>Undo the modifications brought about by the previous Undo.                                                                                                                                                                                     |
 | 复制<br>Copy                          | `Ctrl`+`C`              | 设计视图<br>Design View   | 复制被框选的算子到`PMoS`系统缓冲区，该操作不会改变系统剪贴板内容。<br>Copy the selected operators to the `PMoS` buffer which will not change the system clipboard.                                                                                                           |
 | 粘贴<br>Paste                         | `Ctrl`+`V`              | 设计视图<br>Design View   | 将`PMoS`系统缓冲区中的算子复制到原有位置附近。与此不同的是，右键菜单粘贴时算子会被粘贴在右键菜单附近。<br>Copy operators in the `PMoS` buffer near its original location. Unlike this, operators is pasted near the right-click menu when pasting from the right-click menu. |
 | 删除<br>Delete                        | `Backspace`             | 设计视图<br>Design View   | 删除被框选的算子。<br>Delete the selected operators.                                                                                                                                                                                                                         |
