@@ -391,6 +391,10 @@ class Slice {
             MESSAGE_PUSH(MESSAGE_TYPE.GraphChanged);
         });
 
+        MESSAGE_HANDLER(MESSAGE_TYPE.OperationRecordReset, () => {
+            xdoClear();
+        });
+
         jsPlumbInstance.bind("drag:stop", (dragStopPayload) => {
             MESSAGE_PUSH(MESSAGE_TYPE.OperationSave, {
                 moveNodes: dragStopPayload.elements.map((item) => {
