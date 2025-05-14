@@ -1,6 +1,6 @@
 import os
 
-VERSION = '0.1.alpha202504'
+VERSION = '0.1.202504'
 PACKAGE_NAME = 'flowing'
 PACKAGE_FULL_NAME = f'PMoS.nn.{PACKAGE_NAME}'
 OWNER = 'PMoS'
