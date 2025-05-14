@@ -20,7 +20,7 @@ jobs:
       - name: Test import
         run: python -c "import flowing"
       - name: Package flowing
-        run: python -m build
+        run: python -m build --wheel
       - name: Upload dist
         uses: actions/upload-artifact@v4
         with:
