@@ -115,4 +115,4 @@ function viewportRectangle() {
     };
 }
 
-const UNNAMED_GRAPH_NAME = "Unname-Graph";
+const UNNAMED_GRAPH_NAME = "Unnamed-Graph";

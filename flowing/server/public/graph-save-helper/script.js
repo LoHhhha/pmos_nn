@@ -139,7 +139,10 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
             if (!event.detail?.continueDisabled) {
                 addTransverseItem(
                     event.detail?.continueText,
-                    "Continue",
+                    `Continue "${MEMORY_GET(
+                        MEMORY_KEYS.CurrentGraphSaveName,
+                        GRAPH_SAVE_HELPER_DEFAULT_GRAPH_NAME
+                    )}"`,
                     () => {
                         MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose);
                     },
@@ -232,6 +235,10 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
                         data,
                         err,
                     });
+                    continue;
+                }
+
+                if (graphKey === CURRENT_GRAPH_KEY) {
                     continue;
                 }
 

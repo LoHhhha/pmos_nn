@@ -96,12 +96,14 @@
 .graph-save-item {
     display: grid;
     grid-template-columns: auto var(--graph-save-unit);
+    grid-template-rows: auto auto auto auto;
     min-width: var(--graph-save-item-width);
     backdrop-filter: var(--blur);
     background-color: var(--graph-save-item-background-color);
     outline: var(--border-width) solid var(--graph-save-item-outline-color);
     border-radius: var(--radius);
     padding: var(--margin);
+    cursor: pointer;
 }
 
 .graph-save-item * {
@@ -114,7 +116,6 @@
     outline: var(--hover-border-width) solid
         var(--graph-save-item-hover-outline-color);
     background-color: var(--graph-save-item-hover-background-color);
-    cursor: pointer;
 }
 
 .graph-save-item-title {
