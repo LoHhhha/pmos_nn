@@ -13,8 +13,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Prepare setuptools
-        run: pip install setuptools
+      - name: Prepare build-system
+        run: pip install setuptools build
       - name: Install flowing
         run: pip install .
       - name: Test import
