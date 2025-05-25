@@ -1,4 +1,4 @@
-const PMoS_VERSION = "0.1.alpha202504";
+const PMoS_VERSION = "0.1.alpha202505";
 const PMoS_REP_HREF = "https://github.com/LoHhhha/pmos_nn";
 const PMoS_FLOWING_INSTRUCTION_HREF =
     "https://github.com/LoHhhha/pmos_nn/blob/master/doc/help/flowing-instruction.md";
