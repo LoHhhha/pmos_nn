@@ -66,6 +66,17 @@ jsPlumb.ready(() => {
 
     window.initTopControlBar();
 
+    // touch mode warning
+    const touchDeleteCallback = () => {
+        MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
+            config: PROMPT_CONFIG.WARNING,
+            content: I18N_STRINGS.feature_limited_when_touch,
+            timeout: 10000,
+        });
+        document.removeEventListener("touchstart", touchDeleteCallback);
+    };
+    document.addEventListener("touchstart", touchDeleteCallback, false);
+
     // welcome page
     MESSAGE_PUSH(MESSAGE_TYPE.OpenGraphs, {
         continueText: I18N_STRINGS.using_from_scratch,

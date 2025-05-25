@@ -226,24 +226,6 @@
         <script src="./script.js" onload="loaded(this)"></script>
         <!-- total -->
     </head>
-    <script>
-        window.hadHintTouchLimited = false;
-        document.addEventListener(
-            "touchstart",
-            () => {
-                if (!window.hadHintTouchLimited) {
-                    MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
-                        config: PROMPT_CONFIG.WARNING,
-                        content:
-                            "Features will be limited in touch mode. Mouse and keyboard control is recommended.",
-                        timeout: 10000,
-                    });
-                    window.hadHintTouchLimited = true;
-                }
-            },
-            false
-        );
-    </script>
     <body>
         <div id="main-window">
             <div id="top-control-bar"></div>

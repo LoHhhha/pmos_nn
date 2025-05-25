@@ -666,12 +666,16 @@ const LANGUAGE_DATA = {
         en: "Can not redo now!",
         cn: "目前无法恢复！",
     },
-    language_switch_format:{
-        en:"Switch to '{0}' Language.",
-        cn:"语言切换到“{0}”。",
+    language_switch_format: {
+        en: "Switch to '{0}' Language.",
+        cn: "语言切换到“{0}”。",
     },
-    theme_switch_format:{
-        en:"Switch to '{0}' theme.",
-        cn:"主题切换到“{0}”。",
-    }
+    theme_switch_format: {
+        en: "Switch to '{0}' theme.",
+        cn: "主题切换到“{0}”。",
+    },
+    feature_limited_when_touch: {
+        en: "Features will be limited in touch mode. Mouse and keyboard control is recommended.",
+        cn: "在触摸模式下，部分功能特性将会受限。推荐使用键盘鼠标进行操作。",
+    },
 };
