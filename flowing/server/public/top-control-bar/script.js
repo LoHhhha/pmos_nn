@@ -20,6 +20,14 @@ class GraphInfoBarBuilder {
             this.unSavedMode();
         });
 
+        MESSAGE_HANDLER(MESSAGE_TYPE.LanguageChanged, () => {
+            if (this.isUnsavedMode) {
+                this.unSavedMode();
+            } else {
+                this.savedMode(this.prevSaveTimestamp);
+            }
+        });
+
         setTimeout(() => {
             this.saveNameEle.onchange();
         }, 0);
@@ -27,6 +35,7 @@ class GraphInfoBarBuilder {
         this.unSavedMode();
     }
 
+    isUnsavedMode;
     prevSaveTimestamp;
     unSavedMode() {
         this.prevSaveTimeEle.classList.remove("tcb-graph-saved-text");
@@ -41,6 +50,7 @@ class GraphInfoBarBuilder {
         this.prevSaveTimeEle.onclick = () => {
             MESSAGE_PUSH(MESSAGE_TYPE.SaveGraph);
         };
+        this.isUnsavedMode = true;
     }
     savedMode(timestamp) {
         this.prevSaveTimeEle.classList.remove("tcb-graph-unsaved-text");
@@ -51,6 +61,7 @@ class GraphInfoBarBuilder {
             );
         this.prevSaveTimestamp = timestamp;
         this.prevSaveTimeEle.onclick = null;
+        this.isUnsavedMode = false;
     }
 
     #createPrevSaveTimeEle() {
