@@ -18,6 +18,7 @@ const MEMORY_KEYS = {
     GraphKeys: "pmos-graph-keys", // graph-save-helper, string: [key0, ...]
     // Graph: "pmos-graph-*" // graph-save-helper, string: {timestamp:int,createTimestamp:int,data:JsonStr,name:str}
     ThemeSetting: "theme-setting", // theme-helper
+    LanguageSetting: "language-setting", // i18n
 };
 
 function MEMORY_GET(key, default_value) {

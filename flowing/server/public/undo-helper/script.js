@@ -149,13 +149,13 @@ class Slice {
         MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
             config: PROMPT_CONFIG.INFO,
             iconSvg: isUndo ? UNDO_ICON : REDO_ICON,
-            content: `Changed ${
+            content: I18N_STRINGS.change_nodes_and_connections_format?.format(
+                I18N_STRINGS.change,
                 needDeleteNodes.length +
-                this.deleteNodes.length +
-                this.movedNodes.length
-            } node(s) and ${
+                    this.deleteNodes.length +
+                    this.movedNodes.length,
                 this.createConnections.length + this.deleteConnections.length
-            } connection(s).`,
+            ),
             timeout: 2000,
         });
         console.info(
@@ -346,7 +346,7 @@ class Slice {
                 MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                     config: PROMPT_CONFIG.WARNING,
                     iconSvg: UNDO_ICON,
-                    content: `Can not undo now!`,
+                    content: I18N_STRINGS.can_not_undo,
                     timeout: 2000,
                 });
                 console.warn("[OperationUndo] can not undo now!");
@@ -371,7 +371,7 @@ class Slice {
                 MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                     config: PROMPT_CONFIG.WARNING,
                     iconSvg: UNDO_ICON,
-                    content: `Can not redo now!`,
+                    content: I18N_STRINGS.can_not_redo,
                     timeout: 2000,
                 });
                 console.warn("[OperationRedo] can not redo now!");

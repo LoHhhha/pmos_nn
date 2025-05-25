@@ -4,12 +4,6 @@ const PMoS_FLOWING_INSTRUCTION_HREF =
     "https://github.com/LoHhhha/pmos_nn/blob/master/doc/help/flowing-instruction.md";
 const JS_PLUMB_REP_HREF = "https://github.com/jsplumb/community-edition";
 const MARKED_REP_HREF = "https://github.com/markedjs/marked";
-const LINKS = [
-    { title: "Instruction", url: PMoS_FLOWING_INSTRUCTION_HREF },
-    { title: "PMoS-nn Code Repository", url: PMoS_REP_HREF },
-    { title: "JsPlumb Code Repository", url: JS_PLUMB_REP_HREF },
-    { title: "Marked Code Repository", url: MARKED_REP_HREF },
-];
 
 const rootStyle = getComputedStyle(document.querySelector(":root"));
 rootStyle.var = (key) => rootStyle.getPropertyValue(key);
@@ -90,6 +84,12 @@ const ICONS = {
     chat: '<svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><path fill="currentColor" d="M2 22V9q0-.825.588-1.413Q3.175 7 4 7h2V4q0-.825.588-1.413Q7.175 2 8 2h12q.825 0 1.413.587Q22 3.175 22 4v8q0 .825-.587 1.412Q20.825 14 20 14h-2v3q0 .825-.587 1.413Q16.825 19 16 19H5Zm6-10h8V9H8Zm-4 5h12v-3H8q-.825 0-1.412-.588Q6 12.825 6 12V9H4Zm14-5h2V4H8v3h8q.825 0 1.413.587Q18 8.175 18 9Z"/></svg>',
     navigation:
         '<svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><path fill="currentColor" d="m12 18l-6.45 2.75q-.325.125-.612.063t-.488-.263t-.262-.5t.062-.625L11.075 4.05q.125-.3.388-.45T12 3.45t.537.15t.388.45l6.825 15.375q.125.325.062.625t-.262.5t-.488.263t-.612-.063z"/></svg>',
+    chinese:
+        '<svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><path fill="currentColor" d="M20 5h-7V4a1 1 0 0 0-2 0v1H4a1 1 0 0 0 0 2h11.882a14.5 14.5 0 0 1-3.94 7.952A14.4 14.4 0 0 1 8.663 9.67a1 1 0 0 0-1.889.66a16.4 16.4 0 0 0 3.68 5.958a14.3 14.3 0 0 1-5.768 2.735A1 1 0 0 0 4.899 21a1 1 0 0 0 .215-.023a16.3 16.3 0 0 0 6.831-3.319a16.4 16.4 0 0 0 6.842 3.319a1 1 0 0 0 .426-1.954a14.4 14.4 0 0 1-5.79-2.733A16.48 16.48 0 0 0 17.893 7H20a1 1 0 0 0 0-2"/></svg>',
+    english:
+        '<svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><path fill="currentColor" d="M18.97 19.757L15.35 5.272A2.996 2.996 0 0 0 12.437 3h-.877a2.996 2.996 0 0 0-2.91 2.272L5.03 19.757a1 1 0 0 0 1.94.486L8.28 15h7.44l1.31 5.243a1 1 0 0 0 1.94-.486M8.78 13l1.811-7.242a1 1 0 0 1 .97-.758h.878a1 1 0 0 1 .97.758L15.219 13Z"/></svg>',
+    language:
+        '<svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><path fill="currentColor" d="M14.022 7h1a1 1 0 0 1 1 1v1a1 1 0 0 0 2 0V8a3.003 3.003 0 0 0-3-3h-1a1 1 0 0 0 0 2m-4 9h-1a1 1 0 0 1-1-1v-1a1 1 0 0 0-2 0v1a3.003 3.003 0 0 0 3 3h1a1 1 0 0 0 0-2m11-1a1 1 0 0 0 0-2h-3v-.5a1 1 0 0 0-2 0v.5h-3a1 1 0 0 0 0 2h5.184a6.7 6.7 0 0 1-1.225 2.527a6.7 6.7 0 0 1-.63-.983a1 1 0 1 0-1.779.912a8.7 8.7 0 0 0 .96 1.468a6.6 6.6 0 0 1-2.426 1.099a1 1 0 0 0 .427 1.954a8.6 8.6 0 0 0 3.445-1.622a8.7 8.7 0 0 0 3.469 1.622a1 1 0 1 0 .43-1.954a6.7 6.7 0 0 1-2.446-1.09A8.74 8.74 0 0 0 20.244 15Zm-11.97-3.757a1 1 0 0 0 1.94-.486l-1.757-7.03a2.281 2.281 0 0 0-4.426 0l-1.757 7.03a1 1 0 0 0 1.94.486L5.552 9h2.94ZM6.052 7l.698-2.787a.291.291 0 0 1 .544 0L7.991 7Z"/></svg>',
 };
 
 const CANVAS_MAX_LEFT = 1e5;
@@ -114,5 +114,3 @@ function viewportRectangle() {
         height: viewport.offsetHeight,
     };
 }
-
-const UNNAMED_GRAPH_NAME = "Unnamed-Graph";

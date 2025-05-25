@@ -1,6 +1,7 @@
 /**
  * MESSAGE_TYPE.ThemeChange
  *      change to <event.detail.theme> style
+ *      [<event.detail.quiet>]
  *
  * MESSAGE_TYPE.ThemeCurrent -> THEME_STYLE.xx
  */
@@ -9,6 +10,17 @@ const THEME_STYLE = {
     auto: "auto",
     light: "light",
     dark: "dark",
+};
+const THEME_STYLE_NAME = {
+    get auto() {
+        return I18N_STRINGS.auto_theme;
+    },
+    get light() {
+        return I18N_STRINGS.light_theme;
+    },
+    get dark() {
+        return I18N_STRINGS.dark_theme;
+    },
 };
 
 const THEME_COLOR_REPLACE_RULE = {
@@ -39,7 +51,7 @@ const THEME_ICON = ICONS.theme;
     const prefers =
         window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
 
-    function changToTheme(themeStyle) {
+    function changToTheme(themeStyle, quiet) {
         // themeStyle is one of THEME_STYLE
         THEME_ELEMENT.className = themeStyle;
         const style = window.getComputedStyle(THEME_ELEMENT);
@@ -52,14 +64,16 @@ const THEME_ICON = ICONS.theme;
             );
         }
         console.info("[ThemeHelper] witch theme to", themeStyle);
-        MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
-            config: PROMPT_CONFIG.INFO,
-            iconSvg: THEME_ICON,
-            content: `Switch to "${
-                themeStyle.charAt(0).toUpperCase() + themeStyle.slice(1)
-            }" theme.`,
-            timeout: 1000,
-        });
+        if (!quiet) {
+            MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
+                config: PROMPT_CONFIG.INFO,
+                iconSvg: THEME_ICON,
+                content: I18N_STRINGS.theme_switch_format?.format(
+                    THEME_STYLE_NAME[themeStyle]
+                ),
+                timeout: 1000,
+            });
+        }
     }
 
     function autoChange() {
@@ -76,11 +90,11 @@ const THEME_ICON = ICONS.theme;
 
     window.addThemeHelper = (initTheme) => {
         MESSAGE_HANDLER(MESSAGE_TYPE.ThemeChange, (event) => {
-            const themeStyle = THEME_STYLE[event.detail.theme];
+            const themeStyle = event.detail?.theme;
             if (themeStyle === undefined) {
                 console.warn(
                     "[ThemeHelper] error theme as",
-                    event.detail.theme
+                    event.detail?.theme
                 );
                 return;
             }
@@ -94,7 +108,7 @@ const THEME_ICON = ICONS.theme;
                 return;
             }
             prefers.removeEventListener("change", autoChange);
-            changToTheme(themeStyle);
+            changToTheme(themeStyle, event.detail?.quiet);
         });
 
         MESSAGE_HANDLER(MESSAGE_TYPE.ThemeCurrent, () => CURRENT_THEME);
@@ -105,6 +119,15 @@ const THEME_ICON = ICONS.theme;
                 THEME_STYLE.auto
             );
         }
-        MESSAGE_PUSH(MESSAGE_TYPE.ThemeChange, { theme: initTheme });
+        MESSAGE_PUSH(MESSAGE_TYPE.ThemeChange, {
+            theme: initTheme,
+            quiet: true,
+        });
+
+        window.addThemeHelper = () => {
+            console.warn(
+                "[ThemeHelper] calling addThemeHelper more than once is useless!"
+            );
+        };
     };
 })();

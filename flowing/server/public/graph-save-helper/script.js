@@ -16,8 +16,7 @@
  */
 
 const GRAPH_SAVE_HELPER_ICON = ICONS.save;
-const GRAPH_SAVE_HELPER_DEFAULT_GRAPH_NAME = UNNAMED_GRAPH_NAME;
-let CURRENT_GRAPH_KEY = undefined;
+let CURRENT_GRAPH_KEY;
 
 const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
 
@@ -59,7 +58,9 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
                     config: PROMPT_CONFIG.ERROR,
                     iconSvg: GRAPH_SAVE_HELPER_ICON,
                     content:
-                        "ExportGraph handler not found, please contact us!",
+                        I18N_STRINGS.handler_not_found_format?.format(
+                            "ExportGraph"
+                        ),
                     timeout: 5000,
                 });
                 return;
@@ -77,7 +78,7 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
                 graphInfo = {
                     name: MEMORY_GET(
                         MEMORY_KEYS.CurrentGraphSaveName,
-                        GRAPH_SAVE_HELPER_DEFAULT_GRAPH_NAME
+                        I18N_STRINGS.unnamed_graph
                     ),
                     data: callResult[0],
                     timestamp: timestamp,
@@ -106,7 +107,7 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
                 MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                     config: PROMPT_CONFIG.ERROR,
                     iconSvg: GRAPH_SAVE_HELPER_ICON,
-                    content: "Graph save error, please contact us!",
+                    content: I18N_STRINGS.graph_save_error,
                     timeout: 5000,
                 });
                 console.error("[SaveGraph] graph not found after saved");
@@ -116,7 +117,7 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
             MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                 config: PROMPT_CONFIG.INFO,
                 iconSvg: GRAPH_SAVE_HELPER_ICON,
-                content: "Graph has been saved!",
+                content: I18N_STRINGS.graph_saved,
                 timeout: 2000,
             });
 
@@ -139,10 +140,12 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
             if (!event.detail?.continueDisabled) {
                 addTransverseItem(
                     event.detail?.continueText,
-                    `Continue "${MEMORY_GET(
-                        MEMORY_KEYS.CurrentGraphSaveName,
-                        GRAPH_SAVE_HELPER_DEFAULT_GRAPH_NAME
-                    )}"`,
+                    I18N_STRINGS.continue_graph_format?.format(
+                        MEMORY_GET(
+                            MEMORY_KEYS.CurrentGraphSaveName,
+                            I18N_STRINGS.unnamed_graph
+                        )
+                    ),
                     () => {
                         MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose);
                     },
@@ -152,12 +155,12 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
             if (!event.detail?.newGraphDisabled) {
                 addTransverseItem(
                     event.detail?.newGraphText,
-                    "Create new graph",
+                    I18N_STRINGS.create_graph,
                     () => {
                         MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose, {
                             afterClose: () => {
                                 MESSAGE_PUSH(MESSAGE_TYPE.RestartPage, {
-                                    title: "Create new graph",
+                                    title: I18N_STRINGS.create_graph,
                                 });
                             },
                         });
@@ -168,7 +171,7 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
 
             const prevGraphItemTitleEle = document.createElement("h2");
             prevGraphItemTitleEle.className = "graph-save-h2-title";
-            prevGraphItemTitleEle.textContent = "Previous Graphs";
+            prevGraphItemTitleEle.textContent = I18N_STRINGS.previous_graphs;
 
             const getTimeEle = (title, timestamp, cssClass) => {
                 const timeEle = document.createElement("div");
@@ -220,7 +223,7 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
 
             const checkLocalGraphItemContainer = () => {
                 if (localGraphItemContainer.children.length === 0) {
-                    localGraphItemContainer.textContent = "None";
+                    localGraphItemContainer.textContent = I18N_STRINGS.none;
                 }
             };
 
@@ -247,21 +250,23 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
 
                 const titleEle = document.createElement("div");
                 titleEle.className = "graph-save-item-title";
-                titleEle.textContent = name || "UNNAMED";
+                titleEle.textContent = name || I18N_STRINGS.unnamed_graph;
 
                 const detailEle = document.createElement("div");
                 detailEle.classList.add("graph-save-item-detail");
-                detailEle.textContent = `${graph.nodes?.length || 0} node(s), ${
-                    graph.connections?.length || 0
-                } connection(s)`;
+                detailEle.textContent = `${graph.nodes?.length || 0} ${
+                    I18N_STRINGS.nodes
+                }${I18N_STRINGS.sep}${graph.connections?.length || 0} ${
+                    I18N_STRINGS.connections
+                }`;
 
                 const createTimeEle = getTimeEle(
-                    "Created",
+                    I18N_STRINGS.created_time,
                     createTimestamp,
                     "graph-save-item-create-time"
                 );
                 const changeTimeEle = getTimeEle(
-                    "Modify",
+                    I18N_STRINGS.modify_time,
                     timestamp,
                     "graph-save-item-change-time"
                 );
@@ -293,20 +298,20 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
 
             const helpTitleEle = document.createElement("h2");
             helpTitleEle.className = "graph-save-h2-title";
-            helpTitleEle.textContent = "Help";
+            helpTitleEle.textContent = I18N_STRINGS.help;
 
             const introductionLinkEle = document.createElement("a");
-            introductionLinkEle.textContent = "Instruction";
+            introductionLinkEle.textContent = I18N_STRINGS.instruction;
             introductionLinkEle.href = PMoS_FLOWING_INSTRUCTION_HREF;
             introductionLinkEle.target = "_blank";
 
             const repositoryLinkEle = document.createElement("a");
-            repositoryLinkEle.textContent = "PMoS-nn Code Repository";
+            repositoryLinkEle.textContent = `PMoS-nn ${I18N_STRINGS.code_repository}`;
             repositoryLinkEle.href = PMoS_REP_HREF;
             repositoryLinkEle.target = "_blank";
 
             MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
-                title: "What's next?",
+                title: I18N_STRINGS.whats_next,
                 elements: [
                     ...transverseItems,
                     prevGraphItemTitleEle,
@@ -324,7 +329,7 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
             // reset graph name
             MESSAGE_CALL(MESSAGE_TYPE.GraphSaved, {
                 timestamp: undefined,
-                name: UNNAMED_GRAPH_NAME,
+                name: I18N_STRINGS.unnamed_graph,
             });
             // unsaved
             MESSAGE_CALL(MESSAGE_TYPE.GraphChanged);

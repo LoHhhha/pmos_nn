@@ -1,7 +1,4 @@
 class GraphInfoBarBuilder {
-    static unsavedText = "Unsaved changes! Click here to save.";
-    static defaultGraphName = UNNAMED_GRAPH_NAME;
-
     ele;
     prevSaveTimeEle;
     saveNameEle;
@@ -34,11 +31,12 @@ class GraphInfoBarBuilder {
     unSavedMode() {
         this.prevSaveTimeEle.classList.remove("tcb-graph-saved-text");
         this.prevSaveTimeEle.classList.add("tcb-graph-unsaved-text");
-        this.prevSaveTimeEle.textContent = GraphInfoBarBuilder.unsavedText;
+        this.prevSaveTimeEle.textContent = I18N_STRINGS.unsaved_changes;
         if (this.prevSaveTimestamp) {
-            this.prevSaveTimeEle.textContent += ` (Last saved at ${new Date(
-                this.prevSaveTimestamp
-            ).toLocaleString()})`;
+            this.prevSaveTimeEle.textContent +=
+                I18N_STRINGS.prev_save_time_format?.format(
+                    new Date(this.prevSaveTimestamp).toLocaleString()
+                );
         }
         this.prevSaveTimeEle.onclick = () => {
             MESSAGE_PUSH(MESSAGE_TYPE.SaveGraph);
@@ -47,9 +45,10 @@ class GraphInfoBarBuilder {
     savedMode(timestamp) {
         this.prevSaveTimeEle.classList.remove("tcb-graph-unsaved-text");
         this.prevSaveTimeEle.classList.add("tcb-graph-saved-text");
-        this.prevSaveTimeEle.textContent = `Saved at ${
-            timestamp && new Date(timestamp).toLocaleString()
-        }`;
+        this.prevSaveTimeEle.textContent =
+            I18N_STRINGS.save_time_format?.format(
+                timestamp && new Date(timestamp).toLocaleString()
+            );
         this.prevSaveTimestamp = timestamp;
         this.prevSaveTimeEle.onclick = null;
     }
@@ -68,8 +67,8 @@ class GraphInfoBarBuilder {
 
         const ele = document.createElement("input");
         ele.className = "tcb-graph-name-input";
-        ele.defaultValue = GraphInfoBarBuilder.defaultGraphName;
-        ele.placeholder = "Name";
+        ele.defaultValue = I18N_STRINGS.unnamed_graph;
+        ele.placeholder = I18N_STRINGS.graph_name_placeholder;
 
         const changeSize = () => {
             ele.style.width = "0px";
@@ -79,7 +78,7 @@ class GraphInfoBarBuilder {
 
         ele.onchange = (event) => {
             if (!ele.value) {
-                ele.value = GraphInfoBarBuilder.defaultGraphName;
+                ele.value = I18N_STRINGS.unnamed_graph;
             }
             MEMORY_SET(MEMORY_KEYS.CurrentGraphSaveName, ele.value);
             changeSize();
@@ -116,14 +115,17 @@ class NavigatorBarBuilder {
         this.ele.appendChild(this.infoEle);
         this.ele.appendChild(this.modeEle);
 
-        this.updateModeEle(true);
+        const info = MESSAGE_CALL(MESSAGE_TYPE.NavigationInfo).at(0);
+        this.updateInfoEle(info);
+        this.updateModeEle(info?.moveMode);
+
         this.addHandler();
     }
 
     updateInfoEle(info) {
-        this.infoEle.innerHTML = `${Math.floor(-info.left)},${Math.floor(
-            -info.top
-        )} ${info.scale.toFixed(2)}x`;
+        this.infoEle.innerHTML = `${Math.floor(-info?.left)},${Math.floor(
+            -info?.top
+        )} ${info?.scale.toFixed(2)}x`;
     }
 
     updateModeEle(moveMode) {
@@ -132,11 +134,9 @@ class NavigatorBarBuilder {
         this.modeEle.classList.remove("tcb-navigator-bar-mode-button-move");
         if (moveMode === true) {
             this.modeEle.iconEle.innerHTML = NavigatorBarBuilder.MoveModeSvg;
-            this.modeEle.titleEle.textContent = "Move";
             this.modeEle.classList.add("tcb-navigator-bar-mode-button-move");
         } else {
             this.modeEle.iconEle.innerHTML = NavigatorBarBuilder.SelectModeSvg;
-            this.modeEle.titleEle.textContent = "Select";
             this.modeEle.classList.add("tcb-navigator-bar-mode-button-select");
         }
     }
@@ -154,14 +154,8 @@ class NavigatorBarBuilder {
         const iconEle = document.createElement("div");
         iconEle.className = "tcb-navigator-bar-mode-icon";
 
-        const titleEle = document.createElement("div");
-        titleEle.className = "tcb-navigator-bar-mode-title";
-
         modeEle.iconEle = iconEle;
-        modeEle.titleEle = titleEle;
-
         modeEle.appendChild(iconEle);
-        modeEle.appendChild(titleEle);
 
         modeEle.onclick = () => {
             MESSAGE_PUSH(MESSAGE_TYPE.NavigatorChangeMoveMode, {
@@ -192,11 +186,17 @@ class MenuBarBuilder {
     }
 
     menuButtonShowing = false;
-    #createMenuButton(title, items, keyCode) {
+    #createMenuButton(title_key, items, keyCode) {
         const button = document.createElement("div");
         button.className = "top-control-bar-menu-button";
 
-        button.innerHTML = `${title}<small>(${keyCode.toUpperCase()})<\small>`;
+        const setButtonInnerHTML = () => {
+            button.innerHTML = `${
+                I18N_STRINGS[title_key]
+            }<small>(${keyCode.toUpperCase()})<\small>`;
+        };
+        setButtonInnerHTML();
+        MESSAGE_HANDLER(MESSAGE_TYPE.LanguageChanged, setButtonInnerHTML);
 
         const showMenu = () => {
             MESSAGE_PUSH(MESSAGE_TYPE.RightKeyMenuShow, {
@@ -235,10 +235,10 @@ class MenuBarBuilder {
 
     #createMenus() {
         this.#createMenuButton(
-            "Graph",
-            [
+            "graph",
+            () => [
                 {
-                    title: "Save",
+                    title: I18N_STRINGS.save,
                     keyTips: "Ctrl+S",
                     icon: ICONS.save,
                     callback: () => {
@@ -246,7 +246,7 @@ class MenuBarBuilder {
                     },
                 },
                 {
-                    title: "Save As..",
+                    title: I18N_STRINGS.save_as + "...",
                     icon: ICONS.saveAsNew,
                     callback: () => {
                         MESSAGE_PUSH(MESSAGE_TYPE.SaveAsPage);
@@ -256,7 +256,7 @@ class MenuBarBuilder {
                     isSeparator: true,
                 },
                 {
-                    title: "Open...",
+                    title: I18N_STRINGS.open + "...",
                     callback: () => {
                         MESSAGE_PUSH(MESSAGE_TYPE.OpenGraphs);
                     },
@@ -265,12 +265,12 @@ class MenuBarBuilder {
                     isSeparator: true,
                 },
                 {
-                    title: "Import...",
+                    title: I18N_STRINGS.import + "...",
                     icon: ICONS.import,
                     callback: () => MESSAGE_PUSH(MESSAGE_TYPE.ImportGraph),
                 },
                 {
-                    title: "Clipboard Import",
+                    title: I18N_STRINGS.clipboard_import,
                     icon: ICONS.import,
                     callback: async () => {
                         try {
@@ -288,15 +288,14 @@ class MenuBarBuilder {
                             );
                             MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                                 config: PROMPT_CONFIG.WARNING,
-                                content:
-                                    'Read clipboard fail, please using "Import" to paste!',
+                                content: I18N_STRINGS.clipboard_authority_error,
                                 timeout: 2000,
                             });
                         }
                     },
                 },
                 {
-                    title: "Export...",
+                    title: I18N_STRINGS.export + "...",
                     icon: ICONS.export,
                     callback: () => MESSAGE_PUSH(MESSAGE_TYPE.ExportGraph),
                 },
@@ -305,10 +304,10 @@ class MenuBarBuilder {
         );
 
         this.#createMenuButton(
-            "Edit",
-            [
+            "edit",
+            () => [
                 {
-                    title: "Paste",
+                    title: I18N_STRINGS.paste,
                     keyTips: "Ctrl+V",
                     icon: ICONS.paste,
                     callback: () => {
@@ -321,7 +320,7 @@ class MenuBarBuilder {
                     isSeparator: true,
                 },
                 {
-                    title: "Undo",
+                    title: I18N_STRINGS.undo,
                     keyTips: "Ctrl+Z",
                     icon: ICONS.undo,
                     callback: () => {
@@ -331,7 +330,7 @@ class MenuBarBuilder {
                         !MEMORY_GET(MEMORY_KEYS.CanUndoOperation, false),
                 },
                 {
-                    title: "Redo",
+                    title: I18N_STRINGS.redo,
                     keyTips: "Ctrl+Y",
                     icon: ICONS.redo,
                     callback: () => {
@@ -344,7 +343,7 @@ class MenuBarBuilder {
                     isSeparator: true,
                 },
                 {
-                    title: "Select All",
+                    title: I18N_STRINGS.select_all,
                     keyTips: "Ctrl+A",
                     icon: ICONS.selectAll,
                     callback: () => {
@@ -356,14 +355,14 @@ class MenuBarBuilder {
         );
 
         this.#createMenuButton(
-            "View",
+            "view",
             () => {
                 const moveMode = MESSAGE_CALL(
                     MESSAGE_TYPE.NavigatorCurrentMoveMode
                 ).at(0);
                 return [
                     {
-                        title: "Zoom In",
+                        title: I18N_STRINGS.zoom_in,
                         keyTips: "+/=",
                         icon: ICONS.zoomIn,
                         callback: () => {
@@ -371,7 +370,7 @@ class MenuBarBuilder {
                         },
                     },
                     {
-                        title: "Zoom Out",
+                        title: I18N_STRINGS.zoom_out,
                         keyTips: "-",
                         icon: ICONS.zoomOut,
                         callback: () => {
@@ -379,21 +378,21 @@ class MenuBarBuilder {
                         },
                     },
                     {
-                        title: "Zoom to 100%",
+                        title: I18N_STRINGS.zoom_to_100,
                         icon: ICONS.zoomTo100,
                         callback: () => {
                             MESSAGE_PUSH(MESSAGE_TYPE.NavigatorZoomTo100);
                         },
                     },
                     {
-                        title: "View All",
+                        title: I18N_STRINGS.view_all,
                         icon: ICONS.viewAllFit,
                         callback: () => {
                             MESSAGE_PUSH(MESSAGE_TYPE.NavigatorViewAllFit);
                         },
                     },
                     {
-                        title: "Back to Origin",
+                        title: I18N_STRINGS.back_to_origin,
                         keyTips: "Home",
                         icon: ICONS.backToOrigin,
                         callback: () => {
@@ -404,11 +403,11 @@ class MenuBarBuilder {
                         isSeparator: true,
                     },
                     {
-                        title: "Drag Mode",
+                        title: I18N_STRINGS.drag_mode,
                         icon: ICONS.drag,
                         subItems: [
                             {
-                                title: "Move",
+                                title: I18N_STRINGS.move_mode,
                                 disabled: moveMode,
                                 undefined: moveMode,
                                 icon: ICONS.pointer,
@@ -420,7 +419,7 @@ class MenuBarBuilder {
                                 },
                             },
                             {
-                                title: "Select",
+                                title: I18N_STRINGS.select_mode,
                                 disabled: !moveMode,
                                 undefined: !moveMode,
                                 icon: ICONS.select,
@@ -439,15 +438,15 @@ class MenuBarBuilder {
         );
 
         this.#createMenuButton(
-            "Tools",
-            [
+            "tools",
+            () => [
                 {
-                    title: "Clear Nodes",
+                    title: I18N_STRINGS.clear_nodes,
                     icon: ICONS.clear,
                     callback: () => MESSAGE_PUSH(MESSAGE_TYPE.ClearGraphPage),
                 },
                 {
-                    title: "Tidy Nodes",
+                    title: I18N_STRINGS.tidy_nodes,
                     icon: ICONS.tidy,
                     callback: () => MESSAGE_PUSH(MESSAGE_TYPE.TidyNodes),
                 },
@@ -455,7 +454,7 @@ class MenuBarBuilder {
                     isSeparator: true,
                 },
                 {
-                    title: "Generate Graph",
+                    title: I18N_STRINGS.generate_graph,
                     icon: ICONS.chat,
                     callback: () => MESSAGE_PUSH(MESSAGE_TYPE.LLMCodeGenerator),
                 },
@@ -463,7 +462,7 @@ class MenuBarBuilder {
                     isSeparator: true,
                 },
                 {
-                    title: "Export to Code",
+                    title: I18N_STRINGS.export_to_code,
                     icon: ICONS.graph,
                     callback: () => MESSAGE_PUSH(MESSAGE_TYPE.CalculateGraph),
                 },
@@ -472,11 +471,14 @@ class MenuBarBuilder {
         );
 
         this.#createMenuButton(
-            "Settings",
+            "settings",
             () => {
                 const currentTheme = MESSAGE_CALL(MESSAGE_TYPE.ThemeCurrent).at(
                     0
                 );
+                const currentLanguage = MESSAGE_CALL(
+                    MESSAGE_TYPE.LanguageCurrent
+                ).at(0);
                 const operationBarVisible = MESSAGE_CALL(
                     MESSAGE_TYPE.VisibleOperatorBar
                 ).at(0);
@@ -485,11 +487,11 @@ class MenuBarBuilder {
                 ).at(0);
                 return [
                     {
-                        title: "OperatorBar",
+                        title: I18N_STRINGS.operator_bar,
                         icon: ICONS.operatorBar,
                         subItems: [
                             {
-                                title: "Show",
+                                title: I18N_STRINGS.show,
                                 disabled: operationBarVisible,
                                 underline: operationBarVisible,
                                 icon: ICONS.show,
@@ -498,7 +500,7 @@ class MenuBarBuilder {
                                 },
                             },
                             {
-                                title: "Hide",
+                                title: I18N_STRINGS.hide,
                                 disabled: !operationBarVisible,
                                 underline: !operationBarVisible,
                                 icon: ICONS.hide,
@@ -509,11 +511,11 @@ class MenuBarBuilder {
                         ],
                     },
                     {
-                        title: "MiniMap",
+                        title: I18N_STRINGS.mini_map,
                         icon: ICONS.map,
                         subItems: [
                             {
-                                title: "Show",
+                                title: I18N_STRINGS.show,
                                 disabled: miniMapVisible,
                                 underline: miniMapVisible,
                                 icon: ICONS.show,
@@ -522,7 +524,7 @@ class MenuBarBuilder {
                                 },
                             },
                             {
-                                title: "Hide",
+                                title: I18N_STRINGS.hide,
                                 disabled: !miniMapVisible,
                                 underline: !miniMapVisible,
                                 icon: ICONS.hide,
@@ -536,11 +538,11 @@ class MenuBarBuilder {
                         isSeparator: true,
                     },
                     {
-                        title: "Theme",
+                        title: I18N_STRINGS.theme,
                         icon: ICONS.theme,
                         subItems: [
                             {
-                                title: "Dark",
+                                title: I18N_STRINGS.dark_theme,
                                 icon: ICONS.darkTheme,
                                 underline: currentTheme === THEME_STYLE.dark,
                                 disabled: currentTheme === THEME_STYLE.dark,
@@ -551,7 +553,7 @@ class MenuBarBuilder {
                                 },
                             },
                             {
-                                title: "Light",
+                                title: I18N_STRINGS.light_theme,
                                 icon: ICONS.lightTheme,
                                 underline: currentTheme === THEME_STYLE.light,
                                 disabled: currentTheme === THEME_STYLE.light,
@@ -562,7 +564,7 @@ class MenuBarBuilder {
                                 },
                             },
                             {
-                                title: "Auto",
+                                title: I18N_STRINGS.auto_theme,
                                 icon: ICONS.autoTheme,
                                 underline: currentTheme === THEME_STYLE.auto,
                                 disabled: currentTheme === THEME_STYLE.auto,
@@ -575,10 +577,40 @@ class MenuBarBuilder {
                         ],
                     },
                     {
+                        title: I18N_STRINGS.language,
+                        icon: ICONS.language,
+                        subItems: [
+                            {
+                                title: I18N_STRINGS.english,
+                                icon: ICONS.english,
+                                underline:
+                                    currentLanguage === LANGUAGES.english,
+                                disabled: currentLanguage === LANGUAGES.english,
+                                callback: () => {
+                                    MESSAGE_PUSH(MESSAGE_TYPE.ChangeLanguage, {
+                                        language: LANGUAGES.english,
+                                    });
+                                },
+                            },
+                            {
+                                title: I18N_STRINGS.chinese,
+                                icon: ICONS.chinese,
+                                underline:
+                                    currentLanguage === LANGUAGES.chinese,
+                                disabled: currentLanguage === LANGUAGES.chinese,
+                                callback: () => {
+                                    MESSAGE_PUSH(MESSAGE_TYPE.ChangeLanguage, {
+                                        language: LANGUAGES.chinese,
+                                    });
+                                },
+                            },
+                        ],
+                    },
+                    {
                         isSeparator: true,
                     },
                     {
-                        title: "Restart",
+                        title: I18N_STRINGS.restart,
                         callback: () => {
                             MESSAGE_PUSH(MESSAGE_TYPE.RestartPage);
                         },
@@ -589,10 +621,10 @@ class MenuBarBuilder {
         );
 
         this.#createMenuButton(
-            "Help",
-            [
+            "help",
+            () => [
                 {
-                    title: "About",
+                    title: I18N_STRINGS.about,
                     icon: ICONS.help,
                     callback: () => {
                         MESSAGE_PUSH(MESSAGE_TYPE.HelpPage);
@@ -634,21 +666,41 @@ class ToolBarBuilder {
     }
 
     #createItems() {
-        this.#createSimpleItem(ICONS.zoomIn, "Zoom In", () => {
-            MESSAGE_PUSH(MESSAGE_TYPE.NavigatorZoomIn);
-        });
-        this.#createSimpleItem(ICONS.zoomOut, "Zoom Out", () => {
-            MESSAGE_PUSH(MESSAGE_TYPE.NavigatorZoomOut);
-        });
-        this.#createSimpleItem(ICONS.zoomTo100, "Zoom to 100%", () => {
-            MESSAGE_PUSH(MESSAGE_TYPE.NavigatorZoomTo100);
-        });
-        this.#createSimpleItem(ICONS.viewAllFit, "View All Fit", () => {
-            MESSAGE_PUSH(MESSAGE_TYPE.NavigatorViewAllFit);
-        });
-        this.#createSimpleItem(ICONS.backToOrigin, "Back to Origin", () => {
-            MESSAGE_PUSH(MESSAGE_TYPE.NavigatorBackToOrigin);
-        });
+        this.#createSimpleItem(
+            ICONS.zoomIn,
+            () => I18N_STRINGS.zoom_in,
+            () => {
+                MESSAGE_PUSH(MESSAGE_TYPE.NavigatorZoomIn);
+            }
+        );
+        this.#createSimpleItem(
+            ICONS.zoomOut,
+            () => I18N_STRINGS.zoom_out,
+            () => {
+                MESSAGE_PUSH(MESSAGE_TYPE.NavigatorZoomOut);
+            }
+        );
+        this.#createSimpleItem(
+            ICONS.zoomTo100,
+            () => I18N_STRINGS.zoom_to_100,
+            () => {
+                MESSAGE_PUSH(MESSAGE_TYPE.NavigatorZoomTo100);
+            }
+        );
+        this.#createSimpleItem(
+            ICONS.viewAllFit,
+            () => I18N_STRINGS.view_all,
+            () => {
+                MESSAGE_PUSH(MESSAGE_TYPE.NavigatorViewAllFit);
+            }
+        );
+        this.#createSimpleItem(
+            ICONS.backToOrigin,
+            () => I18N_STRINGS.back_to_origin,
+            () => {
+                MESSAGE_PUSH(MESSAGE_TYPE.NavigatorBackToOrigin);
+            }
+        );
     }
 }
 
@@ -713,7 +765,12 @@ class ControlBar {
 }
 
 (function () {
-    window.addEventListener("load", () => {
+    window.initTopControlBar = () => {
         new ControlBar(document.getElementById("top-control-bar"));
-    });
+        window.initTopControlBar = () => {
+            console.warn(
+                "[TopControlBar] calling initTopControlBar more than once is useless!"
+            );
+        };
+    };
 })();

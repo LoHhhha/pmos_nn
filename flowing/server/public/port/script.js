@@ -27,8 +27,7 @@ const EXPORT_ICON = ICONS.export;
         MESSAGE_HANDLER(MESSAGE_TYPE.ImportGraph, (event) => {
             const jsonTextEle = document.createElement("textarea");
             jsonTextEle.className = "port-textarea";
-            jsonTextEle.placeholder =
-                "Enter graph code here, and cover previous graph.";
+            jsonTextEle.placeholder = I18N_STRINGS.import_placeholder;
             if (event.detail?.default) {
                 jsonTextEle.value = event.detail.default;
             }
@@ -46,7 +45,7 @@ const EXPORT_ICON = ICONS.export;
                     MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                         config: PROMPT_CONFIG.ERROR,
                         iconSvg: IMPORT_ICON,
-                        content: "Json parse failed, check your code!",
+                        content: I18N_STRINGS.code_json_parse_error,
                         timeout: 5000,
                     });
                     return;
@@ -76,7 +75,7 @@ const EXPORT_ICON = ICONS.export;
                     MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                         config: PROMPT_CONFIG.ERROR,
                         iconSvg: IMPORT_ICON,
-                        content: "Graph create failed, check your code!",
+                        content: I18N_STRINGS.code_graph_create_error,
                         timeout: 5000,
                     });
                     return;
@@ -101,7 +100,12 @@ const EXPORT_ICON = ICONS.export;
                     MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                         config: PROMPT_CONFIG.INFO,
                         iconSvg: IMPORT_ICON,
-                        content: `Imported ${importObject.nodes.length} node(s), ${importObject.connections.length} edge(s).`,
+                        content:
+                            I18N_STRINGS.change_nodes_and_connections_format?.format(
+                                I18N_STRINGS.import,
+                                importObject.nodes.length,
+                                importObject.connections.length
+                            ),
                         timeout: 1000,
                     });
                 }, 0);
@@ -124,7 +128,9 @@ const EXPORT_ICON = ICONS.export;
                         err: err,
                         value: jsonTextEle.value,
                     });
-                    checkResult = ["Unexpected error, please contact us!"];
+                    checkResult = [
+                        I18N_STRINGS.unexpected_error_format?.format(err),
+                    ];
                 }
 
                 checkResult = checkResult[0];
@@ -133,14 +139,14 @@ const EXPORT_ICON = ICONS.export;
                     importCheckButton.textContent = checkResult;
                 } else {
                     importCheckButton.classList.remove("port-button-disable");
-                    importCheckButton.textContent = "Import to Graph";
+                    importCheckButton.textContent = I18N_STRINGS.import;
                 }
             };
             jsonTextEle.onchange();
 
             const importNodes = () => {
                 MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
-                    title: "Importing Nodes...",
+                    title: I18N_STRINGS.importing_graph,
                     afterInit: () => {
                         importNodesFromJsonTextEle();
                         MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose);
@@ -162,7 +168,7 @@ const EXPORT_ICON = ICONS.export;
                 return;
             }
             MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
-                title: "Import Graph",
+                title: I18N_STRINGS.import_graph,
                 elements: [jsonTextEle, importCheckButton],
                 buttonMode: COVERING_BUTTON_MODE.CloseButton,
                 init: () => jsonTextEle.focus(),
@@ -208,7 +214,8 @@ const EXPORT_ICON = ICONS.export;
             }
             exportCoordinateInputEle.value = exportProperty.containCoordinate;
             const exportCoordinateTitleEle = document.createElement("label");
-            exportCoordinateTitleEle.textContent = "Export with coordinates";
+            exportCoordinateTitleEle.textContent =
+                I18N_STRINGS.coordinates_export;
             exportCoordinateCombo.appendChild(exportCoordinateTitleEle);
             exportCoordinateCombo.appendChild(exportCoordinateInputEle);
 
@@ -218,18 +225,18 @@ const EXPORT_ICON = ICONS.export;
 
             const exportCopyEle = document.createElement("button");
             exportCopyEle.className = "port-button";
-            exportCopyEle.textContent = "Copy to Clipboard";
+            exportCopyEle.textContent = I18N_STRINGS.copy_to_clipboard;
             exportCopyEle.onclick = () => {
                 navigator.clipboard.writeText(exportProperty.jsonStr);
 
-                exportCopyEle.textContent = "Copied!";
+                exportCopyEle.textContent = I18N_STRINGS.copied;
                 if (exportCopyEle.timeoutId) {
                     clearTimeout(exportCopyEle.timeoutId);
                     exportCopyEle.timeoutId = null;
                 }
 
                 exportCopyEle.timeoutId = setTimeout(() => {
-                    exportCopyEle.textContent = "Copy to Clipboard";
+                    exportCopyEle.textContent = I18N_STRINGS.copy_to_clipboard;
                 }, 1000);
             };
 
@@ -302,7 +309,7 @@ const EXPORT_ICON = ICONS.export;
 
             if (!event.detail?.quiet) {
                 MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
-                    title: "Export Graph",
+                    title: I18N_STRINGS.export_graph,
                     elements: [
                         exportCoordinateCombo,
                         exportJsonTextEle,
@@ -337,7 +344,7 @@ const EXPORT_ICON = ICONS.export;
                     data,
                     err,
                 });
-                return "JSON grammar check failed";
+                return I18N_STRINGS.json_grammar_check_fail;
             }
 
             // scheme check
@@ -348,7 +355,7 @@ const EXPORT_ICON = ICONS.export;
                 console.error("[CheckImportGraph] json scheme check failed!", {
                     data,
                 });
-                return "JSON scheme check failed";
+                return I18N_STRINGS.json_scheme_check_fail;
             }
 
             const nodeConfigs = [];
@@ -363,7 +370,10 @@ const EXPORT_ICON = ICONS.export;
                         `[CheckImportGraph] node${idx} apiName not found!`,
                         { data }
                     );
-                    return `Operator${idx}'s apiName not found`;
+                    return I18N_STRINGS.node_param_not_found_format?.format(
+                        idx,
+                        "apiName"
+                    );
                 }
 
                 if (content == undefined) {
@@ -371,7 +381,10 @@ const EXPORT_ICON = ICONS.export;
                         `[CheckImportGraph] node${idx} content not found!`,
                         { data }
                     );
-                    return `Operator${idx}'s content not found`;
+                    return I18N_STRINGS.node_param_not_found_format?.format(
+                        idx,
+                        "content"
+                    );
                 }
 
                 const nodeConfig = apiName2operators.get(apiName);
@@ -380,7 +393,10 @@ const EXPORT_ICON = ICONS.export;
                         `[CheckImportGraph] node${idx} ${apiName} not supported!`,
                         { data }
                     );
-                    return `Operator${idx}-${apiName} unsupported!`;
+                    return I18N_STRINGS.node_unsupported_format?.format(
+                        idx,
+                        apiName
+                    );
                 }
 
                 for (const arg of nodeConfig.args) {
@@ -389,7 +405,10 @@ const EXPORT_ICON = ICONS.export;
                             `[CheckImportGraph] node${idx} param-${arg.name} not found!`,
                             { data }
                         );
-                        return `Operator${idx}'s parameter(${arg.name}) not found`;
+                        return I18N_STRINGS.node_param_not_found_format?.format(
+                            idx,
+                            `content.${arg.name}`
+                        );
                     }
 
                     // check the value is valid
@@ -403,7 +422,10 @@ const EXPORT_ICON = ICONS.export;
                             `[CheckImportGraph] node${idx} param-${arg.name} invalid!`,
                             { data }
                         );
-                        return `Operator${idx}'s parameter(${arg.name}) invalid`;
+                        return I18N_STRINGS.node_param_invalid_format?.format(
+                            idx,
+                            `content.${arg.name}`
+                        );
                     }
                 }
 
@@ -429,7 +451,9 @@ const EXPORT_ICON = ICONS.export;
                         `[CheckImportGraph] missing some indexes in connection${idx}!`,
                         { data }
                     );
-                    return `Connection${idx} missing some indexes`;
+                    return I18N_STRINGS.connection_indexes_not_found_format?.format(
+                        idx
+                    );
                 }
 
                 if (
@@ -442,7 +466,9 @@ const EXPORT_ICON = ICONS.export;
                         `[CheckImportGraph] invalid node index in connection${idx}!`,
                         { data }
                     );
-                    return `Connection${idx} found invalid operator index`;
+                    return I18N_STRINGS.connection_node_indexes_invalid_format?.format(
+                        idx
+                    );
                 }
 
                 if (
@@ -456,7 +482,9 @@ const EXPORT_ICON = ICONS.export;
                         `[CheckImportGraph] invalid endpoint index in connection${idx}!`,
                         { data }
                     );
-                    return `Connection${idx} found invalid endpoint index`;
+                    return I18N_STRINGS.connection_endpoint_indexes_invalid_format?.format(
+                        idx
+                    );
                 }
             }
             return null;

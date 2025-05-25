@@ -38,15 +38,15 @@ class CodeGenerator {
     sendButtonTypeConfig = {
         waitingParam: {
             id: "generator-button-default",
-            text: "Please enter the required parameters firstly and continue!",
+            text: I18N_STRINGS.not_enough_parameters,
         },
         loading: {
             id: "generator-button-default",
-            text: "Loading",
+            text: I18N_STRINGS.loading,
         },
         sendReady: {
             id: "generator-button-confirm",
-            text: "Send",
+            text: I18N_STRINGS.send,
             onclick: () => {
                 const baseUrl = this.baseUrlInputEle.value;
                 const apiKey = this.apiKeyInputEle.value;
@@ -65,7 +65,7 @@ class CodeGenerator {
         },
         stopReady: {
             id: "generator-button-cancel",
-            text: "Stop",
+            text: I18N_STRINGS.stop,
             onclick: () => {
                 try {
                     this.#sendAbortController.abort();
@@ -77,11 +77,11 @@ class CodeGenerator {
         copyReady: {
             display: "initial",
             id: "generator-button-confirm",
-            text: "Copy Code to Clipboard",
+            text: I18N_STRINGS.copy_to_clipboard,
             onclick: () => {
                 navigator.clipboard.writeText(this.finallyCode);
 
-                this.copyButton.textContent = "Copied!";
+                this.copyButton.textContent = I18N_STRINGS.copied;
                 if (this.copyButton.timeoutId) {
                     clearTimeout(this.copyButton.timeoutId);
                     this.copyButton.timeoutId = null;
@@ -96,7 +96,7 @@ class CodeGenerator {
         notCode: {
             display: "initial",
             id: "generator-button-default",
-            text: "No code detected, please try again.",
+            text: I18N_STRINGS.no_code_error,
         },
         errorCode: {
             display: "initial",
@@ -106,7 +106,7 @@ class CodeGenerator {
         tooMuchCode: {
             display: "initial",
             id: "generator-button-default",
-            text: "Too much code detected, please choice one by yourself.",
+            text: I18N_STRINGS.too_much_code_error,
         },
         hide: {
             display: "none",
@@ -190,7 +190,7 @@ class CodeGenerator {
         this.inputMask = CodeGenerator.inputMasks.default;
 
         this.baseUrlInputEle = this.#createInputElement({
-            title: "Base URL",
+            title: I18N_STRINGS.base_url,
             placeholder: "http://xxx.chat.ai",
             flex: 2,
             parent: configComboEle,
@@ -199,8 +199,8 @@ class CodeGenerator {
         });
 
         const apiKeyInputEle = this.#createInputElement({
-            title: "Api Key",
-            placeholder: "api-authentication-key",
+            title: I18N_STRINGS.api_key,
+            placeholder: I18N_STRINGS.api_key_placeholder,
             flex: 2,
             parent: configComboEle,
             inputMaskId: CodeGenerator.inputMasks.apiKey,
@@ -210,8 +210,8 @@ class CodeGenerator {
         this.apiKeyInputEle = apiKeyInputEle;
 
         this.moduleInputEle = this.#createInputElement({
-            title: "Module",
-            placeholder: "module-name",
+            title: I18N_STRINGS.module,
+            placeholder: I18N_STRINGS.module_placeholder,
             flex: 1,
             parent: configComboEle,
             inputMaskId: CodeGenerator.inputMasks.module,
@@ -221,8 +221,8 @@ class CodeGenerator {
         this.block.append(configComboEle);
 
         this.promptInputEle = this.#createInputElement({
-            title: "Prompt",
-            placeholder: "Enter your prompt in here.",
+            title: I18N_STRINGS.prompt,
+            placeholder: I18N_STRINGS.prompt_placeholder,
             inputType: "textarea",
             inputId: "generator-input-prompt",
             inputMaskId: CodeGenerator.inputMasks.prompt,
@@ -234,8 +234,8 @@ class CodeGenerator {
         );
 
         this.queryInputEle = this.#createInputElement({
-            title: "Query",
-            placeholder: "Enter what you want in here.",
+            title: I18N_STRINGS.query,
+            placeholder: I18N_STRINGS.query_placeholder,
             inputType: "textarea",
             autoHeight: true,
             inputId: "generator-input-query",
@@ -342,7 +342,7 @@ class CodeGenerator {
             );
             this.#setCopyButton(
                 this.copyButtonTypeConfig.errorCode,
-                `Unexpected error: ${error}`
+                I18N_STRINGS.unexpected_error_format?.format(error)
             );
             return;
         }
@@ -351,6 +351,12 @@ class CodeGenerator {
             console.error(
                 "[CodeGenerator] MESSAGE_TYPE.CheckImportGraph return nothing!"
             );
+            this.#setCopyButton(
+                this.copyButtonTypeConfig.errorCode,
+                I18N_STRINGS.handler_not_found_format?.format(
+                    "CheckImportGraph"
+                )
+            );
             return;
         }
 
@@ -358,7 +364,7 @@ class CodeGenerator {
         if (msg) {
             this.#setCopyButton(
                 this.copyButtonTypeConfig.errorCode,
-                `Code invalid: ${msg}`
+                I18N_STRINGS.unexpected_code_format?.format(msg)
             );
             return;
         }
@@ -484,7 +490,9 @@ class CodeGenerator {
                 error,
             });
             this.#addErrorMessage(
-                "Request failed, please check if 'BaseURL' is correct!"
+                I18N_STRINGS.url_request_error_format?.format(
+                    I18N_STRINGS.base_url
+                )
             );
             return;
         }
@@ -502,15 +510,13 @@ class CodeGenerator {
                     console.info("[CodeGenerator] Request canceled.", {
                         requestBody,
                     });
-                    this.#addErrorMessage("Request cancel!");
+                    this.#addErrorMessage(I18N_STRINGS.request_cancel);
                 } else {
                     console.error("[CodeGenerator] Fail to read data!", {
                         requestBody,
                         error,
                     });
-                    this.#addErrorMessage(
-                        "Read stream failed, please check your network!"
-                    );
+                    this.#addErrorMessage(I18N_STRINGS.read_data_stream_error);
                 }
                 return;
             }
@@ -535,7 +541,7 @@ class CodeGenerator {
                         requestBody,
                         error,
                     });
-                    this.#addErrorMessage("Fail to parse a package, skipping!");
+                    this.#addErrorMessage(I18N_STRINGS.parse_data_package_fail);
                     continue;
                 }
 
@@ -545,9 +551,9 @@ class CodeGenerator {
                         requestBody,
                     });
                     this.#addErrorMessage(
-                        `Detect an unexpected package as '${JSON.stringify(
-                            object
-                        )}'!`
+                        I18N_STRINGS.unexpected_data_package_format?.format(
+                            JSON.stringify(object)
+                        )
                     );
                     continue;
                 }
@@ -556,7 +562,10 @@ class CodeGenerator {
                     if (object.usage) {
                         console.info("[CodeGenerator] Get usage", object.usage);
                         this.#addAnswer(
-                            `\n\n---\n\nCompletion Tokens: ${object.usage.completion_tokens}\n\nPrompt Tokens: ${object.usage.prompt_tokens}\n\nTotal Tokens: ${object.usage.total_tokens}`
+                            "\n\n---" +
+                                `\n\n${I18N_STRINGS.completion_tokens}${I18N_STRINGS.colon}${object.usage.completion_tokens}` +
+                                `\n\n${I18N_STRINGS.prompt_tokens}${I18N_STRINGS.colon}${object.usage.prompt_tokens}` +
+                                `\n\n${I18N_STRINGS.total_tokens}${I18N_STRINGS.colon}${object.usage.total_tokens}`
                         );
                         break;
                     }
@@ -589,7 +598,7 @@ class CodeGenerator {
                         "[CodeGenerator] more than one thinking content, dropping!"
                     );
                     this.#addErrorMessage(
-                        "More than one thinking content, dropping!"
+                        I18N_STRINGS.too_much_thinking_content
                     );
                     thinkingContent = "";
                 }
@@ -615,7 +624,7 @@ class CodeGenerator {
 
     show() {
         MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
-            title: "Generation",
+            title: I18N_STRINGS.generation,
             elements: [this.block],
             buttonMode: COVERING_BUTTON_MODE.CloseButton,
             buttonCallback: {

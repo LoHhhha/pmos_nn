@@ -114,8 +114,10 @@ class Overview {
         if (node.config.link) {
             link.onclick = () => {
                 MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
-                    title: "Page Jump!",
-                    text: `Go to introduction for ${node.config.apiName} page?`,
+                    title: I18N_STRINGS.page_jumps,
+                    text: I18N_STRINGS.go_to_op_introduction_format?.format(
+                        node.config.apiName
+                    ),
                     buttonMode: COVERING_BUTTON_MODE.ConfirmAndCancelButton,
                     buttonCallback: {
                         confirm: () => {
@@ -167,7 +169,7 @@ class Overview {
                             node.content[arg.name] = itemInput.value;
                         } else {
                             MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
-                                title: "Warning!",
+                                title: I18N_STRINGS.warning,
                                 text: arg.type.note,
                                 buttonMode: COVERING_BUTTON_MODE.CloseButton,
                             });
@@ -191,14 +193,10 @@ class Overview {
                     };
                     break;
                 default:
+                    // impossible
                     console.error(
-                        "[operator-bar] get a nonsupport input type: ${arg.type.input}."
+                        `[operator-bar] get a nonsupport input type: ${arg.type.input}.`
                     );
-                    MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
-                        title: "Error!",
-                        text: `Found nonsupport input type: ${arg.type.input}, please report to us.`,
-                        buttonMode: COVERING_BUTTON_MODE.CloseButton,
-                    });
             }
             itemInput.value = node.content[arg.name];
             item.appendChild(itemInput);
@@ -210,7 +208,7 @@ class Overview {
         // button
         const deleteButton = document.createElement("button");
         deleteButton.classList.add("overview-delete-button");
-        deleteButton.textContent = "Delete";
+        deleteButton.textContent = I18N_STRINGS.delete;
         deleteButton.addEventListener("click", () => {
             this.remove();
             node.dispose();
@@ -496,7 +494,9 @@ class Node {
                 showTop: e.clientY,
                 items: [
                     {
-                        title: `Copy ${nodesLength} Nodes`,
+                        title: I18N_STRINGS.copy_nodes_format?.format(
+                            nodesLength
+                        ),
                         keyTips: "Ctrl+C",
                         icon: ICONS.copy,
                         callback: () => {
@@ -506,7 +506,9 @@ class Node {
                         },
                     },
                     {
-                        title: `Delete ${nodesLength} Nodes`,
+                        title: I18N_STRINGS.delete_nodes_format?.format(
+                            nodesLength
+                        ),
                         keyTips: "Backspace",
                         icon: ICONS.delete,
                         callback: () => {
@@ -519,7 +521,7 @@ class Node {
                         isSeparator: true,
                     },
                     {
-                        title: "Export Selected",
+                        title: I18N_STRINGS.export_selected,
                         icon: ICONS.export,
                         callback: () => {
                             MESSAGE_PUSH(MESSAGE_TYPE.ExportGraph, {
@@ -851,7 +853,7 @@ class OperatorNode {
         if (result.includes(false)) {
             MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                 config: PROMPT_CONFIG.ERROR,
-                content: "Add node failed, please contact us!",
+                content: I18N_STRINGS.add_node_fail,
                 timeout: 5000,
             });
         }
@@ -964,7 +966,10 @@ class OperatorBar {
 
         const searchInput = document.createElement("input");
         searchInput.className = "operator-bar-search-input";
-        searchInput.placeholder = "Search Operator";
+        searchInput.placeholder = I18N_STRINGS.search_node;
+        MESSAGE_HANDLER(MESSAGE_TYPE.LanguageChanged, () => {
+            searchInput.placeholder = I18N_STRINGS.search_node;
+        });
         searchInput.onchange = () => {
             this.onlyChoseNameLike = searchInput.value;
             this.excludeTypes.clear();
@@ -1169,7 +1174,7 @@ class OperatorBar {
                     )
                 ) {
                     MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
-                        title: "Error",
+                        title: I18N_STRINGS.error,
                         text: rule.tip,
                         buttonMode: COVERING_BUTTON_MODE.CloseButton,
                     });
@@ -1391,7 +1396,12 @@ class OperatorBar {
                 MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                     config: PROMPT_CONFIG.INFO,
                     iconSvg: DELETE_ICON,
-                    content: `Delete ${len} node(s) and ${deleteConnectionsMap.size} connection(s)`,
+                    content:
+                        I18N_STRINGS.change_nodes_and_connections_format?.format(
+                            I18N_STRINGS.delete,
+                            len,
+                            deleteConnectionsMap.size
+                        ),
                     timeout: 1000,
                 });
             }
@@ -1500,8 +1510,8 @@ class OperatorBar {
                     showTop: displayCoordinate.top,
                     items: [
                         {
-                            title: "Disconnect",
-                            keyTips: "Drag",
+                            title: I18N_STRINGS.disconnect,
+                            keyTips: I18N_STRINGS.drag,
                             icon: ICONS.disconnect,
                             callback: () => {
                                 jsPlumbNavigator.jsPlumbInstance.deleteConnection(

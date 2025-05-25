@@ -120,9 +120,9 @@ class Navigator {
             MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                 config: PROMPT_CONFIG.INFO,
                 iconSvg: NAVIGATOR_ICON,
-                content: `Change to "${
-                    moveMode ? "Move" : "Select"
-                }" viewport drag mode.`,
+                content: I18N_STRINGS.change_drag_mode_format?.format(
+                    moveMode ? I18N_STRINGS.move_mode : I18N_STRINGS.select_mode
+                ),
                 timeout: 2000,
             });
         }
@@ -190,6 +190,8 @@ class Navigator {
             }
             this.moveWhenAtEdge--;
         });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.NavigationInfo, () => this.getAllInfo());
 
         MESSAGE_HANDLER(MESSAGE_TYPE.NavigatorZoomIn, () => {
             this.zoomIn();
@@ -295,7 +297,7 @@ class Navigator {
             MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                 config: PROMPT_CONFIG.ERROR,
                 iconSvg: NAVIGATOR_ICON,
-                content: "Detect error during adding node, please contact us!",
+                content: I18N_STRINGS.navigator_add_node_error,
                 timeout: 2000,
             });
         }
@@ -307,8 +309,7 @@ class Navigator {
             MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                 config: PROMPT_CONFIG.ERROR,
                 iconSvg: NAVIGATOR_ICON,
-                content:
-                    "Detect error during updating node, please contact us!",
+                content: I18N_STRINGS.navigator_update_node_error,
                 timeout: 2000,
             });
         }
@@ -325,8 +326,7 @@ class Navigator {
             MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                 config: PROMPT_CONFIG.ERROR,
                 iconSvg: NAVIGATOR_ICON,
-                content:
-                    "Detect error during deleting node, please contact us!",
+                content: I18N_STRINGS.navigator_delete_node_error,
                 timeout: 2000,
             });
         }
@@ -514,7 +514,7 @@ class Navigator {
             showTop: e.clientY,
             items: [
                 {
-                    title: "Paste",
+                    title: I18N_STRINGS.paste,
                     keyTips: "Ctrl+V",
                     icon: ICONS.paste,
                     callback: MEMORY_GET(MEMORY_KEYS.CanPasteNodes, false)
@@ -530,7 +530,7 @@ class Navigator {
                     isSeparator: true,
                 },
                 {
-                    title: "Undo",
+                    title: I18N_STRINGS.undo,
                     keyTips: "Ctrl+Z",
                     icon: ICONS.undo,
                     callback: () => {
@@ -539,7 +539,7 @@ class Navigator {
                     disabled: !MEMORY_GET(MEMORY_KEYS.CanUndoOperation, false),
                 },
                 {
-                    title: "Redo",
+                    title: I18N_STRINGS.redo,
                     keyTips: "Ctrl+Y",
                     icon: ICONS.redo,
                     callback: () => {
@@ -551,7 +551,7 @@ class Navigator {
                     isSeparator: true,
                 },
                 {
-                    title: "Select All",
+                    title: I18N_STRINGS.select_all,
                     keyTips: "Ctrl+A",
                     icon: ICONS.selectAll,
                     callback: () => {
@@ -562,33 +562,33 @@ class Navigator {
                     isSeparator: true,
                 },
                 {
-                    title: "View",
+                    title: I18N_STRINGS.view,
                     icon: NAVIGATOR_ICON,
                     subItems: [
                         {
-                            title: "Zoom In",
+                            title: I18N_STRINGS.zoom_in,
                             keyTips: "+/=",
                             icon: ICONS.zoomIn,
                             callback: this.zoomIn.bind(this),
                         },
                         {
-                            title: "Zoom Out",
+                            title: I18N_STRINGS.zoom_out,
                             keyTips: "-",
                             icon: ICONS.zoomOut,
                             callback: this.zoomOut.bind(this),
                         },
                         {
-                            title: "Zoom to 100%",
+                            title: I18N_STRINGS.zoom_to_100,
                             icon: ICONS.zoomTo100,
                             callback: this.zoomTo100.bind(this),
                         },
                         {
-                            title: "View All",
+                            title: I18N_STRINGS.view_all,
                             icon: ICONS.viewAllFit,
                             callback: this.viewAllFit.bind(this),
                         },
                         {
-                            title: "Back to Origin",
+                            title: I18N_STRINGS.back_to_origin,
                             keyTips: "Home",
                             icon: ICONS.backToOrigin,
                             callback: this.backToOrigin.bind(this),
@@ -599,7 +599,7 @@ class Navigator {
                     isSeparator: true,
                 },
                 {
-                    title: "Clipboard Import",
+                    title: I18N_STRINGS.clipboard_import,
                     icon: ICONS.import,
                     callback: async () => {
                         try {
@@ -614,15 +614,14 @@ class Navigator {
                             });
                             MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                                 config: PROMPT_CONFIG.WARNING,
-                                content:
-                                    'Read clipboard fail, please using "Import" to paste!',
+                                content: I18N_STRINGS.clipboard_authority_error,
                                 timeout: 2000,
                             });
                         }
                     },
                 },
                 {
-                    title: "Save",
+                    title: I18N_STRINGS.save,
                     keyTips: "Ctrl+S",
                     icon: ICONS.save,
                     callback: () => {
@@ -780,6 +779,13 @@ class Navigator {
         };
     }
 
+    getAllInfo() {
+        return {
+            moveMode: this.moveMode,
+            ...this.getCanvasBoundsAndScale(),
+        };
+    }
+
     getViewportBounds() {
         return {
             left: 0,
@@ -899,7 +905,7 @@ class Navigator {
         MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
             config: PROMPT_CONFIG.INFO,
             iconSvg: NAVIGATOR_ICON,
-            content: "View all nodes.",
+            content: I18N_STRINGS.view_all_nodes,
             timeout: 1000,
         });
 

@@ -1,19 +1,22 @@
 jsPlumb.ready(() => {
-    MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
-        config: PROMPT_CONFIG.INFO,
-        content: "Welcome to PMoS, click me to know more about PMoS!",
-        onclick: (promptItem) => {
-            window.open(PMoS_REP_HREF);
-            promptItem.dispose();
-        },
-    });
-
     // set copyright
     const copyrightEle = document.getElementById("copyright");
     copyrightEle.innerHTML = `Powered by PMoS-nn<br>Version: ${PMoS_VERSION}<br>Copyright © 2024-2025 PMoS. All rights reserved.`;
 
+    // initLanguage set as null, set as local settings or english.
+    window.addI18n(null);
+
     // initTheme set as null, set as local settings or 'auto'.
     window.addThemeHelper(null);
+
+    MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
+        config: PROMPT_CONFIG.INFO,
+        content: I18N_STRINGS.welcome,
+        onclick: (promptItem) => {
+            promptItem.dispose();
+            MESSAGE_PUSH(MESSAGE_TYPE.HelpPage);
+        },
+    });
 
     const viewportEle = document.getElementById("viewport");
     const canvasEle = document.getElementById("canvas");
@@ -61,9 +64,11 @@ jsPlumb.ready(() => {
 
     window.addGraphSaveHelper();
 
+    window.initTopControlBar();
+
     // welcome page
     MESSAGE_PUSH(MESSAGE_TYPE.OpenGraphs, {
-        continueText: "Start the journey at PMoS from scratch",
+        continueText: I18N_STRINGS.using_from_scratch,
         newGraphDisabled: true,
     });
 });

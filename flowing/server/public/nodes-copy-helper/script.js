@@ -100,7 +100,12 @@ const NO_OFFSET_PASTE_EXCURSION = {
             MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                 config: PROMPT_CONFIG.INFO,
                 iconSvg: ICONS.copy,
-                content: `Copy ${NODES_COPY_DATA.length} node(s) and ${CONNECTION_COPY_DATA.length} edge(s)`,
+                content:
+                    I18N_STRINGS.change_nodes_and_connections_format?.format(
+                        I18N_STRINGS.copy,
+                        NODES_COPY_DATA.length,
+                        CONNECTION_COPY_DATA.length
+                    ),
                 timeout: 1000,
             });
         });
@@ -139,7 +144,12 @@ const NO_OFFSET_PASTE_EXCURSION = {
             MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                 config: PROMPT_CONFIG.INFO,
                 iconSvg: ICONS.paste,
-                content: `Pasted ${NODES_COPY_DATA.length} node(s) and ${CONNECTION_COPY_DATA.length} edge(s)`,
+                content:
+                    I18N_STRINGS.change_nodes_and_connections_format?.format(
+                        I18N_STRINGS.paste,
+                        NODES_COPY_DATA.length,
+                        CONNECTION_COPY_DATA.length
+                    ),
                 timeout: 1000,
             });
         });

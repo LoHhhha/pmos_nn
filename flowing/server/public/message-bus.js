@@ -33,6 +33,7 @@ const MESSAGE_TYPE = {
     NavigatorRemoveNode: "navigator-remove-node",
     NavigatorChangeMoveMode: "navigator-change-move-mode",
     NavigatorCurrentMoveMode: "navigator-current-move-mode",
+    NavigationInfo: "navigator-info", // return
     NavigationChanged: "navigator-changed", // out
     NavigatorMoveModeChanged: "navigator-move-mode-changed", // out
     NavigatorMoveWhenAtEdge: "navigator-move-when-at-edge",
@@ -92,7 +93,12 @@ const MESSAGE_TYPE = {
     AddTooltip: "add-tooltip",
 
     // general
-    GraphChanged: "graph-changed",
+    GraphChanged: "graph-changed", // out
+
+    // i18n
+    ChangeLanguage: "change-language",
+    LanguageChanged: "language-changed", // out
+    LanguageCurrent: "language-current",
 };
 
 const MESSAGE_HANDLER_MAP = new Map();

@@ -139,6 +139,7 @@
     display: flex;
     flex-direction: row;
     gap: var(--margin);
+    margin-left: auto
 }
 
 .tcb-navigator-bar-mode-button {
@@ -151,7 +152,6 @@
     gap: var(--margin);
     border-radius: var(--radius);
     cursor: pointer;
-    width: calc(4 * var(--tcb-length-unit));
 }
 
 .tcb-navigator-bar-mode-button:hover {
@@ -175,14 +175,6 @@
 
 .tcb-navigator-bar-mode-icon {
     height: var(--tcb-length-unit);
-}
-
-.tcb-navigator-bar-mode-title {
-    display: flex;
-    font-size: large;
-    text-align: center;
-    align-items: center;
-    user-select: none;
 }
 
 .tcb-menu-bar {

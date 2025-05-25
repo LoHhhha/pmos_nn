@@ -259,7 +259,7 @@ const TIDY_NODES_ICON = ICONS.tidy;
         // shape === ERROR_RESULT_SHAPE mean error shape
         const errorMode = shape === ERROR_RESULT_SHAPE;
         const shapeShow = errorMode
-            ? "Error!\nClick here to learn more."
+            ? I18N_STRINGS.shape_error_tips
             : shape.join("*");
         const overlayCssClass = errorMode
             ? CONNECTION_OVERLAY_ERROR_CSS_CLASS
@@ -461,8 +461,7 @@ const TIDY_NODES_ICON = ICONS.tidy;
                             MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                                 config: PROMPT_CONFIG.ERROR,
                                 iconSvg: SHAPE_ICON,
-                                content:
-                                    "Disconnect from server, please contact us!",
+                                content: I18N_STRINGS.server_disconnect,
                                 timeout: 5000,
                             });
                             break;
@@ -470,9 +469,10 @@ const TIDY_NODES_ICON = ICONS.tidy;
                             MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                                 config: PROMPT_CONFIG.ERROR,
                                 iconSvg: SHAPE_ICON,
-                                content: `Server internal error, return '${
-                                    JSON.parse(xhr.responseText).msg
-                                }', please contact us.`,
+                                content:
+                                    I18N_STRINGS.server_internal_error_format?.format(
+                                        JSON.parse(xhr.responseText).msg
+                                    ),
                                 timeout: 5000,
                             });
                     }
@@ -484,7 +484,7 @@ const TIDY_NODES_ICON = ICONS.tidy;
                     MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                         config: PROMPT_CONFIG.ERROR,
                         iconSvg: SHAPE_ICON,
-                        content: `Found error result from sever, please contact us!`,
+                        content: I18N_STRINGS.server_return_unexpected,
                         timeout: 5000,
                     });
                     return;
@@ -674,8 +674,7 @@ const TIDY_NODES_ICON = ICONS.tidy;
                 MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                     config: PROMPT_CONFIG.WARNING,
                     iconSvg: TIDY_NODES_ICON,
-                    content:
-                        "Loop has been found, so we can not tidy this graph!",
+                    content: I18N_STRINGS.loop_found_cannot_tidy,
                     timeout: 5000,
                 });
                 return;
@@ -708,8 +707,7 @@ const TIDY_NODES_ICON = ICONS.tidy;
             MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                 config: PROMPT_CONFIG.WARNING,
                 iconSvg: TIDY_NODES_ICON,
-                content:
-                    "Can't calculate the rank of nodes, please contact us!",
+                content: I18N_STRINGS.node_rank_calc_error,
                 timeout: 5000,
             });
             return;
@@ -1250,7 +1248,7 @@ const TIDY_NODES_ICON = ICONS.tidy;
                 const prevCoordinates = node.getCoordinates?.();
                 node.redraw(...coordinates);
                 // fake nodes
-                if(prevCoordinates){
+                if (prevCoordinates) {
                     moveNodes.push({
                         node,
                         prevX: prevCoordinates.left,
@@ -1558,8 +1556,8 @@ const TIDY_NODES_ICON = ICONS.tidy;
 
             if (canArrive(sourceNode)) {
                 MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
-                    title: "Error",
-                    text: "This connection will introduce a loop!",
+                    title: I18N_STRINGS.error,
+                    text: I18N_STRINGS.connection_causes_loop,
                     buttonMode: COVERING_BUTTON_MODE.CloseButton,
                 });
                 console.warn("[GraphChecker]", "Loop");
@@ -1584,7 +1582,7 @@ const TIDY_NODES_ICON = ICONS.tidy;
                 loggerEle.appendChild(logEle);
             };
 
-            add2Logger("Calculating network construction...");
+            add2Logger(I18N_STRINGS.network_calculating);
 
             const calc = () => {
                 const graph = calculate(canvasEle);
@@ -1594,12 +1592,10 @@ const TIDY_NODES_ICON = ICONS.tidy;
                     graph.net_nodes.length === 0 ||
                     graph.output_nodes.length === 0
                 ) {
-                    add2Logger(
-                        "Found an impossible network construction, please check and try a again."
-                    );
+                    add2Logger(I18N_STRINGS.impossible_network);
                     return;
                 } else {
-                    add2Logger("Calculation finished!");
+                    add2Logger(I18N_STRINGS.network_calculation_finish);
                 }
 
                 const xhr = new XMLHttpRequest();
@@ -1613,39 +1609,39 @@ const TIDY_NODES_ICON = ICONS.tidy;
                     if (xhr.status !== 200) {
                         switch (xhr.status) {
                             case 0:
-                                add2Logger(
-                                    `Server connect error, please contact us.`
-                                );
+                                add2Logger(I18N_STRINGS.server_disconnect);
                                 break;
                             default:
                                 add2Logger(
-                                    `Server internal error as ${
+                                    I18N_STRINGS.server_internal_error_format?.format(
                                         JSON.parse(xhr.responseText).msg
-                                    }, please contact us.`
+                                    )
                                 );
                         }
                         return;
                     }
 
                     const info = JSON.parse(xhr.responseText);
-                    add2Logger(`Analysis finished: ${info.msg}.`);
+                    add2Logger(
+                        I18N_STRINGS.network_analysis_result_format?.format(
+                            info.msg
+                        )
+                    );
 
                     if (info.fn) {
                         const downloadLink = document.createElement("button");
                         downloadLink.className = "download-button";
-                        downloadLink.textContent = "Download Code";
+                        downloadLink.textContent = I18N_STRINGS.download_code;
                         downloadLink.onclick = () => {
                             window.open(`/model/download/${info.fn}`, "_blank");
                             return false;
                         };
                         loggerEle.appendChild(downloadLink);
                     } else {
-                        add2Logger(
-                            "No file return from server, please contact us."
-                        );
+                        add2Logger(I18N_STRINGS.no_file_return_from_server);
                     }
                 };
-                add2Logger("Trying to analyze via server...");
+                add2Logger(I18N_STRINGS.init_network_analysis);
                 xhr.send(
                     JSON.stringify({
                         timestamp: new Date().getDate(),
@@ -1656,7 +1652,7 @@ const TIDY_NODES_ICON = ICONS.tidy;
             };
 
             MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
-                title: "Calculate",
+                title: I18N_STRINGS.calculate,
                 elements: [loggerEle],
                 buttonMode: COVERING_BUTTON_MODE.CloseButton,
                 afterInit: calc,
@@ -1685,7 +1681,7 @@ const TIDY_NODES_ICON = ICONS.tidy;
                     MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
                         config: PROMPT_CONFIG.ERROR,
                         iconSvg: TIDY_NODES_ICON,
-                        content: "Tidy node failed, please contact us!",
+                        content: I18N_STRINGS.tidy_nodes_fail,
                         timeout: 5000,
                     });
                 }
@@ -1701,7 +1697,7 @@ const TIDY_NODES_ICON = ICONS.tidy;
                 tidy(false);
             } else {
                 MESSAGE_CALL(MESSAGE_TYPE.CoveringShow, {
-                    title: "Tiding Nodes...",
+                    title: I18N_STRINGS.tiding_nodes,
                     afterInit: tidy,
                 });
             }

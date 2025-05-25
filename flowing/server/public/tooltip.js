@@ -1,7 +1,7 @@
 /**
  * MESSAGE_TYPE.AddTooltip
  *      <event.detail.element>
- *      <event.detail.textContent>
+ *      <event.detail.textContent: text/callable>
  */
 
 const TOOLTIP = document.createElement("div");
@@ -62,7 +62,7 @@ const TOOLTIP_MARGIN = rootStyle
         ele.tooltipOpenCallback = () => {
             const eleRect = ele.getBoundingClientRect();
             showTooltip(
-                textContent,
+                textContent instanceof Function ? textContent() : textContent,
                 (eleRect.left + eleRect.right) / 2,
                 eleRect.top,
                 eleRect.bottom

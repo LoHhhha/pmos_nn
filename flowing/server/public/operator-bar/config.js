@@ -50,7 +50,9 @@ operatorBarNamespace.argsType = {
         getValue: (value) => {
             return value;
         },
-        note: "Please input a identifier which starting with letter or underline and only containing letter, underline and number such as 'a1', '_var'.",
+        get note() {
+            return I18N_STRINGS.str_var_note;
+        },
     },
     strInt: {
         reg: /^[-+]?\d+$/,
@@ -58,7 +60,9 @@ operatorBarNamespace.argsType = {
         getValue: (value) => {
             return parseInt(value);
         },
-        note: "Please input a integer such as 19528.",
+        get note() {
+            return I18N_STRINGS.str_int_note;
+        },
     },
     strIntOrNone: {
         reg: /^(([-+]?\d+)|(None))$/,
@@ -67,7 +71,9 @@ operatorBarNamespace.argsType = {
             if (value === "None") return null;
             return parseInt(value);
         },
-        note: "Please input 'None' or a integer such as 19528.",
+        get note() {
+            return I18N_STRINGS.str_int_or_none_note;
+        },
     },
     strFloat: {
         reg: /^[-+]?\d+\.?\d*(e[-+]?\d+)?$/,
@@ -75,7 +81,9 @@ operatorBarNamespace.argsType = {
         getValue: (value) => {
             return parseFloat(value);
         },
-        note: "Please input a float such as 19528, -0.15 or 3.14e-2",
+        get note() {
+            return I18N_STRINGS.str_float_note;
+        },
     },
     strFloatOrNone: {
         reg: /^(([-+]?\d+\.?\d*(e[-+]?\d+)?)|(None))$/,
@@ -83,7 +91,9 @@ operatorBarNamespace.argsType = {
         getValue: (value) => {
             return parseFloat(value);
         },
-        note: "Please input a float such as 19528, -0.15 or 3.14e-2",
+        get note() {
+            return I18N_STRINGS.str_float_or_none_note;
+        },
     },
     strTuple: {
         reg: /^\(\s*[-+]?\d+\s*(,\s*[-+]?\d+\s*)*\)$/,
@@ -93,7 +103,9 @@ operatorBarNamespace.argsType = {
                 return parseInt(item, 10);
             });
         },
-        note: "Please input a tuple containing integers like string which divided by ',' and included by '(' and ')' such as '(-1,3,64,64)'.",
+        get note() {
+            return I18N_STRINGS.str_tuple_note;
+        },
     },
     strNotNegTuple: {
         reg: /^\(\s*\d+\s*(,\s*\d+\s*)*\)$/,
@@ -103,7 +115,9 @@ operatorBarNamespace.argsType = {
                 return parseInt(item, 10);
             });
         },
-        note: "Please input a tuple containing nonnegative integers like string which divided by ',' and included by '(' and ')' such as '(1,3,64,64)'.",
+        get note() {
+            return I18N_STRINGS.str_not_neg_tuple_note;
+        },
     },
     strNotNegIntOrCanNoneNotNegTuple: {
         reg: /^((\d+)|(\(\s*((\d+)|None)\s*(,\s*((\d+)|None)\s*)*\)))$/,
@@ -120,7 +134,9 @@ operatorBarNamespace.argsType = {
             }
             return values;
         },
-        note: "Please input a nonnegative integers or tuple containing nonnegative integers or None like string which divided by ',' and included by '(' and ')' such as '(1,3,None,64)'.",
+        get note() {
+            return I18N_STRINGS.str_not_neg_int_or_can_none_not_neg_tuple_note;
+        },
     },
     strIntOrTuple: {
         reg: /^((\(\s*[-+]?\d+\s*(,\s*[-+]?\d+\s*)*\))|([-+]?\d+))$/,
@@ -132,7 +148,9 @@ operatorBarNamespace.argsType = {
             if (ret.length === 1) return ret[0];
             return ret;
         },
-        note: "Please input 'None',  a integer or a tuple containing integers like string which divided by ',' and included by '(' and ')' such as '(-1,3,64,64)'.",
+        get note() {
+            return I18N_STRINGS.str_int_or_tuple_note;
+        },
     },
     strNotNegIntOrNotNegTuple: {
         reg: /^((\(\s*\d+\s*(,\s*\d+\s*)*\))|(\s*\d+\s*))$/,
@@ -144,7 +162,9 @@ operatorBarNamespace.argsType = {
             if (ret.length === 1) return ret[0];
             return ret;
         },
-        note: "Please input a nonnegative integer or a tuple containing nonnegative integers like string which divided by ',' and included by '(' and ')' such as '(1,3,64,64)'.",
+        get note() {
+            return I18N_STRINGS.str_not_neg_int_or_not_neg_tuple;
+        },
     },
     strIntOrTupleOrNone: {
         reg: /^((\(\s*[-+]?\d+\s*(,\s*[-+]?\d+\s*)*\))|([-+]?\d+)|(None))$/,
@@ -157,7 +177,9 @@ operatorBarNamespace.argsType = {
             if (ret.length === 1) return ret[0];
             return ret;
         },
-        note: "Please input 'None', a integer or a tuple containing integers like string which divided by ',' and included by '(' and ')' such as '(-1,3,64,64)'.",
+        get note() {
+            return I18N_STRINGS.str_int_or_tuple_or_none_note;
+        },
     },
     bool: {
         reg: null,
@@ -3417,14 +3439,18 @@ for (const operator of operatorBarNamespace.operators) {
 operatorBarNamespace.connectionRule = [
     {
         name: "SelfNotSelf",
-        tip: "Do not connect node to itself!",
+        get tip() {
+            return I18N_STRINGS.self_not_self_tip;
+        },
         check: (srcNode, tarNode) => {
             return srcNode.id === tarNode.id;
         },
     },
     {
         name: "InputNotOutput",
-        tip: "Do not connect input to output!",
+        get tip() {
+            return I18N_STRINGS.input_not_output;
+        },
         check: (srcNode, tarNode) => {
             return (
                 srcNode.config.apiName === "Input" &&
@@ -3434,7 +3460,9 @@ operatorBarNamespace.connectionRule = [
     },
     {
         name: "MaxPoolIndices",
-        tip: "This MaxPool node not return indices, don't use it's indices!",
+        get tip() {
+            return I18N_STRINGS.max_pool_indices;
+        },
         check: (srcNode, tarNode, srcEndpointIdx, tarEndpointIdx) => {
             return (
                 srcNode.config.apiName.includes("MaxPool") &&
