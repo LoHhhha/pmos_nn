@@ -251,6 +251,7 @@ class Node {
     static jsPlumbInstance;
 
     // static method
+    static MOVING_NODES_INFO_SET = new Set(); // {node,offsetTop,offsetLeft}
     static SELECTED_NODES_SET = new Set();
     static clearSelect() {
         for (const node of Node.SELECTED_NODES_SET) {
@@ -364,15 +365,15 @@ class Node {
     pointerDownHandlerFunc = this.pointerDownHandler.bind(this);
 
     getCoordinates() {
-        if (this.element.style.left && this.element.style.top) {
+        if (this.nextLeft !== undefined && this.nextTop !== undefined) {
             return {
-                left: this.element.offsetLeft,
-                top: this.element.offsetTop,
+                left: this.nextLeft,
+                top: this.nextTop,
             };
         }
         return {
-            left: this.nextLeft,
-            top: this.nextTop,
+            left: this.element.offsetLeft,
+            top: this.element.offsetTop,
         };
     }
 
@@ -1458,18 +1459,84 @@ class OperatorBar {
             }
         });
 
+        const checkPerformance = () => {
+            // when the nodes or select nodes count are small, just redraw when drag
+            return (
+                CURRENT_NODES_COUNT >= PERFORMANCE_ACTION_NODES_COUNT ||
+                Node.SELECTED_NODES_SET.size >=
+                    PERFORMANCE_ACTION_SELECT_NODES_COUNT *
+                        (1 -
+                            CURRENT_NODES_COUNT /
+                                PERFORMANCE_ACTION_NODES_COUNT)
+            );
+        };
+
+        const movingHandler = (event) => {
+            const canvasInfo = jsPlumbNavigator.getCanvasBoundsAndScale();
+            for (const {
+                node,
+                offsetLeft,
+                offsetTop,
+            } of Node.MOVING_NODES_INFO_SET) {
+                node.redraw(
+                    event.clientX / canvasInfo.scale -
+                        canvasInfo.left -
+                        offsetLeft,
+                    event.clientY / canvasInfo.scale -
+                        canvasInfo.top -
+                        offsetTop
+                );
+            }
+        };
+
+        /**
+         * using to:
+         *      1. set moving
+         */
+        jsPlumbNavigator.jsPlumbInstance.bind(
+            "drag:start",
+            (dragStartPayload) => {
+                const eventCoordinates = getEventCoordinates(
+                    dragStartPayload.e
+                );
+                const canvasInfo = jsPlumbNavigator.getCanvasBoundsAndScale();
+
+                MESSAGE_PUSH(MESSAGE_TYPE.NavigatorMoveWhenAtEdge);
+
+                for (const node of Node.SELECTED_NODES_SET) {
+                    const nodeCoordinates = node.getCoordinates();
+                    Node.MOVING_NODES_INFO_SET.add({
+                        node,
+                        offsetLeft:
+                            eventCoordinates.left / canvasInfo.scale -
+                            canvasInfo.left -
+                            nodeCoordinates.left,
+                        offsetTop:
+                            eventCoordinates.top / canvasInfo.scale -
+                            canvasInfo.top -
+                            nodeCoordinates.top,
+                    });
+                }
+
+                if (!checkPerformance()) {
+                    document.addEventListener("pointermove", movingHandler);
+                }
+            }
+        );
+
         /**
          * using to:
          *      1. redraw
+         *      2. clear moving
          */
         jsPlumbNavigator.jsPlumbInstance.bind(
             "drag:stop",
             (dragStopPayload) => {
-                for (const ele of dragStopPayload.elements) {
-                    const node = ele.el.origin;
-                    const { left, top } = node.getCoordinates();
-                    node.redraw(left, top, true);
-                }
+                MESSAGE_PUSH(MESSAGE_TYPE.NavigatorCancelMoveWhenAtEdge);
+
+                document.removeEventListener("pointermove", movingHandler);
+                movingHandler(dragStopPayload.e);
+                Node.MOVING_NODES_INFO_SET.clear();
             }
         );
 
@@ -1480,18 +1547,7 @@ class OperatorBar {
         jsPlumbNavigator.jsPlumbInstance.bind(
             "drag:move",
             (dragMovePayload) => {
-                // when the nodes or select nodes count are small, just redraw when drag
-                if (
-                    CURRENT_NODES_COUNT >= PERFORMANCE_ACTION_NODES_COUNT ||
-                    Node.SELECTED_NODES_SET.size >=
-                        PERFORMANCE_ACTION_SELECT_NODES_COUNT *
-                            (1 -
-                                CURRENT_NODES_COUNT /
-                                    PERFORMANCE_ACTION_NODES_COUNT)
-                ) {
-                    return;
-                }
-
+                if (checkPerformance()) return;
                 dragMovePayload.el.origin.redrawMiniMapNode();
             }
         );

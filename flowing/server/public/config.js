@@ -114,3 +114,16 @@ function viewportRectangle() {
         height: viewport.offsetHeight,
     };
 }
+
+function getEventCoordinates(event) {
+    if (event instanceof TouchEvent) {
+        return {
+            left: event.changedTouches[0]?.clientX,
+            top: event.changedTouches[0]?.clientY,
+        };
+    }
+    return {
+        left: event.clientX,
+        top: event.clientY,
+    };
+}
