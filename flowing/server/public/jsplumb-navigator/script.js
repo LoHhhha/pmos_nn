@@ -509,6 +509,7 @@ class Navigator {
     handleViewportRightKeyMenu(e) {
         if (e.target !== this.viewportEle) return true;
         const coordinates = coordinatesWindow2Viewport(e.clientX, e.clientY);
+        const canvasInfo = this.getCanvasBoundsAndScale();
         MESSAGE_PUSH(MESSAGE_TYPE.RightKeyMenuShow, {
             showLeft: e.clientX,
             showTop: e.clientY,
@@ -525,6 +526,34 @@ class Navigator {
                               );
                           }
                         : undefined,
+                },
+                {
+                    title: I18N_STRINGS.clipboard_import,
+                    icon: ICONS.import,
+                    callback: async () => {
+                        try {
+                            const clipboardData =
+                                await navigator.clipboard.readText();
+                            MESSAGE_PUSH(MESSAGE_TYPE.ImportNodes, {
+                                data: clipboardData,
+                                left:
+                                    coordinates.left / canvasInfo.scale -
+                                    canvasInfo.left,
+                                top:
+                                    coordinates.top / canvasInfo.scale -
+                                    canvasInfo.top,
+                            });
+                        } catch (err) {
+                            console.warn("[Navigator] read clipboard fail!", {
+                                err: err,
+                            });
+                            MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
+                                config: PROMPT_CONFIG.WARNING,
+                                content: I18N_STRINGS.clipboard_authority_error,
+                                timeout: 2000,
+                            });
+                        }
+                    },
                 },
                 {
                     isSeparator: true,
@@ -597,28 +626,6 @@ class Navigator {
                 },
                 {
                     isSeparator: true,
-                },
-                {
-                    title: I18N_STRINGS.clipboard_import,
-                    icon: ICONS.import,
-                    callback: async () => {
-                        try {
-                            const clipboardData =
-                                await navigator.clipboard.readText();
-                            MESSAGE_PUSH(MESSAGE_TYPE.ImportGraph, {
-                                default: clipboardData,
-                            });
-                        } catch (err) {
-                            console.warn("[Navigator] read clipboard fail!", {
-                                err: err,
-                            });
-                            MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
-                                config: PROMPT_CONFIG.WARNING,
-                                content: I18N_STRINGS.clipboard_authority_error,
-                                timeout: 2000,
-                            });
-                        }
-                    },
                 },
                 {
                     title: I18N_STRINGS.save,

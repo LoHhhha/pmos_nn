@@ -281,31 +281,6 @@ class MenuBarBuilder {
                     callback: () => MESSAGE_PUSH(MESSAGE_TYPE.ImportGraph),
                 },
                 {
-                    title: I18N_STRINGS.clipboard_import,
-                    icon: ICONS.import,
-                    callback: async () => {
-                        try {
-                            const clipboardData =
-                                await navigator.clipboard.readText();
-                            MESSAGE_PUSH(MESSAGE_TYPE.ImportGraph, {
-                                default: clipboardData,
-                            });
-                        } catch (err) {
-                            console.warn(
-                                "[TopControlBar] read clipboard fail!",
-                                {
-                                    err: err,
-                                }
-                            );
-                            MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
-                                config: PROMPT_CONFIG.WARNING,
-                                content: I18N_STRINGS.clipboard_authority_error,
-                                timeout: 2000,
-                            });
-                        }
-                    },
-                },
-                {
                     title: I18N_STRINGS.export + "...",
                     icon: ICONS.export,
                     callback: () => MESSAGE_PUSH(MESSAGE_TYPE.ExportGraph),

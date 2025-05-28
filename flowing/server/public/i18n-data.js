@@ -642,6 +642,10 @@ const LANGUAGE_DATA = {
         en: "Connection{0} endpoint indexes invalid",
         cn: "数据流{0}的端点下标不合法",
     },
+    node_coordinates_lost_format: {
+        en: "Node{0} coordinates lost",
+        cn: "算子{0}坐标数据丢失",
+    },
     unsaved_changes: {
         en: "Unsaved changes! Click here to save.",
         cn: "更改未保存！点击此处以保存。",

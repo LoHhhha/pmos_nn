@@ -1,6 +1,6 @@
 /**
  * object:{
- *      nodes:[{apiName:...,content:{...}},...],
+ *      nodes:[{apiName:...,content:{...},left,top},...],
  *      connections:[{srcNodeIdx:...,srcEndpointIdx:...,tarNodeIdx:...,tarEndpointIdx:...},...]
  * }
  *
@@ -9,6 +9,12 @@
  *      [<event.detail.withoutConfirm bool>]
  *      [<event.detail.callback>]
  *
+ * MESSAGE_TYPE.ImportNodes
+ *      <event.detail.data object_code>
+ *      (view left/top)
+ *      <event.detail.left int>
+ *      <event.detail.top int>
+ *
  * MESSAGE_TYPE.ExportGraph
  *      return the first time calculate result.
  *      [<event.detail.nodes Set<Node>|Array<Node>>]
@@ -16,7 +22,7 @@
  *      [<event.detail.quiet bool>]
  *
  * MESSAGE_TYPE.CheckImportGraph
- *      <event.detail.data:object> => return null when ok, return "error_reason" when error
+ *      <event.detail.data: object_code> => return null when ok, return "error_reason" when error
  */
 
 const IMPORT_ICON = ICONS.import;
@@ -24,6 +30,43 @@ const EXPORT_ICON = ICONS.export;
 
 (function () {
     window.addPortHelper = () => {
+        const objectParse = (code, prompt = true) => {
+            let object = null;
+            try {
+                object = JSON.parse(code);
+            } catch (err) {
+                console.error(
+                    `[objectParse] json '${code}' parse failed!`,
+                    err
+                );
+                if (prompt) {
+                    MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
+                        config: PROMPT_CONFIG.ERROR,
+                        iconSvg: IMPORT_ICON,
+                        content: I18N_STRINGS.code_json_parse_error,
+                        timeout: 5000,
+                    });
+                }
+            }
+            return object;
+        };
+
+        const objectCheck = (data) => {
+            let checkResult;
+            try {
+                checkResult = MESSAGE_CALL(MESSAGE_TYPE.CheckImportGraph, {
+                    data,
+                }).at(0);
+            } catch (err) {
+                console.error(`[objectCheck] check failed!`, {
+                    err,
+                    data,
+                });
+                checkResult = I18N_STRINGS.unexpected_error_format?.format(err);
+            }
+            return checkResult;
+        };
+
         MESSAGE_HANDLER(MESSAGE_TYPE.ImportGraph, (event) => {
             const jsonTextEle = document.createElement("textarea");
             jsonTextEle.className = "port-textarea";
@@ -34,20 +77,9 @@ const EXPORT_ICON = ICONS.export;
 
             const importNodesFromJsonTextEle = () => {
                 const jsonText = jsonTextEle.value;
-                let importObject;
-                try {
-                    importObject = JSON.parse(jsonText);
-                } catch (err) {
-                    console.error(
-                        `[ImportGraph] json '${jsonText}' parse failed!`,
-                        err
-                    );
-                    MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
-                        config: PROMPT_CONFIG.ERROR,
-                        iconSvg: IMPORT_ICON,
-                        content: I18N_STRINGS.code_json_parse_error,
-                        timeout: 5000,
-                    });
+
+                let importObject = objectParse(jsonText);
+                if (importObject === null) {
                     return;
                 }
 
@@ -115,25 +147,7 @@ const EXPORT_ICON = ICONS.export;
             importCheckButton.className = "port-button";
 
             jsonTextEle.onchange = () => {
-                let checkResult;
-                try {
-                    checkResult = MESSAGE_CALL(MESSAGE_TYPE.CheckImportGraph, {
-                        data: jsonTextEle.value,
-                    });
-                    if (checkResult.length === 0) {
-                        throw "Not check result";
-                    }
-                } catch (err) {
-                    console.error(`[ImportGraph] import check failed!`, {
-                        err: err,
-                        value: jsonTextEle.value,
-                    });
-                    checkResult = [
-                        I18N_STRINGS.unexpected_error_format?.format(err),
-                    ];
-                }
-
-                checkResult = checkResult[0];
+                const checkResult = objectCheck(jsonTextEle.value);
                 if (checkResult !== null) {
                     importCheckButton.classList.add("port-button-disable");
                     importCheckButton.textContent = checkResult;
@@ -172,6 +186,95 @@ const EXPORT_ICON = ICONS.export;
                 elements: [jsonTextEle, importCheckButton],
                 buttonMode: COVERING_BUTTON_MODE.CloseButton,
                 init: () => jsonTextEle.focus(),
+            });
+        });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.ImportNodes, (event) => {
+            if (
+                event.detail?.data === undefined ||
+                event.detail?.left === undefined ||
+                event.detail?.top === undefined
+            ) {
+                console.error("[ImportNodes] unexpected params", event);
+                return;
+            }
+
+            // step1: check
+            const checkResult = objectCheck(event.detail.data);
+            if (checkResult !== null) {
+                MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
+                    config: PROMPT_CONFIG.ERROR,
+                    iconSvg: IMPORT_ICON,
+                    content: checkResult,
+                    timeout: 5000,
+                });
+                return;
+            }
+
+            // step2: change coordinate
+            let object = objectParse(event.detail.data);
+            if (object === null) {
+                return;
+            }
+
+            const containCoordinate = object.containCoordinate === true;
+            if (containCoordinate) {
+                let midLeft = 0,
+                    midTop = 0;
+                for (const { left, top } of object.nodes) {
+                    midLeft += left;
+                    midTop += top;
+                }
+                midLeft /= object.nodes.length;
+                midTop /= object.nodes.length;
+
+                for (const node of object.nodes) {
+                    node.left = node.left - midLeft + event.detail.left;
+                    node.top = node.top - midTop + event.detail.top;
+                }
+            } else {
+                const height = rootStyle
+                    .var("--node-height")
+                    .match(/\d+/g)
+                    .map(parseInt)[0];
+
+                let prevTop = event.detail.top;
+                for (const node of object.nodes) {
+                    node.left = event.detail.left;
+                    node.top = prevTop;
+                    prevTop += height;
+                }
+            }
+
+            // step3: create
+            const result = MESSAGE_CALL(MESSAGE_TYPE.CreateNodes, {
+                nodesInfo: object.nodes,
+                connectionsInfo: object.connections,
+                viewportCoordinate: true,
+            });
+            if (result.includes(false)) {
+                // error
+                console.error(`[ImportNodes] nodes create failed!`, object);
+                MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
+                    config: PROMPT_CONFIG.ERROR,
+                    iconSvg: IMPORT_ICON,
+                    content: I18N_STRINGS.code_graph_create_error,
+                    timeout: 5000,
+                });
+                return;
+            }
+
+            // step4: prompt
+            MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
+                config: PROMPT_CONFIG.INFO,
+                iconSvg: IMPORT_ICON,
+                content:
+                    I18N_STRINGS.change_nodes_and_connections_format?.format(
+                        I18N_STRINGS.import,
+                        object.nodes.length,
+                        object.connections.length
+                    ),
+                timeout: 1000,
             });
         });
 
@@ -487,6 +590,23 @@ const EXPORT_ICON = ICONS.export;
                     );
                 }
             }
+
+            // check coordinate
+            const containCoordinate = object.containCoordinate === true;
+            if (containCoordinate) {
+                for (const [idx, node] of object.nodes.entries()) {
+                    if (node.left === undefined || node.top === undefined) {
+                        console.error(
+                            `[CheckImportGraph] coordinates lost in node${idx}!`,
+                            { data }
+                        );
+                        return I18N_STRINGS.node_coordinates_lost_format?.format(
+                            idx
+                        );
+                    }
+                }
+            }
+
             return null;
         });
     };

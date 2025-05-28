@@ -65,6 +65,7 @@ const MESSAGE_TYPE = {
 
     // port
     ImportGraph: "import-graph", // menu
+    ImportNodes: "import-nodes",
     ExportGraph: "export-graph", // menu, return
     CheckImportGraph: "check-import-graph", // return
 
