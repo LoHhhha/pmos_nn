@@ -1472,6 +1472,7 @@ class OperatorBar {
         };
 
         const movingHandler = (event) => {
+            const eventCoordinates = getEventCoordinates(event);
             const canvasInfo = jsPlumbNavigator.getCanvasBoundsAndScale();
             for (const {
                 node,
@@ -1479,10 +1480,10 @@ class OperatorBar {
                 offsetTop,
             } of Node.MOVING_NODES_INFO_SET) {
                 node.redraw(
-                    event.clientX / canvasInfo.scale -
+                    eventCoordinates.left / canvasInfo.scale -
                         canvasInfo.left -
                         offsetLeft,
-                    event.clientY / canvasInfo.scale -
+                    eventCoordinates.top / canvasInfo.scale -
                         canvasInfo.top -
                         offsetTop
                 );
