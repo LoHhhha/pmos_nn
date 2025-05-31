@@ -220,7 +220,7 @@ const LANGUAGE_DATA = {
         cn: "提示词Token数",
     },
     total_tokens: {
-        en: "nTotal Tokens",
+        en: "Total Tokens",
         cn: "总Token数",
     },
     generation: {
