@@ -3,13 +3,14 @@
 from typing import Tuple, List, Annotated, Optional
 
 from flowing.net.layer import Layer
+from flowing.net.layer.torch.common import TorchNNLayer
 
 __all__ = [
     "LayerNorm",
 ]
 
 
-class LayerNorm(Layer):
+class LayerNorm(TorchNNLayer):
     _api_name = "LayerNorm"
 
     normalized_shape: Annotated[List[int], Layer.LayerContent]

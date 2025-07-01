@@ -3,6 +3,7 @@
 from typing import Tuple, List, Annotated, Optional
 
 from flowing.net.layer import Layer
+from flowing.net.layer.torch.common import TorchNNLayer
 
 __all__ = [
     'Dropout',
@@ -14,7 +15,7 @@ __all__ = [
 ]
 
 
-class _Dropout(Layer):
+class _Dropout(TorchNNLayer):
     _api_name = ...
 
     p: Annotated[float, Layer.LayerContent]

@@ -3,6 +3,7 @@
 from typing import Tuple, List, Optional, Annotated, Iterable
 
 from flowing.net.layer import Layer
+from flowing.net.layer.torch.common import TorchNNLayer
 from flowing.net.layer.torch.utils import get_and_check_target_dim_param
 
 __all__ = [
@@ -15,7 +16,7 @@ __all__ = [
 ]
 
 
-class _AdaptivePool(Layer):
+class _AdaptivePool(TorchNNLayer):
     _api_name = ...
 
     data_amount = 1

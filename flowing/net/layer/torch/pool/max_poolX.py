@@ -4,6 +4,7 @@ import math
 from typing import Tuple, List, Optional, Annotated
 
 from flowing.net.layer import Layer
+from flowing.net.layer.torch.common import TorchNNLayer
 from flowing.net.layer.torch.pool.utils import padding_and_kernel_size_check
 from flowing.net.layer.torch.utils import get_and_check_target_dim_param
 
@@ -14,7 +15,7 @@ __all__ = [
 ]
 
 
-class _MaxPool(Layer):
+class _MaxPool(TorchNNLayer):
     _api_name = ...
 
     kernel_size: Annotated[int | Tuple[int, ...], Layer.LayerContent]

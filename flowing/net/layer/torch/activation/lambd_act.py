@@ -1,6 +1,6 @@
 # Copyright © 2025 PMoS. All rights reserved.
 
-from flowing.net.layer.torch.activation.base import _LambdActivation
+from flowing.net.layer.torch.activation.common import _LambdActivation
 
 __all__ = [
     'Softshrink',

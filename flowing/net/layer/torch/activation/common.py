@@ -3,9 +3,10 @@
 from typing import Tuple, List, Annotated, Optional
 
 from flowing.net.layer import Layer
+from flowing.net.layer.torch.common import TorchNNLayer
 
 
-class _SimpleActivation(Layer):
+class _SimpleActivation(TorchNNLayer):
     data_amount = 1
     output_amount = 1
 

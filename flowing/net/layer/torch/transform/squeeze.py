@@ -4,6 +4,7 @@ from collections.abc import Iterable
 from typing import Tuple, List, Optional, Annotated
 
 from flowing.net.layer import Layer
+from flowing.net.layer.torch.common import TorchLayer
 
 __all__ = [
     "Squeeze",
@@ -11,10 +12,10 @@ __all__ = [
 ]
 
 
-class Squeeze(Layer):
+class Squeeze(TorchLayer):
     _api_name = "squeeze"
 
-    dim: Annotated[Optional[int | Tuple[int, ...]], Layer.LayerContent]
+    dim: Annotated[Optional[int | Tuple[int, ...]], Layer.LayerForwardContent]
 
     data_amount = 1
     output_amount = 1
@@ -33,11 +34,12 @@ class Squeeze(Layer):
         return ()
 
     @Layer.injected_check
-    def forward_code(self, add_self: bool = False) -> Tuple[str, ...]:
-        # add_self is useless
-        if self.dim is None:
-            return f"{self.output_name} = torch.{self._api_name}(input={self.data_names[0]})",
-        return f"{self.output_name} = torch.{self._api_name}(input={self.data_names[0]}, dim={self.dim})",
+    def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:
+        # identifier is useless
+        return f"{self.output_name} = torch.{self._api_name}({self.get_forward_args(
+            extend_params=self.get_contents(Layer.LayerForwardContent),
+            data_names_tuple_name=["input"],
+        )})",
 
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
@@ -73,10 +75,10 @@ class Squeeze(Layer):
         return tuple(result_shape),
 
 
-class Unsqueeze(Layer):
+class Unsqueeze(TorchLayer):
     _api_name = "unsqueeze"
 
-    dim: Annotated[int, Layer.LayerContent]
+    dim: Annotated[int, Layer.LayerForwardContent]
 
     data_amount = 1
     output_amount = 1
@@ -95,9 +97,12 @@ class Unsqueeze(Layer):
         return ()
 
     @Layer.injected_check
-    def forward_code(self, add_self: bool = False) -> Tuple[str, ...]:
-        # add_self is useless
-        return f"{self.output_name} = torch.{self._api_name}(input={self.data_names[0]}, dim={self.dim})",
+    def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:
+        # identifier is useless
+        return f"{self.output_name} = torch.{self._api_name}({self.get_forward_args(
+            extend_params=self.get_contents(Layer.LayerForwardContent),
+            data_names_tuple_name=["input"],
+        )})",
 
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:

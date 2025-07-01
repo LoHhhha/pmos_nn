@@ -3,6 +3,7 @@
 from typing import Tuple, List, Optional, Annotated
 
 from flowing.net.layer import Layer
+from flowing.net.layer.torch.common import TorchNNLayer
 
 __all__ = [
     'MaxUnpool1d',
@@ -11,7 +12,7 @@ __all__ = [
 ]
 
 
-class _MaxUnpool(Layer):
+class _MaxUnpool(TorchNNLayer):
     _api_name = ...
 
     kernel_size: Annotated[int | Tuple[int, ...], Layer.LayerContent]

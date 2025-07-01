@@ -4,6 +4,7 @@ import math
 from typing import Tuple, List, Annotated, Optional
 
 from flowing.net.layer import Layer
+from flowing.net.layer.torch.common import TorchNNLayer
 from flowing.net.layer.torch.utils import get_and_check_target_dim_param
 
 __all__ = [
@@ -22,7 +23,7 @@ __all__ = [
 ]
 
 
-class _LazyConv(Layer):
+class _LazyConv(TorchNNLayer):
     _api_name = ...
 
     out_channels: Annotated[int, Layer.LayerContent]

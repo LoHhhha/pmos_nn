@@ -1,6 +1,6 @@
 # Copyright © 2025 PMoS. All rights reserved.
 
-from flowing.net.layer.torch.activation.base import _OptionalDimActivation
+from flowing.net.layer.torch.activation.common import _OptionalDimActivation
 
 __all__ = [
     'Softmax',

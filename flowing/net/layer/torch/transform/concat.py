@@ -4,6 +4,7 @@ from abc import abstractmethod
 from typing import Tuple, List, Annotated, Optional
 
 from flowing.net.layer import Layer
+from flowing.net.layer.torch.common import TorchLayer
 
 __all__ = [
     "Cat",
@@ -11,10 +12,10 @@ __all__ = [
 ]
 
 
-class _Concat(Layer):
+class _Concat(TorchLayer):
     _api_name = ...
 
-    dim: Annotated[int, Layer.LayerContent]
+    dim: Annotated[int, Layer.LayerForwardContent]
 
     output_amount = 1
 
@@ -32,10 +33,13 @@ class _Concat(Layer):
         return ()
 
     @Layer.injected_check
-    def forward_code(self, add_self: bool = False) -> Tuple[str, ...]:
-        # add_self is useless
-        return (f"{self.output_name} = torch.{self._api_name}(tensors=({self.data_names[0]}, {self.data_names[1]}), "
-                f"dim={self.dim})"),
+    def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:
+        # identifier is useless
+        return (f"{self.output_name} = torch.{self._api_name}({self.get_forward_args(
+            extend_params=self.get_contents(Layer.LayerForwardContent),
+            data_names_as_tuple=True,
+            data_names_identifiers=["tensors"],
+        )})"),
 
     @abstractmethod
     @Layer.input_shape_check

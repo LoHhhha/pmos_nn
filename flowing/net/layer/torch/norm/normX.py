@@ -3,6 +3,7 @@
 from typing import Tuple, List, Optional, Annotated
 
 from flowing.net.layer import Layer
+from flowing.net.layer.torch.common import TorchNNLayer
 
 __all__ = [
     "LazyBatchNorm1d",
@@ -20,7 +21,7 @@ __all__ = [
 ]
 
 
-class _LazyBatchNorm(Layer):
+class _LazyBatchNorm(TorchNNLayer):
     _api_name = ...
 
     data_amount = 1

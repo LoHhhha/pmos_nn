@@ -3,6 +3,7 @@
 from typing import Tuple, List, Annotated, Optional
 
 from flowing.net.layer import Layer
+from flowing.net.layer.torch.common import TorchNNLayer
 
 __all__ = [
     "RandLike",
@@ -14,10 +15,10 @@ __all__ = [
 ]
 
 
-class _DataXLike(Layer):
+class _DataXLike(TorchNNLayer):
     _api_name = ...
 
-    requires_grad: Annotated[bool, Layer.LayerContent]
+    requires_grad: Annotated[bool, Layer.LayerForwardContent]
 
     data_amount = 1
     output_amount = 1
@@ -30,10 +31,9 @@ class _DataXLike(Layer):
     def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
         return ()
 
-    @Layer.injected_check
-    def forward_code(self, add_self: bool = False) -> Tuple[str, ...]:
-        # add_self is useless
-        return f"{self.output_name} = torch.{self._api_name}({self.data_names[0]}, requires_grad={self.requires_grad})",
+    def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:
+        # identifier is useless
+        return super().forward_code(identifier=f"torch.{self._api_name}")
 
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
@@ -51,8 +51,8 @@ class RandNormalLike(_DataXLike):
 class RandIntLike(_DataXLike):
     _api_name = "randint_like"
 
-    low: Annotated[int, Layer.LayerContent]
-    high: Annotated[int, Layer.LayerContent]
+    low: Annotated[int, Layer.LayerForwardContent]
+    high: Annotated[int, Layer.LayerForwardContent]
 
     def __init__(self, high: int, low: int = 0, **kwargs):
         super().__init__(**kwargs)
@@ -60,10 +60,9 @@ class RandIntLike(_DataXLike):
         self.low = low
         self.high = high
 
-    @Layer.injected_check
-    def forward_code(self, add_self: bool = False) -> Tuple[str, ...]:
-        return (f"{self.output_name} = torch.{self._api_name}({self.data_names[0]}, low={self.low}, high={self.high}, "
-                f"requires_grad={self.requires_grad})"),
+    def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:
+        # identifier is useless
+        return super().forward_code(identifier=f"torch.{self._api_name}")
 
 
 class OnesLike(_DataXLike):
@@ -77,14 +76,13 @@ class ZerosLike(_DataXLike):
 class FullLike(_DataXLike):
     _api_name = "full_like"
 
-    fill_value: Annotated[float, Layer.LayerContent]
+    fill_value: Annotated[float, Layer.LayerForwardContent]
 
     def __init__(self, fill_value: float = 0, **kwargs):
         super().__init__(**kwargs)
 
         self.fill_value = fill_value
 
-    @Layer.injected_check
-    def forward_code(self, add_self: bool = False) -> Tuple[str, ...]:
-        return (f"{self.output_name} = torch.{self._api_name}({self.data_names[0]}, fill_value={self.fill_value}, "
-                f"requires_grad={self.requires_grad})"),
+    def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:
+        # identifier is useless
+        return super().forward_code(identifier=f"torch.{self._api_name}")

@@ -3,7 +3,7 @@
 from typing import Tuple, List, Annotated
 
 from flowing.net.layer import Layer
-from flowing.net.layer.torch.activation.base import _SimpleActivation
+from flowing.net.layer.torch.activation.common import _SimpleActivation
 
 __all__ = [
     'PReLU',

@@ -4,16 +4,17 @@ from functools import reduce
 from typing import Tuple, List, Annotated, Optional
 
 from flowing.net.layer import Layer
+from flowing.net.layer.torch.common import TorchLayer
 
 __all__ = [
     'Reshape'
 ]
 
 
-class Reshape(Layer):
-    _api_name = "Reshape"
+class Reshape(TorchLayer):
+    _api_name = "reshape"
 
-    shape: Annotated[Tuple[int, ...], Layer.LayerContent]
+    shape: Annotated[Tuple[int, ...], Layer.LayerForwardContent]
 
     __shape_mul: int = ...
 
@@ -30,9 +31,12 @@ class Reshape(Layer):
         return ()
 
     @Layer.injected_check
-    def forward_code(self, add_self: bool = False) -> Tuple[str, ...]:
-        # add_self is useless
-        return f"{self.output_name} = torch.reshape(input={self.data_names[0]}, shape={self.shape})",
+    def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:
+        # identifier is useless
+        return f"{self.output_name} = torch.{self._api_name}({self.get_forward_args(
+            extend_params=self.get_contents(Layer.LayerForwardContent),
+            data_names_tuple_name=["input"],
+        )})",
 
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:

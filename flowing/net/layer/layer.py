@@ -1,7 +1,7 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
-
-from functools import wraps
-from typing import List, Tuple, Annotated, Optional
+import inspect
+from functools import wraps, reduce
+from typing import List, Tuple, Annotated, Optional, Any, Callable
 from abc import ABC, abstractmethod
 
 __all__ = [
@@ -20,9 +20,14 @@ class Layer(ABC):
         def forward/xxx(self):
             <forward_code>
     """
-    LayerContent: str = "LayerContentMark"  # using Annotated[type, Layer.LayerContent] to mark attr
+    # using Annotated[type, Layer.LayerContent] to mark attr (class init args)
+    LayerContent: str = "LayerContentMark"
+    # using Annotated[type, Layer.LayerForwardContent] to mark other forward args
+    LayerForwardContent: str = "LayerForwardContentMark"
 
     _api_name: str = ...
+    _api_init_func: Optional[Callable] = None
+    _api_forward_func: Optional[Callable] = None
 
     layer_name: str = ...
     data_names: List[str | None] = ...
@@ -102,18 +107,53 @@ class Layer(ABC):
 
         return wrapped_function
 
-    @injected_check
-    def get_forward_args(self, block: str = ", ") -> str:
-        # ensure data_name is not ...
-        return block.join(self.data_names)
+    @staticmethod
+    def _trim_params(params: List[Tuple[str, Any]], func: Optional[Callable]) -> List[Tuple[str, Any]]:
+        if func is None:
+            return params
 
-    def get_contents(self):
+        args_info = inspect.getfullargspec(func)
+
+        key2default = {}
+        default_values = args_info.defaults
+        if default_values is None:
+            default_values = []
+        for idx, value in enumerate(default_values):
+            key2default[args_info.args[-len(args_info.defaults) + idx]] = value
+
+        return list((key, value) for key, value in params if (key not in key2default) or (key2default[key] != value))
+
+    @injected_check
+    def get_forward_args(
+            self,
+            block: str = ", ",
+            extend_params: Optional[List[Tuple[str, Any]]] = None,
+            data_names_as_tuple: bool = False,
+            data_names_identifiers: Optional[List[str]] = None,
+    ) -> str:
+        # ensure data_name is not ...
+        if extend_params is None:
+            extend_params = []
+        args = self.data_names if not data_names_as_tuple else (f"({", ".join(self.data_names)})",)
+        if data_names_identifiers is not None:
+            if len(args) != len(data_names_identifiers):
+                raise ValueError(
+                    f"detect an unexpected data_names_identifiers as {data_names_identifiers}, "
+                    f"expected length is {len(args)}"
+                )
+            args = (f"{key}={value}" for key, value in zip(data_names_identifiers, args))
+        return block.join((
+            *args,
+            *(f"{key}={repr(value)}" for key, value in extend_params),
+        ))
+
+    def get_contents(self, content_type) -> List[Tuple[str, Any]]:
         contents = []
         for cls in self.__class__.__mro__:
             if not issubclass(cls, Layer):
                 continue
             for key, value_cls in cls.__annotations__.items():
-                if value_cls.__name__ == Annotated.__name__ and Layer.LayerContent in value_cls.__metadata__:
+                if value_cls.__name__ == Annotated.__name__ and content_type in value_cls.__metadata__:
                     contents.append((key, getattr(self, key)))
 
         return contents
@@ -127,14 +167,19 @@ class Layer(ABC):
 
     @named_check
     def init_code(self, package: str = "", add_self: bool = True) -> Tuple[str, ...]:
-        init_params = self.get_contents()
+        init_params = self.get_contents(Layer.LayerContent)
+        init_params = self._trim_params(init_params, self._api_init_func)
         init_params_str = ", ".join(f"{key}={repr(value)}" for key, value in init_params)
         package_name = f"{package}." if package and not package.endswith(".") else package
         return f"{"self." if add_self else ""}{self.layer_name} = {package_name}{self._api_name}({init_params_str})",
 
     @injected_check
-    def forward_code(self, add_self: bool = True) -> Tuple[str, ...]:
-        return f"{self.output_name} = {"self." if add_self else ""}{self.layer_name}({self.get_forward_args()})",
+    def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:
+        # using "self.<layer_name>" when identifier is None
+        forward_params = self.get_contents(Layer.LayerForwardContent)
+        forward_params = self._trim_params(forward_params, self._api_forward_func)
+        return (f"{self.output_name} = {f'self.{self.layer_name}' if identifier is None else identifier}"
+                f"({self.get_forward_args(extend_params=forward_params)})"),
 
     @abstractmethod
     @input_shape_check

@@ -3,6 +3,7 @@
 from typing import Tuple, List, Annotated, Optional
 
 from flowing.net.layer import Layer
+from flowing.net.layer.torch.common import TorchNNLayer
 
 __all__ = [
     'LayerLinear',
@@ -11,7 +12,7 @@ __all__ = [
 ]
 
 
-class LayerLinear(Layer):
+class LayerLinear(TorchNNLayer):
     _api_name = "LayerLinear"
 
     out_features: Annotated[int, Layer.LayerContent]

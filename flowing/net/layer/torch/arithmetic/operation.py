@@ -26,8 +26,8 @@ class _Operation(Layer):
     def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
         return ()
 
-    def forward_code(self, add_self: bool = True) -> Tuple[str, ...]:
-        # add_self is useless
+    def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:
+        # identifier is useless
         return f"{self.output_name} = {self.get_forward_args(block=f' {self.operation} ')}",
 
     @Layer.input_shape_check

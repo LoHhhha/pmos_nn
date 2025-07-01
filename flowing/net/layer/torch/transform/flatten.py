@@ -4,6 +4,7 @@ from functools import reduce
 from typing import Tuple, List, Annotated, Optional
 
 from flowing.net.layer import Layer
+from flowing.net.layer.torch.common import TorchNNLayer
 
 __all__ = [
     'Flatten',
@@ -11,7 +12,7 @@ __all__ = [
 ]
 
 
-class Flatten(Layer):
+class Flatten(TorchNNLayer):
     _api_name = "Flatten"
 
     start_dim: Annotated[int, Layer.LayerContent]
@@ -65,7 +66,7 @@ class Flatten(Layer):
         return tuple(output_shape),
 
 
-class Unflatten(Layer):
+class Unflatten(TorchNNLayer):
     _api_name = "Unflatten"
 
     dim: Annotated[int, Layer.LayerContent]

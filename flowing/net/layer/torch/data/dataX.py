@@ -3,6 +3,7 @@
 from typing import Tuple, List, Optional, Annotated
 
 from flowing.net.layer import Layer
+from flowing.net.layer.torch.common import TorchNNLayer
 from flowing.net.layer.torch.types import Device, Dtype
 
 __all__ = [
@@ -15,13 +16,13 @@ __all__ = [
 ]
 
 
-class _DataX(Layer):
+class _DataX(TorchNNLayer):
     _api_name = ...
 
-    size: Annotated[Tuple[int, ...], Layer.LayerContent]
-    device: Annotated[Device, Layer.LayerContent]
-    dtype: Annotated[Dtype, Layer.LayerContent]
-    requires_grad: Annotated[bool, Layer.LayerContent]
+    size: Annotated[Tuple[int, ...], Layer.LayerForwardContent]
+    device: Annotated[Device, Layer.LayerForwardContent]
+    dtype: Annotated[Dtype, Layer.LayerForwardContent]
+    requires_grad: Annotated[bool, Layer.LayerForwardContent]
 
     data_amount = 0
     output_amount = 1
@@ -44,11 +45,9 @@ class _DataX(Layer):
     def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
         return ()
 
-    @Layer.injected_check
-    def forward_code(self, add_self: bool = False) -> Tuple[str, ...]:
-        # add_self is useless
-        return (f"{self.output_name} = torch.{self._api_name}(size={self.size}, device={self.device}, "
-                f"dtype={self.dtype}, requires_grad={self.requires_grad})"),
+    def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:
+        # identifier is useless
+        return super().forward_code(identifier=f"torch.{self._api_name}")
 
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
@@ -66,8 +65,8 @@ class RandNormal(_DataX):
 class RandInt(_DataX):
     _api_name = "randint"
 
-    low: Annotated[int, Layer.LayerContent]
-    high: Annotated[int, Layer.LayerContent]
+    low: Annotated[int, Layer.LayerForwardContent]
+    high: Annotated[int, Layer.LayerForwardContent]
 
     def __init__(self, high: int, low: int = 0, **kwargs):
         super().__init__(**kwargs)
@@ -75,10 +74,9 @@ class RandInt(_DataX):
         self.low = low
         self.high = high
 
-    @Layer.injected_check
-    def forward_code(self, add_self: bool = False) -> Tuple[str, ...]:
-        return (f"{self.output_name} = torch.{self._api_name}(size={self.size}, low={self.low}, high={self.high}, "
-                f"device={self.device}, dtype={self.dtype}, requires_grad={self.requires_grad})"),
+    def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:
+        # identifier is useless
+        return super().forward_code(identifier=f"torch.{self._api_name}")
 
 
 class Ones(_DataX):
@@ -92,14 +90,13 @@ class Zeros(_DataX):
 class Full(_DataX):
     _api_name = "full"
 
-    fill_value: Annotated[float, Layer.LayerContent]
+    fill_value: Annotated[float, Layer.LayerForwardContent]
 
     def __init__(self, fill_value: float = 0, **kwargs):
         super().__init__(**kwargs)
 
         self.fill_value = fill_value
 
-    @Layer.injected_check
-    def forward_code(self, add_self: bool = False) -> Tuple[str, ...]:
-        return (f"{self.output_name} = torch.{self._api_name}(size={self.size}, fill_value={self.fill_value}, "
-                f"device={self.device}, dtype={self.dtype}, requires_grad={self.requires_grad})"),
+    def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:
+        # identifier is useless
+        return super().forward_code(identifier=f"torch.{self._api_name}")

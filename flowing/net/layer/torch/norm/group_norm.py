@@ -3,13 +3,14 @@
 from typing import Tuple, List, Annotated, Optional
 
 from flowing.net.layer import Layer
+from flowing.net.layer.torch.common import TorchNNLayer
 
 __all__ = [
     "GroupNorm",
 ]
 
 
-class GroupNorm(Layer):
+class GroupNorm(TorchNNLayer):
     _api_name = "GroupNorm"
 
     num_groups: Annotated[int, Layer.LayerContent]

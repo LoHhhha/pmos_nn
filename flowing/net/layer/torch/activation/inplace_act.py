@@ -2,8 +2,10 @@
 
 from typing import Annotated
 
+import torch
+
 from flowing.net.layer import Layer
-from flowing.net.layer.torch.activation.base import _InplaceActivation
+from flowing.net.layer.torch.activation.common import _InplaceActivation
 
 __all__ = [
     'ReLU',
