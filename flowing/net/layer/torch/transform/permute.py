@@ -26,11 +26,6 @@ class Permute(TorchLayer):
         super().__init__(data_amount=data_amount)
         self.dims = dims
 
-    @Layer.named_check
-    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        # add_self is useless
-        return ()
-
     @Layer.injected_check
     def forward_code(self, add_self: bool = False) -> Tuple[str, ...]:
         # add_self is useless

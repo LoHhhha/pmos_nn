@@ -21,6 +21,7 @@
     user-select: none;
     width: var(--minimap-width);
     height: var(--minimap-height);
+    z-index: 4;
 }
 
 .minimap-viewport {

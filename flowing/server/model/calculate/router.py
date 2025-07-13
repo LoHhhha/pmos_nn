@@ -127,7 +127,10 @@ async def model_calculate_pytorch(request: ModelCalculateRequest):
                             net_node_idx<int>,
                             data_idx<int>
                         }],
-                        args<dict>
+                        args<list>:[{
+                            key<str>,
+                            value<Any>
+                        }]
                     }],
                     input_nodes<list>:[{
                         shape<tuple>:(<int>,...),

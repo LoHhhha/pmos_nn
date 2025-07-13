@@ -54,6 +54,9 @@ async def shape_calculate_pytorch(request: ShapeCalculateRequest):
     except json.JSONDecodeError as e:
         Logger.error(f"JSON parse fail due to:{e}, data={request.data}")
         return JSON_PARSE_ERROR_RESPONSE
+    except Exception as e:
+        Logger.error(f"unexpected error:{e}, data={request.data}")
+        return get_json_response(400, f"Unexpected error:{e}")
 
     if not isinstance(info, dict):
         Logger.error(f"Info type is {type(info)} expected dict")

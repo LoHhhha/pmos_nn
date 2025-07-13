@@ -18,9 +18,6 @@ class _SimpleActivation(TorchNNLayer):
         data_shape = input_shape[0]
         return tuple(data_shape),
 
-    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return super().init_code(package=package, add_self=add_self)
-
 
 class _InplaceActivation(_SimpleActivation):
     inplace: Annotated[bool, Layer.LayerContent]

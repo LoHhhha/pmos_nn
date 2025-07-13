@@ -41,6 +41,10 @@ operatorBarNamespace.argsInputType = {
         element: "select",
         type: null,
     },
+    button: {
+        element: "button",
+        type: null,
+    },
 };
 
 operatorBarNamespace.argsType = {
@@ -242,11 +246,59 @@ operatorBarNamespace.argsType = {
         ],
         note: null,
     },
+    pytorchSequential: {
+        typeCls: Array,
+        input: operatorBarNamespace.argsInputType.button,
+        getValue: (value) => {
+            const result = [];
+            for (const { apiName, content } of value) {
+                const config =
+                    operatorBarNamespace.apiName2operators.get(apiName);
+
+                const vContent = {};
+                for (const arg of config.args) {
+                    vContent[arg.name] = arg.type.getValue(content[arg.name]);
+                }
+                result.push({
+                    apiName,
+                    content: vContent,
+                });
+            }
+            return result;
+        },
+        get textContent() {
+            return I18N_STRINGS.modify;
+        },
+        callback: (event, node) => {
+            const wicket = new Wicket();
+            wicket.show(
+                `${node.config.apiName} #${node.id}`,
+                node.content["modules"],
+                () => {
+                    node.content["modules"] = JSON.parse(
+                        JSON.stringify(wicket.getNodesInfo())
+                    );
+                    MESSAGE_PUSH(MESSAGE_TYPE.GraphChanged);
+                }
+            );
+            MESSAGE_CALL(MESSAGE_TYPE.ShowCanvasMask, {
+                closeWhenClick: true,
+                beforeClose: () => {
+                    wicket.hide();
+                    node.update();
+                },
+            });
+        },
+        note: null,
+    },
 };
 
 operatorBarNamespace.argsValueCheck = (type, value) => {
     if (type.reg) {
         return type.reg.test(value);
+    }
+    if (type.typeCls) {
+        return value instanceof type.typeCls;
     }
     return type.values.includes(value);
 };
@@ -267,13 +319,14 @@ operatorBarNamespace.typeCode = {
     IO: 0,
     math: 1,
     data: 2,
-    transform: 3,
-    activation: 4,
-    drop: 5,
-    convolution: 6,
-    pool: 7,
-    linear: 8,
-    normalization: 9,
+    block: 3,
+    transform: 4,
+    activation: 5,
+    drop: 6,
+    convolution: 7,
+    pool: 8,
+    linear: 9,
+    normalization: 10,
 };
 
 operatorBarNamespace.typeInfo = {};
@@ -291,6 +344,7 @@ operatorBarNamespace.typeColorInfo = {
     IO: [0, 0, 0, 0, 0, 0], // manual
     math: [60, 120, 140, -4, -3, 5],
     data: [88, 148, 116, -3, -5, 4],
+    block: [90, 110, 140, -4, -3, 5],
     transform: [160, 120, 180, -5, 2, 4],
     activation: [200, 100, 90, -2, -1, 1],
     drop: [180, 140, 80, -4, -4, 4],
@@ -298,6 +352,11 @@ operatorBarNamespace.typeColorInfo = {
     pool: [120, 180, 140, -3, -6, 3],
     linear: [200, 180, 60, -5, -4, 4],
     normalization: [170, 120, 160, -4, -3, 5],
+};
+
+operatorBarNamespace.outlinesGetter = {
+    length: (value) => value.length,
+    default: (value) => value,
 };
 
 /**
@@ -621,6 +680,29 @@ operatorBarNamespace.operators = [
         outputShapeComeFromArg: "size",
     },
     {
+        apiName: "Sequential",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.block,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [
+            {
+                name: "modules",
+                short: "M",
+                getter: operatorBarNamespace.outlinesGetter.length,
+            },
+        ],
+        args: [
+            {
+                name: "modules",
+                type: operatorBarNamespace.argsType.pytorchSequential,
+                default: [],
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://pytorch.org/docs/stable/generated/torch.nn.Sequential.html",
+    },
+    {
         apiName: "Reshape",
         extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.transform,
@@ -661,6 +743,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Flatten.html",
+        canBeSequential: true,
     },
     {
         apiName: "Unflatten",
@@ -686,6 +769,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Unflatten.html",
+        canBeSequential: true,
     },
     {
         apiName: "Cat",
@@ -938,6 +1022,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Dropout.html",
+        canBeSequential: true,
     },
     {
         apiName: "Dropout1d",
@@ -960,6 +1045,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Dropout1d.html",
+        canBeSequential: true,
     },
     {
         apiName: "Dropout2d",
@@ -982,6 +1068,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Dropout2d.html",
+        canBeSequential: true,
     },
     {
         apiName: "Dropout3d",
@@ -1004,6 +1091,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Dropout3d.html",
+        canBeSequential: true,
     },
     {
         apiName: "AlphaDropout",
@@ -1026,6 +1114,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.AlphaDropout.html",
+        canBeSequential: true,
     },
     {
         apiName: "FeatureAlphaDropout",
@@ -1048,6 +1137,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.FeatureAlphaDropout.html",
+        canBeSequential: true,
     },
     {
         apiName: "Identity",
@@ -1059,6 +1149,7 @@ operatorBarNamespace.operators = [
         args: [],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Identity.html",
+        canBeSequential: true,
     },
     {
         apiName: "ReLU",
@@ -1076,6 +1167,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.ReLU.html",
+        canBeSequential: true,
     },
     {
         apiName: "LeakyReLU",
@@ -1098,6 +1190,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.LeakyReLU.html",
+        canBeSequential: true,
     },
     {
         apiName: "SELU",
@@ -1115,6 +1208,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.SELU.html",
+        canBeSequential: true,
     },
     {
         apiName: "CELU",
@@ -1137,6 +1231,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.CELU.html",
+        canBeSequential: true,
     },
     {
         apiName: "Sigmoid",
@@ -1148,6 +1243,7 @@ operatorBarNamespace.operators = [
         args: [],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Sigmoid.html",
+        canBeSequential: true,
     },
     {
         apiName: "Softmax",
@@ -1165,6 +1261,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Softmax.html",
+        canBeSequential: true,
     },
     {
         apiName: "PReLU",
@@ -1187,6 +1284,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.PReLU.html",
+        canBeSequential: true,
     },
     {
         apiName: "GELU",
@@ -1204,6 +1302,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.GELU.html",
+        canBeSequential: true,
     },
     {
         apiName: "LogSigmoid",
@@ -1215,6 +1314,7 @@ operatorBarNamespace.operators = [
         args: [],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.LogSigmoid.html",
+        canBeSequential: true,
     },
     {
         apiName: "Softplus",
@@ -1240,6 +1340,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Softplus.html",
+        canBeSequential: true,
     },
     {
         apiName: "Tanh",
@@ -1251,6 +1352,7 @@ operatorBarNamespace.operators = [
         args: [],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Tanh.html",
+        canBeSequential: true,
     },
     {
         apiName: "Tanhshrink",
@@ -1262,6 +1364,7 @@ operatorBarNamespace.operators = [
         args: [],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Tanhshrink.html",
+        canBeSequential: true,
     },
     {
         apiName: "Mish",
@@ -1279,6 +1382,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Mish.html",
+        canBeSequential: true,
     },
     {
         apiName: "GLU",
@@ -1296,6 +1400,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.GLU.html",
+        canBeSequential: true,
     },
     {
         apiName: "Softsign",
@@ -1307,6 +1412,7 @@ operatorBarNamespace.operators = [
         args: [],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Softsign.html",
+        canBeSequential: true,
     },
     {
         apiName: "Softmax2d",
@@ -1318,6 +1424,7 @@ operatorBarNamespace.operators = [
         args: [],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Softmax2d.html",
+        canBeSequential: true,
     },
     {
         apiName: "ELU",
@@ -1340,6 +1447,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.ELU.html",
+        canBeSequential: true,
     },
     {
         apiName: "Threshold",
@@ -1370,6 +1478,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Threshold.html",
+        canBeSequential: true,
     },
     {
         apiName: "ReLU6",
@@ -1387,6 +1496,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.ReLU6.html",
+        canBeSequential: true,
     },
     {
         apiName: "Hardsigmoid",
@@ -1404,6 +1514,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Hardsigmoid.html",
+        canBeSequential: true,
     },
     {
         apiName: "Hardtanh",
@@ -1434,6 +1545,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Hardtanh.html",
+        canBeSequential: true,
     },
     {
         apiName: "Hardswish",
@@ -1451,6 +1563,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Hardswish.html",
+        canBeSequential: true,
     },
     {
         apiName: "SiLU",
@@ -1468,6 +1581,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.SiLU.html",
+        canBeSequential: true,
     },
     {
         apiName: "LogSoftmax",
@@ -1485,6 +1599,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.LogSoftmax.html",
+        canBeSequential: true,
     },
     {
         apiName: "Softmin",
@@ -1502,6 +1617,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Softmin.html",
+        canBeSequential: true,
     },
     {
         apiName: "Softshrink",
@@ -1519,6 +1635,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Softshrink.html",
+        canBeSequential: true,
     },
     {
         apiName: "Hardshrink",
@@ -1536,6 +1653,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Hardshrink.html",
+        canBeSequential: true,
     },
     {
         apiName: "Conv1d",
@@ -1599,6 +1717,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Conv1d.html",
+        canBeSequential: true,
     },
     {
         apiName: "Conv2d",
@@ -1662,6 +1781,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html",
+        canBeSequential: true,
     },
     {
         apiName: "Conv3d",
@@ -1725,6 +1845,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Conv3d.html",
+        canBeSequential: true,
     },
     {
         apiName: "LazyConv1d",
@@ -1782,6 +1903,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyConv1d.html",
+        canBeSequential: true,
     },
     {
         apiName: "LazyConv2d",
@@ -1839,6 +1961,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyConv2d.html",
+        canBeSequential: true,
     },
     {
         apiName: "LazyConv3d",
@@ -1896,6 +2019,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyConv3d.html",
+        canBeSequential: true,
     },
     {
         apiName: "ConvTranspose1d",
@@ -1959,6 +2083,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.ConvTranspose1d.html",
+        canBeSequential: true,
     },
     {
         apiName: "ConvTranspose2d",
@@ -2022,6 +2147,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.ConvTranspose2d.html",
+        canBeSequential: true,
     },
     {
         apiName: "ConvTranspose3d",
@@ -2085,6 +2211,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.ConvTranspose3d.html",
+        canBeSequential: true,
     },
     {
         apiName: "LazyConvTranspose1d",
@@ -2142,6 +2269,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyConvTranspose1d.html",
+        canBeSequential: true,
     },
     {
         apiName: "LazyConvTranspose2d",
@@ -2199,6 +2327,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyConvTranspose2d.html",
+        canBeSequential: true,
     },
     {
         apiName: "LazyConvTranspose3d",
@@ -2256,6 +2385,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyConvTranspose3d.html",
+        canBeSequential: true,
     },
     {
         apiName: "MaxPool1d",
@@ -2303,6 +2433,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.MaxPool1d.html",
+        canBeSequential: true,
         changeCallBack: (node) => {
             if (
                 !operatorBarNamespace.argsType.bool.getValue(
@@ -2363,6 +2494,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.MaxPool2d.html",
+        canBeSequential: true,
         changeCallBack: (node) => {
             if (
                 !operatorBarNamespace.argsType.bool.getValue(
@@ -2423,6 +2555,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.MaxPool3d.html",
+        canBeSequential: true,
         changeCallBack: (node) => {
             if (
                 !operatorBarNamespace.argsType.bool.getValue(
@@ -2462,6 +2595,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.AdaptiveMaxPool1d.html",
+        canBeSequential: true,
         changeCallBack: (node) => {
             if (
                 !operatorBarNamespace.argsType.bool.getValue(
@@ -2501,6 +2635,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.AdaptiveMaxPool2d.html",
+        canBeSequential: true,
         changeCallBack: (node) => {
             if (
                 !operatorBarNamespace.argsType.bool.getValue(
@@ -2540,6 +2675,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.AdaptiveMaxPool3d.html",
+        canBeSequential: true,
         changeCallBack: (node) => {
             if (
                 !operatorBarNamespace.argsType.bool.getValue(
@@ -2571,6 +2707,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.AdaptiveAvgPool1d.html",
+        canBeSequential: true,
     },
     {
         apiName: "AdaptiveAvgPool2d",
@@ -2589,6 +2726,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.AdaptiveAvgPool2d.html",
+        canBeSequential: true,
     },
     {
         apiName: "AdaptiveAvgPool3d",
@@ -2607,6 +2745,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.AdaptiveAvgPool3d.html",
+        canBeSequential: true,
     },
     {
         apiName: "MaxUnpool1d",
@@ -2639,6 +2778,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.MaxUnpool1d.html",
+        canBeSequential: true,
     },
     {
         apiName: "MaxUnpool2d",
@@ -2671,6 +2811,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.MaxUnpool2d.html",
+        canBeSequential: true,
     },
     {
         apiName: "MaxUnpool3d",
@@ -2703,6 +2844,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.MaxUnpool3d.html",
+        canBeSequential: true,
     },
     {
         apiName: "AvgPool1d",
@@ -2744,6 +2886,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.AvgPool1d.html",
+        canBeSequential: true,
     },
     {
         apiName: "AvgPool2d",
@@ -2785,6 +2928,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.AvgPool2d.html",
+        canBeSequential: true,
     },
     {
         apiName: "AvgPool3d",
@@ -2826,6 +2970,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.AvgPool3d.html",
+        canBeSequential: true,
     },
     {
         apiName: "Linear",
@@ -2856,6 +3001,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Linear.html",
+        canBeSequential: true,
     },
     {
         apiName: "LayerLinear",
@@ -2878,6 +3024,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyLinear.html",
+        canBeSequential: true,
     },
     {
         apiName: "Bilinear",
@@ -2914,6 +3061,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.Bilinear.html",
+        canBeSequential: true,
     },
     {
         apiName: "BatchNorm1d",
@@ -2951,6 +3099,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.BatchNorm1d.html",
+        canBeSequential: true,
     },
     {
         apiName: "BatchNorm2d",
@@ -2988,6 +3137,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.BatchNorm2d.html",
+        canBeSequential: true,
     },
     {
         apiName: "BatchNorm3d",
@@ -3025,6 +3175,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.BatchNorm3d.html",
+        canBeSequential: true,
     },
     {
         apiName: "LazyBatchNorm1d",
@@ -3057,6 +3208,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyBatchNorm1d.html",
+        canBeSequential: true,
     },
     {
         apiName: "LazyBatchNorm2d",
@@ -3089,6 +3241,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyBatchNorm2d.html",
+        canBeSequential: true,
     },
     {
         apiName: "LazyBatchNorm3d",
@@ -3121,6 +3274,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyBatchNorm3d.html",
+        canBeSequential: true,
     },
     {
         apiName: "InstanceNorm1d",
@@ -3158,6 +3312,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.InstanceNorm1d.html",
+        canBeSequential: true,
     },
     {
         apiName: "InstanceNorm2d",
@@ -3195,6 +3350,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.InstanceNorm2d.html",
+        canBeSequential: true,
     },
     {
         apiName: "InstanceNorm3d",
@@ -3232,6 +3388,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.InstanceNorm3d.html",
+        canBeSequential: true,
     },
     {
         apiName: "LazyInstanceNorm1d",
@@ -3264,6 +3421,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyInstanceNorm1d.html",
+        canBeSequential: true,
     },
     {
         apiName: "LazyInstanceNorm2d",
@@ -3296,6 +3454,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyInstanceNorm2d.html",
+        canBeSequential: true,
     },
     {
         apiName: "LazyInstanceNorm3d",
@@ -3328,6 +3487,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.LazyInstanceNorm3d.html",
+        canBeSequential: true,
     },
     {
         apiName: "GroupNorm",
@@ -3363,6 +3523,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.GroupNorm.html",
+        canBeSequential: true,
     },
     {
         apiName: "LayerNorm",
@@ -3395,6 +3556,7 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.pytorch,
         link: "https://pytorch.org/docs/stable/generated/torch.nn.LayerNorm.html",
+        canBeSequential: true,
     },
 ];
 

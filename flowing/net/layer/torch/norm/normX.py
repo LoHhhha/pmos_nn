@@ -47,9 +47,6 @@ class _LazyBatchNorm(TorchNNLayer):
         self.affine = affine
         self.track_running_stats = track_running_stats
 
-    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return super().init_code(package=package, add_self=add_self)
-
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         # need allowed_dims as args.
@@ -88,7 +85,7 @@ class _BatchNorm(_LazyBatchNorm):
         if self.num_features != data_shape[check_dim]:
             raise ValueError(
                 f"detect an unexpected data_shape as {data_shape}, "
-                f"expected data_shape's NO.{check_dim + 1} dimension is equal to num_features as {self.num_features}"
+                f"expected data_shape's No.{check_dim + 1} dimension is equal to num_features as {self.num_features}"
             )
         return tuple(data_shape),
 

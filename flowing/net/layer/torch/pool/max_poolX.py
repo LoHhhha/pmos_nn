@@ -45,13 +45,10 @@ class _MaxPool(TorchNNLayer):
         self.return_indices = return_indices
         self.ceil_mode = ceil_mode
 
-        if self.return_indices is True:
+        if self.return_indices:
             self.output_amount = 2
         else:
             self.output_amount = 1
-
-    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return super().init_code(package=package, add_self=add_self)
 
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:

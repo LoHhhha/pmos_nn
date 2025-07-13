@@ -28,11 +28,6 @@ class Squeeze(TorchLayer):
         super().__init__(data_amount=data_amount)
         self.dim = dim
 
-    @Layer.named_check
-    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        # add_self is useless
-        return ()
-
     @Layer.injected_check
     def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:
         # identifier is useless
@@ -90,11 +85,6 @@ class Unsqueeze(TorchLayer):
     ):
         super().__init__(data_amount=data_amount)
         self.dim = dim
-
-    @Layer.named_check
-    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        # add_self is useless
-        return ()
 
     @Layer.injected_check
     def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:

@@ -38,9 +38,6 @@ class LayerNorm(TorchNNLayer):
         self.elementwise_affine = elementwise_affine
         self.bias = bias
 
-    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return super().init_code(package=package, add_self=add_self)
-
     def _is_bad_data_shape(self, data_shape: List[int]) -> bool:
         if len(data_shape) < len(self.normalized_shape):
             return True

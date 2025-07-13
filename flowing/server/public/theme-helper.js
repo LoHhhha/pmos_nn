@@ -32,6 +32,7 @@ const THEME_COLOR_REPLACE_RULE = {
     "--sub-content-background-color": "--lucency-level-6-color",
     "--viewport-background-color": "--level-2-color",
     "--default-color": "--level-14-color",
+    "--default-inverse-color": "--level-3-color",
     "--disabled-color": "--level-9-color",
 };
 

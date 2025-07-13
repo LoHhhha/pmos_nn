@@ -29,6 +29,8 @@
 
 const NODE_FRAME_QUEUE_WEIGHT = 1;
 
+const WICKET_KEY_NAMESPACE = "wicket";
+
 let MAX_Z_INDEX = 16; // reserve 0-15
 let CREATE_NODE_COUNT = 0;
 let ENDPOINT_COUNT = 0;
@@ -160,6 +162,7 @@ class Overview {
             switch (arg.type.input) {
                 case operatorBarNamespace.argsInputType.text:
                     itemInput.onchange = () => {
+                        const prevValue = node.content[arg.name];
                         if (
                             operatorBarNamespace.argsValueCheck(
                                 arg.type,
@@ -176,7 +179,10 @@ class Overview {
                             itemInput.value = arg.default;
                             node.content[arg.name] = arg.default;
                         }
-                        node.update();
+                        if (prevValue != node.content[arg.name]) {
+                            MESSAGE_PUSH(MESSAGE_TYPE.GraphChanged);
+                            node.update();
+                        }
                     };
                     break;
                 case operatorBarNamespace.argsInputType.select:
@@ -188,8 +194,19 @@ class Overview {
                     }
 
                     itemInput.onchange = () => {
+                        const prevValue = node.content[arg.name];
                         node.content[arg.name] = itemInput.value;
-                        node.update();
+                        if (prevValue != node.content[arg.name]) {
+                            MESSAGE_PUSH(MESSAGE_TYPE.GraphChanged);
+                            node.update();
+                        }
+                    };
+                    break;
+                case operatorBarNamespace.argsInputType.button:
+                    itemInput.classList.add("overview-item-input-button");
+                    itemInput.textContent = arg.type.textContent;
+                    itemInput.onclick = (event) => {
+                        arg.type.callback?.(event, node);
                     };
                     break;
                 default:
@@ -211,7 +228,11 @@ class Overview {
         deleteButton.textContent = I18N_STRINGS.delete;
         deleteButton.addEventListener("click", () => {
             this.remove();
-            node.dispose();
+            if (node.notAddIntoGraph) {
+                node.dispose();
+            } else {
+                MESSAGE_CALL(MESSAGE_TYPE.DeleteNodes, { nodes: [node] });
+            }
         });
         this.element.appendChild(deleteButton);
 
@@ -232,6 +253,308 @@ class Overview {
     }
 }
 
+class Wicket {
+    static #wicketInstance = null;
+
+    static element;
+    static titleEle;
+    static nodeContainerEle;
+    static viewport;
+    static jsPlumbNavigator;
+    static updateCallback;
+
+    static addNode(node) {
+        if (!Wicket.isShowing) {
+            console.error("[Wicket] adding node when wicket is hiding");
+            return;
+        }
+        node.element.draggable = true;
+
+        Wicket.nodeContainerEle.appendChild(node.element);
+    }
+
+    static getNodes() {
+        const nodes = [];
+        for (const ele of Wicket.nodeContainerEle.childNodes) {
+            if (ele.origin instanceof Node) {
+                const node = ele.origin;
+                nodes.push(node);
+            }
+        }
+        return nodes;
+    }
+
+    static addNodeFromInfo(config, content) {
+        Wicket.addNode(
+            new Node(
+                config,
+                null,
+                null,
+                Wicket.jsPlumbNavigator,
+                content,
+                true,
+                undefined,
+                true
+            )
+        );
+    }
+
+    static deleteNodes() {
+        while (Wicket.nodeContainerEle.firstChild) {
+            Wicket.nodeContainerEle.firstChild.origin?.dispose();
+        }
+    }
+
+    static #pasteNodes() {
+        const copyData = MESSAGE_CALL(MESSAGE_TYPE.CopyData).at(0);
+        if (
+            copyData === undefined ||
+            copyData.nodes[Symbol.iterator] === undefined
+        ) {
+            console.error("[Wicket] can't get CopyData.nodes", {
+                copyData,
+            });
+            return;
+        }
+
+        let count = 0;
+        for (const { config, content } of copyData.nodes) {
+            if (config.canBeSequential) {
+                Wicket.addNodeFromInfo(config, content);
+                count += 1;
+            }
+        }
+
+        MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
+            config: PROMPT_CONFIG.INFO,
+            iconSvg: ICONS.paste,
+            content:
+                I18N_STRINGS.paste_valid_nodes_and_drop_connections_format?.format(
+                    count,
+                    0
+                ),
+            timeout: 1000,
+        });
+    }
+
+    static #selectAllNoes() {
+        MESSAGE_PUSH(MESSAGE_TYPE.SelectNodes, {
+            nodes: Wicket.getNodes(),
+        });
+    }
+
+    #addHandler() {
+        let currentMoving;
+
+        const draggingImage = document.createElement("div");
+        draggingImage.classList.add("wicket-dragging-image");
+        Wicket.element.appendChild(draggingImage);
+
+        Wicket.nodeContainerEle.addEventListener("dragstart", (e) => {
+            e.dataTransfer.effectAllowed = "move";
+            currentMoving = e.target;
+
+            draggingImage.textContent = currentMoving.textContent;
+            e.dataTransfer.setDragImage(draggingImage, -20, 0);
+
+            setTimeout(() => {
+                currentMoving.classList.add("wicket-moving-node");
+            });
+        });
+
+        Wicket.nodeContainerEle.addEventListener("dragenter", (e) => {
+            e.preventDefault();
+            if (
+                e.target === currentMoving ||
+                e.target === Wicket.nodeContainerEle
+            ) {
+                return;
+            }
+            const nodesList = Array.from(Wicket.nodeContainerEle.childNodes);
+            let currentIndex = nodesList.indexOf(currentMoving);
+            let targetIndex = nodesList.indexOf(e.target);
+
+            if (currentIndex < targetIndex) {
+                Wicket.nodeContainerEle.insertBefore(
+                    currentMoving,
+                    e.target.nextElementSibling
+                );
+            } else {
+                Wicket.nodeContainerEle.insertBefore(currentMoving, e.target);
+            }
+        });
+
+        Wicket.nodeContainerEle.addEventListener("dragover", (e) => {
+            e.preventDefault();
+        });
+
+        Wicket.nodeContainerEle.addEventListener("dragend", (e) => {
+            currentMoving.classList.remove("wicket-moving-node");
+            Wicket.updateCallback?.();
+        });
+
+        Wicket.element.oncontextmenu = (e) => {
+            if (e.target?.origin instanceof Node) return true;
+
+            MESSAGE_PUSH(MESSAGE_TYPE.RightKeyMenuShow, {
+                showLeft: e.clientX,
+                showTop: e.clientY,
+                items: [
+                    {
+                        title: I18N_STRINGS.paste,
+                        keyTips: "Ctrl+V",
+                        icon: ICONS.paste,
+                        callback: Wicket.#pasteNodes,
+                    },
+                    {
+                        title: I18N_STRINGS.select_all,
+                        keyTips: "Ctrl+A",
+                        icon: ICONS.selectAll,
+                        callback: Wicket.#selectAllNoes,
+                    },
+                    {
+                        isSeparator: true,
+                    },
+                    {
+                        title: I18N_STRINGS.clear_nodes,
+                        icon: ICONS.clear,
+                        callback: Wicket.deleteNodes,
+                    },
+                ],
+            });
+        };
+
+        Wicket.element.onclick = (e) => {
+            if (!(e.target?.origin instanceof Node)) {
+                Node.clearSelect();
+                return true;
+            }
+        };
+    }
+
+    constructor(jsPlumbNavigator) {
+        if (Wicket.#wicketInstance !== null) {
+            return Wicket.#wicketInstance;
+        }
+        Wicket.viewport = jsPlumbNavigator.viewportEle;
+        Wicket.jsPlumbNavigator = jsPlumbNavigator;
+
+        Wicket.element = document.createElement("div");
+        Wicket.element.className = "wicket";
+
+        Wicket.viewport.appendChild(Wicket.element);
+
+        Wicket.titleEle = document.createElement("div");
+        Wicket.titleEle.className = "wicket-text";
+        Wicket.element.appendChild(Wicket.titleEle);
+
+        Wicket.nodeContainerEle = document.createElement("div");
+        Wicket.nodeContainerEle.className = "wicket-node-container";
+        Wicket.element.appendChild(Wicket.nodeContainerEle);
+
+        this.#addHandler();
+
+        return (Wicket.#wicketInstance = this);
+    }
+
+    setKeyHandler() {
+        ENTER_NEW_KEY_NAMESPACE(WICKET_KEY_NAMESPACE);
+
+        ADD_KEY_HANDLER(WICKET_KEY_NAMESPACE, "Backspace", [], () => {
+            for (const node of Node.SELECTED_NODES_SET) {
+                if (node.notAddIntoGraph) {
+                    node.dispose();
+                } else {
+                    console.warn(
+                        "[Wicket] detect deleting node on the graph, skipped."
+                    );
+                }
+            }
+        });
+
+        ADD_KEY_HANDLER(
+            WICKET_KEY_NAMESPACE,
+            "c",
+            [MODIFIER_KEY_CODE.ctrl],
+            () => {
+                const nodes = [];
+                for (const node of Node.SELECTED_NODES_SET) {
+                    if (node.notAddIntoGraph) {
+                        nodes.push(node);
+                    } else {
+                        console.warn(
+                            "[Wicket] detect coping node on the graph, skipped."
+                        );
+                    }
+                }
+                MESSAGE_PUSH(MESSAGE_TYPE.NodesCopy, {
+                    nodes,
+                });
+            }
+        );
+
+        ADD_KEY_HANDLER(
+            WICKET_KEY_NAMESPACE,
+            "v",
+            [MODIFIER_KEY_CODE.ctrl],
+            Wicket.#pasteNodes
+        );
+
+        ADD_KEY_HANDLER(
+            WICKET_KEY_NAMESPACE,
+            "a",
+            [MODIFIER_KEY_CODE.ctrl],
+            Wicket.#selectAllNoes
+        );
+    }
+
+    getNodesInfo() {
+        const nodesInfo = [];
+        for (const node of Wicket.getNodes()) {
+            nodesInfo.push({
+                apiName: node.config.apiName,
+                content: node.getContent(),
+            });
+        }
+        return nodesInfo;
+    }
+
+    static isShowing = false;
+    hide() {
+        Wicket.updateCallback?.();
+        Wicket.element.style.display = "none";
+        Wicket.isShowing = false;
+        Wicket.deleteNodes();
+        Node.clearSelect();
+        EXIT_KEY_NAMESPACE(WICKET_KEY_NAMESPACE);
+    }
+
+    show(title, originNodesArgs, updateCallback) {
+        this.setKeyHandler();
+
+        Wicket.element.style.display = "grid";
+        Wicket.isShowing = true;
+        // ensure not select both graph and wicket nodes at first.
+        Node.clearSelect();
+        Wicket.element.focus();
+
+        Wicket.titleEle.textContent = title;
+
+        for (const { apiName, content } of originNodesArgs) {
+            const config = operatorBarNamespace.apiName2operators.get(apiName);
+            if (config === undefined) {
+                console.error("[Wicket] can't recover origin nodes.");
+                Wicket.deleteNodes();
+                break;
+            }
+
+            Wicket.addNodeFromInfo(config, content);
+        }
+
+        Wicket.updateCallback = updateCallback;
+    }
+}
+
 class Node {
     id;
     element; // element.origin -> this
@@ -248,6 +571,7 @@ class Node {
     outline;
     canvas;
     viewport;
+    notAddIntoGraph;
     static jsPlumbInstance;
 
     // static method
@@ -333,13 +657,24 @@ class Node {
     }
 
     update() {
+        if (this.notAddIntoGraph) return;
+
         // outline
         let outlineText = "";
-        for (const { name, short } of this.config.outlines) {
+        for (const { name, short, getter } of this.config.outlines) {
             if (outlineText !== "") {
                 outlineText += " ";
             }
-            outlineText += `${short}:${String(this.content[name])}`;
+
+            let value;
+            if (getter === undefined) {
+                value = operatorBarNamespace.outlinesGetter.default(
+                    this.content[name]
+                );
+            } else {
+                value = getter(this.content[name]);
+            }
+            outlineText += `${short}:${value}`;
         }
         this.outline.textContent = outlineText;
         if (this.config.changeCallBack instanceof Function) {
@@ -353,6 +688,8 @@ class Node {
     }
 
     upZIndex() {
+        if (this.notAddIntoGraph) return;
+
         this.element.style.zIndex = getNextZIndex();
     }
 
@@ -418,6 +755,8 @@ class Node {
         this.redrawPlanned = false;
     }
     redraw(left, top, force) {
+        if (this.notAddIntoGraph) return;
+
         const { left: L, top: T } = this.coordinatesTruncate(left, top);
         this.nextLeft = L;
         this.nextTop = T;
@@ -433,6 +772,8 @@ class Node {
     }
 
     updateNavigator(focus, left, top) {
+        if (this.notAddIntoGraph) return;
+
         if (focus) {
             MESSAGE_CALL(MESSAGE_TYPE.NavigatorUpdateNode, {
                 node: this,
@@ -449,6 +790,8 @@ class Node {
     }
 
     redrawMiniMapNode(focus) {
+        if (this.notAddIntoGraph) return;
+
         if (focus) {
             MESSAGE_CALL(MESSAGE_TYPE.RedrawMapNode, {
                 id: this.id,
@@ -466,6 +809,25 @@ class Node {
                 height: this.element.offsetHeight,
             });
         }
+    }
+
+    getArgs() {
+        const args = [];
+        for (const arg of this.config.args) {
+            args.push({
+                key: arg.name,
+                value: arg.type.getValue(this.content[arg.name]),
+            });
+        }
+        return args;
+    }
+
+    getContent() {
+        const content = {};
+        for (const arg of this.config.args) {
+            content[arg.name] = this.content[arg.name];
+        }
+        return content;
     }
 
     hideOverview = null;
@@ -513,9 +875,19 @@ class Node {
                         keyTips: "Backspace",
                         icon: ICONS.delete,
                         callback: () => {
-                            MESSAGE_PUSH(MESSAGE_TYPE.DeleteNodes, {
-                                nodes: nodes,
-                            });
+                            const graphNodes = [];
+                            for (const node of nodes) {
+                                if (node.notAddIntoGraph) {
+                                    node.dispose();
+                                } else {
+                                    graphNodes.push(node);
+                                }
+                            }
+                            if (graphNodes.length) {
+                                MESSAGE_PUSH(MESSAGE_TYPE.DeleteNodes, {
+                                    nodes: graphNodes,
+                                });
+                            }
                         },
                     },
                     {
@@ -559,7 +931,8 @@ class Node {
         jsPlumbNavigator,
         content = undefined,
         initNow = true,
-        id = undefined // warning: do not push a id >= getNextNodeId(), and it must be exist prev.
+        id = undefined, // warning: do not push a id >= getNextNodeId(), and it must be exist prev.
+        notAddIntoGraph = false
     ) {
         if (id === undefined) {
             id = getNextNodeId();
@@ -615,6 +988,21 @@ class Node {
             }
         }
 
+        // set outputEndpointConnection
+        for (let idx = 0; idx < nodeConfig.outputEnd.length; idx++) {
+            this.outputEndpointConnection[idx] = new Set();
+        }
+
+        // add to Id2Node
+        MEMORY_GET(MEMORY_KEYS.Id2Node).set(id, this);
+
+        // not need to add into graph
+        this.notAddIntoGraph = notAddIntoGraph;
+        if (notAddIntoGraph) {
+            this.#init(left, top);
+            return this;
+        }
+
         // place
         this.element.style.position = "absolute";
         const canvasBounds = jsPlumbNavigator.getCanvasBounds();
@@ -633,11 +1021,6 @@ class Node {
         // initNow = false, we use this to navigate node.
         this.nextLeft = left;
         this.nextTop = top;
-
-        // set outputEndpointConnection
-        for (let idx = 0; idx < nodeConfig.outputEnd.length; idx++) {
-            this.outputEndpointConnection[idx] = new Set();
-        }
 
         // set endpoint
         for (let ptr = 0; ptr < nodeConfig.outputEnd.length; ptr++) {
@@ -671,18 +1054,10 @@ class Node {
                 this.#init.bind(this, left, top)
             );
         }
-
-        // add to Id2Node
-        MEMORY_GET(MEMORY_KEYS.Id2Node).set(id, this);
     }
 
     select(showOverview) {
-        this.element.style.outlineColor = rootStyle.var(
-            "--node-selected-outline-color"
-        );
-        this.element.style.outlineWidth = rootStyle.var(
-            "--node-selected-outline-width"
-        );
+        this.element.classList.add("node-select-mode");
         if (showOverview && this.hideOverview === null) {
             this.showOverview();
         }
@@ -691,8 +1066,7 @@ class Node {
     }
 
     unSelect() {
-        this.element.style.outlineColor = rootStyle.var("--node-outline-color");
-        this.element.style.outlineWidth = rootStyle.var("--border-width");
+        this.element.classList.remove("node-select-mode");
         if (this.hideOverview) {
             this.hideOverview();
         }
@@ -713,13 +1087,15 @@ class Node {
             MEMORY_GET(MEMORY_KEYS.Id2Node).delete(this.id);
             CURRENT_NODES_COUNT--;
         }
-        // delete from MiniMap
-        MESSAGE_PUSH(MESSAGE_TYPE.DeleteMapNode, {
-            id: this.id,
-        });
-        MESSAGE_PUSH(MESSAGE_TYPE.NavigatorRemoveNode, {
-            node: this,
-        });
+        if (!this.notAddIntoGraph) {
+            // delete from MiniMap and Navigator
+            MESSAGE_PUSH(MESSAGE_TYPE.DeleteMapNode, {
+                id: this.id,
+            });
+            MESSAGE_PUSH(MESSAGE_TYPE.NavigatorRemoveNode, {
+                node: this,
+            });
+        }
     }
 }
 
@@ -810,24 +1186,65 @@ class OperatorNode {
             OperatorNode.deletePointFollowNode();
             return false;
         }
+        const originOperatorNode = OperatorNode.pointFollowNode.origin;
 
-        const rect = OperatorNode.container.getBoundingClientRect();
-        const barMinX = rect.left;
-        const barMaxX = rect.right;
-        const barMinY = rect.top;
-        const barMaxY = rect.bottom;
-        if (
-            e.clientX > barMaxX ||
-            e.clientX < barMinX ||
-            e.clientY > barMaxY ||
-            e.clientY < barMinY
+        const { clientX: x, clientY: y } = e;
+
+        const {
+            left: barMinX,
+            right: barMaxX,
+            top: barMinY,
+            bottom: barMaxY,
+        } = OperatorNode.container.getBoundingClientRect();
+
+        const {
+            left: wicketMinX,
+            right: wicketMaxX,
+            top: wicketMinY,
+            bottom: wicketMaxY,
+        } = Wicket.element.getBoundingClientRect();
+
+        if (x <= barMaxX && x >= barMinX && y <= barMaxY && y >= barMinY) {
+            // do not thing
+        } else if (
+            Wicket.isShowing &&
+            x <= wicketMaxX &&
+            x >= wicketMinX &&
+            y <= wicketMaxY &&
+            y >= wicketMinY
         ) {
-            const coordinates = coordinatesWindow2Viewport(
-                e.clientX,
-                e.clientY
-            );
+            if (originOperatorNode.config.canBeSequential) {
+                Wicket.addNode(
+                    new Node(
+                        originOperatorNode.config,
+                        null,
+                        null,
+                        OperatorNode.jsPlumbNavigator,
+                        undefined,
+                        true,
+                        undefined,
+                        true
+                    )
+                );
+            } else {
+                MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
+                    config: PROMPT_CONFIG.ERROR,
+                    iconSvg: ICONS.node,
+                    content: I18N_STRINGS.can_not_add_this_node,
+                    timeout: 1000,
+                });
+            }
+        } else if (Wicket.isShowing) {
+            MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
+                config: PROMPT_CONFIG.WARNING,
+                iconSvg: ICONS.node,
+                content: I18N_STRINGS.can_not_place_node_into_graph,
+                timeout: 1000,
+            });
+        } else {
+            const coordinates = coordinatesWindow2Viewport(x, y);
             const scale = OperatorNode.jsPlumbNavigator.getCanvasScale();
-            OperatorNode.pointFollowNode.origin.addNode(
+            originOperatorNode.addNode(
                 coordinates.left / scale - OperatorNode.pointFollowNode.offsetX,
                 coordinates.top / scale - OperatorNode.pointFollowNode.offsetY
             );
@@ -1582,6 +1999,9 @@ class OperatorBar {
             }
         );
 
+        // initial
+        new Wicket(jsPlumbNavigator);
+
         ADD_KEY_HANDLER(
             DEFAULT_KEY_NAMESPACE,
             "a",
@@ -1592,9 +2012,19 @@ class OperatorBar {
         );
 
         ADD_KEY_HANDLER(DEFAULT_KEY_NAMESPACE, "Backspace", [], () => {
-            MESSAGE_PUSH(MESSAGE_TYPE.DeleteNodes, {
-                nodes: Node.SELECTED_NODES_SET,
-            });
+            const graphNodes = [];
+            for (const node of Node.SELECTED_NODES_SET) {
+                if (node.notAddIntoGraph) {
+                    node.dispose();
+                } else {
+                    graphNodes.push(node);
+                }
+            }
+            if (graphNodes.length) {
+                MESSAGE_PUSH(MESSAGE_TYPE.DeleteNodes, {
+                    nodes: graphNodes,
+                });
+            }
         });
 
         return new OperatorBar(jsPlumbNavigator, {

@@ -110,12 +110,7 @@ const TIDY_NODES_ICON = ICONS.tidy;
                 outputId2Idx.set(nodeId, outputIdx++);
             } else {
                 const layerNode = new LayerNode(node.config.apiName);
-                for (const arg of node.config.args) {
-                    layerNode.args.push({
-                        key: arg.name,
-                        value: arg.type.getValue(node.content[arg.name]),
-                    });
-                }
+                layerNode.args = node.getArgs();
                 graph.net_nodes.push(layerNode);
 
                 nodeId2Idx.set(nodeId, nodeIdx++);
@@ -547,12 +542,7 @@ const TIDY_NODES_ICON = ICONS.tidy;
             layerNode.from_data = new Array(node.inputEndpoint.length).fill(
                 null
             );
-            for (const arg of node.config.args) {
-                layerNode.args.push({
-                    key: arg.name,
-                    value: arg.type.getValue(node.content[arg.name]),
-                });
-            }
+            layerNode.args = node.getArgs();
             xhr.send(
                 JSON.stringify({
                     timestamp: new Date().getDate(),

@@ -1,8 +1,11 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
+
 import inspect
-from functools import wraps, reduce
+from functools import wraps
 from typing import List, Tuple, Annotated, Optional, Any, Callable
 from abc import ABC, abstractmethod
+
+from flowing.shower import Logger
 
 __all__ = [
     'Layer'
@@ -112,7 +115,11 @@ class Layer(ABC):
         if func is None:
             return params
 
-        args_info = inspect.getfullargspec(func)
+        try:
+            args_info = inspect.getfullargspec(func)
+        except Exception as e:
+            Logger.warning(f"Detect an exception as {e} during trim_params using func={func}, skipped.")
+            return params
 
         key2default = {}
         default_values = args_info.defaults

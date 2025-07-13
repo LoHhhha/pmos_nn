@@ -26,10 +26,6 @@ class Reshape(TorchLayer):
         self.shape = output_shape
         self.__shape_mul = reduce(lambda x, y: x * y, self.shape)
 
-    @Layer.named_check
-    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return ()
-
     @Layer.injected_check
     def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:
         # identifier is useless

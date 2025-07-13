@@ -6,14 +6,21 @@
  *      (window left, top)
  *      <event.detail.left> <event.detail.top> -> MESSAGE_TYPE.CreateNode
  *
+ * MESSAGE_TYPE.CopyData
+ *      using MESSAGE_CALL!!
+ *      return {
+ *          nodes: NODES_COPY_DATA
+ *          connections: CONNECTION_COPY_DATA
+ *      }
+ *
  */
 
-const NODES_COPY_DATA = new Array(0);
+const NODES_COPY_DATA = new Array(0); // {left, top, config, content}
 const NODES_COPY_POSITION = {
     left: 0,
     top: 0,
 };
-const CONNECTION_COPY_DATA = new Array(0);
+const CONNECTION_COPY_DATA = new Array(0); // {srcNodeIdx, srcEndpointIdx, tarNodeIdx, tarEndpointIdx}
 
 const NO_OFFSET_PASTE_EXCURSION = {
     left: 50,
@@ -152,6 +159,13 @@ const NO_OFFSET_PASTE_EXCURSION = {
                     ),
                 timeout: 1000,
             });
+        });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.CopyData, () => {
+            return {
+                nodes: NODES_COPY_DATA,
+                connections: CONNECTION_COPY_DATA,
+            };
         });
 
         ADD_KEY_HANDLER(

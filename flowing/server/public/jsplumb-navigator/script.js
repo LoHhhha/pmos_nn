@@ -39,6 +39,12 @@
  *
  * MESSAGE_TYPE.NavigatorCancelMoveWhenAtEdge
  *
+ * MESSAGE_TYPE.ShowCanvasMask
+ *      [<event.detail.closeWhenClick: bool>]
+ *      [<event.detail.beforeClose: callback>]
+ *
+ * MESSAGE_TYPE.HideCanvasMask
+ *
  */
 
 const NAVIGATOR_MOVE_FRAME_QUEUE_WEIGHT = 0;
@@ -59,9 +65,12 @@ const NAVIGATOR_ICON = ICONS.navigation;
 class Navigator {
     jsPlumbInstance;
     canvasEle;
+    canvasMaskEle;
     viewportEle;
     selectBoxEle;
     canvasTransform;
+
+    beforeCloseCanvasMask = [];
 
     moveMode;
     selectBoxUpdateHandler;
@@ -98,6 +107,8 @@ class Navigator {
         this.canvasEle.appendChild(this.selectBoxEle);
 
         this.edgeHighlight = new EdgeHighlighter(viewportEle);
+
+        this.canvasMaskEle = document.getElementById("canvas-mask");
 
         this.#addHandler();
 
@@ -215,6 +226,32 @@ class Navigator {
             MESSAGE_TYPE.NavigatorBackToOrigin,
             this.backToOrigin.bind(this)
         );
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.ShowCanvasMask, (event) => {
+            if (this.isShowingCanvasMask) {
+                console.error("[ShowCanvasMask] call show before hide.");
+                return;
+            }
+
+            if (event?.detail?.beforeClose) {
+                this.beforeCloseCanvasMask.push(event.detail.beforeClose);
+            }
+            if (event?.detail?.closeWhenClick) {
+                this.canvasMaskEle.onclick = () =>
+                    MESSAGE_CALL(MESSAGE_TYPE.HideCanvasMask);
+            } else {
+                this.canvasMaskEle.onclick = undefined;
+            }
+            this.showCanvasMask();
+        });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.HideCanvasMask, () => {
+            for (const callback of this.beforeCloseCanvasMask) {
+                callback();
+            }
+            this.beforeCloseCanvasMask.length = 0;
+            this.hideCanvasMask();
+        });
 
         ADD_KEY_HANDLER(DEFAULT_KEY_NAMESPACE, "+", [], this.zoomIn.bind(this));
         ADD_KEY_HANDLER(DEFAULT_KEY_NAMESPACE, "=", [], this.zoomIn.bind(this)); // =+ button
@@ -366,6 +403,17 @@ class Navigator {
                 nodes: this.getNodesFromRange(point.x, point.y, width, height),
             });
         }
+    }
+
+    isShowingCanvasMask = false;
+    hideCanvasMask() {
+        this.isShowingCanvasMask = false;
+        this.canvasMaskEle.style.display = "none";
+    }
+
+    showCanvasMask() {
+        this.isShowingCanvasMask = true;
+        this.canvasMaskEle.style.display = "inline";
     }
 
     changeViewportBackground(scale, offsetLeft, offsetTop) {

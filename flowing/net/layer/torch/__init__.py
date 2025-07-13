@@ -1,5 +1,6 @@
 from flowing.net.layer.torch.activation import *
 from flowing.net.layer.torch.arithmetic import *
+from flowing.net.layer.torch.block import *
 from flowing.net.layer.torch.conv import *
 from flowing.net.layer.torch.data import *
 from flowing.net.layer.torch.dropout import *

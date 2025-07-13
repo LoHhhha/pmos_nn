@@ -34,14 +34,23 @@
     --node-overview-container-max-height: 20vh;
     --node-overview-margin: var(--margin);
     --node-overview-outline-color: var(--container-outline-color);
+    --node-overview-hover-outline-color: var(--default-color);
     --node-overview-item-input-background-color: var(
         --content-background-color
+    );
+    --node-overview-item-input-button-hover-background-color: var(
+        --content-outline-color
     );
     --node-overview-item-input-outline-color: var(--content-outline-color);
     --node-overview-button-color: var(--default-color);
     --node-overview-button-outline-color: var(--content-outline-color);
     --node-overview-button-background-color: var(--lucency-reddish);
     --node-overview-button-hover-background-color: var(--lucency-red);
+
+    --wicket-background-color: var(--container-background-color);
+    --wicket-shadow-color: var(--content-background-color);
+    --wicket-outline-color: var(--container-outline-color);
+    --wicket-height: 50vh;
 }
 
 .node {
@@ -60,6 +69,11 @@
 .node:hover {
     outline: var(--node-hover-outline-width) solid
         var(--node-hover-outline-color) !important;
+}
+
+.node-select-mode {
+    outline: var(--node-selected-outline-width) solid
+        var(--node-selected-outline-color);
 }
 
 .node-outline {
@@ -94,6 +108,7 @@
     align-items: center;
     height: calc(100% - calc(2 * var(--operator-bar-margin)));
     margin: var(--operator-bar-margin);
+    z-index: 7;
 }
 
 .operator-bar {
@@ -200,6 +215,7 @@
     line-height: var(--node-height);
     border-radius: var(--radius);
     box-shadow: var(--shadow) var(--node-overview-shadow-color);
+    z-index: 6;
 }
 
 .overview-args-container {
@@ -209,6 +225,7 @@
     flex-direction: column;
     margin: var(--operator-bar-margin);
     flex: 1;
+    user-select: none;
 }
 
 .overview-title * {
@@ -252,6 +269,21 @@
     margin: 0 auto;
 }
 
+.overview-item-input:hover {
+    outline: var(--hover-border-width) solid
+        var(--node-overview-hover-outline-color);
+}
+
+.overview-item-input-button {
+    cursor: pointer;
+}
+
+.overview-item-input-button:hover {
+    background-color: var(
+        --node-overview-item-input-button-hover-background-color
+    );
+}
+
 .overview-delete-button {
     font-size: medium;
     height: var(--node-height);
@@ -268,4 +300,78 @@
 
 .overview-delete-button:hover {
     background-color: var(--node-overview-button-hover-background-color);
+}
+
+.wicket {
+    width: auto;
+    height: var(--wicket-height);
+    background-color: var(--wicket-background-color);
+    backdrop-filter: var(--blur);
+    outline: var(--border-width) solid var(--wicket-outline-color);
+    box-shadow: var(--shadow) var(--wicket-shadow-color);
+    z-index: 2;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: var(--radius);
+    display: none;
+    user-select: none;
+    grid-template-rows: auto 1fr;
+    gap: var(--margin);
+    padding: var(--margin);
+}
+
+.wicket-text {
+    width: calc(var(--node-width) + 2 * var(--margin));
+    height: min-content;
+    justify-self: center;
+    text-align: center;
+    font-size: large;
+    font-weight: bold;
+    user-select: none;
+    grid-row: 1;
+}
+
+.wicket-node-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: var(--margin);
+    overflow: auto;
+    align-items: center;
+    justify-content: flex-start;
+    grid-row: 2;
+    padding: var(--margin);
+}
+
+.wicket-add-node-mask {
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    background-color: var(--sub-content-background-color);
+    backdrop-filter: var(--blur);
+}
+
+.wicket-moving-node {
+    color: rgba(0, 0, 0, 0);
+    background-color: rgba(0, 0, 0, 0) !important;
+    outline: var(--node-selected-outline-width) dashed
+        var(--node-selected-outline-color);
+}
+
+.wicket-moving-node:hover {
+    outline: var(--node-selected-outline-width) dashed
+        var(--node-selected-outline-color);
+}
+
+.wicket-dragging-image {
+    top: -999999px;
+    position: absolute;
+    text-align: center;
+    border-radius: var(--radius);
+    color: var(--default-color);
+    background-color: var(--default-inverse-color);
+    padding: var(--margin);
+    border: var(--border-width) dashed var(--default-color);
 }

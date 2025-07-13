@@ -3,7 +3,7 @@
 from typing import Tuple, List, Optional, Annotated
 
 from flowing.net.layer import Layer
-from flowing.net.layer.torch.common import TorchNNLayer
+from flowing.net.layer.torch.common import TorchLayer
 from flowing.net.layer.torch.types import Device, Dtype
 
 __all__ = [
@@ -16,7 +16,7 @@ __all__ = [
 ]
 
 
-class _DataX(TorchNNLayer):
+class _DataX(TorchLayer):
     _api_name = ...
 
     size: Annotated[Tuple[int, ...], Layer.LayerForwardContent]
@@ -40,10 +40,6 @@ class _DataX(TorchNNLayer):
         self.device = Device(device)
         self.dtype = Dtype(dtype)
         self.requires_grad = requires_grad
-
-    @Layer.named_check
-    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return ()
 
     def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:
         # identifier is useless

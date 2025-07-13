@@ -7,6 +7,7 @@
     --sub-content-background-color: rgba(170, 170, 170, 0.5);
     --viewport-background-color: rgb(238, 238, 238);
     --default-color: rgb(34, 34, 34);
+    --default-inverse-color: rgb(221, 221, 221);
     --disabled-color: rgb(119, 119, 119);
 }
 
@@ -103,6 +104,17 @@ a:hover {
 #canvas {
     position: absolute;
     z-index: 0;
+}
+
+#canvas-mask {
+    user-select: none;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    background-color: var(--container-background-color);
+    backdrop-filter: var(--blur);
+    z-index: 1;
+    display: none;
 }
 
 #copyright {

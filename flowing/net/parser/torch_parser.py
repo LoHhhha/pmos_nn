@@ -131,7 +131,14 @@ class TorchParser(Parser):
         )
 
         try:
-            class_str = autopep8.fix_code(class_str)
+            class_str = autopep8.fix_code(
+                class_str,
+                options={
+                    "aggressive": 2,
+                    "experimental": True,
+                    "pep8_passes": 20,
+                }
+            )
         except Exception as e:
             Logger.fault(f"Network({self.network_name}) class format as pep8 fail.")
             raise e

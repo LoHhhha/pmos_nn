@@ -26,9 +26,6 @@ class Flatten(TorchNNLayer):
         self.start_dim = start_dim
         self.end_dim = end_dim
 
-    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return super().init_code(package=package, add_self=add_self)
-
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         data_shape = list(input_shape[0])
@@ -82,9 +79,6 @@ class Unflatten(TorchNNLayer):
         self.unflattened_size = unflattened_size
         self.__unflattened_size_mul = reduce(lambda x, y: x * y, unflattened_size)
 
-    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return super().init_code(package=package, add_self=add_self)
-
     @Layer.input_shape_check
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         data_shape = list(input_shape[0])
@@ -121,7 +115,7 @@ class Unflatten(TorchNNLayer):
             if output_mul > data_shape[dim] or output_mul == 0 or data_shape[dim] % output_mul != 0:
                 raise ValueError(
                     f"detect an unexpected data_shape:{data_shape}, "
-                    f"which NO.{self.dim} dimension cannot unflatten to {self.unflattened_size}"
+                    f"which No.{self.dim} dimension cannot unflatten to {self.unflattened_size}"
                 )
             output_shape[neg_idx] = data_shape[dim] // output_mul
             data_shape[dim:dim + 1] = output_shape
@@ -130,7 +124,7 @@ class Unflatten(TorchNNLayer):
         if data_shape[dim] != self.__unflattened_size_mul:
             raise ValueError(
                 f"detect an unexpected data_shape as {data_shape}, "
-                f"expected data_shape's NO.{dim + 1} dimension should be {self.__unflattened_size_mul}"
+                f"expected data_shape's No.{dim + 1} dimension should be {self.__unflattened_size_mul}"
             )
 
         data_shape[dim:dim + 1] = self.unflattened_size

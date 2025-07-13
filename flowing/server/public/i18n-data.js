@@ -337,6 +337,10 @@ const LANGUAGE_DATA = {
         en: "Change",
         cn: "修改",
     },
+    modify: {
+        en: "Modify",
+        cn: "修改",
+    },
 
     welcome: {
         en: "Welcome to PMoS, click me to know more about PMoS!",
@@ -518,6 +522,10 @@ const LANGUAGE_DATA = {
         en: "{0} {1} node(s) and {2} connection(s).",
         cn: "完成对{1}个算子与{2}条数据流的{0}。",
     },
+    paste_valid_nodes_and_drop_connections_format: {
+        en: "Paste {0} nodes(s), maybe connections and some of nodes skipped.",
+        cn: "完成对{0}个算子的粘贴，数据流与部分算子不参与该操作。",
+    },
     str_var_note: {
         en: "Please input a identifier which starting with letter or underline and only containing letter, underline and number such as 'a1', '_var'.",
         cn: "请输入一个以英文字母或下划线开头的且仅包含英文字母、下划线、阿拉伯数字的标识符，例如：“a1”、“_var”。",
@@ -681,5 +689,13 @@ const LANGUAGE_DATA = {
     feature_limited_when_touch: {
         en: "Features will be limited in touch mode. Mouse and keyboard control is recommended.",
         cn: "在触摸模式下，部分功能特性将会受限。推荐使用键盘鼠标进行操作。",
+    },
+    can_not_add_this_node: {
+        en: "This node can't be appended into here!",
+        cn: "该算子不支持加入到此处！",
+    },
+    can_not_place_node_into_graph: {
+        en: "Can't place node into graph now!",
+        cn: "现在无法添加算子到网络中！",
     },
 };

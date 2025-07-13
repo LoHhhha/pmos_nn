@@ -38,6 +38,8 @@ const MESSAGE_TYPE = {
     NavigatorMoveModeChanged: "navigator-move-mode-changed", // out
     NavigatorMoveWhenAtEdge: "navigator-move-when-at-edge",
     NavigatorCancelMoveWhenAtEdge: "navigator-cancel-move-when-at-edge",
+    ShowCanvasMask: "show-canvas-mask",
+    HideCanvasMask: "hide-canvas-mask",
 
     // right-key-menu
     RightKeyMenuShow: "right-key-menu-show",
@@ -50,6 +52,7 @@ const MESSAGE_TYPE = {
     // nodes-copy-helper
     NodesCopy: "nodes-copy",
     NodesPaste: "nodes-paste",
+    CopyData: "copy-data", // return
 
     // mini-map
     DeleteMapNode: "delete-map-node",

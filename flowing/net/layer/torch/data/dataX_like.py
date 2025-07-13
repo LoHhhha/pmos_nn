@@ -3,7 +3,7 @@
 from typing import Tuple, List, Annotated, Optional
 
 from flowing.net.layer import Layer
-from flowing.net.layer.torch.common import TorchNNLayer
+from flowing.net.layer.torch.common import TorchLayer
 
 __all__ = [
     "RandLike",
@@ -15,7 +15,7 @@ __all__ = [
 ]
 
 
-class _DataXLike(TorchNNLayer):
+class _DataXLike(TorchLayer):
     _api_name = ...
 
     requires_grad: Annotated[bool, Layer.LayerForwardContent]
@@ -26,10 +26,6 @@ class _DataXLike(TorchNNLayer):
     def __init__(self, requires_grad: bool = False, data_amount: Optional[int] = None):
         super().__init__(data_amount=data_amount)
         self.requires_grad = requires_grad
-
-    @Layer.named_check
-    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return ()
 
     def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:
         # identifier is useless
