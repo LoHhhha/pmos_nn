@@ -1,4 +1,10 @@
 jsPlumb.ready(async () => {
+    // initLanguage set as null, set as local settings or english.
+    window.addI18n(null);
+
+    // initTheme set as null, set as local settings or 'auto'.
+    window.addThemeHelper(null);
+
     // get version for server
     try {
         await fetch("/version/web", { method: "POST" })
@@ -24,12 +30,6 @@ jsPlumb.ready(async () => {
     // set copyright
     const copyrightEle = document.getElementById("copyright");
     copyrightEle.innerHTML = `Version: ${PMoS_VERSION}<br>Powered by PMoS-nn(${PMoS_FLOWING_VERSION})<br>Copyright © 2024-2025 PMoS. All rights reserved.`;
-
-    // initLanguage set as null, set as local settings or english.
-    window.addI18n(null);
-
-    // initTheme set as null, set as local settings or 'auto'.
-    window.addThemeHelper(null);
 
     MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
         config: PROMPT_CONFIG.INFO,
