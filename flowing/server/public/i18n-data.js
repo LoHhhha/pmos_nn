@@ -539,11 +539,11 @@ const LANGUAGE_DATA = {
         cn: "请输入“None”或者一个整数，例如：“19528”。",
     },
     str_float_note: {
-        en: "Please input a float such as '19528', '-0.15' or '3.14e-2'",
+        en: "Please input a float such as '19528', '-0.15' or '3.14e-2'.",
         cn: "请输入一个浮点数，例如：“19528”、“-0.15”、“3.14e-2”。",
     },
     str_float_or_none_note: {
-        en: "Please input 'None' or a float such as '19528', '-0.15' or '3.14e-2'",
+        en: "Please input 'None' or a float such as '19528', '-0.15' or '3.14e-2'.",
         cn: "请输入“None”或者一个浮点数，例如：“19528”、“-0.15”、“3.14e-2”。",
     },
     str_tuple_note: {
@@ -555,7 +555,7 @@ const LANGUAGE_DATA = {
         cn: "请输入一个包含若干非负整数的元组，元组元素被“,”分割并且元组被“(”与“)”囊括，例如：“(1,3,64,64)”。",
     },
     str_not_neg_int_or_can_none_not_neg_tuple_note: {
-        en: "Please input a nonnegative integers or tuple containing nonnegative integers or 'None' like string which divided by ',' and included by '(' and ')' such as '(1,3,None,64)'.",
+        en: "Please input a nonnegative integers or tuple containing nonnegative integers/'None' like string which divided by ',' and included by '(' and ')' such as '(1,3,None,64)'.",
         cn: "请输入一个非负整数或者一个包含若干非负整数或“None”的元组，其中元组元素被“,”分割并且元组被“(”与“)”囊括，例如：“(1,3,None,64)”。",
     },
     str_int_or_tuple_note: {

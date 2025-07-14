@@ -49,6 +49,7 @@ operatorBarNamespace.argsInputType = {
 
 operatorBarNamespace.argsType = {
     strVar: {
+        id: "identifier",
         reg: /^[_a-zA-Z][_a-zA-Z0-9]*$/,
         input: operatorBarNamespace.argsInputType.text,
         getValue: (value) => {
@@ -57,8 +58,10 @@ operatorBarNamespace.argsType = {
         get note() {
             return I18N_STRINGS.str_var_note;
         },
+        prompt: "identifier which starting with letter or underline and only containing letter, underline and number such as 'a1', '_var'",
     },
     strInt: {
+        id: "integer",
         reg: /^[-+]?\d+$/,
         input: operatorBarNamespace.argsInputType.text,
         getValue: (value) => {
@@ -67,8 +70,10 @@ operatorBarNamespace.argsType = {
         get note() {
             return I18N_STRINGS.str_int_note;
         },
+        prompt: "integer such as '19528'",
     },
     strIntOrNone: {
+        id: "None or integer",
         reg: /^(([-+]?\d+)|(None))$/,
         input: operatorBarNamespace.argsInputType.text,
         getValue: (value) => {
@@ -78,8 +83,10 @@ operatorBarNamespace.argsType = {
         get note() {
             return I18N_STRINGS.str_int_or_none_note;
         },
+        prompt: "'None' or integer such as '19528'",
     },
     strFloat: {
+        id: "float",
         reg: /^[-+]?\d+\.?\d*(e[-+]?\d+)?$/,
         input: operatorBarNamespace.argsInputType.text,
         getValue: (value) => {
@@ -88,8 +95,10 @@ operatorBarNamespace.argsType = {
         get note() {
             return I18N_STRINGS.str_float_note;
         },
+        prompt: "float such as '19528', '-0.15' or '3.14e-2'",
     },
     strFloatOrNone: {
+        id: "None or float",
         reg: /^(([-+]?\d+\.?\d*(e[-+]?\d+)?)|(None))$/,
         input: operatorBarNamespace.argsInputType.text,
         getValue: (value) => {
@@ -98,8 +107,10 @@ operatorBarNamespace.argsType = {
         get note() {
             return I18N_STRINGS.str_float_or_none_note;
         },
+        prompt: "'None' or float such as '19528', '-0.15' or '3.14e-2'",
     },
     strTuple: {
+        id: "integer tuple",
         reg: /^\(\s*[-+]?\d+\s*(,\s*[-+]?\d+\s*)*\)$/,
         input: operatorBarNamespace.argsInputType.text,
         getValue: (value) => {
@@ -110,8 +121,10 @@ operatorBarNamespace.argsType = {
         get note() {
             return I18N_STRINGS.str_tuple_note;
         },
+        prompt: "tuple containing integers like string which divided by ',' and included by '(' and ')' such as '(-1,3,64,64)'",
     },
     strNotNegTuple: {
+        id: "nonnegative integer tuple",
         reg: /^\(\s*\d+\s*(,\s*\d+\s*)*\)$/,
         input: operatorBarNamespace.argsInputType.text,
         getValue: (value) => {
@@ -122,8 +135,10 @@ operatorBarNamespace.argsType = {
         get note() {
             return I18N_STRINGS.str_not_neg_tuple_note;
         },
+        prompt: "tuple containing nonnegative integers like string which divided by ',' and included by '(' and ')' such as '(1,3,64,64)'",
     },
     strNotNegIntOrCanNoneNotNegTuple: {
+        id: "nonnegative integer or nonnegative integer/None tuple",
         reg: /^((\d+)|(\(\s*((\d+)|None)\s*(,\s*((\d+)|None)\s*)*\)))$/,
         input: operatorBarNamespace.argsInputType.text,
         getValue: (value) => {
@@ -141,8 +156,10 @@ operatorBarNamespace.argsType = {
         get note() {
             return I18N_STRINGS.str_not_neg_int_or_can_none_not_neg_tuple_note;
         },
+        prompt: "nonnegative integers or tuple containing nonnegative integers/'None' like string which divided by ',' and included by '(' and ')' such as '(1,3,None,64)'",
     },
     strIntOrTuple: {
+        id: "integer or integer tuple",
         reg: /^((\(\s*[-+]?\d+\s*(,\s*[-+]?\d+\s*)*\))|([-+]?\d+))$/,
         input: operatorBarNamespace.argsInputType.text,
         getValue: (value) => {
@@ -155,8 +172,10 @@ operatorBarNamespace.argsType = {
         get note() {
             return I18N_STRINGS.str_int_or_tuple_note;
         },
+        prompt: "integer or tuple containing integers like string which divided by ',' and included by '(' and ')' such as '(-1,3,64,64)'",
     },
     strNotNegIntOrNotNegTuple: {
+        id: "nonnegative integer or nonnegative integer tuple",
         reg: /^((\(\s*\d+\s*(,\s*\d+\s*)*\))|(\s*\d+\s*))$/,
         input: operatorBarNamespace.argsInputType.text,
         getValue: (value) => {
@@ -169,8 +188,10 @@ operatorBarNamespace.argsType = {
         get note() {
             return I18N_STRINGS.str_not_neg_int_or_not_neg_tuple;
         },
+        prompt: "nonnegative integer or tuple containing nonnegative integers like string which divided by ',' and included by '(' and ')' such as '(1,3,64,64)'",
     },
     strIntOrTupleOrNone: {
+        id: "None or integer or integer tuple",
         reg: /^((\(\s*[-+]?\d+\s*(,\s*[-+]?\d+\s*)*\))|([-+]?\d+)|(None))$/,
         input: operatorBarNamespace.argsInputType.text,
         getValue: (value) => {
@@ -184,46 +205,63 @@ operatorBarNamespace.argsType = {
         get note() {
             return I18N_STRINGS.str_int_or_tuple_or_none_note;
         },
+        prompt: "'None', integer or tuple containing integers like string which divided by ',' and included by '(' and ')' such as '(-1,3,64,64)'",
     },
     bool: {
-        reg: null,
+        id: "boolean",
         input: operatorBarNamespace.argsInputType.select,
         getValue: (value) => {
             return value === "True";
         },
         values: ["False", "True"],
-        note: null,
+        get prompt() {
+            return `one of ${operatorBarNamespace.argsType.bool.values.join(
+                ", "
+            )}`;
+        },
     },
     pytorchPaddingMode: {
-        reg: null,
+        id: "pytorch padding mode",
         input: operatorBarNamespace.argsInputType.select,
         getValue: (value) => {
             return value;
         },
         values: ["zeros", "reflect", "replicate", "circular"],
-        note: null,
+        get prompt() {
+            return `one of ${operatorBarNamespace.argsType.pytorchPaddingMode.values.join(
+                ", "
+            )}`;
+        },
     },
     pytorchApproximate: {
-        reg: null,
+        id: "pytorch approximate",
         input: operatorBarNamespace.argsInputType.select,
         getValue: (value) => {
             return value;
         },
         values: ["none", "tanh"],
-        note: null,
+        get prompt() {
+            return `one of ${operatorBarNamespace.argsType.pytorchApproximate.values.join(
+                ", "
+            )}`;
+        },
     },
     pytorchDevice: {
-        reg: null,
+        id: "pytorch device",
         input: operatorBarNamespace.argsInputType.select,
         getValue: (value) => {
             if (value === "default") return null;
             return value;
         },
         values: ["default", "cpu", "cuda", "mps", "xpu", "xla", "mate"],
-        note: null,
+        get prompt() {
+            return `one of ${operatorBarNamespace.argsType.pytorchDevice.values.join(
+                ", "
+            )}`;
+        },
     },
     pytorchDataType: {
-        reg: null,
+        id: "pytorch data type",
         input: operatorBarNamespace.argsInputType.select,
         getValue: (value) => {
             if (value === "default") return null;
@@ -244,9 +282,14 @@ operatorBarNamespace.argsType = {
             "complex64",
             "complex128",
         ],
-        note: null,
+        get prompt() {
+            return `one of ${operatorBarNamespace.argsType.pytorchDataType.values.join(
+                ", "
+            )}`;
+        },
     },
     pytorchSequential: {
+        id: "pytorch sequential",
         typeCls: Array,
         input: operatorBarNamespace.argsInputType.button,
         getValue: (value) => {
@@ -289,7 +332,7 @@ operatorBarNamespace.argsType = {
                 },
             });
         },
-        note: null,
+        prompt: "using JSON format like '[{apiName:node_api_name,content:{param:value,...}},...]' to describe a series of nodes",
     },
 };
 
