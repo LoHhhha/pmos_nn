@@ -1,7 +1,29 @@
-jsPlumb.ready(() => {
+jsPlumb.ready(async () => {
+    // get version for server
+    try {
+        await fetch("/version/web", { method: "POST" })
+            .then((response) => response.json())
+            .then((data) => {
+                PMoS_VERSION = data.version;
+            });
+        await fetch("/version/package", { method: "POST" })
+            .then((response) => response.json())
+            .then((data) => {
+                PMoS_FLOWING_VERSION = data.version;
+            });
+    } catch (error) {
+        console.error("[GetVersion]", { error });
+        MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
+            config: PROMPT_CONFIG.ERROR,
+            iconSvg: ICONS.error,
+            content: I18N_STRINGS.server_disconnect,
+            timeout: 5000,
+        });
+    }
+
     // set copyright
     const copyrightEle = document.getElementById("copyright");
-    copyrightEle.innerHTML = `Powered by PMoS-nn<br>Version: ${PMoS_VERSION}<br>Copyright © 2024-2025 PMoS. All rights reserved.`;
+    copyrightEle.innerHTML = `Version: ${PMoS_VERSION}<br>Powered by PMoS-nn(${PMoS_FLOWING_VERSION})<br>Copyright © 2024-2025 PMoS. All rights reserved.`;
 
     // initLanguage set as null, set as local settings or english.
     window.addI18n(null);
