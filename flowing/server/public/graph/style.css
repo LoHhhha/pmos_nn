@@ -60,7 +60,6 @@
 
 .connection-overlay:hover {
     background-color: var(--connection-overlay-background-hover-color);
-    cursor: pointer;
 }
 
 .connection-overlay-error {
@@ -78,6 +77,7 @@
     outline: var(--border-width) solid var(--connection-overlay-outline-color);
     backdrop-filter: var(--blur);
     padding: var(--margin);
+    cursor: pointer;
 }
 
 .connection-overlay-error:hover {
