@@ -58,7 +58,7 @@ const NAVIGATOR_CHANGE_INTERVAL_DISTANCE = 50;
 const NAVIGATOR_MOVE_BASE_INTERVAL_DISTANCE = 0;
 const NAVIGATOR_MOVE_ADD_INTERVAL_DISTANCE = 1;
 const NAVIGATOR_MOVE_MAX_INTERVAL_DISTANCE = 16;
-const NAVIGATOR_EDGE_WIDTH = 16;
+const NAVIGATOR_EDGE_WIDTH = 4;
 
 const NAVIGATOR_ICON = ICONS.navigation;
 
@@ -227,6 +227,7 @@ class Navigator {
             this.backToOrigin.bind(this)
         );
 
+        let endDragNodeHandlerId;
         MESSAGE_HANDLER(MESSAGE_TYPE.ShowCanvasMask, (event) => {
             if (this.isShowingCanvasMask) {
                 console.error("[ShowCanvasMask] call show before hide.");
@@ -242,6 +243,24 @@ class Navigator {
             } else {
                 this.canvasMaskEle.onclick = undefined;
             }
+
+            endDragNodeHandlerId = MESSAGE_CALL(
+                MESSAGE_TYPE.AddEndDragNodeHandler,
+                {
+                    handler: () => {
+                        MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
+                            config: PROMPT_CONFIG.WARNING,
+                            iconSvg: ICONS.node,
+                            content: I18N_STRINGS.can_not_place_node_into_graph,
+                            timeout: 1000,
+                        });
+
+                        return -1;
+                    },
+                    element: this.canvasMaskEle,
+                }
+            ).at(0);
+
             this.showCanvasMask();
         });
 
@@ -251,6 +270,10 @@ class Navigator {
             }
             this.beforeCloseCanvasMask.length = 0;
             this.hideCanvasMask();
+
+            MESSAGE_CALL(MESSAGE_TYPE.RemoveEndDragNodeHandler, {
+                id: endDragNodeHandlerId,
+            });
         });
 
         ADD_KEY_HANDLER(DEFAULT_KEY_NAMESPACE, "+", [], this.zoomIn.bind(this));

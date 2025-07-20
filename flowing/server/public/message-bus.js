@@ -17,6 +17,10 @@ const MESSAGE_TYPE = {
     HideOperatorBar: "hide-operator-bar",
     ShowOperatorBar: "show-operator-bar",
     VisibleOperatorBar: "visible-operator-bar", // return
+    StartDragNode: "start-drag-node", // out
+    AddEndDragNodeHandler: "add-end-drag-node-handler", // return
+    RemoveEndDragNodeHandler: "remove-end-drag-node-handler",
+    EndDragNode: "end-drag-node", // out
 
     // covering
     CoveringShow: "covering-show",

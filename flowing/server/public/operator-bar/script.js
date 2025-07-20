@@ -25,6 +25,27 @@
  * MESSAGE_TYPE.ShowOperatorBar
  *
  * MESSAGE_TYPE.VisibleOperatorBar -> bool
+ *
+ * MESSAGE_TYPE.StartDragNode (out)
+ *      <event.detail.config>
+ *
+ * MESSAGE_TYPE.AddEndDragNodeHandler -> id(int)
+ *      ! will call handlers from top element to bottom element
+ *      <event.detail.handler: callable>
+ *          (config, pointerupEvent)=>{return int}
+ *              1: accept this event, stop
+ *              0: continue another handler
+ *             -1: drop and stop
+ *      <event.detail.element: js.node>
+ *
+ * MESSAGE_TYPE.RemoveEndDragNodeHandler
+ *      <event.detail.id: int>
+ *
+ * MESSAGE_TYPE.EndDragNode (out)
+ *      <event.detail.returnCode: int>
+ *          like MESSAGE_TYPE.AddEndDragNodeHandler.<event.detail.handler: callable>
+ *          maybe undefined
+ *      <event.detail.stopElement: js.node>
  */
 
 const NODE_FRAME_QUEUE_WEIGHT = 1;
@@ -271,6 +292,7 @@ class Wicket {
         node.element.draggable = true;
 
         Wicket.nodeContainerEle.appendChild(node.element);
+        return node.element;
     }
 
     static getNodes() {
@@ -285,7 +307,7 @@ class Wicket {
     }
 
     static addNodeFromInfo(config, content) {
-        Wicket.addNode(
+        return Wicket.addNode(
             new Node(
                 config,
                 null,
@@ -430,6 +452,50 @@ class Wicket {
                 return true;
             }
         };
+
+        MESSAGE_CALL(MESSAGE_TYPE.AddEndDragNodeHandler, {
+            handler: (config, event) => {
+                if (!Wicket.isShowing) return 0;
+
+                if (config.canBeSequential) {
+                    let { clientY: y } = event;
+                    // offset
+                    y -= Wicket.nodeContainerEle.getBoundingClientRect().top;
+
+                    const newEle = Wicket.addNodeFromInfo(config);
+
+                    for (const ele of Array.from(
+                        Wicket.nodeContainerEle.childNodes
+                    )) {
+                        if (
+                            ele.offsetTop >=
+                            y + Wicket.nodeContainerEle.scrollTop
+                        ) {
+                            Wicket.nodeContainerEle.insertBefore(newEle, ele);
+                            break;
+                        }
+                    }
+                } else {
+                    MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
+                        config: PROMPT_CONFIG.ERROR,
+                        iconSvg: ICONS.node,
+                        content: I18N_STRINGS.can_not_add_this_node,
+                        timeout: 1000,
+                    });
+                }
+
+                return 1;
+            },
+            element: Wicket.element,
+        });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.StartDragNode, () => {
+            Wicket.element.classList.add("bold-outline-element");
+        });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.EndDragNode, () => {
+            Wicket.element.classList.remove("bold-outline-element");
+        });
     }
 
     constructor(jsPlumbNavigator) {
@@ -1124,9 +1190,73 @@ class OperatorNode {
         }
     }
 
+    static dragEndHandlers = new Map(); // {id:{id,element,handler}}
+    static dragEndHandlerIdCounter = 0;
+
+    static initialize(container, jsPlumbNavigator) {
+        OperatorNode.container = container;
+        OperatorNode.jsPlumbNavigator = jsPlumbNavigator;
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.AddEndDragNodeHandler, (event) => {
+            if (
+                event.detail?.handler === undefined ||
+                event.detail?.element === undefined
+            ) {
+                console.error(
+                    "[AddEndDragNodeHandler] unexpected params.",
+                    event
+                );
+                return null;
+            }
+            const id = OperatorNode.dragEndHandlerIdCounter++;
+
+            OperatorNode.dragEndHandlers.set(id, {
+                id,
+                handler: event.detail.handler,
+                element: event.detail.element,
+                reverseRect: event.detail.reverseRect,
+                anywhere: event.detail.anywhere,
+            });
+
+            return id;
+        });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.RemoveEndDragNodeHandler, (event) => {
+            if (event.detail?.id === undefined) {
+                console.error(
+                    "[RemoveEndDragNodeHandler] unexpected params.",
+                    event
+                );
+                return;
+            }
+
+            if (
+                OperatorNode.dragEndHandlers.get(event.detail.id) === undefined
+            ) {
+                console.error(
+                    "[RemoveEndDragNodeHandler] handler not found.",
+                    event
+                );
+                return;
+            }
+
+            OperatorNode.dragEndHandlers.delete(event.detail.id);
+        });
+
+        // drop and stop when end in operator bar.
+        MESSAGE_CALL(MESSAGE_TYPE.AddEndDragNodeHandler, {
+            handler: () => -1,
+            element: OperatorNode.container,
+        });
+    }
+
     handleDragStart(e) {
         // left button only
         if (e.buttons !== 1) return false;
+
+        MESSAGE_PUSH(MESSAGE_TYPE.StartDragNode, {
+            config: this.config,
+        });
 
         if (OperatorNode.pointFollowNode !== null) {
             OperatorNode.deletePointFollowNode();
@@ -1189,97 +1319,41 @@ class OperatorNode {
         const originOperatorNode = OperatorNode.pointFollowNode.origin;
 
         const { clientX: x, clientY: y } = e;
+        const focusElements = document.elementsFromPoint(x, y);
 
-        const {
-            left: barMinX,
-            right: barMaxX,
-            top: barMinY,
-            bottom: barMaxY,
-        } = OperatorNode.container.getBoundingClientRect();
+        const callList = [];
+        for (const [_, h] of OperatorNode.dragEndHandlers) {
+            const { element, handler } = h;
 
-        const {
-            left: wicketMinX,
-            right: wicketMaxX,
-            top: wicketMinY,
-            bottom: wicketMaxY,
-        } = Wicket.element.getBoundingClientRect();
+            const idx = focusElements.findIndex((item) => item === element);
+            if (idx === -1) continue;
 
-        if (x <= barMaxX && x >= barMinX && y <= barMaxY && y >= barMinY) {
-            // do not thing
-        } else if (
-            Wicket.isShowing &&
-            x <= wicketMaxX &&
-            x >= wicketMinX &&
-            y <= wicketMaxY &&
-            y >= wicketMinY
-        ) {
-            if (originOperatorNode.config.canBeSequential) {
-                Wicket.addNode(
-                    new Node(
-                        originOperatorNode.config,
-                        null,
-                        null,
-                        OperatorNode.jsPlumbNavigator,
-                        undefined,
-                        true,
-                        undefined,
-                        true
-                    )
-                );
-            } else {
-                MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
-                    config: PROMPT_CONFIG.ERROR,
-                    iconSvg: ICONS.node,
-                    content: I18N_STRINGS.can_not_add_this_node,
-                    timeout: 1000,
-                });
-            }
-        } else if (Wicket.isShowing) {
-            MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
-                config: PROMPT_CONFIG.WARNING,
-                iconSvg: ICONS.node,
-                content: I18N_STRINGS.can_not_place_node_into_graph,
-                timeout: 1000,
-            });
-        } else {
-            const coordinates = coordinatesWindow2Viewport(x, y);
-            const scale = OperatorNode.jsPlumbNavigator.getCanvasScale();
-            originOperatorNode.addNode(
-                coordinates.left / scale - OperatorNode.pointFollowNode.offsetX,
-                coordinates.top / scale - OperatorNode.pointFollowNode.offsetY
-            );
+            callList.push({ layer: idx, element, handler });
         }
+
+        callList.sort((a, b) => a.layer - b.layer);
+
+        let returnCode, stopElement;
+        for (const { element, handler } of callList) {
+            returnCode = handler?.(originOperatorNode.config, e);
+            if (returnCode !== 0) {
+                stopElement = element;
+                break;
+            }
+        }
+
+        MESSAGE_PUSH(MESSAGE_TYPE.EndDragNode, {
+            returnCode,
+            stopElement,
+        });
+        console.info("[EndDragNode] drag end", { returnCode, stopElement });
 
         MESSAGE_PUSH(MESSAGE_TYPE.NavigatorCancelMoveWhenAtEdge);
 
         OperatorNode.deletePointFollowNode();
     }
 
-    addNode(left, top) {
-        const result = MESSAGE_CALL(MESSAGE_TYPE.CreateNodes, {
-            nodesInfo: [
-                {
-                    config: this.config,
-                    left: left,
-                    top: top,
-                },
-            ],
-            connectionsInfo: [],
-            noSelectNodes: true,
-        });
-
-        if (result.includes(false)) {
-            MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
-                config: PROMPT_CONFIG.ERROR,
-                content: I18N_STRINGS.add_node_fail,
-                timeout: 5000,
-            });
-        }
-    }
-
-    constructor(nodeConfig, container, jsPlumbNavigator) {
-        OperatorNode.container = container;
-        OperatorNode.jsPlumbNavigator = jsPlumbNavigator;
+    constructor(nodeConfig) {
         this.config = nodeConfig;
         this.element = getNodeElement(nodeConfig);
         this.element.style.position = "relative";
@@ -1315,6 +1389,28 @@ class OperatorBar {
 
     static visibleSvg = ICONS.downTriangle;
     static hiddenSvg = ICONS.leftTriangle;
+
+    static addNodeToGraph(config, left, top) {
+        const result = MESSAGE_CALL(MESSAGE_TYPE.CreateNodes, {
+            nodesInfo: [
+                {
+                    config: config,
+                    left: left,
+                    top: top,
+                },
+            ],
+            connectionsInfo: [],
+            noSelectNodes: true,
+        });
+
+        if (result.includes(false)) {
+            MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
+                config: PROMPT_CONFIG.ERROR,
+                content: I18N_STRINGS.add_node_fail,
+                timeout: 5000,
+            });
+        }
+    }
 
     constructor(jsPlumbNavigator, options) {
         this.options = options;
@@ -1413,6 +1509,37 @@ class OperatorBar {
         MESSAGE_HANDLER(MESSAGE_TYPE.ShowOperatorBar, this.show.bind(this));
         MESSAGE_HANDLER(MESSAGE_TYPE.HideOperatorBar, this.hide.bind(this));
         MESSAGE_HANDLER(MESSAGE_TYPE.VisibleOperatorBar, () => this.visible);
+
+        // initial OperatorNode
+        OperatorNode.initialize(this.barEle, this.jsPlumbNavigator);
+
+        // add to graph
+        MESSAGE_CALL(MESSAGE_TYPE.AddEndDragNodeHandler, {
+            handler: (config, event) => {
+                const { clientX: x, clientY: y } = event;
+                const coordinates = coordinatesWindow2Viewport(x, y);
+                const scale = this.jsPlumbNavigator.getCanvasScale();
+
+                OperatorBar.addNodeToGraph(
+                    config,
+                    coordinates.left / scale -
+                        OperatorNode.pointFollowNode.offsetX,
+                    coordinates.top / scale -
+                        OperatorNode.pointFollowNode.offsetY
+                );
+
+                return 1;
+            },
+            element: this.jsPlumbNavigator.viewportEle,
+        });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.StartDragNode, () => {
+            this.barEle.classList.add("bold-outline-element");
+        });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.EndDragNode, () => {
+            this.barEle.classList.remove("bold-outline-element");
+        });
     }
 
     #createSeparation(typeInfo, isVisible) {
@@ -1506,11 +1633,7 @@ class OperatorBar {
                 continue;
             }
 
-            const operatorNode = new OperatorNode(
-                operator,
-                this.barEle,
-                this.jsPlumbNavigator
-            );
+            const operatorNode = new OperatorNode(operator);
             this.barEle.appendChild(operatorNode.element);
         }
         // update prev count
@@ -1999,9 +2122,6 @@ class OperatorBar {
             }
         );
 
-        // initial
-        new Wicket(jsPlumbNavigator);
-
         ADD_KEY_HANDLER(
             DEFAULT_KEY_NAMESPACE,
             "a",
@@ -2027,9 +2147,14 @@ class OperatorBar {
             }
         });
 
-        return new OperatorBar(jsPlumbNavigator, {
+        const operatorBar = new OperatorBar(jsPlumbNavigator, {
             ...defaultOptions,
             ...options,
         });
+
+        // initial Wicket
+        new Wicket(jsPlumbNavigator);
+
+        return operatorBar;
     };
 })();

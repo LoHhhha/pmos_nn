@@ -23,6 +23,7 @@ class MiniMap {
     miniMapCanvasEle;
     miniMapNodeEleMap;
     margin;
+    endDragNodeHandlerId;
 
     constructor(navigator, viewportEle, canvasEle, options) {
         this.navigator = navigator;
@@ -145,6 +146,52 @@ class MiniMap {
         MESSAGE_HANDLER(MESSAGE_TYPE.HideMiniMap, this.hide.bind(this));
         MESSAGE_HANDLER(MESSAGE_TYPE.VisibleMiniMap, () => this.visible);
 
+        this.endDragNodeHandlerId = MESSAGE_CALL(
+            MESSAGE_TYPE.AddEndDragNodeHandler,
+            {
+                handler: (config, event) => {
+                    let { clientX: x, clientY: y } = event;
+
+                    const rect =
+                        this.miniMapViewportEle.getBoundingClientRect();
+                    const canvasScale = this.navigator.getCanvasScale();
+
+                    // offset
+                    x -= rect.left;
+                    y -= rect.top;
+                    // scale to minimap
+                    x /= this.viewScale;
+                    y /= this.viewScale;
+                    // scale to canvas
+                    x /= canvasScale;
+                    y /= canvasScale;
+
+                    MESSAGE_CALL(MESSAGE_TYPE.CreateNodes, {
+                        nodesInfo: [
+                            {
+                                config,
+                                left: this.miniMapViewportEle.offsetLeft + x,
+                                top: this.miniMapViewportEle.offsetTop + y,
+                            },
+                        ],
+                        connectionsInfo: [],
+                        noSelectNodes: true,
+                    });
+
+                    return 1;
+                },
+                element: this.miniMapEle,
+            }
+        ).at(0);
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.StartDragNode, () => {
+            this.miniMapEle.classList.add("bold-outline-element");
+        });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.EndDragNode, () => {
+            this.miniMapEle.classList.remove("bold-outline-element");
+        });
+
         CALL_BEFORE_EVERY_FRAME(
             MINIMAP_FRAME_QUEUE_WEIGHT,
             this.refreshHandler
@@ -189,6 +236,7 @@ class MiniMap {
         this.miniMapEle.style.cursor = "grab";
     }
 
+    viewScale;
     layout() {
         const viewportBounds = this.navigator.getViewportBounds();
         const canvasActualBounds = this.navigator.getCanvasActualBounds();
@@ -326,6 +374,9 @@ class MiniMap {
 
     dispose() {
         DELETE_FRAME_HANDLER(MINIMAP_FRAME_QUEUE_WEIGHT, this.refreshHandler);
+        MESSAGE_CALL(MESSAGE_TYPE.RemoveEndDragNodeHandler, {
+            id: this.endDragNodeHandlerId,
+        });
         this.miniMapEle.onpointerdown = null;
         this.miniMapEle.onpointermove = null;
         this.miniMapEle.onpointerup = null;

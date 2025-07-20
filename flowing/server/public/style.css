@@ -127,3 +127,7 @@ a:hover {
     color: var(--copyright-color);
     z-index: 1;
 }
+
+.bold-outline-element {
+    outline: var(--hover-border-width) solid var(--default-color) !important;
+}
