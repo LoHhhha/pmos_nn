@@ -84,6 +84,8 @@ class Classification:
             label_size: int = None):
         if label_name_list is not None:
             self.label_name_list = label_name_list
+            if label_size is not None:
+                assert len(label_name_list) == label_size
             self.label_size = len(label_name_list)
         elif label_size is not None:
             self.label_size = label_size
@@ -92,7 +94,7 @@ class Classification:
             raise ValueError("Classification: must provide label_name_list or label_size.")
 
         self.confusion_matrix = np.zeros((self.label_size, self.label_size), dtype=np.int64)
-        self.info = _ClassificationMetric(label_size=label_size)
+        self.info = _ClassificationMetric(label_size=self.label_size)
 
     @torch.no_grad()
     def __call__(self, predict: torch.Tensor, gt: torch.Tensor) -> _ClassificationMetric:
