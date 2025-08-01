@@ -95,20 +95,6 @@ class TorchParser(Parser):
         ]
         self._forward_code_result_list += [node.forward_code() for node in self.output_nodes]
 
-        parse_sequence_index_list_size = len(self._parse_sequence_index_list)
-        for idx in range(parse_sequence_index_list_size):
-            if self._forward_code_result_list[idx] is None:
-                Logger.fault(f"Network({self.network_name}) forward_code parse fail.")
-                raise ValueError(
-                    f"net_nodes[{idx}] get a None forward_code, which is impossible."
-                )
-        for idx in range(self.output_nodes_size):
-            if self._forward_code_result_list[idx + parse_sequence_index_list_size] is None:
-                Logger.fault(f"Network({self.network_name}) forward_code parse fail.")
-                raise ValueError(
-                    f"output_nodes[{idx}] get a None forward_code, which is impossible."
-                )
-
         return self._forward_code_result_list
 
     def network_class(self, save_path: str = None) -> Any:

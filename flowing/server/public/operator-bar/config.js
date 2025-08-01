@@ -723,6 +723,29 @@ operatorBarNamespace.operators = [
         outputShapeComeFromArg: "size",
     },
     {
+        apiName: "Parameter",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.data,
+        inputEnd: [],
+        outputEnd: ["data"],
+        outlines: [],
+        args: [
+            {
+                name: "data_size",
+                type: operatorBarNamespace.argsType.strNotNegTuple,
+                default: "(16,16)",
+            },
+            {
+                name: "requires_grad",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+        ],
+        framework: operatorBarNamespace.framework.pytorch,
+        link: "https://docs.pytorch.org/docs/stable/generated/torch.nn.parameter.Parameter.html",
+        outputShapeComeFromArg: "data_size",
+    },
+    {
         apiName: "Sequential",
         extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.block,
