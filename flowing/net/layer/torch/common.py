@@ -2,11 +2,12 @@
 
 import inspect
 from abc import ABC
-from typing import Tuple
+from typing import Tuple, Dict, Any
 
 import torch
 
 from flowing.net.layer.layer import Layer
+from flowing.shower import Logger
 
 
 class _TorchLayer(Layer, ABC):
@@ -15,45 +16,52 @@ class _TorchLayer(Layer, ABC):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        assert hasattr(
-            self._api_package,
-            self._api_name
-        ), f"could not find {self._api_name} in {self._api_package}"
-        api = getattr(self._api_package, self._api_name)
+        api = getattr(self._api_package, self._api_name, None)
 
         if inspect.isclass(api) and issubclass(api, torch.nn.Module):
             self._api_init_func = api.__init__
             self._api_forward_func = api.forward
         elif inspect.isfunction(api) or inspect.ismethod(api) or inspect.isbuiltin(api):
             self._api_forward_func = api
+        # will not assign _api_init_func and _api_forward_func
+        elif api is None:
+            Logger.warning(f"could not find {self._api_name} in {self._api_package}")
         else:
-            raise NotImplementedError(
+            Logger.warning(
                 f"unexpected object get from {self._api_package}.{self._api_name}, got {api}"
             )
-
-    def init_code_rvalue(self, package: str = "") -> Tuple[str, ...]:
-        raise NotImplementedError(
-            "layer not support get init code's rvalue"
-        )
 
 
 class TorchNNLayer(_TorchLayer, ABC):
     _api_package = torch.nn
 
-    def init_code_rvalue(self, package: str = "torch.nn") -> Tuple[str, ...]:
-        init_params = self.get_contents(Layer.LayerContent)
-        init_params = self._trim_params(init_params, self._api_init_func)
-        init_params_str = ", ".join(f"{key}={repr(value)}" for key, value in init_params)
-        package_name = f"{package}." if package and not package.endswith(".") else package
-        return f"{package_name}{self._api_name}({init_params_str})",
-
-    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return super().init_code(package=package, add_self=add_self)
+    def init_code(
+            self,
+            package: str = "torch.nn",
+            add_self: bool = True,
+            extend_params: Dict[str, Any] = None,
+            only_right_value: bool = False,
+    ) -> Tuple[str, ...]:
+        return super().init_code(
+            package=package,
+            add_self=add_self,
+            extend_params=extend_params,
+            only_right_value=only_right_value
+        )
 
 
 class TorchLayer(_TorchLayer, ABC):
     _api_package = torch
 
-    def init_code(self, package: str = "", add_self: bool = True) -> Tuple[str, ...]:
-        # those layers don't need to init
+    def init_code(
+            self,
+            package: str = "",
+            add_self: bool = True,
+            extend_params: Dict[str, Any] = None,
+            only_right_value: bool = False,
+    ) -> Tuple[str, ...]:
+        if only_right_value:
+            raise ValueError(
+                "this Layer haven't initial code"
+            )
         return ()

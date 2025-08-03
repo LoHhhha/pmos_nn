@@ -26,7 +26,7 @@ class LayerLinear(TorchNNLayer):
         self.out_features = out_features
         self.bias = bias
 
-    @Layer.input_shape_check
+    @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         data_shape = input_shape[0]
 
@@ -78,7 +78,7 @@ class Bilinear(LayerLinear):
         self.in1_features = in1_features
         self.in2_features = in2_features
 
-    @Layer.input_shape_check
+    @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         data1_shape = list(input_shape[0])
         data2_shape = list(input_shape[1])

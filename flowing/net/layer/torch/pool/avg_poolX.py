@@ -44,7 +44,7 @@ class _AvgPool(TorchNNLayer):
         self.ceil_mode = ceil_mode
         self.count_include_pad = count_include_pad
 
-    @Layer.input_shape_check
+    @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         # need dim as args.
         dim = kwargs['dim']

@@ -50,7 +50,7 @@ class _MaxPool(TorchNNLayer):
         else:
             self.output_amount = 1
 
-    @Layer.input_shape_check
+    @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         # need dim as args.
         dim = kwargs['dim']

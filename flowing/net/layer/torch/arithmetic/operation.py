@@ -1,8 +1,9 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
 
-from typing import Tuple, List, Optional
+from typing import Tuple, List, Optional, Dict, Any
 
 from flowing.net.layer import Layer
+from flowing.net.layer.torch.common import TorchLayer
 
 __all__ = [
     'Add',
@@ -12,7 +13,7 @@ __all__ = [
 ]
 
 
-class _Operation(Layer):
+class _Operation(TorchLayer):
     operation: str = ...
 
     output_amount = 1
@@ -22,16 +23,21 @@ class _Operation(Layer):
     def __init__(self, data_amount: Optional[int] = None):
         super().__init__(data_amount=data_amount)
 
-    @Layer.named_check
-    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return ()
-
-    def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:
+    @Layer.injected_check_wrap
+    def forward_code(
+            self,
+            identifier: Optional[str] = None,
+            extend_params: Dict[str, Any] = None,
+            only_right_value: bool = False,
+    ) -> Tuple[str, ...]:
         # identifier is useless
-        return f"{self.output_name} = {self.get_forward_args(block=f' {self.operation} ')}",
+        right_value = f"{self.get_forward_args(block=f' {self.operation} ')}"
+        if only_right_value:
+            return right_value,
+        return f"{self.output_name} = {right_value}",
 
-    @Layer.input_shape_check
-    @Layer.data_amount_not_zero_check
+    @Layer.input_shape_check_wrap
+    @Layer.data_amount_not_zero_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         input_shape: List[Tuple[int, ...] | List[int]] = sorted(input_shape, key=lambda item: len(item), reverse=True)
 

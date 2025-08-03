@@ -13,7 +13,7 @@ class _SimpleActivation(TorchNNLayer):
     def __init__(self, data_amount: Optional[int] = None):
         super().__init__(data_amount=data_amount)
 
-    @Layer.input_shape_check
+    @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         data_shape = input_shape[0]
         return tuple(data_shape),

@@ -1,6 +1,6 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
 
-from typing import Tuple, List, Annotated, Optional
+from typing import Tuple, List, Annotated, Optional, Dict, Any
 
 from flowing.net.layer import Layer
 from flowing.net.layer.torch.common import TorchLayer
@@ -26,15 +26,23 @@ class Permute(TorchLayer):
         super().__init__(data_amount=data_amount)
         self.dims = dims
 
-    @Layer.injected_check
-    def forward_code(self, add_self: bool = False) -> Tuple[str, ...]:
-        # add_self is useless
-        return f"{self.output_name} = torch.{self._api_name}({self.get_forward_args(
+    @Layer.injected_check_wrap
+    def forward_code(
+            self,
+            identifier: Optional[str] = None,
+            extend_params: Dict[str, Any] = None,
+            only_right_value: bool = False,
+    ) -> Tuple[str, ...]:
+        right_value = f"torch.{self._api_name}({self.get_forward_args(
             extend_params=self.get_contents(Layer.LayerForwardContent),
-            data_names_tuple_name=["input"],
-        )})",
+            data_names_identifiers=["input"],
+        )})"
 
-    @Layer.input_shape_check
+        if only_right_value:
+            return right_value,
+        return f"{self.output_name} = {right_value}",
+
+    @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         data_shape = input_shape[0]
 

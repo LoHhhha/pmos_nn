@@ -1,7 +1,7 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
 
 from abc import abstractmethod
-from typing import Tuple, List, Annotated, Optional
+from typing import Tuple, List, Annotated, Optional, Dict, Any
 
 from flowing.net.layer import Layer
 from flowing.net.layer.torch.common import TorchLayer
@@ -27,17 +27,25 @@ class _Concat(TorchLayer):
         super().__init__(data_amount=data_amount)
         self.dim = dim
 
-    @Layer.injected_check
-    def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:
-        # identifier is useless
-        return (f"{self.output_name} = torch.{self._api_name}({self.get_forward_args(
+    @Layer.injected_check_wrap
+    def forward_code(
+            self,
+            identifier: Optional[str] = None,
+            extend_params: Dict[str, Any] = None,
+            only_right_value: bool = False,
+    ) -> Tuple[str, ...]:
+        right_value = f"torch.{self._api_name}({self.get_forward_args(
             extend_params=self.get_contents(Layer.LayerForwardContent),
             data_names_as_tuple=True,
             data_names_identifiers=["tensors"],
-        )})"),
+        )}"
+
+        if only_right_value:
+            return right_value,
+        return f"{self.output_name} = {right_value})",
 
     @abstractmethod
-    @Layer.input_shape_check
+    @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         ...
 
@@ -45,8 +53,8 @@ class _Concat(TorchLayer):
 class Cat(_Concat):
     _api_name = "cat"
 
-    @Layer.input_shape_check
-    @Layer.data_amount_not_zero_check
+    @Layer.input_shape_check_wrap
+    @Layer.data_amount_not_zero_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         prev_shape = None
         dim_sum = 0
@@ -83,8 +91,8 @@ class Cat(_Concat):
 class Stack(_Concat):
     _api_name = "stack"
 
-    @Layer.input_shape_check
-    @Layer.data_amount_not_zero_check
+    @Layer.input_shape_check_wrap
+    @Layer.data_amount_not_zero_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         prev_shape = None
         for shape in input_shape:

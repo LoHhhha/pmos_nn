@@ -1,7 +1,7 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
 
 from functools import reduce
-from typing import Tuple, List, Annotated, Optional
+from typing import Tuple, List, Annotated, Optional, Dict, Any
 
 from flowing.net.layer import Layer
 from flowing.net.layer.torch.common import TorchLayer
@@ -26,15 +26,23 @@ class Reshape(TorchLayer):
         self.shape = output_shape
         self.__shape_mul = reduce(lambda x, y: x * y, self.shape)
 
-    @Layer.injected_check
-    def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:
-        # identifier is useless
-        return f"{self.output_name} = torch.{self._api_name}({self.get_forward_args(
+    @Layer.injected_check_wrap
+    def forward_code(
+            self,
+            identifier: Optional[str] = None,
+            extend_params: Dict[str, Any] = None,
+            only_right_value: bool = False,
+    ) -> Tuple[str, ...]:
+        right_value = f"torch.{self._api_name}({self.get_forward_args(
             extend_params=self.get_contents(Layer.LayerForwardContent),
-            data_names_tuple_name=["input"],
-        )})",
+            data_names_identifiers=["input"],
+        )})"
 
-    @Layer.input_shape_check
+        if only_right_value:
+            return right_value,
+        return f"{self.output_name} = {right_value}",
+
+    @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         data_shape = input_shape[0]
         data_shape_mul = reduce(lambda x, y: x * y, data_shape)

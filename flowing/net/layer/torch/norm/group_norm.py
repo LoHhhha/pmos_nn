@@ -35,7 +35,7 @@ class GroupNorm(TorchNNLayer):
         self.eps = eps
         self.affine = affine
 
-    @Layer.input_shape_check
+    @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         data_shape = input_shape[0]
 

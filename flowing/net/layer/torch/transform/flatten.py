@@ -26,7 +26,7 @@ class Flatten(TorchNNLayer):
         self.start_dim = start_dim
         self.end_dim = end_dim
 
-    @Layer.input_shape_check
+    @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         data_shape = list(input_shape[0])
         output_shape = []
@@ -68,7 +68,8 @@ class Unflatten(TorchNNLayer):
 
     dim: Annotated[int, Layer.LayerContent]
     unflattened_size: Annotated[Tuple[int, ...], Layer.LayerContent]
-    __unflattened_size_mul: Annotated[int, Layer.LayerContent]
+
+    __unflattened_size_mul: int
 
     data_amount = 1
     output_amount = 1
@@ -79,7 +80,7 @@ class Unflatten(TorchNNLayer):
         self.unflattened_size = unflattened_size
         self.__unflattened_size_mul = reduce(lambda x, y: x * y, unflattened_size)
 
-    @Layer.input_shape_check
+    @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         data_shape = list(input_shape[0])
 

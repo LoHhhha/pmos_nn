@@ -1,17 +1,17 @@
 # Copyright © 2025 PMoS. All rights reserved.
 
-from typing import Tuple, List, Annotated, Optional
+from typing import Tuple, List, Annotated, Optional, Dict, Any
 
 import torch
 
 from flowing.net.layer import Layer
+from flowing.net.layer.obj import IdentifierStr
 
 __all__ = [
     "Parameter"
 ]
 
 
-# todo: now only supports using torch.randn to initial
 class Parameter(Layer):
     _api_name = "Parameter"
 
@@ -43,21 +43,37 @@ class Parameter(Layer):
         self.data_size = data_size
         self.requires_grad = requires_grad
 
-    @Layer.named_check
-    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        init_params = self.get_contents(Layer.LayerContent)
-        init_params = self._trim_params(init_params, self._api_init_func)
-        init_params_str = ", ".join(f"{key}={repr(value)}" for key, value in init_params)
-        package_name = f"{package}." if package and not package.endswith(".") else package
-        return (f"{"self." if add_self else ""}{self.layer_name} = {package_name}"
-                f"{self._api_name}(torch.randn({repr(self.data_size)})"
-                f"{", " + init_params_str if init_params_str else ""})"),
+    def init_code(
+            self,
+            package: str = "torch.nn",
+            add_self: bool = True,
+            extend_params: Dict[str, Any] = None,
+            only_right_value: bool = False,
+    ) -> Tuple[str, ...]:
+        # todo: now only supports using torch.randn to initial
+        if extend_params is None:
+            extend_params = {}
+        extend_params["data"] = IdentifierStr(f"torch.randn({repr(self.data_size)})")
+        return super().init_code(
+            package=package,
+            add_self=add_self,
+            extend_params=extend_params,
+            only_right_value=only_right_value,
+        )
 
-    @Layer.injected_check
-    def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:
-        # identifier is useless
+    @Layer.injected_check_wrap
+    def forward_code(
+            self,
+            identifier: Optional[str] = None,
+            extend_params: Dict[str, Any] = None,
+            only_right_value: bool = False,
+    ) -> Tuple[str, ...]:
+        if only_right_value:
+            raise ValueError(
+                "this Layer haven't forward code"
+            )
         return ()
 
-    @Layer.input_shape_check
+    @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         return tuple(self.data_size),

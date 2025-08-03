@@ -29,7 +29,7 @@ class _Dropout(TorchNNLayer):
         self.p = p
         self.inplace = inplace
 
-    @Layer.input_shape_check
+    @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         # need dim and output_padding as args.
         dim = kwargs.get('dim', -1)

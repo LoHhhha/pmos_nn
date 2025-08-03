@@ -2,7 +2,7 @@
 
 import functools
 import importlib
-from typing import Optional, Annotated, Dict, Tuple, List
+from typing import Optional, Annotated, Dict, Tuple, List, Any
 
 from flowing.net.layer import Layer
 from flowing.net.layer.torch.common import TorchNNLayer
@@ -66,19 +66,26 @@ class Sequential(TorchNNLayer):
 
         return layers
 
-    def init_code_rvalue(self, package: str = "torch.nn") -> Tuple[str, ...]:
-        sub_layer_init_code_rvalues = functools.reduce(
+    def init_code(
+            self,
+            package: str = "torch.nn",
+            add_self: bool = True,
+            extend_params: Dict[str, Any] = None,
+            only_right_value: bool = False,
+    ) -> Tuple[str, ...]:
+        sub_layer_rvalues = functools.reduce(
             lambda x, y: x + y,
-            tuple(layer.init_code_rvalue(package) for layer in self.layers),
+            tuple(layer.init_code(only_right_value=True) for layer in self.layers),
         )
         package_name = f"{package}." if package and not package.endswith(".") else package
-        return f"{package_name}{self._api_name}({', '.join(sub_layer_init_code_rvalues)})",
+        right_value = f"{package_name}{self._api_name}({', '.join(sub_layer_rvalues)})"
+        if only_right_value:
+            return right_value,
 
-    @Layer.named_check
-    def init_code(self, package: str = "torch.nn", add_self: bool = True) -> Tuple[str, ...]:
-        return f"{"self." if add_self else ""}{self.layer_name} = {self.init_code_rvalue(package)[0]}",
+        self.named_check()
+        return f"{"self." if add_self else ""}{self.layer_name} = {right_value}",
 
-    @Layer.input_shape_check
+    @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         data_shape = tuple(input_shape[0])
 

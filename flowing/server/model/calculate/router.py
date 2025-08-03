@@ -2,6 +2,7 @@
 
 import json
 import os.path
+import traceback
 
 from typing import List, Dict
 
@@ -170,6 +171,7 @@ async def model_calculate_pytorch(request: ModelCalculateRequest):
 
         parser.network_class(save_path)
     except Exception as e:
+        traceback.print_exc()
         return get_json_response(status_code=400, msg=f"Parser return error due to {str(e)}")
 
     return get_json_response(status_code=200, msg=f"Parser return successfully", fn=file_name)

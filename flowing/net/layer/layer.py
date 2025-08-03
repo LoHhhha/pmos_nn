@@ -2,7 +2,7 @@
 
 import inspect
 from functools import wraps
-from typing import List, Tuple, Annotated, Optional, Any, Callable
+from typing import List, Tuple, Annotated, Optional, Any, Callable, Dict
 from abc import ABC, abstractmethod
 
 from flowing.shower import Logger
@@ -59,33 +59,38 @@ class Layer(ABC):
 
         self.data_names = [None] * self.data_amount
 
+    def named_check(self):
+        if self.layer_name is ...:
+            raise NotImplementedError(
+                "please first assign the Layer.layer_name"
+            )
+
+    def injected_check(self):
+        if self.layer_name is ... or self.output_name is ... or self.data_names is ...:
+            raise NotImplementedError(
+                "please first assign the Layer.layer_name, Layer.output_name and Layer.data_name"
+            )
+
     @staticmethod
-    def named_check(init_code):
-        @wraps(init_code)
+    def named_check_wrap(func):
+        @wraps(func)
         def wrapped_function(instance, *args, **kwargs):
-            if instance.layer_name is ...:
-                raise NotImplementedError(
-                    "please first assign the Layer.layer_name before you call Layer.init_code()"
-                )
-            return init_code(instance, *args, **kwargs)
+            instance.named_check()
+            return func(instance, *args, **kwargs)
 
         return wrapped_function
 
     @staticmethod
-    def injected_check(forward_code):
-        @wraps(forward_code)
+    def injected_check_wrap(func):
+        @wraps(func)
         def wrapped_function(instance, *args, **kwargs):
-            if instance.layer_name is ... or instance.output_name is ... or instance.data_names is ...:
-                raise NotImplementedError(
-                    "please first assign the Layer.layer_name, Layer.output_name and Layer.data_name before you call "
-                    "Layer.forward_code()"
-                )
-            return forward_code(instance, *args, **kwargs)
+            instance.injected_check()
+            return func(instance, *args, **kwargs)
 
         return wrapped_function
 
     @staticmethod
-    def input_shape_check(output_shape):
+    def input_shape_check_wrap(output_shape):
         @wraps(output_shape)
         def wrapped_function(instance, *input_shape: Tuple[int, ...] | List[int], **kwargs):
             if len(input_shape) != instance.data_amount:
@@ -98,7 +103,7 @@ class Layer(ABC):
         return wrapped_function
 
     @staticmethod
-    def data_amount_not_zero_check(output_shape):
+    def data_amount_not_zero_check_wrap(output_shape):
         @wraps(output_shape)
         def wrapped_function(instance, *input_shape: Tuple[int, ...] | List[int], **kwargs):
             if instance.data_amount == 0:
@@ -130,7 +135,7 @@ class Layer(ABC):
 
         return list((key, value) for key, value in params if (key not in key2default) or (key2default[key] != value))
 
-    @injected_check
+    @injected_check_wrap
     def get_forward_args(
             self,
             block: str = ", ",
@@ -141,6 +146,8 @@ class Layer(ABC):
         # ensure data_name is not ...
         if extend_params is None:
             extend_params = []
+        extend_params = self._trim_params(extend_params, self._api_forward_func)
+
         args = self.data_names if not data_names_as_tuple else (f"({", ".join(self.data_names)})",)
         if data_names_identifiers is not None:
             if len(args) != len(data_names_identifiers):
@@ -172,24 +179,47 @@ class Layer(ABC):
     #     """
     #     return ()
 
-    @named_check
-    def init_code(self, package: str = "", add_self: bool = True) -> Tuple[str, ...]:
+    def init_code(
+            self,
+            package: str = "",
+            add_self: bool = True,
+            extend_params: Dict[str, Any] = None,
+            only_right_value: bool = False,
+    ) -> Tuple[str, ...]:
         init_params = self.get_contents(Layer.LayerContent)
+        if extend_params is not None:
+            init_params.extend((key, value) for key, value in extend_params.items())
         init_params = self._trim_params(init_params, self._api_init_func)
         init_params_str = ", ".join(f"{key}={repr(value)}" for key, value in init_params)
         package_name = f"{package}." if package and not package.endswith(".") else package
-        return f"{"self." if add_self else ""}{self.layer_name} = {package_name}{self._api_name}({init_params_str})",
 
-    @injected_check
-    def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:
+        right_value = f"{package_name}{self._api_name}({init_params_str})"
+        if only_right_value:
+            return right_value,
+
+        self.named_check()
+        return f"{"self." if add_self else ""}{self.layer_name} = {right_value}",
+
+    @injected_check_wrap
+    def forward_code(
+            self,
+            identifier: Optional[str] = None,
+            extend_params: Dict[str, Any] = None,
+            only_right_value: bool = False,
+    ) -> Tuple[str, ...]:
         # using "self.<layer_name>" when identifier is None
         forward_params = self.get_contents(Layer.LayerForwardContent)
-        forward_params = self._trim_params(forward_params, self._api_forward_func)
-        return (f"{self.output_name} = {f'self.{self.layer_name}' if identifier is None else identifier}"
-                f"({self.get_forward_args(extend_params=forward_params)})"),
+        if extend_params is not None:
+            forward_params.extend((key, value) for key, value in extend_params.items())
+
+        right_value = (f"{f'self.{self.layer_name}' if identifier is None else identifier}"
+                       f"({self.get_forward_args(extend_params=forward_params)})")
+        if only_right_value:
+            return right_value,
+        return f"{self.output_name} = {right_value}",
 
     @abstractmethod
-    @input_shape_check
+    @input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         """
         Return what shape of date will get if push [input_shape] data to Layer.

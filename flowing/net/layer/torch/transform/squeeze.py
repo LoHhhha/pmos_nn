@@ -1,7 +1,7 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
 
 from collections.abc import Iterable
-from typing import Tuple, List, Optional, Annotated
+from typing import Tuple, List, Optional, Annotated, Dict, Any
 
 from flowing.net.layer import Layer
 from flowing.net.layer.torch.common import TorchLayer
@@ -20,6 +20,12 @@ class Squeeze(TorchLayer):
     data_amount = 1
     output_amount = 1
 
+    # using to ensure param dim will be deleted when dim=None
+    # because squeeze using overload to implement
+    @staticmethod
+    def _squeeze_forward(dim=None):
+        pass
+
     def __init__(
             self,
             dim: Optional[int | Tuple[int, ...]] = None,
@@ -28,15 +34,25 @@ class Squeeze(TorchLayer):
         super().__init__(data_amount=data_amount)
         self.dim = dim
 
-    @Layer.injected_check
-    def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:
-        # identifier is useless
-        return f"{self.output_name} = torch.{self._api_name}({self.get_forward_args(
-            extend_params=self.get_contents(Layer.LayerForwardContent),
-            data_names_tuple_name=["input"],
-        )})",
+        self._api_forward_func = Squeeze._squeeze_forward
 
-    @Layer.input_shape_check
+    @Layer.injected_check_wrap
+    def forward_code(
+            self,
+            identifier: Optional[str] = None,
+            extend_params: Dict[str, Any] = None,
+            only_right_value: bool = False,
+    ) -> Tuple[str, ...]:
+        right_value = f"torch.{self._api_name}({self.get_forward_args(
+            extend_params=self.get_contents(Layer.LayerForwardContent),
+            data_names_identifiers=["input"],
+        )})"
+
+        if only_right_value:
+            return right_value,
+        return f"{self.output_name} = {right_value}",
+
+    @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         data_shape = input_shape[0]
         result_shape = list(data_shape)
@@ -86,15 +102,23 @@ class Unsqueeze(TorchLayer):
         super().__init__(data_amount=data_amount)
         self.dim = dim
 
-    @Layer.injected_check
-    def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:
-        # identifier is useless
-        return f"{self.output_name} = torch.{self._api_name}({self.get_forward_args(
+    @Layer.injected_check_wrap
+    def forward_code(
+            self,
+            identifier: Optional[str] = None,
+            extend_params: Dict[str, Any] = None,
+            only_right_value: bool = False,
+    ) -> Tuple[str, ...]:
+        right_value = f"torch.{self._api_name}({self.get_forward_args(
             extend_params=self.get_contents(Layer.LayerForwardContent),
-            data_names_tuple_name=["input"],
-        )})",
+            data_names_identifiers=["input"],
+        )})"
 
-    @Layer.input_shape_check
+        if only_right_value:
+            return right_value,
+        return f"{self.output_name} = {right_value}",
+
+    @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         data_shape = list(input_shape[0])
 

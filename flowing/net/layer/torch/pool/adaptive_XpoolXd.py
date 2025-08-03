@@ -33,7 +33,7 @@ class _AdaptivePool(TorchNNLayer):
 
         self.output_size = output_size
 
-    @Layer.input_shape_check
+    @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         # need dim as args.
         dim = kwargs['dim']
@@ -85,7 +85,7 @@ class _AdaptiveMaxPool(_AdaptiveAvgPool):
 
         self.return_indices = return_indices
 
-    @Layer.input_shape_check
+    @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         data_shape = super().output_shape(*input_shape, **kwargs)[0]
 

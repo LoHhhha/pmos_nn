@@ -60,7 +60,7 @@ class _LazyConv(TorchNNLayer):
         self.groups = groups
         self.bias = bias
 
-    @Layer.input_shape_check
+    @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         # need dim and output_padding as args.
         dim = kwargs['dim']
@@ -119,7 +119,7 @@ class _Conv(_LazyConv):
         super().__init__(*args, **kwargs)
         self.in_channels = in_channels
 
-    @Layer.input_shape_check
+    @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         # need dim and output_padding as args.
         dim = kwargs['dim']

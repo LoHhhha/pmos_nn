@@ -77,13 +77,7 @@ class TorchParser(Parser):
             code for idx in self._parse_sequence_index_list for code in self.net_nodes[idx].layer_object.init_code()
         ]
 
-        # some op doesn't need init, so it is ok when some is None.
-        # for idx in range(self.net_nodes_size):
-        #     if self._init_code_result_list[idx] is None:
-        #         Logger.fault(f"Network({self.network_name}) parse fail.")
-        #         raise
-
-        return list(filter(lambda x: x is not None, self._init_code_result_list))
+        return list(self._init_code_result_list)
 
     def _forward_code_list(self) -> List[str]:
         if self._forward_code_result_list is not None:

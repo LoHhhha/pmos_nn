@@ -47,7 +47,7 @@ class _LazyBatchNorm(TorchNNLayer):
         self.affine = affine
         self.track_running_stats = track_running_stats
 
-    @Layer.input_shape_check
+    @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         # need allowed_dims as args.
         allowed_dims = kwargs['allowed_dims']

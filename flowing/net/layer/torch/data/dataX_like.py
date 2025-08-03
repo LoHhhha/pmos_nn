@@ -1,6 +1,6 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
 
-from typing import Tuple, List, Annotated, Optional
+from typing import Tuple, List, Annotated, Optional, Dict, Any
 
 from flowing.net.layer import Layer
 from flowing.net.layer.torch.common import TorchLayer
@@ -27,11 +27,15 @@ class _DataXLike(TorchLayer):
         super().__init__(data_amount=data_amount)
         self.requires_grad = requires_grad
 
-    def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:
-        # identifier is useless
+    def forward_code(
+            self,
+            identifier: Optional[str] = None,
+            extend_params: Dict[str, Any] = None,
+            only_right_value: bool = False,
+    ) -> Tuple[str, ...]:
         return super().forward_code(identifier=f"torch.{self._api_name}")
 
-    @Layer.input_shape_check
+    @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         return tuple(input_shape[0]),
 
@@ -56,10 +60,6 @@ class RandIntLike(_DataXLike):
         self.low = low
         self.high = high
 
-    def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:
-        # identifier is useless
-        return super().forward_code(identifier=f"torch.{self._api_name}")
-
 
 class OnesLike(_DataXLike):
     _api_name = "ones_like"
@@ -78,7 +78,3 @@ class FullLike(_DataXLike):
         super().__init__(**kwargs)
 
         self.fill_value = fill_value
-
-    def forward_code(self, identifier: Optional[str] = None) -> Tuple[str, ...]:
-        # identifier is useless
-        return super().forward_code(identifier=f"torch.{self._api_name}")
