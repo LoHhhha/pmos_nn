@@ -73,11 +73,11 @@ class TorchParser(Parser):
         if self._init_code_result_list is not None:
             return self._init_code_result_list
 
-        self._init_code_result_list = [
+        self._init_code_result_list = list(
             code for idx in self._parse_sequence_index_list for code in self.net_nodes[idx].layer_object.init_code()
-        ]
+        )
 
-        return list(self._init_code_result_list)
+        return self._init_code_result_list
 
     def _forward_code_list(self) -> List[str]:
         if self._forward_code_result_list is not None:
