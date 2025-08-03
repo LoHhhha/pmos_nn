@@ -11,7 +11,7 @@ from flowing.shower import Logger
 
 
 class _TorchLayer(Layer, ABC):
-    _api_package: str = ...
+    _api_package = ...
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
