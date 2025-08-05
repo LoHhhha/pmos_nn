@@ -1,16 +1,13 @@
-# Copyright © 2024 PMoS. All rights reserved.
+# Copyright © 2024-2025 PMoS. All rights reserved.
 
-import torch
+from typing import Any
 
 
 class ModelPair:
     name: str
-    model: torch.nn.Module
+    model: Any
 
-    def __init__(
-            self,
-            name: str,
-            model: torch.nn.Module):
+    def __init__(self, name: str, model: Any):
         self.name = name
         self.model = model
 

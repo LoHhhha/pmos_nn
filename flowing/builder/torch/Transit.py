@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 from typing import Tuple, List
 import tqdm
 
-from flowing.builder import Args
+from flowing.builder.torch import Args
 from flowing.builder import Action
 
 

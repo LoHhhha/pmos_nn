@@ -1,5 +1,6 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
 
+import importlib
 import os
 import time
 import autopep8
@@ -27,6 +28,13 @@ LAYER_NAME_FMT = "{api_name}_{api_idx}"
 LAYER_OUTPUT_NAME_FMT = "h_{api_name}_{api_idx}"
 INPUT_NAME_FMT = "x_{idx}"
 OUTPUT_NAME_FMT = "y_{idx}"
+
+TORCH_OK = False
+try:
+    importlib.import_module("torch")
+    TORCH_OK = True
+except ImportError:
+    pass
 
 
 class TorchParser(Parser):
@@ -100,6 +108,7 @@ class TorchParser(Parser):
         class_str = class_tmpl.format(
             time=datetime.now(),
             version=VERSION,
+            feature_supported="Full" if TORCH_OK else "Limited",
             more_information="",
             other_import="",
             net_name=self.network_name,
@@ -123,12 +132,13 @@ class TorchParser(Parser):
             Logger.fault(f"Network({self.network_name}) class format as pep8 fail.")
             raise e
 
+        exec_success = False
         try:
             Logger.debug(class_str)
             exec(class_str, globals())
+            exec_success = True
         except Exception as e:
-            Logger.fault(f"Network({self.network_name}) class execute fail.")
-            raise e
+            Logger.error(f"Network({self.network_name}) class execute fail, due to {e}, but continue to save.")
 
         if save_path is not None:
             if os.path.isdir(save_path):
@@ -145,7 +155,9 @@ class TorchParser(Parser):
         else:
             Logger.warning("Class will not be saved as a file.")
 
-        return eval(self.network_name)
+        if exec_success and TORCH_OK:
+            return eval(self.network_name)
+        return None
 
     def _get_parse_sequence_index_list(self):
         to_deg = [0 for _ in range(self.net_nodes_size)]

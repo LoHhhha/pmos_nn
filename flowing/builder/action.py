@@ -3,7 +3,6 @@
 from typing import List, Callable
 
 from flowing.builder import ActionCode
-from flowing.builder import Args
 from flowing.builder.struct import LossPair
 from flowing.shower import Logger
 
@@ -92,7 +91,7 @@ class Action:
             raise ValueError(f'action_type {action_type} is not supported')
         self.action_type = action_type
 
-    def __call__(self, args: Args, data_times: int, print_detail: bool = False):
+    def __call__(self, args, data_times: int, print_detail: bool = False):
         if print_detail:
             Logger.info(f"{args} calling {self}.")
 

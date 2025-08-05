@@ -19,7 +19,7 @@ class OutputNode:
                 "please first assign the OutputNode.name and OutputNode.data_name before you call "
                 "OutputNode.forward_code()"
             )
-        return f"{"self." if add_self else ""}{self.name} = {self.data_name}"
+        return f"{'self.' if add_self else ''}{self.name} = {self.data_name}"
 
     def __repr__(self):
         return f"OutputNode(from_data={self.from_data}, data_name={self.data_name}, name={self.name})"

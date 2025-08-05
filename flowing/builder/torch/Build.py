@@ -10,9 +10,9 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
 from flowing.shower import Logger
-from flowing.builder import Transit
+from flowing.builder.torch import Transit
 from flowing.builder.action import Action
-from flowing.helper import LearningRate, TorchCompile
+from flowing.helper.torch import LearningRate, Compile
 
 DEFAULT_TENSORBOARD_LOG_DIR_FMT = './log/{build_id}/tb_log'
 SHOW_TABLE_HEADER = ["Item", "Current", "Previous", "Trend"]
@@ -48,7 +48,7 @@ def build(
         debug_mode: bool = False
 ):
     if compile_models:
-        available_compile = TorchCompile.get_available_compile()
+        available_compile = Compile.get_available_compile()
         if len(available_compile) != 0:
             for name, model in models:
                 model.compile(backend=available_compile[0])

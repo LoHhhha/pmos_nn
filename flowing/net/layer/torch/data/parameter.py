@@ -2,7 +2,10 @@
 
 from typing import Tuple, List, Annotated, Optional, Dict, Any
 
-import torch
+try:
+    import torch
+except ImportError:
+    torch = None
 
 from flowing.net.layer import Layer
 from flowing.net.layer.obj import IdentifierStr
@@ -15,7 +18,7 @@ __all__ = [
 class Parameter(Layer):
     _api_name = "Parameter"
 
-    _api_init_func = torch.nn.Parameter.__new__
+    _api_init_func = torch.nn.Parameter.__new__ if torch is not None else None
 
     data_size: Tuple[int, ...]  # isn't LayerContent
     requires_grad: Annotated[bool, Layer.LayerContent]

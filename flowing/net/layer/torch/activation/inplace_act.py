@@ -2,8 +2,6 @@
 
 from typing import Annotated
 
-import torch
-
 from flowing.net.layer import Layer
 from flowing.net.layer.torch.activation.common import _InplaceActivation
 

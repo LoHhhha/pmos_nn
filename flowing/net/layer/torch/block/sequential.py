@@ -83,7 +83,7 @@ class Sequential(TorchNNLayer):
             return right_value,
 
         self.named_check()
-        return f"{"self." if add_self else ""}{self.layer_name} = {right_value}",
+        return f"{'self.' if add_self else ''}{self.layer_name} = {right_value}",
 
     @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:

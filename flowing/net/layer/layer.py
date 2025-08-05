@@ -148,7 +148,7 @@ class Layer(ABC):
             extend_params = []
         extend_params = self._trim_params(extend_params, self._api_forward_func)
 
-        args = self.data_names if not data_names_as_tuple else (f"({", ".join(self.data_names)})",)
+        args = self.data_names if not data_names_as_tuple else (f"({', '.join(self.data_names)})",)
         if data_names_identifiers is not None:
             if len(args) != len(data_names_identifiers):
                 raise ValueError(
@@ -198,7 +198,7 @@ class Layer(ABC):
             return right_value,
 
         self.named_check()
-        return f"{"self." if add_self else ""}{self.layer_name} = {right_value}",
+        return f"{'self.' if add_self else ''}{self.layer_name} = {right_value}",
 
     @injected_check_wrap
     def forward_code(
@@ -212,7 +212,7 @@ class Layer(ABC):
         if extend_params is not None:
             forward_params.extend((key, value) for key, value in extend_params.items())
 
-        right_value = (f"{f'self.{self.layer_name}' if identifier is None else identifier}"
+        right_value = (f"{('self.' + self.layer_name) if identifier is None else identifier}"
                        f"({self.get_forward_args(extend_params=forward_params)})")
         if only_right_value:
             return right_value,

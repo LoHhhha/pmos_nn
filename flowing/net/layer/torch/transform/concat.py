@@ -34,15 +34,16 @@ class _Concat(TorchLayer):
             extend_params: Dict[str, Any] = None,
             only_right_value: bool = False,
     ) -> Tuple[str, ...]:
-        right_value = f"torch.{self._api_name}({self.get_forward_args(
+        args = self.get_forward_args(
             extend_params=self.get_contents(Layer.LayerForwardContent),
             data_names_as_tuple=True,
             data_names_identifiers=["tensors"],
-        )}"
+        )
+        right_value = f"torch.{self._api_name}({args})"
 
         if only_right_value:
             return right_value,
-        return f"{self.output_name} = {right_value})",
+        return f"{self.output_name} = {right_value}",
 
     @abstractmethod
     @Layer.input_shape_check_wrap

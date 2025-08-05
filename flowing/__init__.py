@@ -22,6 +22,5 @@ import flowing.config
 import flowing.dataset
 import flowing.builder
 import flowing.helper
-import flowing.checker
 import flowing.shower
 import flowing.net

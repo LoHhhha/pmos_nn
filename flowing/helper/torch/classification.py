@@ -154,10 +154,10 @@ class Classification:
             self.info.F1[class_idx] = F1
 
         self.info.accuracy = true_count / tol_count if tol_count > 0 else 1.0
-        self.info.m_precision = np.mean(self.info.precision)
-        self.info.m_recall = np.mean(self.info.recall)
-        self.info.m_IoU = np.mean(self.info.IoU)
-        self.info.macro_F1 = np.mean(self.info.F1)
+        self.info.m_precision = np.mean(self.info.precision).item()
+        self.info.m_recall = np.mean(self.info.recall).item()
+        self.info.m_IoU = np.mean(self.info.IoU).item()
+        self.info.macro_F1 = np.mean(self.info.F1).item()
 
 
 # test

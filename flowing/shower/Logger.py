@@ -50,13 +50,15 @@ def __print_out(msg_type: int, *msg) -> None:
     # inspect.stack()[1] is info/warning/error
     caller_frame = inspect.stack()[2]
 
-    caller_name = f"{os.path.relpath(
+    caller_name = os.path.relpath(
         caller_frame.filename,
         Mate.PACKAGE_PATH
-    ).split('.')[0].replace('\\', '/').replace('/', '.')}"
+    ).split('.')[0].replace('\\', '/').replace('/', '.')
 
-    print(f'[{MSG_TYPES_STR[msg_type]}|{datetime.now()}|{caller_name}:{caller_frame.function}:{caller_frame.lineno}]',
-          *msg)
+    print(
+        f'[{MSG_TYPES_STR[msg_type]}|{datetime.now()}|{caller_name}:{caller_frame.function}:{caller_frame.lineno}]',
+        *msg
+    )
 
     # todo: log save
 

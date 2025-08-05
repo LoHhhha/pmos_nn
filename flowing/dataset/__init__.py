@@ -1,9 +1,21 @@
-from flowing.dataset.image_dataset import ImageDataset
-from flowing.dataset.link_dataset import LinkDataset
+import importlib
 
-"""
-How to use this module:
-    - get some single-data-out torch.utils.data.Dataset
-    - push it to LinkDataset as ld
-    - push ld to torch.utils.data.DataLoader
-"""
+try:
+    importlib.import_module("mindspore")
+    from flowing.dataset import mindspore
+except ImportError:
+    pass
+
+try:
+    importlib.import_module("tensorflow")
+    from flowing.dataset import tensorflow
+except ImportError:
+    pass
+
+try:
+    importlib.import_module("torch")
+    from flowing.dataset import torch
+except ImportError:
+    pass
+
+del importlib

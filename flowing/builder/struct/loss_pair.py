@@ -1,13 +1,13 @@
-# Copyright © 2024 PMoS. All rights reserved.
+# Copyright © 2024-2025 PMoS. All rights reserved.
 
-import torch
+from typing import Any
 
 
 class LossPair:
     model_idx: int
-    loss: torch.Tensor
+    loss: Any
 
-    def __init__(self, model_idx: int, loss: torch.Tensor = None):
+    def __init__(self, model_idx: int, loss: Any = None):
         self.model_idx = model_idx
         self.loss = loss
 

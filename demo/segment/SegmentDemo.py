@@ -3,11 +3,11 @@
 import numpy as np
 import torch
 
-from flowing.checker import Classification
-from flowing.shower import Image as ImageShower
-from flowing.helper import Image as ImageHelper
-from flowing.dataset import ImageDataset, LinkDataset
-from flowing.builder import Action, Build, ActionCode as Ac
+from flowing.helper.torch import Classification
+from flowing.helper.torch import Image as ImageHelper
+from flowing.dataset.torch import ImageDataset, LinkDataset
+from flowing.builder import Action, ActionCode as Ac
+from flowing.builder.torch import Build
 
 from net.hNet import hNet
 from net.DehazeNet import DehazeNet
@@ -96,7 +96,7 @@ def show_image(train_times: int, img, foggy, dehaze, gt, predict):
     if train_times % 50 != 0:
         return
 
-    ImageShower.visualize(
+    ImageHelper.visualize(
         title=f"train_detail_in_{train_times}",
         row_amount=2,
         img=img[0].detach().cpu(),
