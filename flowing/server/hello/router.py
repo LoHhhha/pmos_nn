@@ -7,7 +7,7 @@ from flowing.server.common import get_json_response
 
 router = APIRouter(
     prefix="/hello",
-    tags=["version"],
+    tags=["hello"],
 )
 
 
