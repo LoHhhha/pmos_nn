@@ -341,6 +341,14 @@ const LANGUAGE_DATA = {
         en: "Modify",
         cn: "修改",
     },
+    limited: {
+        en: "Limited",
+        cn: "受限",
+    },
+    ready: {
+        en: "Ready",
+        cn: "就绪",
+    },
 
     welcome: {
         en: "Welcome to PMoS, click me to know more about PMoS!",

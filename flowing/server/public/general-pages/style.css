@@ -15,3 +15,39 @@
 .general-pages-input:hover {
     outline: var(--hover-border-width) solid var(--default-color);
 }
+
+.general-pages-container {
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius);
+}
+
+.general-pages-help-container {
+    gap: var(--margin);
+}
+
+.general-pages-help-pair {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+}
+
+.general-pages-help-title {
+    text-align: left;
+    grid-column: 1;
+}
+
+.general-pages-help-info {
+    text-align: center;
+    border-radius: var(--radius);
+    border: none;
+    backdrop-filter: var(--blur);
+    grid-column: 2;
+}
+
+.general-pages-help-package-support-ready {
+    background-color: var(--lucency-greenish);
+}
+
+.general-pages-help-package-support-not-ready {
+    background-color: var(--lucency-yellowish);
+}

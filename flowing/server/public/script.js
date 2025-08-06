@@ -7,18 +7,17 @@ jsPlumb.ready(async () => {
 
     // get version for server
     try {
-        await fetch("/version/web", { method: "POST" })
+        await fetch("/hello", { method: "POST" })
             .then((response) => response.json())
             .then((data) => {
-                PMoS_VERSION = data.version;
-            });
-        await fetch("/version/package", { method: "POST" })
-            .then((response) => response.json())
-            .then((data) => {
-                PMoS_FLOWING_VERSION = data.version;
+                PMoS_FLOWING_VERSION = data.package_version;
+                PMoS_VERSION = data.web_version;
+                BACKEND_TORCH_READY = data.torch_ready;
+                BACKEND_MIND_SPORE_READY = data.mindspore_ready;
+                BACKEND_TENSOR_FLOW_READY = data.tensorflow_ready;
             });
     } catch (error) {
-        console.error("[GetVersion]", { error });
+        console.error("[HelloBackend]", { error });
         MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
             config: PROMPT_CONFIG.ERROR,
             iconSvg: ICONS.error,

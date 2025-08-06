@@ -1,5 +1,8 @@
 let PMoS_VERSION = "UNKNOWN";
 let PMoS_FLOWING_VERSION = "UNKNOWN";
+let BACKEND_TORCH_READY = false;
+let BACKEND_MIND_SPORE_READY = false;
+let BACKEND_TENSOR_FLOW_READY = false;
 const PMoS_REP_HREF = "https://github.com/LoHhhha/pmos_nn";
 const PMoS_FLOWING_INSTRUCTION_HREF =
     "https://github.com/LoHhhha/pmos_nn/blob/master/doc/help/flowing-instruction.md";

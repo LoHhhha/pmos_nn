@@ -10,7 +10,56 @@
 
 (function () {
     MESSAGE_HANDLER(MESSAGE_TYPE.HelpPage, () => {
-        const linkElements = [];
+        const helpContainerEle = document.createElement("div");
+        helpContainerEle.classList.add("general-pages-container");
+        helpContainerEle.classList.add("general-pages-help-container");
+
+        const packageReadyContainerEle = document.createElement("div");
+        packageReadyContainerEle.classList.add("general-pages-container");
+        packageReadyContainerEle.classList.add("general-pages-help-container");
+        for (const { packageName, ready } of [
+            {
+                packageName: "PyTorch",
+                ready: BACKEND_TORCH_READY,
+            },
+            {
+                packageName: "MindSpore",
+                ready: BACKEND_MIND_SPORE_READY,
+            },
+            {
+                packageName: "TensorFlow",
+                ready: BACKEND_TENSOR_FLOW_READY,
+            },
+        ]) {
+            const supportEle = document.createElement("div");
+            supportEle.classList.add("general-pages-help-pair");
+
+            const packageEle = document.createElement("div");
+            packageEle.classList.add("general-pages-help-title");
+            packageEle.textContent = packageName;
+            supportEle.appendChild(packageEle);
+
+            const infoEle = document.createElement("div");
+            infoEle.classList.add("general-pages-help-info");
+            if (ready) {
+                infoEle.classList.add(
+                    "general-pages-help-package-support-ready"
+                );
+                infoEle.textContent = I18N_STRINGS.ready;
+            } else {
+                infoEle.classList.add(
+                    "general-pages-help-package-support-not-ready"
+                );
+                infoEle.textContent = I18N_STRINGS.limited;
+            }
+            supportEle.appendChild(infoEle);
+
+            packageReadyContainerEle.appendChild(supportEle);
+        }
+        helpContainerEle.appendChild(packageReadyContainerEle);
+
+        const linkContainerEle = document.createElement("div");
+        linkContainerEle.classList.add("general-pages-container");
         for (const { title, url } of [
             {
                 title: I18N_STRINGS.instruction,
@@ -33,13 +82,14 @@
             linkEle.innerHTML = title;
             linkEle.href = url;
             linkEle.target = "_blank";
-            linkElements.push(linkEle);
+            linkContainerEle.appendChild(linkEle);
         }
+        helpContainerEle.appendChild(linkContainerEle);
 
         MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
-            title: `PMoS\t${PMoS_VERSION}`,
+            title: "PMoS",
             text: I18N_STRINGS.help_page_text,
-            elements: linkElements,
+            elements: [helpContainerEle],
             buttonMode: COVERING_BUTTON_MODE.CloseButton,
         });
     });
