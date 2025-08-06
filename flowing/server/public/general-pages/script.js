@@ -87,7 +87,7 @@
         helpContainerEle.appendChild(linkContainerEle);
 
         MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
-            title: "PMoS",
+            title: `PMoS ${PMoS_VERSION}`,
             text: I18N_STRINGS.help_page_text,
             elements: [helpContainerEle],
             buttonMode: COVERING_BUTTON_MODE.CloseButton,
