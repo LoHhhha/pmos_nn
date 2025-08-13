@@ -177,7 +177,9 @@ class Args:
                 f"models:{self.models}, "
                 f"optimizers:{[opt.__class__ for opt in self.optimizers]}, "
                 f"criteria:{[criterion.__class__ for criterion in self.criteria]}, "
-                f"data_buffer:{[data.shape if (isinstance(data, torch.Tensor) or isinstance(data, np.ndarray)) else data
-                                for data in self.data_buffer]}, "
+                f"""data_buffer:{[
+                    data.shape if (isinstance(data, torch.Tensor) or isinstance(data, np.ndarray)) else data
+                    for data in self.data_buffer
+                ]}, """
                 f"loss_buffer:{self.loss_buffer}, "
                 f"device:{self.device})")

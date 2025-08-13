@@ -107,11 +107,11 @@ def build(
 
         Logger.info(
             f"After train_{epoch} models get in train dataset:\n"
-            f"{tabulate(
+            f"""{tabulate(
                 _get_show_table_info(prev_info=prev_train_info, current_info=info),
                 headers=SHOW_TABLE_HEADER, tablefmt="rst",
                 numalign="right", stralign="left", floatfmt=".5f"
-            )}"
+            )}"""
         )
         if tensorboard_enabled:
             for key, value in info.items():
@@ -136,11 +136,11 @@ def build(
 
                 Logger.info(
                     f"After train_{epoch} models get in valid dataset:\n"
-                    f"{tabulate(
+                    f"""{tabulate(
                         _get_show_table_info(prev_info=prev_val_info, current_info=info),
                         headers=SHOW_TABLE_HEADER, tablefmt="rst",
                         numalign="right", stralign="left", floatfmt=".5f"
-                    )}"
+                    )}"""
                 )
                 if tensorboard_enabled:
                     for key, value in info.items():
