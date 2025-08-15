@@ -3,6 +3,7 @@
 from typing import Tuple, List, Optional, Annotated
 
 from flowing.net.layer import Layer
+from flowing.net.layer.shape_helper import OutputShapeCalculator
 from flowing.net.layer.torch.common import TorchNNLayer
 
 __all__ = [
@@ -49,17 +50,15 @@ class _LazyBatchNorm(TorchNNLayer):
 
     @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        # need allowed_dims as args.
+        # need allowed_dims, num_features as args.
         allowed_dims = kwargs['allowed_dims']
+        num_features = kwargs.get('num_features', None)
 
-        data_shape = input_shape[0]
-        if len(data_shape) not in allowed_dims:
-            raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
-                f"expected data_shape has {allowed_dims} dimensions"
-            )
-
-        return tuple(data_shape),
+        return OutputShapeCalculator.batch_norm(
+            allowed_dims,
+            num_features,
+            *input_shape,
+        )
 
 
 class _BatchNorm(_LazyBatchNorm):
@@ -71,23 +70,11 @@ class _BatchNorm(_LazyBatchNorm):
         self.num_features = num_features
 
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        # need allowed_dims as args
-        allowed_dims: Tuple[int, ...] = kwargs['allowed_dims']
-
-        # just call super().output_shape to check.
-        super().output_shape(*input_shape, **kwargs)
-
-        data_shape = input_shape[0]
-
-        # data_shape dimension amount must in allowed_dims, due to super().output_shape
-        allowed_dim_index = allowed_dims.index(len(data_shape))
-        check_dim = allowed_dim_index if len(allowed_dims) == 2 else 1
-        if self.num_features != data_shape[check_dim]:
-            raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
-                f"expected data_shape's No.{check_dim + 1} dimension is equal to num_features as {self.num_features}"
-            )
-        return tuple(data_shape),
+        return super().output_shape(
+            *input_shape,
+            num_features=self.num_features,
+            **kwargs
+        )
 
 
 class _LazyInstanceNorm(_LazyBatchNorm):

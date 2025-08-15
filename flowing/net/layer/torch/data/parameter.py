@@ -27,7 +27,7 @@ class Parameter(Layer):
     output_amount = 1
 
     @property
-    def output_name(self) -> str:
+    def output_name(self):
         if self.layer_name is ...:
             return ...
         return f"self.{self.layer_name}"

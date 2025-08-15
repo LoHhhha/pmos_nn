@@ -3,6 +3,7 @@
 from typing import Tuple, List, Annotated, Optional
 
 from flowing.net.layer import Layer
+from flowing.net.layer.shape_helper import OutputShapeCalculator
 from flowing.net.layer.torch.common import TorchNNLayer
 
 __all__ = [
@@ -50,12 +51,8 @@ class LayerNorm(TorchNNLayer):
 
     @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        data_shape = list(input_shape[0])
-
-        if self._is_bad_data_shape(data_shape):
-            raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
-                f"expected data_shape with shape [*] + {self.normalized_shape}"
-            )
-
-        return tuple(data_shape),
+        return OutputShapeCalculator.layer_norm(
+            self.normalized_shape,
+            -len(self.normalized_shape),
+            *input_shape,
+        )

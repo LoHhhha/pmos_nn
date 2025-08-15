@@ -1,9 +1,9 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
 
-from collections.abc import Iterable
 from typing import Tuple, List, Optional, Annotated, Dict, Any
 
 from flowing.net.layer import Layer
+from flowing.net.layer.shape_helper import OutputShapeCalculator
 from flowing.net.layer.torch.common import TorchLayer
 
 __all__ = [
@@ -55,36 +55,10 @@ class Squeeze(TorchLayer):
 
     @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        data_shape = input_shape[0]
-        result_shape = list(data_shape)
-
-        if self.dim is None:
-            result_shape = [x for x in result_shape if x != 1]
-            return tuple(result_shape),
-
-        if isinstance(self.dim, Iterable):
-            dims = self.dim
-        elif isinstance(self.dim, int):
-            dims = [self.dim]
-        else:
-            raise ValueError(
-                f"detect an unexpected Squeeze params dim as {self.dim}, "
-                f"has type {type(self.dim)}"
-            )
-
-        need_remove_dims = set()
-        for dim in dims:
-            try:
-                if result_shape[dim] == 1:
-                    need_remove_dims.add(dim)
-            except IndexError:
-                raise ValueError(
-                    f"detect an unexpected data_shape as {data_shape}, "
-                    f"expected it's item has at least {dim + 1 if dim >= 0 else abs(dim)} dimensions"
-                )
-
-        result_shape = [result_shape[idx] for idx in range(len(result_shape)) if idx not in need_remove_dims]
-        return tuple(result_shape),
+        return OutputShapeCalculator.squeeze(
+            self.dim,
+            *input_shape,
+        )
 
 
 class Unsqueeze(TorchLayer):
@@ -122,23 +96,7 @@ class Unsqueeze(TorchLayer):
 
     @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        data_shape = list(input_shape[0])
-
-        padding_num = -1
-        result_shape = [padding_num] * (len(data_shape) + 1)
-        try:
-            result_shape[self.dim] = 1
-        except IndexError:
-            raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
-                f"expected it's item has at least {self.dim + 1 if self.dim >= 0 else abs(self.dim)} dimensions"
-            )
-
-        rs_idx = 0
-        for idx in range(len(data_shape)):
-            while result_shape[rs_idx] != padding_num:
-                rs_idx += 1
-            result_shape[rs_idx] = data_shape[idx]
-            rs_idx += 1
-
-        return tuple(result_shape),
+        return OutputShapeCalculator.unsqueeze(
+            self.dim,
+            *input_shape,
+        )

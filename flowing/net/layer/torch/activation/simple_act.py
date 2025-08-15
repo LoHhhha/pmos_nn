@@ -3,6 +3,7 @@
 from typing import Tuple, List, Annotated
 
 from flowing.net.layer import Layer
+from flowing.net.layer.shape_helper import OutputShapeCalculator, DataShapeChecker
 from flowing.net.layer.torch.activation.common import _SimpleActivation
 
 __all__ = [
@@ -83,29 +84,13 @@ class GLU(_SimpleActivation):
 
         self.dim = dim
 
+    @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        # check super()
-        super().output_shape(*input_shape, **kwargs)
-
-        data_shape = list(input_shape[0])
-
-        try:
-            data_shape[self.dim]
-        except IndexError:
-            raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
-                f"expected data_shape should have {self.dim} dimension"
-            )
-
-        if data_shape[self.dim] % 2:
-            raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
-                f"expected data_shape[{self.dim}] is even"
-            )
-
-        data_shape[self.dim] //= 2
-
-        return tuple(data_shape),
+        return OutputShapeCalculator.divide_input_shape(
+            self.dim,
+            2,
+            *input_shape,
+        )
 
 
 class Softsign(_SimpleActivation):
@@ -115,19 +100,13 @@ class Softsign(_SimpleActivation):
 class Softmax2d(_SimpleActivation):
     _api_name = "Softmax2d"
 
+    @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        # check super()
-        super().output_shape(*input_shape, **kwargs)
-
         data_shape = input_shape[0]
 
-        if len(data_shape) not in (3, 4):
-            raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
-                "expected data_shape should have 3 or 4 dimensions"
-            )
+        DataShapeChecker.shape_dim(data_shape, 2)
 
-        return data_shape,
+        return tuple(data_shape),
 
 
 class Identity(_SimpleActivation):

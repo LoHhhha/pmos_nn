@@ -3,6 +3,7 @@
 from typing import Tuple, List, Optional, Annotated
 
 from flowing.net.layer import Layer
+from flowing.net.layer.shape_helper import OutputShapeCalculator
 from flowing.net.layer.torch.common import TorchNNLayer
 
 __all__ = [
@@ -39,43 +40,13 @@ class _MaxUnpool(TorchNNLayer):
         # need dim as args.
         dim = kwargs['dim']
 
-        result_shape, info_shape = input_shape
-
-        if tuple(result_shape) != tuple(info_shape):
-            raise ValueError(
-                f"detect an unexpected result_shape as {result_shape} or info_shape as {info_shape}, "
-                f"expected both of shapes should be same."
-            )
-
-        if len(result_shape) not in (dim + 1, dim + 2):
-            raise ValueError(
-                f"detect an unexpected result_shape as {result_shape}, "
-                f"expected {dim + 1} dimensions(unbatched) or {dim + 2} dimensions(batched) input"
-            )
-
-        if isinstance(self.kernel_size, int):
-            kernel_size = (self.kernel_size,) * dim
-        else:
-            kernel_size = self.kernel_size
-
-        if isinstance(self.padding, int):
-            padding = (self.padding,) * dim
-        else:
-            padding = self.padding
-
-        if self.stride is None:
-            stride = kernel_size
-        elif isinstance(self.stride, int):
-            stride = (self.stride,) * dim
-        else:
-            stride = self.stride
-
-        output_shape = list(result_shape)
-
-        for i in range(dim):
-            output_shape[-dim + i] = (result_shape[-dim + i] - 1) * stride[i] - 2 * padding[i] + kernel_size[i]
-
-        return tuple(output_shape),
+        return OutputShapeCalculator.max_unpool(
+            dim,
+            self.kernel_size,
+            self.padding,
+            self.stride,
+            *input_shape,
+        )
 
 
 class MaxUnpool1d(_MaxUnpool):

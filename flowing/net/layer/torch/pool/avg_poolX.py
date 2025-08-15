@@ -1,12 +1,10 @@
 # Copyright © 2025 PMoS. All rights reserved.
 
-import math
 from typing import Tuple, List, Optional, Annotated
 
 from flowing.net.layer import Layer
+from flowing.net.layer.shape_helper import OutputShapeCalculator
 from flowing.net.layer.torch.common import TorchNNLayer
-from flowing.net.layer.torch.pool.utils import padding_and_kernel_size_check
-from flowing.net.layer.torch.utils import get_and_check_target_dim_param
 
 __all__ = [
     'AvgPool1d',
@@ -49,27 +47,14 @@ class _AvgPool(TorchNNLayer):
         # need dim as args.
         dim = kwargs['dim']
 
-        data_shape = list(input_shape[0])
-
-        if len(data_shape) not in (dim + 1, dim + 2):
-            raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
-                f"expected {dim + 1} dimensions(unbatched) or {dim + 2} dimensions(batched) input"
-            )
-
-        kernel_size = get_and_check_target_dim_param(self.kernel_size, dim, "kernel_size")
-        padding = get_and_check_target_dim_param(self.padding, dim, "padding")
-        stride = get_and_check_target_dim_param(
-            self.kernel_size if self.stride is None else self.stride, dim, "stride"
+        return OutputShapeCalculator.pool(
+            dim,
+            self.kernel_size,
+            self.padding,
+            self.stride,
+            return_indices=False,
+            *input_shape,
         )
-
-        padding_and_kernel_size_check(padding=padding, kernel_size=kernel_size)
-
-        for idx in range(dim):
-            data_shape[-dim + idx] = math.floor(
-                (data_shape[-dim + idx] + 2 * padding[-dim + idx] - kernel_size[-dim + idx]) / stride[-dim + idx] + 1
-            )
-        return tuple(data_shape),
 
 
 class AvgPool1d(_AvgPool):

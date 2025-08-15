@@ -3,6 +3,7 @@
 from typing import Tuple, List, Annotated, Optional, Dict, Any
 
 from flowing.net.layer import Layer
+from flowing.net.layer.shape_helper import OutputShapeCalculator
 from flowing.net.layer.torch.common import TorchLayer
 
 __all__ = [
@@ -48,15 +49,8 @@ class Transpose(TorchLayer):
 
     @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        data_shape = input_shape[0]
-        result_shape = list(data_shape)
-        try:
-            dim_shape = result_shape[self.dim0]
-            result_shape[self.dim0] = result_shape[self.dim1]
-            result_shape[self.dim1] = dim_shape
-        except IndexError:
-            raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
-                f"expected it's item has index {self.dim0} and {self.dim1} at least"
-            )
-        return tuple(result_shape),
+        return OutputShapeCalculator.transpose(
+            self.dim0,
+            self.dim1,
+            *input_shape,
+        )

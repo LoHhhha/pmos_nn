@@ -3,6 +3,7 @@
 from typing import Tuple, List, Annotated, Optional
 
 from flowing.net.layer import Layer
+from flowing.net.layer.shape_helper import OutputShapeCalculator
 from flowing.net.layer.torch.common import TorchNNLayer
 
 __all__ = [
@@ -31,26 +32,15 @@ class _Dropout(TorchNNLayer):
 
     @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        # need dim and output_padding as args.
+        # need dim and at_least_two as args.
         dim = kwargs.get('dim', -1)
         at_least_two = kwargs.get('at_least_two', False)
 
-        data_shape = input_shape[0]
-
-        if at_least_two and len(data_shape) < 2:
-            raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
-                f"expected data_shape at least 2 dimension"
-            )
-
-        size = len(data_shape)
-        if dim != -1 and size != dim + 1 and size != dim + 2:
-            raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
-                f"expected {dim + 1} dimensions(unbatched) or {dim + 2} dimensions(batched) input"
-            )
-
-        return tuple(data_shape),
+        return OutputShapeCalculator.dropout(
+            dim,
+            2 if at_least_two else None,
+            *input_shape,
+        )
 
 
 class Dropout(_Dropout):

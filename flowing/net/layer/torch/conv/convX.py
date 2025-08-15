@@ -1,11 +1,10 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
 
-import math
 from typing import Tuple, List, Annotated, Optional
 
 from flowing.net.layer import Layer
+from flowing.net.layer.shape_helper import OutputShapeCalculator
 from flowing.net.layer.torch.common import TorchNNLayer
-from flowing.net.layer.torch.utils import get_and_check_target_dim_param
 
 __all__ = [
     'Conv1d',
@@ -64,39 +63,20 @@ class _LazyConv(TorchNNLayer):
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         # need dim and output_padding as args.
         dim = kwargs['dim']
+        in_channels = kwargs.get('in_channels', None)
         output_padding = kwargs.get('output_padding', None)
 
-        data_shape = input_shape[0]
-
-        if len(data_shape) not in (dim + 1, dim + 2):
-            raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
-                f"expected {dim + 1} dimensions(unbatched) or {dim + 2} dimensions(batched) input"
-            )
-
-        kernel_size = get_and_check_target_dim_param(self.kernel_size, dim, "kernel_size")
-        padding = get_and_check_target_dim_param(self.padding, dim, "padding")
-        stride = get_and_check_target_dim_param(self.stride, dim, "stride")
-        dilation = get_and_check_target_dim_param(self.dilation, dim, "dilation")
-
-        output_shape = [data_shape[0]] * len(data_shape)
-        # this maybe out_channels or N
-        output_shape[-dim - 1] = self.out_channels
-
-        if output_padding is None:
-            for i in range(dim):
-                output_shape[-dim + i] = math.floor(
-                    (data_shape[-dim + i] + 2 * padding[i] - dilation[i] * (kernel_size[i] - 1) - 1) / stride[i] + 1
-                )
-        else:
-            if isinstance(output_padding, int):
-                output_padding = (output_padding,) * dim
-            for i in range(dim):
-                output_shape[-dim + i] = \
-                    (data_shape[-dim + i] - 1) * stride[i] - 2 * padding[i] + dilation[i] * (kernel_size[i] - 1) + \
-                    output_padding[i] + 1
-
-        return tuple(output_shape),
+        return OutputShapeCalculator.convolution(
+            dim,
+            in_channels,
+            self.out_channels,
+            self.kernel_size,
+            self.padding,
+            self.stride,
+            self.dilation,
+            output_padding,
+            *input_shape,
+        )
 
 
 class _LazyConvTranspose(_LazyConv):
@@ -121,26 +101,7 @@ class _Conv(_LazyConv):
 
     @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        # need dim and output_padding as args.
-        dim = kwargs['dim']
-
-        data_shape = input_shape[0]
-
-        # (N, C, ...)
-        try:
-            C_in = data_shape[-dim - 1]
-        except IndexError:
-            raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
-                f"expected it have at least {dim + 1} dimensions"
-            )
-        if C_in != self.in_channels:
-            raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
-                f"expected it's {-dim - 1} dimensions is equal to in_channels as {self.in_channels}"
-            )
-
-        return super().output_shape(*input_shape, **kwargs)
+        return super().output_shape(*input_shape, in_channels=self.in_channels, **kwargs)
 
 
 class _ConvTranspose(_Conv):

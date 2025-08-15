@@ -3,6 +3,7 @@
 from typing import Tuple, List, Optional, Dict, Any
 
 from flowing.net.layer import Layer
+from flowing.net.layer.shape_helper import OutputShapeCalculator
 from flowing.net.layer.torch.common import TorchLayer
 
 __all__ = [
@@ -20,9 +21,6 @@ class _Operation(TorchLayer):
 
     layer_name = "Useless"
 
-    def __init__(self, data_amount: Optional[int] = None):
-        super().__init__(data_amount=data_amount)
-
     @Layer.injected_check_wrap
     def forward_code(
             self,
@@ -39,24 +37,7 @@ class _Operation(TorchLayer):
     @Layer.input_shape_check_wrap
     @Layer.data_amount_not_zero_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        input_shape: List[Tuple[int, ...] | List[int]] = sorted(input_shape, key=lambda item: len(item), reverse=True)
-
-        prev: List[int] = list(input_shape[0])
-        for shape in input_shape:
-            shape: List[int]
-            for idx in range(len(shape)):
-                if shape[-idx - 1] != prev[-idx - 1]:
-                    if shape[-idx - 1] == 1 or prev[-idx - 1] == 1:
-                        prev[-idx - 1] = max(shape[-idx - 1], prev[-idx - 1])
-                    else:
-                        prev[-idx - 1] = -1
-                # detect <=0 or not in (1, X)/(X, 1)/(X,X)
-                if prev[-idx - 1] <= 0:
-                    raise ValueError(
-                        f"detect an unexpected input_shape as {input_shape}, "
-                        f"has different postfix shapes"
-                    )
-        return tuple(prev),
+        return OutputShapeCalculator.arithmetic_input_shape(*input_shape)
 
 
 class Add(_Operation):

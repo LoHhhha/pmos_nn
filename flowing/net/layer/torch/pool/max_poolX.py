@@ -1,12 +1,10 @@
 # Copyright © 2024-2025 PMoS. All rights reserved.
 
-import math
 from typing import Tuple, List, Optional, Annotated
 
 from flowing.net.layer import Layer
+from flowing.net.layer.shape_helper import OutputShapeCalculator
 from flowing.net.layer.torch.common import TorchNNLayer
-from flowing.net.layer.torch.pool.utils import padding_and_kernel_size_check
-from flowing.net.layer.torch.utils import get_and_check_target_dim_param
 
 __all__ = [
     'MaxPool1d',
@@ -55,33 +53,14 @@ class _MaxPool(TorchNNLayer):
         # need dim as args.
         dim = kwargs['dim']
 
-        data_shape = input_shape[0]
-
-        if len(data_shape) not in (dim + 1, dim + 2):
-            raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
-                f"expected {dim + 1} dimensions(unbatched) or {dim + 2} dimensions(batched) input"
-            )
-
-        kernel_size = get_and_check_target_dim_param(self.kernel_size, dim, "kernel_size")
-        padding = get_and_check_target_dim_param(self.padding, dim, "padding")
-        stride = get_and_check_target_dim_param(
-            self.kernel_size if self.stride is None else self.stride, dim, "stride"
+        return OutputShapeCalculator.pool(
+            dim,
+            self.kernel_size,
+            self.padding,
+            self.stride,
+            self.return_indices,
+            *input_shape,
         )
-        dilation = get_and_check_target_dim_param(self.dilation, dim, "dilation")
-
-        padding_and_kernel_size_check(padding=padding, kernel_size=kernel_size)
-
-        result_shape = list(data_shape)
-        for i in range(dim):
-            result_shape[-dim + i] = math.floor(
-                (data_shape[-dim + i] + 2 * padding[i] - dilation[i] * (kernel_size[i] - 1) - 1) / stride[i] + 1
-            )
-
-        if self.return_indices:
-            info_shape = list(result_shape)
-            return tuple(result_shape), tuple(info_shape)
-        return tuple(result_shape),
 
 
 class MaxPool1d(_MaxPool):

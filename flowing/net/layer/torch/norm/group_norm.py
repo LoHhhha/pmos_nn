@@ -3,6 +3,7 @@
 from typing import Tuple, List, Annotated, Optional
 
 from flowing.net.layer import Layer
+from flowing.net.layer.shape_helper import OutputShapeCalculator
 from flowing.net.layer.torch.common import TorchNNLayer
 
 __all__ = [
@@ -37,24 +38,8 @@ class GroupNorm(TorchNNLayer):
 
     @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        data_shape = input_shape[0]
-
-        if self.num_groups == 0 or self.num_channels % self.num_groups != 0:
-            raise ValueError(
-                f"detect an unexpected num_channels as {self.num_channels} and num_groups {self.num_groups}, "
-                f"expected {self.num_channels} can be divisible by {self.num_groups}."
-            )
-
-        if len(data_shape) < 2:
-            raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
-                "expected data_shape must be at least 2 dimensional"
-            )
-
-        if self.num_channels != data_shape[1]:
-            raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
-                f"expected data_shape's 2nd dimension is {self.num_channels}"
-            )
-
-        return tuple(data_shape),
+        return OutputShapeCalculator.group_norm(
+            self.num_groups,
+            self.num_channels,
+            *input_shape,
+        )

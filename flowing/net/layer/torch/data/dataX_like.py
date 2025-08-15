@@ -3,6 +3,7 @@
 from typing import Tuple, List, Annotated, Optional, Dict, Any
 
 from flowing.net.layer import Layer
+from flowing.net.layer.shape_helper import OutputShapeCalculator
 from flowing.net.layer.torch.common import TorchLayer
 
 __all__ = [
@@ -37,7 +38,7 @@ class _DataXLike(TorchLayer):
 
     @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        return tuple(input_shape[0]),
+        return OutputShapeCalculator.same_as_input_shape(*input_shape)
 
 
 class RandLike(_DataXLike):

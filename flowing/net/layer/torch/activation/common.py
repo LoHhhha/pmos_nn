@@ -3,6 +3,7 @@
 from typing import Tuple, List, Annotated, Optional
 
 from flowing.net.layer import Layer
+from flowing.net.layer.shape_helper import OutputShapeCalculator, DataShapeChecker
 from flowing.net.layer.torch.common import TorchNNLayer
 
 
@@ -10,13 +11,9 @@ class _SimpleActivation(TorchNNLayer):
     data_amount = 1
     output_amount = 1
 
-    def __init__(self, data_amount: Optional[int] = None):
-        super().__init__(data_amount=data_amount)
-
     @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        data_shape = input_shape[0]
-        return tuple(data_shape),
+        return OutputShapeCalculator.same_as_input_shape(*input_shape)
 
 
 class _InplaceActivation(_SimpleActivation):
@@ -36,21 +33,13 @@ class _OptionalDimActivation(_SimpleActivation):
         self.dim = dim
 
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        # check super()
-        super().output_shape(*input_shape, **kwargs)
+        result = super().output_shape(*input_shape, **kwargs)
 
-        data_shape = input_shape[0]
+        # check if dim exist in input_shape
+        for shape in input_shape:
+            DataShapeChecker.exist_dim(shape, self.dim)
 
-        if self.dim is not None:
-            try:
-                data_shape[self.dim]
-            except IndexError:
-                raise ValueError(
-                    f"detect an unexpected data_shape as {data_shape}, "
-                    f"expected data_shape should have {self.dim} dimension"
-                )
-
-        return tuple(data_shape),
+        return result
 
 
 class _LambdActivation(_SimpleActivation):

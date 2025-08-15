@@ -3,8 +3,8 @@
 from typing import Tuple, List, Optional, Annotated, Iterable
 
 from flowing.net.layer import Layer
+from flowing.net.layer.shape_helper import OutputShapeCalculator
 from flowing.net.layer.torch.common import TorchNNLayer
-from flowing.net.layer.torch.utils import get_and_check_target_dim_param
 
 __all__ = [
     "AdaptiveAvgPool1d",
@@ -37,22 +37,14 @@ class _AdaptivePool(TorchNNLayer):
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         # need dim as args.
         dim = kwargs['dim']
+        return_indices = kwargs.get('return_indices', False)
 
-        data_shape = list(input_shape[0])
-
-        if len(data_shape) not in (dim + 1, dim + 2):
-            raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
-                f"expected {dim + 1} dimensions(unbatched) or {dim + 2} dimensions(batched) input"
-            )
-
-        output_size = get_and_check_target_dim_param(self.output_size, dim, "output_size")
-
-        for idx in range(dim):
-            if output_size[idx] is not None:
-                data_shape[-dim + idx] = output_size[idx]
-
-        return tuple(data_shape),
+        return OutputShapeCalculator.adaptive_pool(
+            dim,
+            self.output_size,
+            return_indices,
+            *input_shape,
+        )
 
 
 class _AdaptiveAvgPool(_AdaptivePool):
@@ -87,11 +79,11 @@ class _AdaptiveMaxPool(_AdaptiveAvgPool):
 
     @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        data_shape = super().output_shape(*input_shape, **kwargs)[0]
-
-        if self.return_indices:
-            return data_shape, data_shape
-        return data_shape,
+        return super().output_shape(
+            *input_shape,
+            return_indices=self.return_indices,
+            **kwargs,
+        )
 
 
 class AdaptiveAvgPool1d(_AdaptiveAvgPool):
@@ -129,7 +121,7 @@ class AdaptiveMaxPool1d(_AdaptiveMaxPool):
                 (isinstance(self.output_size, Iterable) and self.output_size.count(None)):
             raise ValueError(
                 f"detect an unexpected output_size as {self.output_size}, "
-                "expected AdaptivePool1d's output_size can not contain or be None"
+                "expected AdaptiveMaxPool1d's output_size can not contain or be None"
             )
         return super().output_shape(*input_shape, dim=1)
 
