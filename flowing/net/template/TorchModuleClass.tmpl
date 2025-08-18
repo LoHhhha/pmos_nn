@@ -19,7 +19,7 @@ import torch
 
 class {net_name}(torch.nn.Module):
     def __init__({init_args}, *args, **kwargs):
-        super({net_name}, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         {init_code}
 
     def forward({inputs}):

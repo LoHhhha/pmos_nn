@@ -38,26 +38,69 @@ class Layer(ABC):
     output_name: str = ...  # through it maybe a tuple but also use one name.
     output_amount: int = ...  # when output_size == 1 means output_name is a var, or it is a tuple.
 
-    def __init__(self, data_amount: Optional[int] = None):
+    def __init__(self, data_amount: Optional[int] = None, **kwargs):
         """
         Unless data_amount is setting error, don't verify the params and raise another exception in here.
         Ensure users can generate their own modules in their way.
 
         So only assign <LayerContent> on __init__(), and remember to call super().__init__(data_amount)!
         """
+
+        if len(kwargs):
+            Logger.warning(
+                f"detect kwargs is not empty in Layer.__init__, "
+                f"confirmed kwargs as {kwargs} is ok."
+            )
+
         if data_amount is not None:
             if self.data_amount is ...:
                 self.data_amount = data_amount
             elif self.data_amount != data_amount:
                 raise ValueError(
-                    f'{self._api_name}.data_amount expected to be {self.data_amount}, but got {data_amount}'
+                    f"{self._api_name}.data_amount expected to be {self.data_amount}, but got {data_amount}"
                 )
         elif self.data_amount is ...:
             raise ValueError(
-                f'{self._api_name}.data_amount need to be implement'
+                f"{self._api_name}.data_amount need to be implement"
             )
 
         self.data_names = [None] * self.data_amount
+
+    def __init_subclass__(cls):
+        super().__init_subclass__()
+
+        # wrap the __init__, check content after __init__
+        # if some class don't rewrite content_check, skip.
+        if not "content_check" in cls.__dict__:
+            return
+
+        sub_cls_init = cls.__init__
+
+        def wrapped_init(self, *args, **kwargs):
+            sub_cls_init(self, *args, **kwargs)
+
+            ignore_content_exception = kwargs.get("ignore_content_exception", False)
+            try:
+                cls.content_check(self)
+            except Exception as e:
+                if not ignore_content_exception:
+                    raise e
+                else:
+                    Logger.warning(
+                        f"{self} content checking failed due to {e}, "
+                        f"but ignored."
+                    )
+
+        cls.__init__ = wrapped_init
+
+    def content_check(self):
+        """
+        Check if contents are valid, this will call after __init__ automatically (all class's content_check)
+        may raise ValueError
+            if you want to ignore Exception, using:
+                Layer(..., ignore_content_exception=True)
+        """
+        pass
 
     def named_check(self):
         if self.layer_name is ...:
@@ -121,17 +164,15 @@ class Layer(ABC):
             return params
 
         try:
-            args_info = inspect.getfullargspec(func)
+            args_info = inspect.signature(func)
         except Exception as e:
             Logger.warning(f"Detect an exception as {e} during trim_params using func={func}, skipped.")
             return params
 
         key2default = {}
-        default_values = args_info.defaults
-        if default_values is None:
-            default_values = []
-        for idx, value in enumerate(default_values):
-            key2default[args_info.args[-len(args_info.defaults) + idx]] = value
+        for name, param in args_info.parameters.items():
+            if param.default != param.empty:
+                key2default[name] = param.default
 
         return list((key, value) for key, value in params if (key not in key2default) or (key2default[key] != value))
 
@@ -223,8 +264,15 @@ class Layer(ABC):
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         """
         Return what shape of date will get if push [input_shape] data to Layer.
+        may raise ValueError
         """
         ...
 
     def __repr__(self):
-        return f"Layer:{self._api_name}(data_amount={self.data_amount},output_amount={self.output_amount})"
+        return (
+            f"Layer:{self._api_name}("
+            f"data_amount={self.data_amount}, "
+            f"output_amount={self.output_amount}, "
+            f"LayerContent={self.get_contents(Layer.LayerContent)}, "
+            f"LayerForwardContent={self.get_contents(Layer.LayerForwardContent)})"
+        )

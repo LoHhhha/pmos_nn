@@ -16,6 +16,8 @@ __all__ = [
 class _AvgPool(TorchNNLayer):
     _api_name = ...
 
+    _dim: int
+
     data_amount = 1
     output_amount = 1
 
@@ -32,9 +34,9 @@ class _AvgPool(TorchNNLayer):
             padding: int | Tuple[int, ...] = 0,
             ceil_mode: bool = False,
             count_include_pad: bool = True,
-            data_amount: Optional[int] = None
+            **kwargs
     ):
-        super().__init__(data_amount=data_amount)
+        super().__init__(**kwargs)
 
         self.kernel_size = kernel_size
         self.stride = stride
@@ -44,15 +46,14 @@ class _AvgPool(TorchNNLayer):
 
     @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        # need dim as args.
-        dim = kwargs['dim']
-
         return OutputShapeCalculator.pool(
-            dim,
+            self._dim,
             self.kernel_size,
             self.padding,
             self.stride,
-            return_indices=False,
+            1,
+            self.ceil_mode,
+            False,
             *input_shape,
         )
 
@@ -60,19 +61,25 @@ class _AvgPool(TorchNNLayer):
 class AvgPool1d(_AvgPool):
     _api_name = "AvgPool1d"
 
+    _dim = 1
+
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        return super().output_shape(*input_shape, dim=1)
+        return super().output_shape(*input_shape)
 
 
 class AvgPool2d(_AvgPool):
     _api_name = "AvgPool2d"
 
+    _dim = 2
+
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        return super().output_shape(*input_shape, dim=2)
+        return super().output_shape(*input_shape)
 
 
 class AvgPool3d(_AvgPool):
     _api_name = "AvgPool3d"
 
+    _dim = 3
+
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        return super().output_shape(*input_shape, dim=3)
+        return super().output_shape(*input_shape)

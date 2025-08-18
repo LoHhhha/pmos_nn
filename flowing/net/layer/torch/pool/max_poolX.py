@@ -5,6 +5,7 @@ from typing import Tuple, List, Optional, Annotated
 from flowing.net.layer import Layer
 from flowing.net.layer.shape_helper import OutputShapeCalculator
 from flowing.net.layer.torch.common import TorchNNLayer
+from flowing.net.layer.utils import get_and_check_target_dim_param
 
 __all__ = [
     'MaxPool1d',
@@ -15,6 +16,8 @@ __all__ = [
 
 class _MaxPool(TorchNNLayer):
     _api_name = ...
+
+    _dim: int
 
     kernel_size: Annotated[int | Tuple[int, ...], Layer.LayerContent]
     stride: Annotated[Optional[int | Tuple[int, ...]], Layer.LayerContent]
@@ -33,9 +36,9 @@ class _MaxPool(TorchNNLayer):
             dilation: int | Tuple[int, ...] = 1,
             return_indices: bool = False,
             ceil_mode: bool = False,
-            data_amount: Optional[int] = None,
+            **kwargs
     ):
-        super().__init__(data_amount=data_amount)
+        super().__init__(**kwargs)
         self.kernel_size = kernel_size
         self.stride = stride
         self.padding = padding
@@ -48,16 +51,23 @@ class _MaxPool(TorchNNLayer):
         else:
             self.output_amount = 1
 
+    def content_check(self):
+        _ = get_and_check_target_dim_param(self.kernel_size, self._dim, 1, "kernel_size")
+        _ = get_and_check_target_dim_param(self.padding, self._dim, 0, "padding")
+        _ = get_and_check_target_dim_param(
+            self.kernel_size if self.stride is None else self.stride, self._dim, 1, "stride"
+        )
+        _ = get_and_check_target_dim_param(self.dilation, self._dim, 0, "dilation")
+
     @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        # need dim as args.
-        dim = kwargs['dim']
-
         return OutputShapeCalculator.pool(
-            dim,
+            self._dim,
             self.kernel_size,
             self.padding,
             self.stride,
+            self.dilation,
+            self.ceil_mode,
             self.return_indices,
             *input_shape,
         )
@@ -66,19 +76,25 @@ class _MaxPool(TorchNNLayer):
 class MaxPool1d(_MaxPool):
     _api_name = "MaxPool1d"
 
+    _dim = 1
+
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        return super().output_shape(*input_shape, dim=1)
+        return super().output_shape(*input_shape)
 
 
 class MaxPool2d(_MaxPool):
     _api_name = "MaxPool2d"
 
+    _dim = 2
+
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        return super().output_shape(*input_shape, dim=2)
+        return super().output_shape(*input_shape)
 
 
 class MaxPool3d(_MaxPool):
     _api_name = "MaxPool3d"
 
+    _dim = 3
+
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        return super().output_shape(*input_shape, dim=3)
+        return super().output_shape(*input_shape)

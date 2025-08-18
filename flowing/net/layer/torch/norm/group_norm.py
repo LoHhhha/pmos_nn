@@ -28,18 +28,30 @@ class GroupNorm(TorchNNLayer):
             num_channels: int,
             eps: float = 1e-5,
             affine: bool = True,
-            data_amount: Optional[int] = None
+            **kwargs
     ):
-        super().__init__(data_amount=data_amount)
+        super().__init__(**kwargs)
         self.num_groups = num_groups
         self.num_channels = num_channels
         self.eps = eps
         self.affine = affine
 
+    def content_check(self):
+        if self.num_groups <= 0:
+            raise ValueError(
+                f"detect an unexpected num_channels as {self.num_channels}, "
+                f"expected num_groups is positive"
+            )
+
+        if self.num_channels % self.num_groups != 0:
+            raise ValueError(
+                f"detect an unexpected num_channels as {self.num_channels} and num_groups as {self.num_groups}, "
+                f"expected num_channels can be divisible by num_groups"
+            )
+
     @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         return OutputShapeCalculator.group_norm(
-            self.num_groups,
             self.num_channels,
             *input_shape,
         )

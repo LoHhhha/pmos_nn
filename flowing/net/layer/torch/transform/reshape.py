@@ -19,9 +19,24 @@ class Reshape(TorchLayer):
     data_amount = 1
     output_amount = 1
 
-    def __init__(self, output_shape, data_amount: Optional[int] = None):
-        super().__init__(data_amount=data_amount)
+    def __init__(self, output_shape, **kwargs):
+        super().__init__(**kwargs)
         self.shape = output_shape
+
+    def content_check(self):
+        negs = [x for x in self.shape if x < 0]
+
+        if len(negs) > 1:
+            raise ValueError(
+                f"detect an unexpected shape as {self.shape}, "
+                f"expected haven't more than one negative number"
+            )
+
+        if negs.count(-1) != len(negs):
+            raise ValueError(
+                f"detect an unexpected shape as {self.shape}, "
+                f"expected only contains -1"
+            )
 
     @Layer.injected_check_wrap
     def forward_code(

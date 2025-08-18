@@ -23,9 +23,9 @@ class _Concat(TorchLayer):
     def __init__(
             self,
             dim: int = 0,
-            data_amount: Optional[int] = None
+            **kwargs
     ):
-        super().__init__(data_amount=data_amount)
+        super().__init__(**kwargs)
         self.dim = dim
 
     @Layer.injected_check_wrap

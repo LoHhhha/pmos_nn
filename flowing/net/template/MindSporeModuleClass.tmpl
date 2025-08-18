@@ -13,3 +13,17 @@ Automatic generated code, powered by PMoS Network Parser.
 # PMoS Package Version: {version}
 # Generation Time: {time}
 {more_information}
+
+import mindspore
+import mindspore.nn
+{other_import}
+
+class {net_name}(mindspore.nn.Cell):
+    def __init__({init_args}, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        {init_code}
+
+    def construct({inputs}):
+        {forward_code}
+
+        return {outputs}

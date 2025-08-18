@@ -81,6 +81,15 @@ class DataShapeChecker:
 
 
 class OutputShapeCalculator:
+    """
+    pattern:
+        OutputShapeCalculator.xxx(..., *input_shape: Tuple[int, ...] | List[int])
+
+    tips:
+        1. Before calling OutputShapeCalculator.xxx, we called Layer.content_check. So *don't* checking contents(params)
+    util necessary.
+    """
+
     @staticmethod
     def same_as_input_shape(
             *input_shape: Tuple[int, ...] | List[int],
@@ -131,25 +140,74 @@ class OutputShapeCalculator:
             c_in: Optional[int],
             c_out: int,
             kernel_size: int | Tuple[int, ...],
-            padding: int | Tuple[int, ...],
+            padding: int | Tuple[int, ...] | str,
             stride: int | Tuple[int, ...],
             dilation: int | Tuple[int, ...],
             output_padding: Optional[int],
+            groups: int,
+            all_bound_padding: bool,
             *input_shape: Tuple[int, ...] | List[int],
     ):
+        """
+        padding: int | Tuple[int, ...] | str
+            - int
+            - Tuple[int, ...]
+            - "same"
+            - "valid"
+        output_padding: Optional[int]
+            - None
+                calculate Conv
+            - other
+                calculate ConvTranspose
+        all_bound_padding: bool
+            - True
+                padding:int | Tuple[int*(2*dim)] | str
+            - False
+                padding:int | Tuple[int*dim] | str
+        """
         data_shape = input_shape[0]
 
         DataShapeChecker.shape_dim(data_shape, dim)
 
-        kernel_size = get_and_check_target_dim_param(kernel_size, dim, "kernel_size")
-        padding = get_and_check_target_dim_param(padding, dim, "padding")
-        stride = get_and_check_target_dim_param(stride, dim, "stride")
-        dilation = get_and_check_target_dim_param(dilation, dim, "dilation")
+        kernel_size = get_and_check_target_dim_param(kernel_size, dim, 1, "kernel_size")
+        stride = get_and_check_target_dim_param(stride, dim, 1, "stride")
+        dilation = get_and_check_target_dim_param(dilation, dim, 0, "dilation")
 
         output_shape = list(data_shape)
 
+        if padding == "same":
+            if output_padding is None:
+                for i in range(dim):
+                    output_shape[-dim + i] = math.ceil(data_shape[-dim + i] / stride[i])
+            else:
+                for i in range(dim):
+                    output_shape[-dim + i] = data_shape[-dim + i] * stride[i]
+            return tuple(output_shape),
+        elif padding == "valid":
+            # as same as padding = 0
+            padding = 0
+            if output_padding is not None:
+                output_padding = 0
+
+        if all_bound_padding:
+            padding = get_and_check_target_dim_param(padding, 2 * dim, 0, "padding")
+            # from padding [C_1^1,C_1^2,...] to [C_1,...]
+            padding = tuple(padding[i] + padding[i + 1] for i in range(0, 2 * dim, 2))
+        else:
+            padding = get_and_check_target_dim_param(padding, dim, 0, "padding")
+
         if c_in is not None:
             DataShapeChecker.check_dim(data_shape, -dim - 1, c_in)
+        else:
+            DataShapeChecker.exist_dim(data_shape, -dim - 1)
+            c_in = data_shape[-dim - 1]
+
+        # this is necessary, because this may called by LazyXConvXd
+        if c_in % groups != 0:
+            raise ValueError(
+                f"detect an unexpected in_channels as {c_in} or groups as {groups}, "
+                f"expected in_channels can be divisible by groups"
+            )
 
         output_shape[-dim - 1] = c_out
 
@@ -159,8 +217,7 @@ class OutputShapeCalculator:
                     (data_shape[-dim + i] + 2 * padding[i] - dilation[i] * (kernel_size[i] - 1) - 1) / stride[i] + 1
                 )
         else:
-            if isinstance(output_padding, int):
-                output_padding = (output_padding,) * dim
+            output_padding = get_and_check_target_dim_param(output_padding, dim, 0, "output_padding")
             for i in range(dim):
                 output_shape[-dim + i] = \
                     (data_shape[-dim + i] - 1) * stride[i] - 2 * padding[i] + dilation[i] * (kernel_size[i] - 1) + \
@@ -233,17 +290,10 @@ class OutputShapeCalculator:
 
     @staticmethod
     def group_norm(
-            num_groups: int,
             num_channels: int,
             *input_shape: Tuple[int, ...] | List[int],
     ):
         data_shape = input_shape[0]
-
-        if num_groups == 0 or num_channels % num_groups != 0:
-            raise ValueError(
-                f"detect an unexpected num_channels as {num_channels} and num_groups {num_groups}, "
-                f"expected {num_channels} can be divisible by {num_groups}."
-            )
 
         # (N,C,*)
         DataShapeChecker.shape_at_least_length(data_shape, 2)
@@ -304,7 +354,7 @@ class OutputShapeCalculator:
 
         DataShapeChecker.shape_dim(data_shape, dim)
 
-        output_size = get_and_check_target_dim_param(output_size, dim, "output_size")
+        output_size = get_and_check_target_dim_param(output_size, dim, 1, "output_size")
 
         output_shape = list(data_shape)
         for idx in range(dim):
@@ -321,6 +371,8 @@ class OutputShapeCalculator:
             kernel_size: int | Tuple[int, ...],
             padding: int | Tuple[int, ...],
             stride: int | Tuple[int, ...] | None,
+            dilation: int | Tuple[int, ...],
+            ceil_mode: bool,
             return_indices: bool,
             *input_shape: Tuple[int, ...] | List[int],
     ):
@@ -332,18 +384,21 @@ class OutputShapeCalculator:
                 f"expected {dim + 1} dimensions(unbatched) or {dim + 2} dimensions(batched) input"
             )
 
-        kernel_size = get_and_check_target_dim_param(kernel_size, dim, "kernel_size")
-        padding = get_and_check_target_dim_param(padding, dim, "padding")
+        kernel_size = get_and_check_target_dim_param(kernel_size, dim, 1, "kernel_size")
+        padding = get_and_check_target_dim_param(padding, dim, 0, "padding")
         stride = get_and_check_target_dim_param(
-            kernel_size if stride is None else stride, dim, "stride"
+            kernel_size if stride is None else stride, dim, 1, "stride"
         )
+        dilation = get_and_check_target_dim_param(dilation, dim, 0, "dilation")
 
         pool_padding_and_kernel_size_check(padding=padding, kernel_size=kernel_size)
 
         output_shape = list(data_shape)
+        truncate_func = math.ceil if ceil_mode else math.floor
         for idx in range(dim):
-            output_shape[-dim + idx] = math.floor(
-                (output_shape[-dim + idx] + 2 * padding[-dim + idx] - kernel_size[-dim + idx]) / stride[-dim + idx] + 1
+            output_shape[-dim + idx] = truncate_func(
+                (output_shape[-dim + idx] + 2 * padding[idx] - dilation[idx] * (kernel_size[idx] - 1) - 1) \
+                / stride[idx] + 1
             )
 
         if return_indices:
@@ -368,10 +423,10 @@ class OutputShapeCalculator:
 
         DataShapeChecker.shape_dim(result_shape, dim)
 
-        kernel_size = get_and_check_target_dim_param(kernel_size, dim, "kernel_size")
-        padding = get_and_check_target_dim_param(padding, dim, "padding")
+        kernel_size = get_and_check_target_dim_param(kernel_size, dim, 1, "kernel_size")
+        padding = get_and_check_target_dim_param(padding, dim, 0, "padding")
         stride = get_and_check_target_dim_param(
-            kernel_size if stride is None else stride, dim, "stride"
+            kernel_size if stride is None else stride, dim, 1, "stride"
         )
 
         output_shape = list(result_shape)
@@ -459,10 +514,11 @@ class OutputShapeCalculator:
         end_dim = end_dim if end_dim >= 0 else len(data_shape) + end_dim
         DataShapeChecker.exist_dim(data_shape, end_dim)
 
+        # this is necessary when (start_dim<0 and end_dim>0) or (start_dim>0 and end_dim<0)
         if start_dim > end_dim:
             raise ValueError(
-                f"detect an unexpected Flatten params, "
-                f"start_dim as {start_dim} which is greater than end_dim as {end_dim}"
+                f"detect an unexpected start_dim as {start_dim} and end_dim as {end_dim}, "
+                f"expected start_dim in front of end_dim"
             )
 
         mul = 1
@@ -489,30 +545,17 @@ class OutputShapeCalculator:
     ):
         data_shape = input_shape[0]
 
-        neg_count = len([x for x in unflattened_size if x < 0])
-        if neg_count > 1:
-            raise ValueError(
-                f"detect an unexpected Unflatten params unflattened_size as {unflattened_size}, "
-                f"having more than one negative number"
-            )
-
         dim = dim if dim >= 0 else len(data_shape) + dim
         DataShapeChecker.exist_dim(data_shape, dim)
 
         output_shape = list(data_shape)
 
-        if neg_count:
+        if unflattened_size.count(-1):
             neg_idx = -1
             output_mul = 1
             for idx, num in enumerate(unflattened_size):
                 if num < 0:
-                    if num != -1:
-                        raise ValueError(
-                            f"detect an unexpected Unflatten params unflattened_size as {unflattened_size}, "
-                            f"having negative number but not -1"
-                        )
-                    else:
-                        neg_idx = idx
+                    neg_idx = idx
                 else:
                     output_mul *= num
 
@@ -547,22 +590,6 @@ class OutputShapeCalculator:
         data_shape = input_shape[0]
 
         length = len(dims)
-        really_dims = tuple(dim if dim >= 0 else length + dim for dim in dims)
-
-        dims_set = set(really_dims)
-        if len(dims_set) != length:
-            raise ValueError(
-                f"detect an unexpected Permute param dims as {dims}, "
-                f"expected it's items are different"
-            )
-
-        min_dim, max_dim = min(dims_set), max(dims_set)
-        if min_dim != 0 or max_dim != length - 1:
-            raise ValueError(
-                f"detect an unexpected Permute param dims as {dims}, "
-                f"expected it is a permutation of 0 to length-1 or -length to -1"
-            )
-
         if length != len(data_shape):
             raise ValueError(
                 f"detect an unexpected data_shape as {data_shape}, "
@@ -571,7 +598,7 @@ class OutputShapeCalculator:
 
         output_shape = [0] * length
         try:
-            for idx, dim in enumerate(really_dims):
+            for idx, dim in enumerate(dims):
                 output_shape[idx] = data_shape[dim]
         except IndexError:
             raise ValueError(
@@ -590,29 +617,15 @@ class OutputShapeCalculator:
         data_shape = input_shape[0]
 
         data_shape_mul = reduce(lambda x, y: x * y, data_shape)
-
-        neg_count = len([x for x in shape if x < 0])
-        if neg_count > 1:
-            raise ValueError(
-                f"detect an unexpected Reshape params shape as {shape}, "
-                f"having more than one negative number"
-            )
-
         shape_mul = reduce(lambda x, y: x * y, shape)
 
         output_shape = list(shape)
-        if neg_count:
+        if shape.count(-1):
             neg_idx = -1
             output_mul = 1
             for idx, num in enumerate(shape):
                 if num < 0:
-                    if num != -1:
-                        raise ValueError(
-                            f"detect an unexpected Reshape params shape as {shape}, "
-                            f"having negative number but not -1"
-                        )
-                    else:
-                        neg_idx = idx
+                    neg_idx = idx
                 else:
                     output_mul *= num
 

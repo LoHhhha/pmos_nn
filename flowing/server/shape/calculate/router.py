@@ -88,17 +88,14 @@ async def shape_calculate_pytorch(request: ShapeCalculateRequest):
 
             layer_node = info_to_layer_node(node)  # may raise ValueError
 
-            # may raise ClassNotFound and so on
-            data_amount = len(layer_node.from_data)
-            if data_amount:
+            try:
+                data_amount = len(layer_node.from_data)
+                # may raise ClassNotFound or ValueError
                 layer_node.layer_object = eval(layer_node.api_name)(
                     data_amount=data_amount,
                     **layer_node.layer_init_kwargs
                 )
-            else:
-                layer_node.layer_object = eval(layer_node.api_name)(**layer_node.layer_init_kwargs)
 
-            try:
                 net_nodes_shape.append(layer_node.layer_object.output_shape(*shape))  # may raise ValueError
                 net_nodes_msg.append(None)
             except ValueError as e:

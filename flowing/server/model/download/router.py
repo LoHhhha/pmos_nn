@@ -18,3 +18,5 @@ async def get_result(file_name):
     file = os.path.join(MODEL_RESULT_PATH, file_name)
     if os.path.isfile(file):
         return FileResponse(file)
+    else:
+        raise FileNotFoundError

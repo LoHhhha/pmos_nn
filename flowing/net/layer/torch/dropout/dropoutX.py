@@ -25,8 +25,8 @@ class _Dropout(TorchNNLayer):
     data_amount = 1
     output_amount = 1
 
-    def __init__(self, p: float = 0.5, inplace: bool = False, data_amount: Optional[int] = None):
-        super().__init__(data_amount=data_amount)
+    def __init__(self, p: float = 0.5, inplace: bool = False, **kwargs):
+        super().__init__(**kwargs)
         self.p = p
         self.inplace = inplace
 

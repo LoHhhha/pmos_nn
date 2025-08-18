@@ -40,11 +40,18 @@ class Parameter(Layer):
             self,
             data_size: Tuple[int, ...],
             requires_grad: bool = False,
-            data_amount: Optional[int] = None
+            **kwargs
     ):
-        super().__init__(data_amount=data_amount)
+        super().__init__(**kwargs)
         self.data_size = data_size
         self.requires_grad = requires_grad
+
+    def content_check(self):
+        if len([val for val in self.data_size if val <= 0]):
+            raise ValueError(
+                f"detect an unexpected data_size as {self.data_size}, "
+                f"expected it contains positive value"
+            )
 
     def init_code(
             self,

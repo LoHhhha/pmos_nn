@@ -4,7 +4,7 @@ import json
 import os.path
 import traceback
 
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
@@ -13,7 +13,6 @@ from flowing.shower import Logger
 from flowing.server.config import MODEL_RESULT_PATH
 from flowing.net.abstract import InputNode, OutputNode, LayerNode
 from flowing.net.parser import TorchParser
-from flowing.net.struct import NodeDataPair
 from flowing.server.common import get_json_response, info_to_input_node, info_to_output_node, info_to_layer_node
 from flowing.server.response import JSON_PARSE_ERROR_RESPONSE, NOT_IMPLEMENTED_ERROR_RESPONSE, \
     JSON_NOT_DICT_ERROR_RESPONSE
@@ -30,7 +29,7 @@ router = APIRouter(
 )
 
 
-def _parse_graph_pytorch(data: str) -> (List[InputNode], List[OutputNode], List[NodeDataPair]):
+def _parse_graph_pytorch(data: str) -> Tuple[List[InputNode], List[OutputNode], List[LayerNode]]:
     try:
         info = json.loads(data)
     except json.JSONDecodeError as e:

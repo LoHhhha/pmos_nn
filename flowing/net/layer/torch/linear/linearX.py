@@ -22,8 +22,8 @@ class LayerLinear(TorchNNLayer):
     data_amount = 1
     output_amount = 1
 
-    def __init__(self, out_features: int, bias: bool = True, data_amount: Optional[int] = None):
-        super().__init__(data_amount=data_amount)
+    def __init__(self, out_features: int, bias: bool = True, **kwargs):
+        super().__init__(**kwargs)
         self.out_features = out_features
         self.bias = bias
 

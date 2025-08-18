@@ -1,4 +1,4 @@
-# Copyright © 2024-2025 PMoS. All rights reserved.
+# Copyright © 2025 PMoS. All rights reserved.
 
 import time
 import importlib
@@ -7,17 +7,17 @@ from typing import List, Tuple
 from flowing.net.template import Mate
 from flowing.net.parser import Parser
 from flowing.net.abstract import LayerNode, InputNode, OutputNode
-import flowing.net.layer.torch as torch_layers
+import flowing.net.layer.mindspore as mindspore_layers
 
-TORCH_OK = False
+MINDSPORE_OK = False
 try:
-    importlib.import_module("torch")
-    TORCH_OK = True
+    importlib.import_module("mindspore")
+    MINDSPORE_OK = True
 except ImportError:
     pass
 
 
-class TorchParser(Parser):
+class MindSporeParser(Parser):
     def __init__(
             self,
             input_nodes: List[InputNode] | Tuple[InputNode, ...],
@@ -26,14 +26,14 @@ class TorchParser(Parser):
             network_name: str = None,
     ):
         if network_name is None:
-            network_name = f"AutoTorchNet{int(time.time() * 1000)}"
+            network_name = f"AutoMindSporeNet{int(time.time() * 1000)}"
 
         super().__init__(
             input_nodes=input_nodes,
             net_nodes=net_nodes,
             output_nodes=output_nodes,
-            dependencies_ready=TORCH_OK,
-            layers_package=torch_layers,
-            network_template_path=Mate.TORCH_TMPL_PATH,
+            dependencies_ready=MINDSPORE_OK,
+            layers_package=mindspore_layers,
+            network_template_path=Mate.MINDSPORE_TMPL_PATH,
             network_name=network_name,
         )

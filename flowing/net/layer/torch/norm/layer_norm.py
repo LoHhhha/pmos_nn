@@ -28,9 +28,9 @@ class LayerNorm(TorchNNLayer):
             eps: float = 1e-5,
             elementwise_affine: bool = True,
             bias: bool = True,
-            data_amount: Optional[int] = None
+            **kwargs
     ):
-        super().__init__(data_amount=data_amount)
+        super().__init__(**kwargs)
         if isinstance(normalized_shape, int):
             self.normalized_shape = [normalized_shape]
         else:
@@ -39,15 +39,12 @@ class LayerNorm(TorchNNLayer):
         self.elementwise_affine = elementwise_affine
         self.bias = bias
 
-    def _is_bad_data_shape(self, data_shape: List[int]) -> bool:
-        if len(data_shape) < len(self.normalized_shape):
-            return True
-
-        for idx in range(len(self.normalized_shape)):
-            if self.normalized_shape[-idx - 1] != data_shape[-idx - 1]:
-                return True
-
-        return False
+    def content_check(self):
+        if len([val for val in self.normalized_shape if val <= 0]):
+            raise ValueError(
+                f"detect an unexpected normalized_shape as {self.normalized_shape}, "
+                f"expected it contains positive value"
+            )
 
     @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:

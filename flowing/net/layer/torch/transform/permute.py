@@ -22,9 +22,9 @@ class Permute(TorchLayer):
     def __init__(
             self,
             dims: Tuple[int, ...],
-            data_amount: Optional[int] = None
+            **kwargs
     ):
-        super().__init__(data_amount=data_amount)
+        super().__init__(**kwargs)
         self.dims = dims
 
     @Layer.injected_check_wrap
@@ -43,6 +43,24 @@ class Permute(TorchLayer):
         if only_right_value:
             return right_value,
         return f"{self.output_name} = {right_value}",
+
+    def content_check(self):
+        length = len(self.dims)
+        really_dims = tuple(dim if dim >= 0 else length + dim for dim in self.dims)
+
+        dims_set = set(really_dims)
+        if len(dims_set) != length:
+            raise ValueError(
+                f"detect an unexpected dims as {self.dims}, "
+                f"expected it's items are different"
+            )
+
+        min_dim, max_dim = min(dims_set), max(dims_set)
+        if min_dim != 0 or max_dim != length - 1:
+            raise ValueError(
+                f"detect an unexpected dims as {self.dims}, "
+                f"expected it is a permutation of 0 to length-1 or -length to -1"
+            )
 
     @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:

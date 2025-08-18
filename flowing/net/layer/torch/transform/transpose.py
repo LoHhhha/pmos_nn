@@ -24,9 +24,9 @@ class Transpose(TorchLayer):
             self,
             dim0: int,
             dim1: int,
-            data_amount: Optional[int] = None
+            **kwargs
     ):
-        super().__init__(data_amount=data_amount)
+        super().__init__(**kwargs)
         self.dim0 = dim0
         self.dim1 = dim1
 

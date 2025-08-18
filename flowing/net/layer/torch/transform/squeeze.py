@@ -29,9 +29,9 @@ class Squeeze(TorchLayer):
     def __init__(
             self,
             dim: Optional[int | Tuple[int, ...]] = None,
-            data_amount: Optional[int] = None
+            **kwargs
     ):
-        super().__init__(data_amount=data_amount)
+        super().__init__(**kwargs)
         self.dim = dim
 
         self._api_forward_func = Squeeze._squeeze_forward
@@ -72,9 +72,9 @@ class Unsqueeze(TorchLayer):
     def __init__(
             self,
             dim: int,
-            data_amount: Optional[int] = None
+            **kwargs
     ):
-        super().__init__(data_amount=data_amount)
+        super().__init__(**kwargs)
         self.dim = dim
 
     @Layer.injected_check_wrap

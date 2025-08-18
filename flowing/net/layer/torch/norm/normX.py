@@ -39,9 +39,9 @@ class _LazyBatchNorm(TorchNNLayer):
             momentum: Optional[float] = 0.1,
             affine: bool = True,
             track_running_stats: bool = True,
-            data_amount: Optional[int] = None
+            **kwargs
     ):
-        super().__init__(data_amount=data_amount)
+        super().__init__(**kwargs)
 
         self.eps = eps
         self.momentum = momentum

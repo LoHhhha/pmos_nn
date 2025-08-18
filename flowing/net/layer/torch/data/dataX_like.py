@@ -24,8 +24,8 @@ class _DataXLike(TorchLayer):
     data_amount = 1
     output_amount = 1
 
-    def __init__(self, requires_grad: bool = False, data_amount: Optional[int] = None):
-        super().__init__(data_amount=data_amount)
+    def __init__(self, requires_grad: bool = False, **kwargs):
+        super().__init__(**kwargs)
         self.requires_grad = requires_grad
 
     def forward_code(

@@ -33,13 +33,20 @@ class _DataX(TorchLayer):
             device: Optional[str] = None,
             dtype: Optional[str] = None,
             requires_grad: bool = False,
-            data_amount: Optional[int] = None
+            **kwargs
     ):
-        super().__init__(data_amount=data_amount)
+        super().__init__(**kwargs)
         self.size = size
         self.device = Device(device)
         self.dtype = Dtype(dtype)
         self.requires_grad = requires_grad
+
+    def content_check(self):
+        if len([val for val in self.size if val <= 0]):
+            raise ValueError(
+                f"detect an unexpected size as {self.size}, "
+                f"expected it contains positive value"
+            )
 
     def forward_code(
             self,
