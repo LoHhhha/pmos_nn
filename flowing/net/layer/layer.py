@@ -46,6 +46,8 @@ class Layer(ABC):
         So only assign <LayerContent> on __init__(), and remember to call super().__init__(data_amount)!
         """
 
+        # remove some known key-value
+        kwargs.pop("ignore_content_exception", False)
         if len(kwargs):
             Logger.warning(
                 f"detect kwargs is not empty in Layer.__init__, "

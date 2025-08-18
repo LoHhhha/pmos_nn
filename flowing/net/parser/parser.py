@@ -1,7 +1,7 @@
 # Copyright © 2024 PMoS. All rights reserved.
 
 import os
-import autopep8
+import black
 from datetime import datetime
 from collections import deque
 from typing import List, Tuple, Any
@@ -148,13 +148,9 @@ class Parser:
         )
 
         try:
-            class_str = autopep8.fix_code(
+            class_str = black.format_str(
                 class_str,
-                options={
-                    "aggressive": 2,
-                    "experimental": True,
-                    "pep8_passes": 1,
-                }
+                mode=black.Mode()
             )
         except Exception as e:
             Logger.fault(f"Network({self.network_name}) class format as pep8 fail.")
