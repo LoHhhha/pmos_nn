@@ -72,6 +72,21 @@ operatorBarNamespace.argsType = {
         },
         prompt: "integer such as '19528'",
     },
+    strNotNegInt: {
+        id: "nonnegative integer",
+        reg: /^\s*\d+\s*$/,
+        input: operatorBarNamespace.argsInputType.text,
+        getValue: (value) => {
+            const ret = value.match(/\d+/g).map((item) => {
+                return parseInt(item, 10);
+            });
+            return ret[0];
+        },
+        get note() {
+            return I18N_STRINGS.str_not_neg_int_note;
+        },
+        prompt: "nonnegative integer such as '19528'",
+    },
     strIntOrNone: {
         id: "None or integer",
         reg: /^(([-+]?\d+)|(None))$/,
@@ -219,6 +234,26 @@ operatorBarNamespace.argsType = {
                 ", "
             )}`;
         },
+    },
+    pytorchPadding: {
+        id: "pytorch padding for convolution",
+        reg: /^((\(\s*\d+\s*(,\s*\d+\s*)*\))|(\s*\d+\s*))|valid|same$/,
+        input: operatorBarNamespace.argsInputType.text,
+        getValue: (value) => {
+            if (value === "valid" || value === "same") {
+                return value;
+            }
+
+            const ret = value.match(/\d+/g).map((item) => {
+                return parseInt(item, 10);
+            });
+            if (ret.length === 1) return ret[0];
+            return ret;
+        },
+        get note() {
+            return I18N_STRINGS.pytorch_padding_note;
+        },
+        prompt: "'valid' or 'same' or nonnegative integer or tuple containing nonnegative integers like string which divided by ',' and included by '(' and ')' such as '(1,3,64,64)'",
     },
     pytorchPaddingMode: {
         id: "pytorch padding mode",
@@ -1747,17 +1782,17 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "kernel_size",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "3",
             },
             {
                 name: "stride",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
             {
                 name: "padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.pytorchPadding,
                 default: "0",
             },
             {
@@ -1767,12 +1802,12 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "dilation",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
             {
                 name: "groups",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "1",
             },
             {
@@ -1811,17 +1846,17 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "kernel_size",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "3",
             },
             {
                 name: "stride",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
             {
                 name: "padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.pytorchPadding,
                 default: "0",
             },
             {
@@ -1831,12 +1866,12 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "dilation",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
             {
                 name: "groups",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "1",
             },
             {
@@ -1875,17 +1910,17 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "kernel_size",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "3",
             },
             {
                 name: "stride",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
             {
                 name: "padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.pytorchPadding,
                 default: "0",
             },
             {
@@ -1895,12 +1930,12 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "dilation",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
             {
                 name: "groups",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "1",
             },
             {
@@ -1933,17 +1968,17 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "kernel_size",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "3",
             },
             {
                 name: "stride",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
             {
                 name: "padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.pytorchPadding,
                 default: "0",
             },
             {
@@ -1953,12 +1988,12 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "dilation",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
             {
                 name: "groups",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "1",
             },
             {
@@ -1991,17 +2026,17 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "kernel_size",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "3",
             },
             {
                 name: "stride",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
             {
                 name: "padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.pytorchPadding,
                 default: "0",
             },
             {
@@ -2011,12 +2046,12 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "dilation",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
             {
                 name: "groups",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "1",
             },
             {
@@ -2049,17 +2084,17 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "kernel_size",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "3",
             },
             {
                 name: "stride",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
             {
                 name: "padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.pytorchPadding,
                 default: "0",
             },
             {
@@ -2069,12 +2104,12 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "dilation",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
             {
                 name: "groups",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "1",
             },
             {
@@ -2113,27 +2148,27 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "kernel_size",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "3",
             },
             {
                 name: "stride",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
             {
                 name: "padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "0",
             },
             {
                 name: "output_padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "0",
             },
             {
                 name: "groups",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "1",
             },
             {
@@ -2143,7 +2178,7 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "dilation",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
         ],
@@ -2177,27 +2212,27 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "kernel_size",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "3",
             },
             {
                 name: "stride",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
             {
                 name: "padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "0",
             },
             {
                 name: "output_padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "0",
             },
             {
                 name: "groups",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "1",
             },
             {
@@ -2207,7 +2242,7 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "dilation",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
         ],
@@ -2241,27 +2276,27 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "kernel_size",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "3",
             },
             {
                 name: "stride",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
             {
                 name: "padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "0",
             },
             {
                 name: "output_padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "0",
             },
             {
                 name: "groups",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "1",
             },
             {
@@ -2271,7 +2306,7 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "dilation",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
         ],
@@ -2299,27 +2334,27 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "kernel_size",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "3",
             },
             {
                 name: "stride",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
             {
                 name: "padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "0",
             },
             {
                 name: "output_padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "0",
             },
             {
                 name: "groups",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "1",
             },
             {
@@ -2329,7 +2364,7 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "dilation",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
         ],
@@ -2357,27 +2392,27 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "kernel_size",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "3",
             },
             {
                 name: "stride",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
             {
                 name: "padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "0",
             },
             {
                 name: "output_padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "0",
             },
             {
                 name: "groups",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "1",
             },
             {
@@ -2387,7 +2422,7 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "dilation",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
         ],
@@ -2415,27 +2450,27 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "kernel_size",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "3",
             },
             {
                 name: "stride",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
             {
                 name: "padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "0",
             },
             {
                 name: "output_padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "0",
             },
             {
                 name: "groups",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "1",
             },
             {
@@ -2445,7 +2480,7 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "dilation",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
         ],
@@ -2468,22 +2503,22 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "kernel_size",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "2",
             },
             {
                 name: "stride",
-                type: operatorBarNamespace.argsType.strIntOrTupleOrNone,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "None",
             },
             {
                 name: "padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "0",
             },
             {
                 name: "dilation",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
             {
@@ -2529,22 +2564,22 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "kernel_size",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "2",
             },
             {
                 name: "stride",
-                type: operatorBarNamespace.argsType.strIntOrTupleOrNone,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "None",
             },
             {
                 name: "padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "0",
             },
             {
                 name: "dilation",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
             {
@@ -2590,22 +2625,22 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "kernel_size",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "2",
             },
             {
                 name: "stride",
-                type: operatorBarNamespace.argsType.strIntOrTupleOrNone,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "None",
             },
             {
                 name: "padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "0",
             },
             {
                 name: "dilation",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "1",
             },
             {
@@ -2828,7 +2863,7 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "kernel_size",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "2",
             },
             {
@@ -2838,7 +2873,7 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "0",
             },
         ],
@@ -2861,7 +2896,7 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "kernel_size",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "2",
             },
             {
@@ -2871,7 +2906,7 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "0",
             },
         ],
@@ -2894,7 +2929,7 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "kernel_size",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "2",
             },
             {
@@ -2904,7 +2939,7 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "0",
             },
         ],
@@ -2926,7 +2961,7 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "kernel_size",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "2",
             },
             {
@@ -2936,7 +2971,7 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "0",
             },
             {
@@ -2968,7 +3003,7 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "kernel_size",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "2",
             },
             {
@@ -2978,7 +3013,7 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "0",
             },
             {
@@ -3010,7 +3045,7 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "kernel_size",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "2",
             },
             {
@@ -3020,7 +3055,7 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "padding",
-                type: operatorBarNamespace.argsType.strIntOrTuple,
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
                 default: "0",
             },
             {

@@ -22,7 +22,7 @@ def get_and_check_target_dim_param(
         if isinstance(param, int) and param < at_least:
             raise ValueError(
                 f"detect an unexpected {param_name} as {param}({type(param)}), "
-                f"expected it is an at least {at_least} int or None"
+                f"expected it is an at least {at_least} or maybe can be None"
             )
         return (param,) * dim
     elif not isinstance(param, Iterable):
