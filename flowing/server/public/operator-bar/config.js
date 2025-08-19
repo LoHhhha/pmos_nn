@@ -2508,7 +2508,7 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "stride",
-                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                type: operatorBarNamespace.argsType.strIntOrTupleOrNone,
                 default: "None",
             },
             {
@@ -2569,7 +2569,7 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "stride",
-                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                type: operatorBarNamespace.argsType.strIntOrTupleOrNone,
                 default: "None",
             },
             {
@@ -2630,7 +2630,7 @@ operatorBarNamespace.operators = [
             },
             {
                 name: "stride",
-                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                type: operatorBarNamespace.argsType.strIntOrTupleOrNone,
                 default: "None",
             },
             {
