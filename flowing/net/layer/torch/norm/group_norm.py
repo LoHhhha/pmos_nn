@@ -39,14 +39,14 @@ class GroupNorm(TorchNNLayer):
     def content_check(self):
         if self.num_groups <= 0:
             raise ValueError(
-                f"detect an unexpected num_channels as {self.num_channels}, "
-                f"expected num_groups is positive"
+                f"detected an unexpected num_channels as {self.num_channels}, "
+                f"expecting num_groups is positive"
             )
 
         if self.num_channels % self.num_groups != 0:
             raise ValueError(
-                f"detect an unexpected num_channels as {self.num_channels} and num_groups as {self.num_groups}, "
-                f"expected num_channels can be divisible by num_groups"
+                f"detected an unexpected num_channels as {self.num_channels} and num_groups as {self.num_groups}, "
+                f"expecting num_channels can be divisible by num_groups"
             )
 
     @Layer.input_shape_check_wrap

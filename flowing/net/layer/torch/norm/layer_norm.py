@@ -42,8 +42,8 @@ class LayerNorm(TorchNNLayer):
     def content_check(self):
         if len([val for val in self.normalized_shape if val <= 0]):
             raise ValueError(
-                f"detect an unexpected normalized_shape as {self.normalized_shape}, "
-                f"expected it contains positive value"
+                f"detected an unexpected normalized_shape as {self.normalized_shape}, "
+                f"expecting it contains positive value"
             )
 
     @Layer.input_shape_check_wrap

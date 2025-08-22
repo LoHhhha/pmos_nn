@@ -51,15 +51,15 @@ class Permute(TorchLayer):
         dims_set = set(really_dims)
         if len(dims_set) != length:
             raise ValueError(
-                f"detect an unexpected dims as {self.dims}, "
-                f"expected it's items are different"
+                f"detected an unexpected dims as {self.dims}, "
+                f"expecting it's items are different"
             )
 
         min_dim, max_dim = min(dims_set), max(dims_set)
         if min_dim != 0 or max_dim != length - 1:
             raise ValueError(
-                f"detect an unexpected dims as {self.dims}, "
-                f"expected it is a permutation of 0 to length-1 or -length to -1"
+                f"detected an unexpected dims as {self.dims}, "
+                f"expecting it is a permutation of 0 to length-1 or -length to -1"
             )
 
     @Layer.input_shape_check_wrap

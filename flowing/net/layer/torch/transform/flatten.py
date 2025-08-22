@@ -30,8 +30,8 @@ class Flatten(TorchNNLayer):
         if (self.start_dim > self.end_dim and min(self.start_dim, self.end_dim) >= 0) or \
                 (self.start_dim < self.end_dim and max(self.start_dim, self.end_dim) < 0):
             raise ValueError(
-                f"detect an unexpected start_dim as {self.start_dim} and end_dim as {self.end_dim}, "
-                f"expected start_dim in front of end_dim"
+                f"detected an unexpected start_dim as {self.start_dim} and end_dim as {self.end_dim}, "
+                f"expecting start_dim in front of end_dim"
             )
 
     @Layer.input_shape_check_wrap
@@ -62,14 +62,14 @@ class Unflatten(TorchNNLayer):
 
         if len(negs) > 1:
             raise ValueError(
-                f"detect an unexpected unflattened_size as {self.unflattened_size}, "
-                f"expected haven't more than one negative number"
+                f"detected an unexpected unflattened_size as {self.unflattened_size}, "
+                f"expecting haven't more than one negative number"
             )
 
         if negs.count(-1) != len(negs):
             raise ValueError(
-                f"detect an unexpected unflattened_size as {self.unflattened_size}, "
-                f"expected only contains -1"
+                f"detected an unexpected unflattened_size as {self.unflattened_size}, "
+                f"expecting only contains -1"
             )
 
     @Layer.input_shape_check_wrap

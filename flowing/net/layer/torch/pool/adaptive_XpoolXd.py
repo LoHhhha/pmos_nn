@@ -99,8 +99,8 @@ class AdaptiveAvgPool1d(_AdaptiveAvgPool):
         if self.output_size is None or \
                 (isinstance(self.output_size, Iterable) and self.output_size.count(None)):
             raise ValueError(
-                f"detect an unexpected output_size as {self.output_size}, "
-                "expected AdaptivePool1d's output_size can not contain or be None"
+                f"detected an unexpected output_size as {self.output_size}, "
+                "expecting AdaptivePool1d's output_size can not contain or be None"
             )
         return super().output_shape(*input_shape)
 
@@ -132,8 +132,8 @@ class AdaptiveMaxPool1d(_AdaptiveMaxPool):
         if self.output_size is None or \
                 (isinstance(self.output_size, Iterable) and self.output_size.count(None)):
             raise ValueError(
-                f"detect an unexpected output_size as {self.output_size}, "
-                "expected AdaptiveMaxPool1d's output_size can not contain or be None"
+                f"detected an unexpected output_size as {self.output_size}, "
+                "expecting AdaptiveMaxPool1d's output_size can not contain or be None"
             )
         return super().output_shape(*input_shape)
 

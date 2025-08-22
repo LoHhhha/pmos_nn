@@ -28,14 +28,14 @@ class Reshape(TorchLayer):
 
         if len(negs) > 1:
             raise ValueError(
-                f"detect an unexpected shape as {self.shape}, "
-                f"expected haven't more than one negative number"
+                f"detected an unexpected shape as {self.shape}, "
+                f"expecting haven't more than one negative number"
             )
 
         if negs.count(-1) != len(negs):
             raise ValueError(
-                f"detect an unexpected shape as {self.shape}, "
-                f"expected only contains -1"
+                f"detected an unexpected shape as {self.shape}, "
+                f"expecting only contains -1"
             )
 
     @Layer.injected_check_wrap

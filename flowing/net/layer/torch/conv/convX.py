@@ -72,13 +72,13 @@ class _LazyConv(TorchNNLayer):
             elif self.padding == 'same':
                 if stride.count(1) != self._dim:
                     raise ValueError(
-                        f"detect an unexpected padding as {self.padding} or stride as {self.stride}, "
-                        f"expected stride should all be 1 when padding is 'same'"
+                        f"detected an unexpected padding as {self.padding} or stride as {self.stride}, "
+                        f"expecting stride should all be 1 when padding is 'same'"
                     )
             else:
                 raise ValueError(
-                    f"detect an unexpected padding as {self.padding}, "
-                    f"expected padding must be one of 'same', 'valid' when padding is str type"
+                    f"detected an unexpected padding as {self.padding}, "
+                    f"expecting padding must be one of 'same', 'valid' when padding is str type"
                 )
         else:
             # int/tuple
@@ -86,14 +86,14 @@ class _LazyConv(TorchNNLayer):
 
         if self.padding_mode not in ('zeros', 'reflect', 'replicate', 'circular'):
             raise ValueError(
-                f"detect an unexpected padding_mode as {self.padding_mode}, "
-                f"expected padding_mode must be one of 'zeros', 'reflect', 'replicate', 'circular'"
+                f"detected an unexpected padding_mode as {self.padding_mode}, "
+                f"expecting padding_mode must be one of 'zeros', 'reflect', 'replicate', 'circular'"
             )
 
         if self.out_channels % self.groups != 0:
             raise ValueError(
-                f"detect an unexpected out_channels as {self.out_channels} or groups as {self.groups}, "
-                f"expected out_channels can be divisible by groups"
+                f"detected an unexpected out_channels as {self.out_channels} or groups as {self.groups}, "
+                f"expecting out_channels can be divisible by groups"
             )
 
     @Layer.input_shape_check_wrap
@@ -130,8 +130,8 @@ class _LazyConvTranspose(_LazyConv):
 
         if isinstance(self.padding, str):
             raise ValueError(
-                f"detect an unexpected padding as {self.padding}, "
-                f"expected padding should be int or tuple"
+                f"detected an unexpected padding as {self.padding}, "
+                f"expecting padding should be int or tuple"
             )
 
 
@@ -149,8 +149,8 @@ class _Conv(_LazyConv):
     def content_check(self):
         if self.in_channels % self.groups != 0:
             raise ValueError(
-                f"detect an unexpected in_channels as {self.in_channels} or groups as {self.groups}, "
-                f"expected in_channels can be divisible by groups"
+                f"detected an unexpected in_channels as {self.in_channels} or groups as {self.groups}, "
+                f"expecting in_channels can be divisible by groups"
             )
 
 
@@ -167,8 +167,8 @@ class _ConvTranspose(_Conv):
 
         if isinstance(self.padding, str):
             raise ValueError(
-                f"detect an unexpected padding as {self.padding}, "
-                f"expected padding should be int or tuple"
+                f"detected an unexpected padding as {self.padding}, "
+                f"expecting padding should be int or tuple"
             )
 
 

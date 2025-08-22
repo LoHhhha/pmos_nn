@@ -44,8 +44,8 @@ class _DataX(TorchLayer):
     def content_check(self):
         if len([val for val in self.size if val <= 0]):
             raise ValueError(
-                f"detect an unexpected size as {self.size}, "
-                f"expected it contains positive value"
+                f"detected an unexpected size as {self.size}, "
+                f"expecting it contains positive value"
             )
 
     def forward_code(

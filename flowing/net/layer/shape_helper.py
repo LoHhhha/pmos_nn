@@ -20,8 +20,8 @@ class DataShapeChecker:
                 data_shape[dim]
             except IndexError:
                 raise ValueError(
-                    f"detect an unexpected {data_shape_name} as {data_shape}, "
-                    f"expected {data_shape_name} should have {dim} dimension"
+                    f"detected an unexpected {data_shape_name} as {data_shape}, "
+                    f"expecting {data_shape_name} should have {dim} dimension"
                 )
 
     @staticmethod
@@ -35,8 +35,8 @@ class DataShapeChecker:
         DataShapeChecker.exist_dim(data_shape, dim, data_shape_name)
         if data_shape[dim] != value:
             raise ValueError(
-                f"detect an unexpected {data_shape_name} as {data_shape}, "
-                f"expected it's {dim} dimensions is equal to in_channels as {value}"
+                f"detected an unexpected {data_shape_name} as {data_shape}, "
+                f"expecting it's {dim} dimensions is equal to in_channels as {value}"
             )
 
     @staticmethod
@@ -50,8 +50,8 @@ class DataShapeChecker:
         DataShapeChecker.exist_dim(data_shape, dim, data_shape_name)
         if (data_shape[dim] % divisor) != 0:
             raise ValueError(
-                f"detect an unexpected {data_shape_name} as {data_shape}, "
-                f"expected {data_shape_name}[{dim}] can be divisible by {divisor}"
+                f"detected an unexpected {data_shape_name} as {data_shape}, "
+                f"expecting {data_shape_name}[{dim}] can be divisible by {divisor}"
             )
 
     @staticmethod
@@ -63,8 +63,8 @@ class DataShapeChecker:
         # check if shape can be described as (N,C,...dim) or (C,...dim)
         if (dim is not None) and (len(data_shape) not in (dim + 1, dim + 2)):
             raise ValueError(
-                f"detect an unexpected {data_shape_name} as {data_shape}, "
-                f"expected {dim + 1} dimensions(unbatched) or {dim + 2} dimensions(batched) input"
+                f"detected an unexpected {data_shape_name} as {data_shape}, "
+                f"expecting {dim + 1} dimensions(unbatched) or {dim + 2} dimensions(batched) input"
             )
 
     @staticmethod
@@ -75,8 +75,8 @@ class DataShapeChecker:
     ):
         if len(data_shape) < length:
             raise ValueError(
-                f"detect an unexpected {data_shape_name} as {data_shape}, "
-                f"expected {data_shape_name} must be at least {length} dimensional"
+                f"detected an unexpected {data_shape_name} as {data_shape}, "
+                f"expecting {data_shape_name} must be at least {length} dimensional"
             )
 
 
@@ -129,7 +129,7 @@ class OutputShapeCalculator:
                 # detect <=0 or not in (1, X)/(X, 1)/(X,X)
                 if prev[-idx - 1] <= 0:
                     raise ValueError(
-                        f"detect an unexpected input_shape as {input_shape}, "
+                        f"detected an unexpected input_shape as {input_shape}, "
                         f"has different postfix shapes"
                     )
         return tuple(prev),
@@ -206,8 +206,8 @@ class OutputShapeCalculator:
         # this is necessary, because this may called by LazyXConvXd
         if c_in % groups != 0:
             raise ValueError(
-                f"detect an unexpected in_channels as {c_in} or groups as {groups}, "
-                f"expected in_channels can be divisible by groups"
+                f"detected an unexpected in_channels as {c_in} or groups as {groups}, "
+                f"expecting in_channels can be divisible by groups"
             )
 
         output_shape[-dim - 1] = c_out
@@ -258,8 +258,8 @@ class OutputShapeCalculator:
             output_shape[-1] = out_features
         except IndexError:
             raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
-                f"expected data_shape has at least 1 dimension"
+                f"detected an unexpected data_shape as {data_shape}, "
+                f"expecting data_shape has at least 1 dimension"
             )
 
         return tuple(output_shape),
@@ -316,8 +316,8 @@ class OutputShapeCalculator:
 
         if tuple(data_shape[begin_norm_axis:]) != tuple(normalized_shape):
             raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
-                f"expected data_shape with shape [*] + {normalized_shape}"
+                f"detected an unexpected data_shape as {data_shape}, "
+                f"expecting data_shape with shape [*] + {normalized_shape}"
             )
 
         return tuple(data_shape),
@@ -332,8 +332,8 @@ class OutputShapeCalculator:
 
         if len(data_shape) not in allowed_dims:
             raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
-                f"expected data_shape has {allowed_dims} dimensions"
+                f"detected an unexpected data_shape as {data_shape}, "
+                f"expecting data_shape has {allowed_dims} dimensions"
             )
 
         if num_features is not None:
@@ -381,8 +381,8 @@ class OutputShapeCalculator:
 
         if len(data_shape) not in (dim + 1, dim + 2):
             raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
-                f"expected {dim + 1} dimensions(unbatched) or {dim + 2} dimensions(batched) input"
+                f"detected an unexpected data_shape as {data_shape}, "
+                f"expecting {dim + 1} dimensions(unbatched) or {dim + 2} dimensions(batched) input"
             )
 
         kernel_size = get_and_check_target_dim_param(kernel_size, dim, 1, "kernel_size")
@@ -418,8 +418,8 @@ class OutputShapeCalculator:
 
         if tuple(result_shape) != tuple(info_shape):
             raise ValueError(
-                f"detect an unexpected result_shape as {result_shape} or info_shape as {info_shape}, "
-                f"expected both of shapes should be same."
+                f"detected an unexpected result_shape as {result_shape} or info_shape as {info_shape}, "
+                f"expecting both of shapes should be same."
             )
 
         DataShapeChecker.shape_dim(result_shape, dim)
@@ -455,7 +455,7 @@ class OutputShapeCalculator:
 
             if prev_shape is not None and shape != prev_shape:
                 raise ValueError(
-                    f"detect an unexpected input_shape as {input_shape}, "
+                    f"detected an unexpected input_shape as {input_shape}, "
                     f"which has different shapes"
                 )
             if prev_shape is None:
@@ -479,8 +479,8 @@ class OutputShapeCalculator:
 
             if prev_shape is not None and shape != prev_shape:
                 raise ValueError(
-                    f"detect an unexpected input_shape as {input_shape}, "
-                    f"has different shapes"
+                    f"detected an unexpected input_shape as {input_shape}, "
+                    f"which has different shapes"
                 )
             if prev_shape is None:
                 prev_shape = shape
@@ -518,8 +518,8 @@ class OutputShapeCalculator:
         # this is necessary when (start_dim<0 and end_dim>0) or (start_dim>0 and end_dim<0)
         if start_dim > end_dim:
             raise ValueError(
-                f"detect an unexpected start_dim as {start_dim} and end_dim as {end_dim}, "
-                f"expected start_dim in front of end_dim"
+                f"detected an unexpected start_dim as {start_dim} and end_dim as {end_dim}, "
+                f"expecting start_dim should in front of end_dim"
             )
 
         mul = 1
@@ -562,7 +562,7 @@ class OutputShapeCalculator:
 
             if output_mul > data_shape[dim] or output_mul == 0 or output_shape[dim] % output_mul != 0:
                 raise ValueError(
-                    f"detect an unexpected data_shape:{data_shape}, "
+                    f"detected an unexpected data_shape:{data_shape}, "
                     f"which {dim} dimension cannot unflatten to {unflattened_size}"
                 )
 
@@ -575,8 +575,8 @@ class OutputShapeCalculator:
 
             if output_shape[dim] != unflattened_size_mul:
                 raise ValueError(
-                    f"detect an unexpected data_shape as {data_shape}, "
-                    f"expected data_shape's {dim + 1} dimension should be {unflattened_size_mul}"
+                    f"detected an unexpected data_shape as {data_shape}, "
+                    f"expecting data_shape's {dim + 1} dimension should be {unflattened_size_mul}"
                 )
 
             output_shape[dim:dim + 1] = unflattened_size
@@ -593,8 +593,8 @@ class OutputShapeCalculator:
         length = len(dims)
         if length != len(data_shape):
             raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
-                f"expected it's item has {length} dimensions"
+                f"detected an unexpected data_shape as {data_shape}, "
+                f"expecting it's item has {length} dimensions"
             )
 
         output_shape = [0] * length
@@ -603,8 +603,8 @@ class OutputShapeCalculator:
                 output_shape[idx] = data_shape[dim]
         except IndexError:
             raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
-                f"expected it can find indexes of {dims}"
+                f"detected an unexpected data_shape as {data_shape}, "
+                f"expecting it can find indexes of {dims}"
             )
 
         return tuple(output_shape),
@@ -632,13 +632,13 @@ class OutputShapeCalculator:
 
             if output_mul > data_shape_mul or output_mul == 0 or data_shape_mul % output_mul != 0:
                 raise ValueError(
-                    f"detect an unexpected data_shape as {data_shape}, "
+                    f"detected an unexpected data_shape as {data_shape}, "
                     f"which cannot reshape to {shape}"
                 )
             output_shape[neg_idx] = data_shape_mul // output_mul
         elif data_shape_mul != shape_mul:
             raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
+                f"detected an unexpected data_shape as {data_shape}, "
                 f"expected it's result of shape multiplication is {shape_mul}"
             )
 

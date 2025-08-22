@@ -67,34 +67,34 @@ class _Conv(MindSporeNNLayer):
         if self.pad_mode == "same":
             if self.padding != 0:
                 raise ValueError(
-                    f"detect an unexpected padding as {self.padding} or pad_mode as {self.pad_mode}, "
-                    f"expected padding should be 1 when pad_mode is 'same'"
+                    f"detected an unexpected padding as {self.padding} or pad_mode as {self.pad_mode}, "
+                    f"expecting padding should be 1 when pad_mode is 'same'"
                 )
         elif self.pad_mode == "valid":
             if self.padding != 0:
                 raise ValueError(
-                    f"detect an unexpected padding as {self.padding} or pad_mode as {self.pad_mode}, "
-                    f"expected padding should be 1 when pad_mode is 'valid'"
+                    f"detected an unexpected padding as {self.padding} or pad_mode as {self.pad_mode}, "
+                    f"expecting padding should be 1 when pad_mode is 'valid'"
                 )
         elif self.pad_mode == "pad":
             # each dim has 2 directions to padding
             _ = get_and_check_target_dim_param(self.padding, 2 * self._dim, 0, "padding")
         else:
             raise ValueError(
-                f"detect an unexpected pad_mode as {self.pad_mode}, "
-                f"expected pad_mode should be one of 'pad', 'valid' or 'same'"
+                f"detected an unexpected pad_mode as {self.pad_mode}, "
+                f"expecting pad_mode should be one of 'pad', 'valid' or 'same'"
             )
 
         if self.in_channels % self.group != 0:
             raise ValueError(
-                f"detect an unexpected in_channels as {self.in_channels} or group as {self.group}, "
-                f"expected in_channels can be divisible by group"
+                f"detected an unexpected in_channels as {self.in_channels} or group as {self.group}, "
+                f"expecting in_channels can be divisible by group"
             )
 
         if self.out_channels % self.group != 0:
             raise ValueError(
-                f"detect an unexpected out_channels as {self.out_channels} or group as {self.group}, "
-                f"expected out_channels can be divisible by group"
+                f"detected an unexpected out_channels as {self.out_channels} or group as {self.group}, "
+                f"expecting out_channels can be divisible by group"
             )
 
     @Layer.input_shape_check_wrap
@@ -106,8 +106,8 @@ class _Conv(MindSporeNNLayer):
         data_shape = input_shape[0]
         if len(data_shape) != (self._dim + 2):
             raise ValueError(
-                f"detect an unexpected data_shape as {data_shape}, "
-                f"expected data_shape has {self._dim + 2} dimension"
+                f"detected an unexpected data_shape as {data_shape}, "
+                f"expecting data_shape has {self._dim + 2} dimension"
             )
 
         return OutputShapeCalculator.convolution(
@@ -141,8 +141,8 @@ class _ConvTranspose(_Conv):
         )
         if len([val for val in output_padding if val is not None and val > 0]) and (self.pad_mode != 'pad'):
             raise ValueError(
-                f"detect an unexpected pad_mode as {self.pad_mode} or output_padding as {self.output_padding}, "
-                f"expected pad_mode should be 'pad' when output_padding > 0"
+                f"detected an unexpected pad_mode as {self.pad_mode} or output_padding as {self.output_padding}, "
+                f"expecting pad_mode should be 'pad' when output_padding > 0"
             )
 
 

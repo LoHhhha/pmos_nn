@@ -163,6 +163,6 @@ class RReLU(_SimpleActivation):
     def content_check(self):
         if self.lower > self.upper:
             raise ValueError(
-                f"detect an unexpected lower as {self.lower} or upper as {self.upper}, "
-                f"expected lower must be lower than upper"
+                f"detected an unexpected lower as {self.lower} or upper as {self.upper}, "
+                f"expecting lower must be lower than upper"
             )

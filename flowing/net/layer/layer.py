@@ -38,6 +38,9 @@ class Layer(ABC):
     output_name: str = ...  # through it maybe a tuple but also use one name.
     output_amount: int = ...  # when output_size == 1 means output_name is a var, or it is a tuple.
 
+    init_error_msg: List[str]
+    __showed_init_error_msg: bool
+
     def __init__(self, data_amount: Optional[int] = None, **kwargs):
         """
         Unless data_amount is setting error, don't verify the params and raise another exception in here.
@@ -50,9 +53,12 @@ class Layer(ABC):
         kwargs.pop("ignore_content_exception", False)
         if len(kwargs):
             Logger.warning(
-                f"detect kwargs is not empty in Layer.__init__, "
-                f"confirmed kwargs as {kwargs} is ok."
+                f"Detect kwargs is not empty in Layer.__init__, "
+                f"confirming kwargs as {kwargs} is ok."
             )
+
+        self.init_error_msg = []
+        self.__showed_init_error_msg = False
 
         if data_amount is not None:
             if self.data_amount is ...:
@@ -85,6 +91,7 @@ class Layer(ABC):
             try:
                 cls.content_check(self)
             except Exception as e:
+                self.init_error_msg.append(str(e))
                 if not ignore_content_exception:
                     raise e
                 else:
@@ -140,8 +147,8 @@ class Layer(ABC):
         def wrapped_function(instance, *input_shape: Tuple[int, ...] | List[int], **kwargs):
             if len(input_shape) != instance.data_amount:
                 raise ValueError(
-                    f"detect an unexpected input_shape as {input_shape}, "
-                    f"expected len is {instance.data_amount}"
+                    f"detected an unexpected input_shape as {input_shape}, "
+                    f"expecting len is {instance.data_amount}"
                 )
             return output_shape(instance, *input_shape, **kwargs)
 
@@ -153,8 +160,8 @@ class Layer(ABC):
         def wrapped_function(instance, *input_shape: Tuple[int, ...] | List[int], **kwargs):
             if instance.data_amount == 0:
                 raise ValueError(
-                    f"detect an unexpected empty input_shape as {input_shape}, "
-                    f"expected at least 1 item"
+                    f"detected an unexpected empty input_shape as {input_shape}, "
+                    f"expecting at least 1 item"
                 )
             return output_shape(instance, *input_shape, **kwargs)
 
@@ -195,8 +202,8 @@ class Layer(ABC):
         if data_names_identifiers is not None:
             if len(args) != len(data_names_identifiers):
                 raise ValueError(
-                    f"detect an unexpected data_names_identifiers as {data_names_identifiers}, "
-                    f"expected length is {len(args)}"
+                    f"detected an unexpected data_names_identifiers as {data_names_identifiers}, "
+                    f"expecting length is {len(args)}"
                 )
             args = (f"{key}={value}" for key, value in zip(data_names_identifiers, args))
         return block.join((
@@ -260,6 +267,22 @@ class Layer(ABC):
         if only_right_value:
             return right_value,
         return f"{self.output_name} = {right_value}",
+
+    def __msg_wrapper(self, code_func: Callable, *arg, **kwargs) -> Tuple[str, ...]:
+        codes = []
+        code = code_func(*arg, **kwargs)
+        if not self.__showed_init_error_msg and len(self.init_error_msg) and len(code):
+            self.__showed_init_error_msg = True
+            codes.append(f"# FIXME! Checking the following warnings:")
+            codes.extend([f"# \t- {msg}" for msg in self.init_error_msg])
+        codes.extend(code)
+        return tuple(codes)
+
+    def init_code_with_msg(self, *arg, **kwargs) -> Tuple[str, ...]:
+        return self.__msg_wrapper(self.init_code, *arg, **kwargs)
+
+    def forward_code_with_msg(self, *arg, **kwargs) -> Tuple[str, ...]:
+        return self.__msg_wrapper(self.forward_code, *arg, **kwargs)
 
     @abstractmethod
     @input_shape_check_wrap

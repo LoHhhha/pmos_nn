@@ -25,8 +25,8 @@ class ELU(CELU):
         # mindspore now only support alpha=1.0
         if abs(self.alpha - 1.0) > 1e-8:
             raise ValueError(
-                f"detect an unexpected alpha as {self.alpha}, "
-                f"expected alpha=1.0"
+                f"detected an unexpected alpha as {self.alpha}, "
+                f"expecting alpha=1.0"
             )
 
 

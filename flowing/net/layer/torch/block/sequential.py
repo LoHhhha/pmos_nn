@@ -46,7 +46,7 @@ class Sequential(TorchNNLayer):
             layer_name = module.get('apiName', None)
             if layer_name is None:
                 raise ValueError(
-                    f"detect an unexpected modules, "
+                    f"detected an unexpected modules, "
                     f"some of module don't have apiName"
                 )
 
@@ -57,7 +57,7 @@ class Sequential(TorchNNLayer):
                 )
                 if not issubclass(layer_cls, TorchNNLayer):
                     raise ValueError(
-                        f"detect an unexpected layer {layer_name}, "
+                        f"detected an unexpected layer {layer_name}, "
                         f"which can't be push into Sequential"
                     )
                 # data_amount is fixed
@@ -66,7 +66,7 @@ class Sequential(TorchNNLayer):
                 )
             except Exception as e:
                 raise ValueError(
-                    f"detect an unexpected modules, "
+                    f"detected an unexpected modules, "
                     f"some of module can't init like {layer_name} because {e}"
                 )
 
@@ -75,7 +75,7 @@ class Sequential(TorchNNLayer):
     def content_check(self):
         if len(self.layers) == 0:
             raise ValueError(
-                f"detect an empty Sequential, "
+                f"detected an empty Sequential, "
                 f"which can't calculate the output shape"
             )
 
@@ -107,7 +107,7 @@ class Sequential(TorchNNLayer):
                 data_shape = layer.output_shape(data_shape)[0]
             except Exception as e:
                 raise ValueError(
-                    f"detect error in {layer._api_name}(No.{idx + 1}): {e}"
+                    f"detected error in {layer._api_name}(No.{idx + 1}): {e}"
                 )
 
         return data_shape,

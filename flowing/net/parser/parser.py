@@ -115,7 +115,8 @@ class Parser:
             return self._init_code_result_list
 
         self._init_code_result_list = list(
-            code for idx in self._parse_sequence_index_list for code in self.net_nodes[idx].layer_object.init_code()
+            code for idx in self._parse_sequence_index_list for code in
+            self.net_nodes[idx].layer_object.init_code_with_msg()
         )
 
         return self._init_code_result_list
@@ -126,7 +127,7 @@ class Parser:
 
         self._forward_code_result_list = [
             code for idx in self._parse_sequence_index_list for code in
-            self.net_nodes[idx].layer_object.forward_code()
+            self.net_nodes[idx].layer_object.forward_code_with_msg()
         ]
         self._forward_code_result_list += [node.forward_code() for node in self.output_nodes]
 

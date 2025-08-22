@@ -21,24 +21,24 @@ def get_and_check_target_dim_param(
     if isinstance(param, int) or param is None:
         if isinstance(param, int) and param < at_least:
             raise ValueError(
-                f"detect an unexpected {param_name} as {param}({type(param)}), "
-                f"expected it is an at least {at_least} or maybe can be None"
+                f"detected an unexpected {param_name} as {param}({type(param)}), "
+                f"expecting it is an at least {at_least} or maybe can be None"
             )
         return (param,) * dim
     elif not isinstance(param, Iterable):
         raise ValueError(
-            f"detect an unexpected {param_name} as {param}({type(param)}), "
-            f"expected it is an integer or a iterable of length {dim}"
+            f"detected an unexpected {param_name} as {param}({type(param)}), "
+            f"expecting it is an integer or a iterable of length {dim}"
         )
     elif len(param) != dim:
         raise ValueError(
-            f"detect an unexpected {param_name} as {param}, "
-            f"expected it is an integer or a iterable of length {dim}"
+            f"detected an unexpected {param_name} as {param}, "
+            f"expecting it is an integer or a iterable of length {dim}"
         )
     elif len([val for val in param if val is not None and val < at_least]):
         raise ValueError(
-            f"detect an unexpected {param_name} as {param}({type(param)}), "
-            f"expected it is containing at least {at_least} int or None"
+            f"detected an unexpected {param_name} as {param}({type(param)}), "
+            f"expecting it is containing at least {at_least} int or None"
         )
     return tuple(param)
 
@@ -49,14 +49,14 @@ def pool_padding_and_kernel_size_check(
 ):
     if len(kernel_size) != len(padding):
         raise ValueError(
-            f"detect an unexpected kernel_size as {kernel_size} or padding as {padding}, "
-            f"expected same length"
+            f"detected an unexpected kernel_size as {kernel_size} or padding as {padding}, "
+            f"expecting kernel_size and padding has same length"
         )
 
     # rule1: pad should be at most half of effective kernel size
     for idx, k in enumerate(kernel_size):
         if k < padding[idx] * 2:
             raise ValueError(
-                f"detect an unexpected kernel_size as {kernel_size} or padding as {padding}, "
-                f"expected pad should be at most half of effective kernel size"
+                f"detected an unexpected kernel_size as {kernel_size} or padding as {padding}, "
+                f"expecting pad should be at most half of effective kernel size"
             )

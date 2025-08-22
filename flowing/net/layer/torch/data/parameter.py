@@ -49,8 +49,8 @@ class Parameter(Layer):
     def content_check(self):
         if len([val for val in self.data_size if val <= 0]):
             raise ValueError(
-                f"detect an unexpected data_size as {self.data_size}, "
-                f"expected it contains positive value"
+                f"detected an unexpected data_size as {self.data_size}, "
+                f"expecting it contains positive value"
             )
 
     def init_code(
