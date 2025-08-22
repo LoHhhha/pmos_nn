@@ -4615,6 +4615,7 @@ operatorBarNamespace.operators.sort(function (a, b) {
 
 // set backColor
 {
+    let colors = {};
     let preTypeCode = -1;
     let r, g, b;
     let diffR, diffG, diffB;
@@ -4625,12 +4626,18 @@ operatorBarNamespace.operators.sort(function (a, b) {
                 operatorBarNamespace.typeInfo[operator.typeCode];
             [r, g, b, diffR, diffG, diffB] =
                 operatorBarNamespace.typeColorInfo[operatorType.key];
+            for (const [_, framework] of Object.entries(
+                operatorBarNamespace.framework
+            )) {
+                colors[framework] = [r, g, b];
+            }
             preTypeCode = operator.typeCode;
         }
-        operator.backgroundColor = `rgb(${r}, ${g}, ${b})`;
-        r += diffR;
-        g += diffG;
-        b += diffB;
+        const framework = operator.framework;
+        operator.backgroundColor = `rgb(${colors[framework][0]}, ${colors[framework][1]}, ${colors[framework][2]})`;
+        colors[framework][0] += diffR;
+        colors[framework][1] += diffG;
+        colors[framework][2] += diffB;
     }
 }
 
