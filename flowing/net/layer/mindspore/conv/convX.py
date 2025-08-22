@@ -68,13 +68,13 @@ class _Conv(MindSporeNNLayer):
             if self.padding != 0:
                 raise ValueError(
                     f"detected an unexpected padding as {self.padding} or pad_mode as {self.pad_mode}, "
-                    f"expecting padding should be 1 when pad_mode is 'same'"
+                    f"expecting padding should be 0 when pad_mode is 'same'"
                 )
         elif self.pad_mode == "valid":
             if self.padding != 0:
                 raise ValueError(
                     f"detected an unexpected padding as {self.padding} or pad_mode as {self.pad_mode}, "
-                    f"expecting padding should be 1 when pad_mode is 'valid'"
+                    f"expecting padding should be 0 when pad_mode is 'valid'"
                 )
         elif self.pad_mode == "pad":
             # each dim has 2 directions to padding
