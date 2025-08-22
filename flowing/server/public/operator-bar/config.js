@@ -331,7 +331,13 @@ operatorBarNamespace.argsType = {
             const result = [];
             for (const { apiName, content } of value) {
                 const config =
-                    operatorBarNamespace.apiName2operators.get(apiName);
+                    operatorBarNamespace.apiName2operators.getOperator(
+                        MEMORY_GET(
+                            MEMORY_KEYS.CurrentFramework,
+                            FRAMEWORK.pytorch
+                        ),
+                        apiName
+                    );
 
                 const vContent = {};
                 for (const arg of config.args) {
@@ -369,6 +375,20 @@ operatorBarNamespace.argsType = {
         },
         prompt: "using JSON format like '[{apiName:node_api_name,content:{param:value,...}},...]' to describe a series of nodes",
     },
+
+    mindsporePadMode: {
+        id: "mindspore pad mode",
+        input: operatorBarNamespace.argsInputType.select,
+        getValue: (value) => {
+            return value;
+        },
+        values: ["same", "valid", "pad"],
+        get prompt() {
+            return `one of ${operatorBarNamespace.argsType.mindsporePadMode.values.join(
+                ", "
+            )}`;
+        },
+    },
 };
 
 operatorBarNamespace.argsValueCheck = (type, value) => {
@@ -383,14 +403,9 @@ operatorBarNamespace.argsValueCheck = (type, value) => {
 
 operatorBarNamespace.framework = {
     all: "all",
-    pytorch: "PyTorch",
-    tensorflow: "TensorFlow",
-};
-
-operatorBarNamespace.frameworkOrder = {
-    all: 0,
-    PyTorch: 1,
-    TensorFlow: 2,
+    pytorch: FRAMEWORK.pytorch,
+    mindspore: FRAMEWORK.mindspore,
+    tensorflow: FRAMEWORK.tensorflow,
 };
 
 operatorBarNamespace.typeCode = {
@@ -455,6 +470,7 @@ operatorBarNamespace.outlinesGetter = {
  * )
  */
 operatorBarNamespace.operators = [
+    // begin, framework: all
     {
         apiName: "Input",
         extendCssClass: [],
@@ -505,7 +521,7 @@ operatorBarNamespace.operators = [
         outputEnd: ["output"],
         outlines: [],
         args: [],
-        framework: operatorBarNamespace.framework.pytorch,
+        framework: operatorBarNamespace.framework.all,
         link: null,
     },
     {
@@ -516,7 +532,7 @@ operatorBarNamespace.operators = [
         outputEnd: ["output"],
         outlines: [],
         args: [],
-        framework: operatorBarNamespace.framework.pytorch,
+        framework: operatorBarNamespace.framework.all,
         link: null,
     },
     {
@@ -527,7 +543,7 @@ operatorBarNamespace.operators = [
         outputEnd: ["output"],
         outlines: [],
         args: [],
-        framework: operatorBarNamespace.framework.pytorch,
+        framework: operatorBarNamespace.framework.all,
         link: null,
     },
     {
@@ -538,9 +554,11 @@ operatorBarNamespace.operators = [
         outputEnd: ["output"],
         outlines: [],
         args: [],
-        framework: operatorBarNamespace.framework.pytorch,
+        framework: operatorBarNamespace.framework.all,
         link: null,
     },
+    // end, framework: all
+    // begin, framework: PyTorch
     {
         apiName: "Rand",
         extendCssClass: [],
@@ -1374,7 +1392,7 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "num_parameters",
-                type: operatorBarNamespace.argsType.strFloat,
+                type: operatorBarNamespace.argsType.strInt,
                 default: "1",
             },
             {
@@ -3659,15 +3677,938 @@ operatorBarNamespace.operators = [
         link: "https://pytorch.org/docs/stable/generated/torch.nn.LayerNorm.html",
         canBeSequential: true,
     },
+    // end, framework: PyTorch
+    // begin, framework: MindSpore
+    {
+        apiName: "Identity",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.Identity.html#mindspore.nn.Identity",
+        canBeSequential: true,
+    },
+    {
+        apiName: "CELU",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [
+            {
+                name: "alpha",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1.0",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.CELU.html#mindspore.nn.CELU",
+        canBeSequential: true,
+    },
+    {
+        apiName: "ELU",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [
+            {
+                name: "alpha",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1.0",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.ELU.html#mindspore.nn.ELU",
+        canBeSequential: true,
+    },
+    {
+        apiName: "FastGelu",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.FastGelu.html#mindspore.nn.FastGelu",
+        canBeSequential: true,
+    },
+    {
+        apiName: "GELU",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [
+            {
+                name: "approximate",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.GELU.html#mindspore.nn.GELU",
+        canBeSequential: true,
+    },
+    {
+        apiName: "GLU",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "axis", short: "A" }],
+        args: [
+            {
+                name: "axis",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "-1",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.GLU.html#mindspore.nn.GLU",
+        canBeSequential: true,
+    },
+    {
+        apiName: "Hardtanh",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "min_val", short: "Mi" },
+            { name: "max_val", short: "Mx" },
+        ],
+        args: [
+            {
+                name: "min_val",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "-1.0",
+            },
+            {
+                name: "max_val",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1.0",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.Hardtanh.html#mindspore.nn.Hardtanh",
+        canBeSequential: true,
+    },
+    {
+        apiName: "HShrink",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "lambd", short: "L" }],
+        args: [
+            {
+                name: "lambd",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "0.5",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.HShrink.html#mindspore.nn.HShrink",
+        canBeSequential: true,
+    },
+    {
+        apiName: "HSigmoid",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.HSigmoid.html#mindspore.nn.HSigmoid",
+        canBeSequential: true,
+    },
+    {
+        apiName: "HSwish",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.HSwish.html#mindspore.nn.HSwish",
+        canBeSequential: true,
+    },
+    {
+        apiName: "LeakyReLU",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [
+            {
+                name: "alpha",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "0.2",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.LeakyReLU.html#mindspore.nn.LeakyReLU",
+        canBeSequential: true,
+    },
+    {
+        apiName: "LogSigmoid",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.LogSigmoid.html#mindspore.nn.LogSigmoid",
+        canBeSequential: true,
+    },
+    {
+        apiName: "LogSoftmax",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "axis", short: "A" }],
+        args: [
+            {
+                name: "axis",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "-1",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.LogSoftmax.html#mindspore.nn.LogSoftmax",
+        canBeSequential: true,
+    },
+    {
+        apiName: "Mish",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.Mish.html#mindspore.nn.Mish",
+        canBeSequential: true,
+    },
+    {
+        apiName: "Softsign",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.Softsign.html#mindspore.nn.Softsign",
+        canBeSequential: true,
+    },
+    {
+        apiName: "PReLU",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "channel", short: "C" }],
+        args: [
+            {
+                name: "channel",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "1",
+            },
+            {
+                name: "w",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "0.25",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.PReLU.html#mindspore.nn.PReLU",
+        canBeSequential: true,
+    },
+    {
+        apiName: "ReLU",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.ReLU.html#mindspore.nn.ReLU",
+        canBeSequential: true,
+    },
+    {
+        apiName: "ReLU6",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.ReLU6.html#mindspore.nn.ReLU6",
+        canBeSequential: true,
+    },
+    {
+        apiName: "RReLU",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [
+            {
+                name: "lower",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "0.125",
+            },
+            {
+                name: "upper",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "0.333333",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.RReLU.html#mindspore.nn.RReLU",
+        canBeSequential: true,
+    },
+    {
+        apiName: "SeLU",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.SeLU.html#mindspore.nn.SeLU",
+        canBeSequential: true,
+    },
+    {
+        apiName: "SiLU",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.SiLU.html#mindspore.nn.SiLU",
+        canBeSequential: true,
+    },
+    {
+        apiName: "Sigmoid",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.Sigmoid.html#mindspore.nn.Sigmoid",
+        canBeSequential: true,
+    },
+    {
+        apiName: "Softmin",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "axis", short: "A" }],
+        args: [
+            {
+                name: "axis",
+                type: operatorBarNamespace.argsType.strIntOrNone,
+                default: "-1",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.Softmin.html#mindspore.nn.Softmin",
+        canBeSequential: true,
+    },
+    {
+        apiName: "Softmax",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "axis", short: "A" }],
+        args: [
+            {
+                name: "axis",
+                type: operatorBarNamespace.argsType.strIntOrNone,
+                default: "-1",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.Softmax.html#mindspore.nn.Softmax",
+        canBeSequential: true,
+    },
+    {
+        apiName: "Softmax2d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.Softmax2d.html#mindspore.nn.Softmax2d",
+        canBeSequential: true,
+    },
+    {
+        apiName: "SoftShrink",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "lambd", short: "L" }],
+        args: [
+            {
+                name: "lambd",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "0.5",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.SoftShrink.html#mindspore.nn.SoftShrink",
+        canBeSequential: true,
+    },
+    {
+        apiName: "Tanh",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.Tanh.html#mindspore.nn.Tanh",
+        canBeSequential: true,
+    },
+    {
+        apiName: "Tanhshrink",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.Tanhshrink.html#mindspore.nn.Tanhshrink",
+        canBeSequential: true,
+    },
+    {
+        apiName: "Threshold",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.activation,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "threshold", short: "T" },
+            { name: "value", short: "V" },
+        ],
+        args: [
+            {
+                name: "threshold",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "0",
+            },
+            {
+                name: "value",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "0",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.Threshold.html#mindspore.nn.Threshold",
+        canBeSequential: true,
+    },
+    {
+        apiName: "Conv1d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.convolution,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "in_channels", short: "I" },
+            { name: "out_channels", short: "O" },
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
+            { name: "padding", short: "P" },
+            { name: "pad_mode", short: "PM" },
+        ],
+        args: [
+            {
+                name: "in_channels",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "3",
+            },
+            {
+                name: "out_channels",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "3",
+            },
+            {
+                name: "kernel_size",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "3",
+            },
+            {
+                name: "stride",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "1",
+            },
+            {
+                name: "pad_mode",
+                type: operatorBarNamespace.argsType.mindsporePadMode,
+                default: "same",
+            },
+            {
+                name: "padding",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "0",
+            },
+            {
+                name: "dilation",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "1",
+            },
+            {
+                name: "group",
+                type: operatorBarNamespace.argsType.strNotNegInt,
+                default: "1",
+            },
+            {
+                name: "has_bias",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.Conv1d.html#mindspore.nn.Conv1d",
+        canBeSequential: true,
+    },
+    {
+        apiName: "Conv2d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.convolution,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "in_channels", short: "I" },
+            { name: "out_channels", short: "O" },
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
+            { name: "padding", short: "P" },
+            { name: "pad_mode", short: "PM" },
+        ],
+        args: [
+            {
+                name: "in_channels",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "3",
+            },
+            {
+                name: "out_channels",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "3",
+            },
+            {
+                name: "kernel_size",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "3",
+            },
+            {
+                name: "stride",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "1",
+            },
+            {
+                name: "pad_mode",
+                type: operatorBarNamespace.argsType.mindsporePadMode,
+                default: "same",
+            },
+            {
+                name: "padding",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "0",
+            },
+            {
+                name: "dilation",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "1",
+            },
+            {
+                name: "group",
+                type: operatorBarNamespace.argsType.strNotNegInt,
+                default: "1",
+            },
+            {
+                name: "has_bias",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.Conv2d.html#mindspore.nn.Conv2d",
+        canBeSequential: true,
+    },
+    {
+        apiName: "Conv3d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.convolution,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "in_channels", short: "I" },
+            { name: "out_channels", short: "O" },
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
+            { name: "padding", short: "P" },
+            { name: "pad_mode", short: "PM" },
+        ],
+        args: [
+            {
+                name: "in_channels",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "3",
+            },
+            {
+                name: "out_channels",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "3",
+            },
+            {
+                name: "kernel_size",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "3",
+            },
+            {
+                name: "stride",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "1",
+            },
+            {
+                name: "pad_mode",
+                type: operatorBarNamespace.argsType.mindsporePadMode,
+                default: "same",
+            },
+            {
+                name: "padding",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "0",
+            },
+            {
+                name: "dilation",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "1",
+            },
+            {
+                name: "group",
+                type: operatorBarNamespace.argsType.strNotNegInt,
+                default: "1",
+            },
+            {
+                name: "has_bias",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.Conv3d.html#mindspore.nn.Conv3d",
+        canBeSequential: true,
+    },
+    {
+        apiName: "Conv1dTranspose",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.convolution,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "in_channels", short: "I" },
+            { name: "out_channels", short: "O" },
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
+            { name: "padding", short: "P" },
+            { name: "pad_mode", short: "PM" },
+        ],
+        args: [
+            {
+                name: "in_channels",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "3",
+            },
+            {
+                name: "out_channels",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "3",
+            },
+            {
+                name: "kernel_size",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "3",
+            },
+            {
+                name: "stride",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "1",
+            },
+            {
+                name: "pad_mode",
+                type: operatorBarNamespace.argsType.mindsporePadMode,
+                default: "same",
+            },
+            {
+                name: "padding",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "0",
+            },
+            {
+                name: "dilation",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "1",
+            },
+            {
+                name: "group",
+                type: operatorBarNamespace.argsType.strNotNegInt,
+                default: "1",
+            },
+            {
+                name: "has_bias",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.Conv1dTranspose.html#mindspore.nn.Conv1dTranspose",
+        canBeSequential: true,
+    },
+    {
+        apiName: "Conv1dTranspose",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.convolution,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "in_channels", short: "I" },
+            { name: "out_channels", short: "O" },
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
+            { name: "padding", short: "P" },
+            { name: "pad_mode", short: "PM" },
+        ],
+        args: [
+            {
+                name: "in_channels",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "3",
+            },
+            {
+                name: "out_channels",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "3",
+            },
+            {
+                name: "kernel_size",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "3",
+            },
+            {
+                name: "stride",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "1",
+            },
+            {
+                name: "pad_mode",
+                type: operatorBarNamespace.argsType.mindsporePadMode,
+                default: "same",
+            },
+            {
+                name: "padding",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "0",
+            },
+            {
+                name: "dilation",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "1",
+            },
+            {
+                name: "group",
+                type: operatorBarNamespace.argsType.strNotNegInt,
+                default: "1",
+            },
+            {
+                name: "has_bias",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.Conv1dTranspose.html#mindspore.nn.Conv1dTranspose",
+        canBeSequential: true,
+    },
+    {
+        apiName: "Conv2dTranspose",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.convolution,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "in_channels", short: "I" },
+            { name: "out_channels", short: "O" },
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
+            { name: "padding", short: "P" },
+            { name: "pad_mode", short: "PM" },
+            { name: "output_padding", short: "OP" },
+        ],
+        args: [
+            {
+                name: "in_channels",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "3",
+            },
+            {
+                name: "out_channels",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "3",
+            },
+            {
+                name: "kernel_size",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "3",
+            },
+            {
+                name: "stride",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "1",
+            },
+            {
+                name: "pad_mode",
+                type: operatorBarNamespace.argsType.mindsporePadMode,
+                default: "same",
+            },
+            {
+                name: "padding",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "0",
+            },
+            {
+                name: "output_padding",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "0",
+            },
+            {
+                name: "dilation",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "1",
+            },
+            {
+                name: "group",
+                type: operatorBarNamespace.argsType.strNotNegInt,
+                default: "1",
+            },
+            {
+                name: "has_bias",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.Conv2dTranspose.html#mindspore.nn.Conv2dTranspose",
+        canBeSequential: true,
+    },
+    {
+        apiName: "Conv3dTranspose",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.convolution,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "in_channels", short: "I" },
+            { name: "out_channels", short: "O" },
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
+            { name: "padding", short: "P" },
+            { name: "pad_mode", short: "PM" },
+            { name: "output_padding", short: "OP" },
+        ],
+        args: [
+            {
+                name: "in_channels",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "3",
+            },
+            {
+                name: "out_channels",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "3",
+            },
+            {
+                name: "kernel_size",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "3",
+            },
+            {
+                name: "stride",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "1",
+            },
+            {
+                name: "pad_mode",
+                type: operatorBarNamespace.argsType.mindsporePadMode,
+                default: "same",
+            },
+            {
+                name: "padding",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "0",
+            },
+            {
+                name: "output_padding",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "0",
+            },
+            {
+                name: "dilation",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "1",
+            },
+            {
+                name: "group",
+                type: operatorBarNamespace.argsType.strNotNegInt,
+                default: "1",
+            },
+            {
+                name: "has_bias",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.Conv3dTranspose.html#mindspore.nn.Conv3dTranspose",
+        canBeSequential: true,
+    },
+    // end, framework: MindSpore
 ];
 
 operatorBarNamespace.operators.sort(function (a, b) {
     if (a.typeCode !== b.typeCode) return a.typeCode < b.typeCode ? -1 : 1;
-    if (a.framework !== b.framework)
-        return operatorBarNamespace.frameworkOrder[a.framework] <
-            operatorBarNamespace.frameworkOrder[b.framework]
-            ? -1
-            : 1;
     if (a.apiName !== b.apiName) return a.apiName < b.apiName ? -1 : 1;
     return 0;
 });
@@ -3693,10 +4634,29 @@ operatorBarNamespace.operators.sort(function (a, b) {
     }
 }
 
+// apiName2operators: {ApiName(str):operators([])}
 operatorBarNamespace.apiName2operators = new Map();
 for (const operator of operatorBarNamespace.operators) {
-    operatorBarNamespace.apiName2operators.set(operator.apiName, operator);
+    if (!operatorBarNamespace.apiName2operators.has(operator.apiName)) {
+        operatorBarNamespace.apiName2operators.set(operator.apiName, []);
+    }
+    operatorBarNamespace.apiName2operators.get(operator.apiName).push(operator);
 }
+operatorBarNamespace.apiName2operators.getOperator = (framework, apiName) => {
+    const operators = operatorBarNamespace.apiName2operators.get(apiName, null);
+    if (operators === null) {
+        return undefined;
+    }
+    for (const operator of operators) {
+        if (
+            operator.framework === operatorBarNamespace.framework.all ||
+            operator.framework === framework
+        ) {
+            return operator;
+        }
+    }
+    return undefined;
+};
 
 // call(srcNode, tarNode, srcEndpointIdx, tarEndpointIdx)
 operatorBarNamespace.connectionRule = [

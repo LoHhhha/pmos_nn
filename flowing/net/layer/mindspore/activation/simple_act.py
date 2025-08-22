@@ -18,7 +18,7 @@ __all__ = [
     'Softmax2d',
     'Identity',
     'ReLU',
-    'SELU',
+    'SeLU',
     'Threshold',
     'ReLU6',
     'HSigmoid',
@@ -26,20 +26,21 @@ __all__ = [
     'HSwish',
     'SiLU',
     'Mish',
+    'RReLU',
 ]
 
 
 class PReLU(_SimpleActivation):
     _api_name = "PReLU"
 
-    num_parameters: Annotated[int, Layer.LayerContent]
-    init: Annotated[float, Layer.LayerContent]
+    channel: Annotated[int, Layer.LayerContent]
+    w: Annotated[float, Layer.LayerContent]
 
-    def __init__(self, num_parameters: int = 1, init: float = 0.25, **kwargs):
+    def __init__(self, channel: int = 1, w: float = 0.25, **kwargs):
         super().__init__(**kwargs)
 
-        self.num_parameters = num_parameters
-        self.init = init
+        self.channel = channel
+        self.w = w
 
 
 class FastGelu(_SimpleActivation):
@@ -97,8 +98,8 @@ class ReLU(_SimpleActivation):
     _api_name = "ReLU"
 
 
-class SELU(_SimpleActivation):
-    _api_name = "SELU"
+class SeLU(_SimpleActivation):
+    _api_name = "SeLU"
 
 
 class Threshold(_SimpleActivation):
@@ -145,3 +146,23 @@ class SiLU(_SimpleActivation):
 
 class Mish(_SimpleActivation):
     _api_name = "Mish"
+
+
+class RReLU(_SimpleActivation):
+    _api_name = "RReLU"
+
+    lower: Annotated[float, Layer.LayerContent]
+    upper: Annotated[float, Layer.LayerContent]
+
+    def __init__(self, lower: float = 1 / 8, upper: float = 1 / 3, **kwargs):
+        super().__init__(**kwargs)
+
+        self.lower = lower
+        self.upper = upper
+
+    def content_check(self):
+        if self.lower > self.upper:
+            raise ValueError(
+                f"detect an unexpected lower as {self.lower} or upper as {self.upper}, "
+                f"expected lower must be lower than upper"
+            )

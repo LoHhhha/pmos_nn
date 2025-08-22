@@ -104,10 +104,10 @@ class _Conv(MindSporeNNLayer):
 
         # mindspore only support (N, C, ...)
         data_shape = input_shape[0]
-        if len(data_shape) != (self._dim + 1):
+        if len(data_shape) != (self._dim + 2):
             raise ValueError(
                 f"detect an unexpected data_shape as {data_shape}, "
-                f"expected data_shape has {self._dim + 1} dimension"
+                f"expected data_shape has {self._dim + 2} dimension"
             )
 
         return OutputShapeCalculator.convolution(
@@ -173,13 +173,14 @@ class Conv3d(_Conv):
         return super().output_shape(*input_shape)
 
 
-class Conv1dTranspose(_ConvTranspose):
+class Conv1dTranspose(_Conv):
+    # mindspore Conv1dTranspose not have output_padding param, so using _Conv
     _api_name = "Conv1dTranspose"
 
     _dim = 1
 
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        return super().output_shape(*input_shape, output_padding=self.output_padding)
+        return super().output_shape(*input_shape, output_padding=0)
 
 
 class Conv2dTranspose(_ConvTranspose):

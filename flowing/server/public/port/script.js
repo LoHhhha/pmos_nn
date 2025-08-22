@@ -1,5 +1,7 @@
 /**
  * object:{
+ *      containCoordinate: bool
+ *      framework: str
  *      nodes:[{apiName:...,content:{...},left,top},...],
  *      connections:[{srcNodeIdx:...,srcEndpointIdx:...,tarNodeIdx:...,tarEndpointIdx:...},...]
  * }
@@ -178,7 +180,7 @@ const EXPORT_ICON = ICONS.export;
             };
 
             if (event.detail?.withoutConfirm) {
-                importNodes();
+                importNodesFromJsonTextEle();
                 return;
             }
             MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
@@ -346,11 +348,14 @@ const EXPORT_ICON = ICONS.export;
             const updateExportData = () => {
                 const nodeId2Index = new Map();
 
-                const exportObject = {};
-                if (exportProperty.containCoordinate) {
-                    exportObject.containCoordinate =
-                        exportProperty.containCoordinate;
-                }
+                const exportObject = {
+                    framework: MEMORY_GET(
+                        MEMORY_KEYS.CurrentFramework,
+                        FRAMEWORK.pytorch
+                    ),
+                    containCoordinate: exportProperty.containCoordinate,
+                };
+
                 exportObject.nodes = [];
                 for (const [idx, node] of allNodes.entries()) {
                     const nodeObject = {};
@@ -427,10 +432,7 @@ const EXPORT_ICON = ICONS.export;
         });
 
         const nodeInformation = MEMORY_GET(MEMORY_KEYS.NodeInformation); // readonly
-        const apiName2operators = new Map();
-        for (const operator of nodeInformation.operators) {
-            apiName2operators.set(operator.apiName, operator);
-        }
+        const apiName2operators = nodeInformation.apiName2operators; // readonly
 
         MESSAGE_HANDLER(MESSAGE_TYPE.CheckImportGraph, (event) => {
             const data = event.detail?.data;
@@ -448,6 +450,22 @@ const EXPORT_ICON = ICONS.export;
                     err,
                 });
                 return I18N_STRINGS.json_grammar_check_fail;
+            }
+
+            // check framework, default framework: pytorch
+            const framework = object.framework || FRAMEWORK.pytorch;
+            const currentFramework = MEMORY_GET(
+                MEMORY_KEYS.CurrentFramework,
+                FRAMEWORK.pytorch
+            );
+            if (framework !== currentFramework) {
+                console.error("[CheckImportGraph] framework not match!", {
+                    data,
+                });
+                return I18N_STRINGS.framework_match_failed_format.format(
+                    currentFramework,
+                    framework
+                );
             }
 
             // scheme check
@@ -490,7 +508,10 @@ const EXPORT_ICON = ICONS.export;
                     );
                 }
 
-                const nodeConfig = apiName2operators.get(apiName);
+                const nodeConfig = apiName2operators.getOperator(
+                    framework,
+                    apiName
+                );
                 if (nodeConfig === undefined) {
                     console.error(
                         `[CheckImportGraph] node${idx} ${apiName} not supported!`,

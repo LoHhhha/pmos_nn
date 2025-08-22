@@ -2,13 +2,17 @@ class GraphInfoBarBuilder {
     ele;
     prevSaveTimeEle;
     saveNameEle;
+    frameworkEle;
+
     constructor(ele) {
         this.ele = ele;
 
         this.prevSaveTimeEle = this.#createPrevSaveTimeEle();
         this.saveNameEle = this.#createSaveNameEle();
+        this.frameworkEle = this.#createFrameworkEle();
 
         this.ele.appendChild(this.saveNameEle);
+        this.ele.appendChild(this.frameworkEle);
         this.ele.appendChild(this.prevSaveTimeEle);
 
         MESSAGE_HANDLER(MESSAGE_TYPE.GraphSaved, (event) => {
@@ -104,6 +108,18 @@ class GraphInfoBarBuilder {
             ele.value = value;
             ele.onchange();
         };
+
+        return ele;
+    }
+
+    #createFrameworkEle() {
+        const ele = document.createElement("div");
+        ele.classList.add("tcb-text");
+        ele.classList.add("tcb-framework-saved-text");
+        ele.textContent = MEMORY_GET(MEMORY_KEYS.CurrentFramework, "UNKNOWN");
+        MESSAGE_HANDLER(MESSAGE_TYPE.FrameworkChanged, (event) => {
+            ele.textContent = event.detail?.framework;
+        });
 
         return ele;
     }

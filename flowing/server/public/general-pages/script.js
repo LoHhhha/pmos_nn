@@ -6,6 +6,8 @@
  * MESSAGE_TYPE.SaveAsPage
  *
  * MESSAGE_TYPE.RestartPage
+ *      <event.detail.withoutConfirm:bool> restart without confirm
+ *      <event.detail.confirmCallback:callable>
  */
 
 (function () {
@@ -129,18 +131,27 @@
     });
 
     MESSAGE_HANDLER(MESSAGE_TYPE.RestartPage, (event) => {
+        const restart = () => {
+            MESSAGE_CALL(MESSAGE_TYPE.ResetCurrentSaveGraph);
+            MESSAGE_CALL(MESSAGE_TYPE.ClearNodes);
+            MESSAGE_CALL(MESSAGE_TYPE.OperationRecordReset);
+            MESSAGE_CALL(MESSAGE_TYPE.NavigatorBackToOrigin);
+            MESSAGE_CALL(MESSAGE_TYPE.NavigatorZoomTo100);
+            MESSAGE_CALL(MESSAGE_TYPE.ClearCopyData);
+            event.detail?.confirmCallback?.();
+        };
+
+        if (event.detail?.withoutConfirm) {
+            restart();
+            return;
+        }
+
         MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
             title: event.detail?.title || I18N_STRINGS.restart_confirm,
             text: I18N_STRINGS.unsaved_warning_text,
             buttonMode: COVERING_BUTTON_MODE.ConfirmAndCancelButton,
             buttonCallback: {
-                beforeConfirm: () => {
-                    MESSAGE_CALL(MESSAGE_TYPE.ResetCurrentSaveGraph);
-                    MESSAGE_CALL(MESSAGE_TYPE.ClearNodes);
-                    MESSAGE_CALL(MESSAGE_TYPE.OperationRecordReset);
-                    MESSAGE_CALL(MESSAGE_TYPE.NavigatorBackToOrigin);
-                    MESSAGE_CALL(MESSAGE_TYPE.NavigatorZoomTo100);
-                },
+                beforeConfirm: restart,
             },
         });
     });

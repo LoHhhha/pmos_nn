@@ -70,6 +70,7 @@ IO: Accept natural language/existing code, output strictly schema-compliant JSON
 
 PMoS's JSON Schema:
 {
+  "framework":"PyTorch/MindSpore/TensorFlow",
   "nodes": [
     {
       "apiName": "officially_supported_operator",
@@ -91,6 +92,7 @@ PMoS's JSON Schema:
 
 Processing Workflow:
 1. Operator Analysis
+    - Analysis the framework going to use, just using the target framework's operators
     - Strictly match official operator list from config
     - For unrecognized operators:
         - Prioritize finding interface-compatible substitutes
@@ -124,6 +126,7 @@ ${JSON.stringify(LLMCodeGeneratorNamespace.promptConfig, null, 2)}
 
 Example:
 {
+  "framework":"PyTorch",
   "nodes": [
     {
       "apiName": "Input",

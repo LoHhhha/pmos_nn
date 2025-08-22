@@ -195,6 +195,7 @@ class OutputShapeCalculator:
             padding = tuple(padding[i] + padding[i + 1] for i in range(0, 2 * dim, 2))
         else:
             padding = get_and_check_target_dim_param(padding, dim, 0, "padding")
+            padding = tuple(p * 2 for p in padding)
 
         if c_in is not None:
             DataShapeChecker.check_dim(data_shape, -dim - 1, c_in)
@@ -214,13 +215,13 @@ class OutputShapeCalculator:
         if output_padding is None:
             for i in range(dim):
                 output_shape[-dim + i] = math.floor(
-                    (data_shape[-dim + i] + 2 * padding[i] - dilation[i] * (kernel_size[i] - 1) - 1) / stride[i] + 1
+                    (data_shape[-dim + i] + padding[i] - dilation[i] * (kernel_size[i] - 1) - 1) / stride[i] + 1
                 )
         else:
             output_padding = get_and_check_target_dim_param(output_padding, dim, 0, "output_padding")
             for i in range(dim):
                 output_shape[-dim + i] = \
-                    (data_shape[-dim + i] - 1) * stride[i] - 2 * padding[i] + dilation[i] * (kernel_size[i] - 1) + \
+                    (data_shape[-dim + i] - 1) * stride[i] - padding[i] + dilation[i] * (kernel_size[i] - 1) + \
                     output_padding[i] + 1
 
         return tuple(output_shape),

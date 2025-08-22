@@ -607,7 +607,10 @@ class Wicket {
         Wicket.titleEle.textContent = title;
 
         for (const { apiName, content } of originNodesArgs) {
-            const config = operatorBarNamespace.apiName2operators.get(apiName);
+            const config = operatorBarNamespace.apiName2operators.getOperator(
+                MEMORY_GET(MEMORY_KEYS.CurrentFramework, FRAMEWORK.pytorch),
+                apiName
+            );
             if (config === undefined) {
                 console.error("[Wicket] can't recover origin nodes.");
                 Wicket.deleteNodes();
@@ -1540,6 +1543,10 @@ class OperatorBar {
         MESSAGE_HANDLER(MESSAGE_TYPE.EndDragNode, () => {
             this.barEle.classList.remove("bold-outline-element");
         });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.FrameworkChanged, () => {
+            this.refresh();
+        });
     }
 
     #createSeparation(typeInfo, isVisible) {
@@ -1589,6 +1596,11 @@ class OperatorBar {
             element.remove();
         }
 
+        const currentFramework = MEMORY_GET(
+            MEMORY_KEYS.CurrentFramework,
+            "UNKNOWN"
+        );
+
         const onlyLike = this.onlyChoseNameLike.toLowerCase();
 
         let prevOperatorTypeCode = -1;
@@ -1596,6 +1608,14 @@ class OperatorBar {
         let prevOperatorTypeCount = 0;
         // operatorBarNamespace.operators is sort by prevOperatorTypeCode.
         for (let operator of operatorBarNamespace.operators) {
+            // skip framework not selected
+            if (
+                operator.framework !== currentFramework &&
+                operator.framework !== operatorBarNamespace.framework.all
+            ) {
+                continue;
+            }
+
             const operatorTypeInfo =
                 operatorBarNamespace.typeInfo[operator.typeCode];
 
@@ -1661,6 +1681,7 @@ class OperatorBar {
         argsValueCheck: operatorBarNamespace.argsValueCheck,
         connectionRule: operatorBarNamespace.connectionRule,
         operators: operatorBarNamespace.operators,
+        apiName2operators: operatorBarNamespace.apiName2operators,
     });
 
     window.createOperatorBar = (jsPlumbNavigator, options) => {
@@ -1760,6 +1781,11 @@ class OperatorBar {
             offsetLeft = offsetLeft === undefined ? 0 : offsetLeft;
             offsetTop = offsetTop === undefined ? 0 : offsetTop;
 
+            const framework = MEMORY_GET(
+                MEMORY_KEYS.CurrentFramework,
+                FRAMEWORK.pytorch
+            );
+
             const isViewportCoordinate = event.detail?.viewportCoordinate;
             const canvasBounds = jsPlumbNavigator.getCanvasBounds();
 
@@ -1767,9 +1793,22 @@ class OperatorBar {
             for (let { id, apiName, config, left, top, content } of event.detail
                 .nodesInfo) {
                 if (apiName !== undefined) {
-                    config =
-                        operatorBarNamespace.apiName2operators.get(apiName);
+                    config = operatorBarNamespace.apiName2operators.getOperator(
+                        framework,
+                        apiName
+                    );
+                } else if (
+                    config.framework !== operatorBarNamespace.framework.all &&
+                    config.framework !== framework
+                ) {
+                    // check config
+                    console.error(
+                        `[CreateNodes] get unexpected node, framework as ${config.framework}, not ${framework}`,
+                        event
+                    );
+                    return false;
                 }
+
                 if (config === undefined) {
                     console.error(
                         `[CreateNodes] get unexpected node, can't find config from ${apiName}`,

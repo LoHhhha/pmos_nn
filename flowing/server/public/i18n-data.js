@@ -349,6 +349,14 @@ const LANGUAGE_DATA = {
         en: "Ready",
         cn: "就绪",
     },
+    framework: {
+        en: "Framework",
+        cn: "框架",
+    },
+    back: {
+        en: "Back",
+        cn: "返回",
+    },
 
     welcome: {
         en: "Welcome to PMoS, click me to know more about PMoS!",
@@ -634,6 +642,10 @@ const LANGUAGE_DATA = {
         en: "Export with nodes coordinates",
         cn: "导出时附带算子位置信息",
     },
+    framework_match_failed_format: {
+        en: "Current's framework({0}) isn't equal to graph's framework({1})",
+        cn: "当前的框架为{0}，与导入的框架（{1}）类型不匹配",
+    },
     json_grammar_check_fail: {
         en: "JSON grammar check failed",
         cn: "JSON语法匹配失败",
@@ -693,6 +705,10 @@ const LANGUAGE_DATA = {
     can_not_redo: {
         en: "Can not redo now!",
         cn: "目前无法恢复！",
+    },
+    can_not_paste: {
+        en: "Can not paste now!",
+        cn: "目前无法粘贴！",
     },
     language_switch_format: {
         en: "Switch to '{0}' Language.",

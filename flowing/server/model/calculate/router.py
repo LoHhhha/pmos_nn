@@ -12,7 +12,7 @@ from fastapi.responses import JSONResponse
 from flowing.shower import Logger
 from flowing.server.config import MODEL_RESULT_PATH
 from flowing.net.abstract import InputNode, OutputNode, LayerNode
-from flowing.net.parser import TorchParser
+from flowing.net.parser import TorchParser, MindSporeParser
 from flowing.server.common import get_json_response, info_to_input_node, info_to_output_node, info_to_layer_node
 from flowing.server.response import JSON_PARSE_ERROR_RESPONSE, NOT_IMPLEMENTED_ERROR_RESPONSE, \
     JSON_NOT_DICT_ERROR_RESPONSE
@@ -111,12 +111,9 @@ def _get_graph_pytorch(data: str) -> Dict | JSONResponse:
     }
 
 
-@router.post("/pytorch")
-async def model_calculate_pytorch(request: ModelCalculateRequest):
-    Logger.debug(request)
-
+def model_calculate(request: ModelCalculateRequest, parser_cls):
     """
-    /model/calculate/pytorch:
+    /model/calculate/*:
         - input:
             ModelCalculateRequest(
                 timestamp<int>,
@@ -163,7 +160,7 @@ async def model_calculate_pytorch(request: ModelCalculateRequest):
         net_name = None
 
     try:
-        parser = TorchParser(**info, network_name=net_name)
+        parser = parser_cls(**info, network_name=net_name)
 
         file_name = f"{parser.network_name}.py"
         save_path = os.path.join(MODEL_RESULT_PATH, file_name)
@@ -174,6 +171,20 @@ async def model_calculate_pytorch(request: ModelCalculateRequest):
         return get_json_response(status_code=400, msg=f"Parser return error due to {str(e)}")
 
     return get_json_response(status_code=200, msg=f"Parser return successfully", fn=file_name)
+
+
+@router.post("/pytorch")
+async def model_calculate_pytorch(request: ModelCalculateRequest):
+    Logger.debug(request)
+
+    return model_calculate(request, TorchParser)
+
+
+@router.post("/mindspore")
+async def model_calculate_mindspore(request: ModelCalculateRequest):
+    Logger.debug(request)
+
+    return model_calculate(request, MindSporeParser)
 
 
 @router.post("/tensorflow")

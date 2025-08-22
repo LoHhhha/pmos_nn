@@ -443,7 +443,11 @@ const TIDY_NODES_ICON = ICONS.tidy;
 
             // update shape
             const xhr = new XMLHttpRequest();
-            xhr.open("POST", "/shape/calculate/pytorch", true);
+            const url = `/shape/calculate/${MEMORY_GET(
+                MEMORY_KEYS.CurrentFramework,
+                FRAMEWORK.pytorch
+            ).toLowerCase()}`;
+            xhr.open("POST", url, true);
             xhr.setRequestHeader("Content-Type", "application/json");
             xhr.onreadystatechange = () => {
                 if (xhr.readyState !== XMLHttpRequest.DONE) {
@@ -1589,7 +1593,11 @@ const TIDY_NODES_ICON = ICONS.tidy;
                 }
 
                 const xhr = new XMLHttpRequest();
-                xhr.open("POST", "/model/calculate/pytorch", true);
+                const url = `/model/calculate/${MEMORY_GET(
+                    MEMORY_KEYS.CurrentFramework,
+                    FRAMEWORK.pytorch
+                ).toLowerCase()}`;
+                xhr.open("POST", url, true);
                 xhr.setRequestHeader("Content-Type", "application/json");
                 xhr.onreadystatechange = () => {
                     if (xhr.readyState !== XMLHttpRequest.DONE) {

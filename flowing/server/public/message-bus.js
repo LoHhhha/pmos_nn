@@ -57,6 +57,7 @@ const MESSAGE_TYPE = {
     NodesCopy: "nodes-copy",
     NodesPaste: "nodes-paste",
     CopyData: "copy-data", // return
+    ClearCopyData: "clear-copy-data",
 
     // mini-map
     DeleteMapNode: "delete-map-node",
@@ -90,6 +91,8 @@ const MESSAGE_TYPE = {
     GraphSaved: "graph-saved", // out
     OpenGraphs: "open-graphs",
     ResetCurrentSaveGraph: "reset-current-save-graph",
+    FrameworkChanged: "framework-changed", // out
+    ChangeFramework: "change-framework",
 
     // general-pages
     HelpPage: "help-page",

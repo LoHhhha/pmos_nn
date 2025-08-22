@@ -13,6 +13,7 @@ const MEMORY_KEYS = {
     ConnectionCreateIgnore: "connection-create-ignore", // undo-helper
     ConnectionDeleteIgnore: "connection-delete-ignore", // undo-helper
     CurrentGraphSaveName: "current-graph-save-name", // graph-save-helper
+    CurrentFramework: "current-framework", // graph-save-helper
 
     // local, only string->string
     GraphKeys: "pmos-graph-keys", // graph-save-helper, string: [key0, ...]

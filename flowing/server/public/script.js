@@ -100,7 +100,6 @@ jsPlumb.ready(async () => {
 
     // welcome page
     MESSAGE_PUSH(MESSAGE_TYPE.OpenGraphs, {
-        continueText: I18N_STRINGS.using_from_scratch,
-        newGraphDisabled: true,
+        firstTime: true,
     });
 });

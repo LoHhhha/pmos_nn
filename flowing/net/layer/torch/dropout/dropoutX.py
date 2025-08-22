@@ -33,7 +33,7 @@ class _Dropout(TorchNNLayer):
     @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         # need dim and at_least_two as args.
-        dim = kwargs.get('dim', -1)
+        dim = kwargs.get('dim', None)
         at_least_two = kwargs.get('at_least_two', False)
 
         return OutputShapeCalculator.dropout(

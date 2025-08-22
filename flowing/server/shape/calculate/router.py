@@ -10,7 +10,8 @@ from flowing.shower import Logger
 from flowing.server.response import JSON_PARSE_ERROR_RESPONSE, NOT_IMPLEMENTED_ERROR_RESPONSE, \
     JSON_NOT_DICT_ERROR_RESPONSE
 from flowing.server.shape.calculate.models import ShapeCalculateRequest, NET_NODE_INFOS_PARSE_ERROR_RESPONSE
-from flowing.net.layer.torch import *  # using to eval()
+import flowing.net.layer.torch as torch_layers
+import flowing.net.layer.mindspore as mindspore_layers
 
 router = APIRouter(
     prefix="/calculate",
@@ -18,12 +19,9 @@ router = APIRouter(
 )
 
 
-@router.post("/pytorch")
-async def shape_calculate_pytorch(request: ShapeCalculateRequest):
-    Logger.debug(request)
-
+def shape_calculate(request: ShapeCalculateRequest, layers):
     """
-        /shape/calculate/pytorch:
+        /shape/calculate/*:
         - input:
             ShapeCalculateRequest(
                 timestamp<int>,
@@ -44,7 +42,7 @@ async def shape_calculate_pytorch(request: ShapeCalculateRequest):
                 ],
             ]
             net_nodes_msg<list>:[
-                msg<str>|None    # when fail to calculate shape, 
+                msg<str>|None    # when fail to calculate shape,
                                     it will be the reason why calculation failed else it will be None!
             ]
     """
@@ -91,7 +89,7 @@ async def shape_calculate_pytorch(request: ShapeCalculateRequest):
             try:
                 data_amount = len(layer_node.from_data)
                 # may raise ClassNotFound or ValueError
-                layer_node.layer_object = eval(layer_node.api_name)(
+                layer_node.layer_object = getattr(layers, layer_node.api_name)(
                     data_amount=data_amount,
                     **layer_node.layer_init_kwargs
                 )
@@ -114,6 +112,20 @@ async def shape_calculate_pytorch(request: ShapeCalculateRequest):
         return NET_NODE_INFOS_PARSE_ERROR_RESPONSE
 
     return get_json_response(status_code=200, net_nodes_shape=net_nodes_shape, net_nodes_msg=net_nodes_msg)
+
+
+@router.post("/pytorch")
+async def shape_calculate_pytorch(request: ShapeCalculateRequest):
+    Logger.debug(request)
+
+    return shape_calculate(request, torch_layers)
+
+
+@router.post("/mindspore")
+async def model_calculate_mindspore(request: ShapeCalculateRequest):
+    Logger.debug(request)
+
+    return shape_calculate(request, mindspore_layers)
 
 
 @router.post("/tensorflow")

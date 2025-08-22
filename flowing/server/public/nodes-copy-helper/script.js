@@ -13,6 +13,8 @@
  *          connections: CONNECTION_COPY_DATA
  *      }
  *
+ * MESSAGE_TYPE.ClearCopyData
+ *
  */
 
 const NODES_COPY_DATA = new Array(0); // {left, top, config, content}
@@ -118,6 +120,17 @@ const NO_OFFSET_PASTE_EXCURSION = {
         });
 
         MESSAGE_HANDLER(MESSAGE_TYPE.NodesPaste, (event) => {
+            if (MEMORY_GET(MEMORY_KEYS.CanPasteNodes, false) === false) {
+                console.warn("[NodesPaste] can not paste now.");
+                MESSAGE_PUSH(MESSAGE_TYPE.PromptShow, {
+                    config: PROMPT_CONFIG.WARNING,
+                    iconSvg: ICONS.paste,
+                    content: I18N_STRINGS.can_not_paste,
+                    timeout: 2000,
+                });
+                return;
+            }
+
             const navigatorInfo = jsPlumbNavigator.getCanvasBoundsAndScale();
 
             let offsetLeft = event.detail?.left,
@@ -166,6 +179,10 @@ const NO_OFFSET_PASTE_EXCURSION = {
                 nodes: NODES_COPY_DATA,
                 connections: CONNECTION_COPY_DATA,
             };
+        });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.ClearCopyData, () => {
+            MEMORY_SET(MEMORY_KEYS.CanPasteNodes, false);
         });
 
         ADD_KEY_HANDLER(

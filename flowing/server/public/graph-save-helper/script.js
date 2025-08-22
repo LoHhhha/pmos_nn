@@ -9,10 +9,13 @@
  *      <event.detail.name>
  *
  * MESSAGE_TYPE.OpenGraphs
- *      [<event.detail.continueText>]
- *      [<event.detail.continueDisabled>]
- *      [<event.detail.newGraphText>]
- *      [<event.detail.newGraphDisabled>]
+ *      [<event.detail.firstTime:bool>]
+ *
+ * MESSAGE_TYPE.FrameworkChanged (out)
+ *      <event.detail.framework>
+ *
+ * MESSAGE_TYPE.ChangeFramework
+ *      <event.detail.framework>
  */
 
 const GRAPH_SAVE_HELPER_ICON = ICONS.save;
@@ -23,18 +26,18 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
 (function () {
     const addTransverseItem = (
         text,
-        defaultText,
         callback,
-        transverseItems
+        transverseItems,
+        leftIcon = false
     ) => {
         const ele = document.createElement("div");
         ele.className = "graph-save-transverse-item";
         const textEle = document.createElement("div");
         textEle.className = "graph-save-transverse-item-text";
-        textEle.textContent = text || defaultText;
+        textEle.textContent = text;
         const iconEle = document.createElement("div");
         iconEle.className = "graph-save-transverse-item-icon";
-        iconEle.innerHTML = ICONS.right;
+        iconEle.innerHTML = leftIcon ? ICONS.left : ICONS.right;
         ele.appendChild(textEle);
         ele.appendChild(iconEle);
         ele.onclick = callback;
@@ -44,6 +47,73 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
         }
 
         transverseItems.push(ele);
+    };
+
+    const setFramework = (type, needRestart) => {
+        const change = () => {
+            MEMORY_SET(MEMORY_KEYS.CurrentFramework, type);
+            MESSAGE_PUSH(MESSAGE_TYPE.FrameworkChanged, {
+                framework: type,
+            });
+        };
+
+        // clear copy anyway
+        if (needRestart) {
+            MESSAGE_CALL(MESSAGE_TYPE.RestartPage, {
+                confirmCallback: change,
+            });
+        } else {
+            MESSAGE_CALL(MESSAGE_TYPE.ClearCopyData);
+            change();
+        }
+    };
+
+    const showFrameworkSelectPage = (firstTime) => {
+        const container = [];
+        addTransverseItem(
+            "PyTorch",
+            () => {
+                MESSAGE_CALL(MESSAGE_TYPE.CoveringClose, {
+                    afterClose: setFramework.bind(
+                        null,
+                        FRAMEWORK.pytorch,
+                        firstTime !== true
+                    ),
+                });
+            },
+            container
+        );
+        addTransverseItem(
+            "MindSpore",
+            () => {
+                MESSAGE_CALL(MESSAGE_TYPE.CoveringClose, {
+                    afterClose: setFramework.bind(
+                        null,
+                        FRAMEWORK.mindspore,
+                        firstTime !== true
+                    ),
+                });
+            },
+            container
+        );
+        addTransverseItem(
+            I18N_STRINGS.back,
+            () => {
+                MESSAGE_CALL(MESSAGE_TYPE.CoveringClose, {
+                    afterClose: () => {
+                        MESSAGE_PUSH(MESSAGE_TYPE.OpenGraphs, {
+                            firstTime,
+                        });
+                    },
+                });
+            },
+            container,
+            true
+        );
+        MESSAGE_PUSH(MESSAGE_TYPE.CoveringShow, {
+            title: I18N_STRINGS.framework,
+            elements: container,
+        });
     };
 
     window.addGraphSaveHelper = () => {
@@ -67,12 +137,17 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
             }
 
             const timestamp = new Date().getTime();
+            const framework = MEMORY_GET(
+                MEMORY_KEYS.CurrentFramework,
+                FRAMEWORK.pytorch
+            );
             let graphInfo;
             if (event.detail?.name) {
                 graphInfo = {
                     name: event.detail?.name,
                     data: callResult[0],
                     timestamp: timestamp,
+                    framework: framework,
                 };
             } else {
                 graphInfo = {
@@ -82,6 +157,7 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
                     ),
                     data: callResult[0],
                     timestamp: timestamp,
+                    framework: framework,
                 };
             }
 
@@ -137,9 +213,8 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
 
             const transverseItems = [];
 
-            if (!event.detail?.continueDisabled) {
+            if (event.detail?.firstTime !== true) {
                 addTransverseItem(
-                    event.detail?.continueText,
                     I18N_STRINGS.continue_graph_format?.format(
                         MEMORY_GET(
                             MEMORY_KEYS.CurrentGraphSaveName,
@@ -152,22 +227,19 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
                     transverseItems
                 );
             }
-            if (!event.detail?.newGraphDisabled) {
-                addTransverseItem(
-                    event.detail?.newGraphText,
-                    I18N_STRINGS.create_graph,
-                    () => {
-                        MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose, {
-                            afterClose: () => {
-                                MESSAGE_PUSH(MESSAGE_TYPE.RestartPage, {
-                                    title: I18N_STRINGS.create_graph,
-                                });
-                            },
-                        });
-                    },
-                    transverseItems
-                );
-            }
+
+            addTransverseItem(
+                I18N_STRINGS.create_graph,
+                () => {
+                    MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose, {
+                        afterClose: showFrameworkSelectPage.bind(
+                            null,
+                            event.detail?.firstTime
+                        ),
+                    });
+                },
+                transverseItems
+            );
 
             const prevGraphItemTitleEle = document.createElement("h2");
             prevGraphItemTitleEle.className = "graph-save-h2-title";
@@ -199,17 +271,23 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
             };
             const itemClick = (graphKey, graphInfo, event) => {
                 MESSAGE_PUSH(MESSAGE_TYPE.CoveringClose, {
-                    afterClose: () => {
+                    beforeClose: () => {
+                        // compatible with previous versions
+                        setFramework(
+                            graphInfo.framework || FRAMEWORK.pytorch,
+                            false
+                        );
+
                         MESSAGE_CALL(MESSAGE_TYPE.ImportGraph, {
                             default: graphInfo.data,
                             withoutConfirm: true,
-                            callback: () => {
-                                MESSAGE_PUSH(MESSAGE_TYPE.OperationRecordReset);
-                                MESSAGE_PUSH(MESSAGE_TYPE.GraphSaved, {
-                                    timestamp: graphInfo.timestamp,
-                                    name: graphInfo.name,
-                                });
-                            },
+                        });
+
+                        MESSAGE_CALL(MESSAGE_TYPE.OperationRecordReset);
+
+                        MESSAGE_CALL(MESSAGE_TYPE.GraphSaved, {
+                            timestamp: graphInfo.timestamp,
+                            name: graphInfo.name,
                         });
                         CURRENT_GRAPH_KEY = graphKey;
                     },
@@ -228,7 +306,8 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
             };
 
             for (const { graphInfo, graphKey } of localGraphs) {
-                const { name, data, timestamp, createTimestamp } = graphInfo;
+                const { name, data, framework, timestamp, createTimestamp } =
+                    graphInfo;
 
                 let graph;
                 try {
@@ -251,6 +330,10 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
                 const titleEle = document.createElement("div");
                 titleEle.className = "graph-save-item-title";
                 titleEle.textContent = name || I18N_STRINGS.unnamed_graph;
+
+                const frameworkEle = document.createElement("div");
+                frameworkEle.className = "graph-save-item-framework";
+                frameworkEle.textContent = framework || FRAMEWORK.pytorch;
 
                 const detailEle = document.createElement("div");
                 detailEle.classList.add("graph-save-item-detail");
@@ -284,6 +367,7 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
                 item.onclick = itemClick.bind(null, graphKey, graphInfo);
 
                 item.appendChild(titleEle);
+                item.appendChild(frameworkEle);
                 item.appendChild(detailEle);
                 item.appendChild(createTimeEle);
                 item.appendChild(changeTimeEle);
@@ -333,6 +417,15 @@ const GRAPH_SAVE_HELPER_FRAME_QUEUE_WEIGHT = CALL_QUEUE_AMOUNT - 1;
             });
             // unsaved
             MESSAGE_CALL(MESSAGE_TYPE.GraphChanged);
+        });
+
+        MESSAGE_HANDLER(MESSAGE_TYPE.ChangeFramework, (event) => {
+            if (event.detail?.framework === undefined) {
+                console.debug("[ChangeFramework] unexpected event as", event);
+                return;
+            }
+
+            setFramework(event.detail.framework);
         });
 
         ADD_KEY_HANDLER(

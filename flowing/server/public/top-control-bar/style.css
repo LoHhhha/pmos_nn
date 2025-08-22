@@ -71,7 +71,7 @@
     display: grid;
     gap: var(--margin);
     height: var(--tcb-length-unit);
-    grid-template-columns: auto auto 1fr;
+    grid-template-columns: auto auto auto 1fr;
 }
 
 .tcb-graph-name-input {
@@ -89,6 +89,11 @@
 .tcb-graph-name-input:hover {
     outline: var(--hover-border-width) solid var(--default-color);
     background-color: var(--tcb-graph-name-input-hover-background-color);
+}
+
+.tcb-framework-saved-text {
+    font-size: small;
+    align-self: flex-end;
 }
 
 .tcb-graph-saved-text {
@@ -139,7 +144,7 @@
     display: flex;
     flex-direction: row;
     gap: var(--margin);
-    margin-left: auto
+    margin-left: auto;
 }
 
 .tcb-navigator-bar-mode-button {
