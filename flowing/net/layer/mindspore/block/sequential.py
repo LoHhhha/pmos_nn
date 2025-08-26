@@ -5,22 +5,22 @@ from typing import Optional, Annotated, Dict, Tuple, List, Any
 
 from flowing.net.layer import Layer
 from flowing.net.layer import utils as layer_utils
-from flowing.net.layer.torch.common import TorchNNLayer
+from flowing.net.layer.mindspore.common import MindSporeNNLayer
 
 __all__ = [
-    'Sequential'
+    'SequentialCell'
 ]
 
 
-class Sequential(TorchNNLayer):
-    _api_name = 'Sequential'
+class SequentialCell(MindSporeNNLayer):
+    _api_name = 'SequentialCell'
 
     data_amount = 1
     output_amount = 1
 
     modules: Annotated[Tuple[Dict[str, str | Dict]], Layer.LayerContent]
 
-    layers: List[TorchNNLayer]
+    layers: List[MindSporeNNLayer]
 
     def __init__(
             self,
@@ -40,21 +40,21 @@ class Sequential(TorchNNLayer):
         self.modules = modules
         self.layers = layer_utils.get_layers_from_modules(
             self.modules,
-            "flowing.net.layer.torch",
-            accept_layer_cls=[TorchNNLayer],
+            "flowing.net.layer.mindspore",
+            accept_layer_cls=[MindSporeNNLayer],
             extend_init_kwargs=kwargs
         )
 
     def content_check(self):
         if len(self.layers) == 0:
             raise ValueError(
-                f"detected an empty Sequential, "
+                f"detected an empty SequentialCell, "
                 f"which can't calculate the output shape"
             )
 
     def init_code(
             self,
-            package: str = "torch.nn",
+            package: str = "mindspore.nn",
             add_self: bool = True,
             extend_params: Dict[str, Any] = None,
             only_right_value: bool = False,
@@ -64,7 +64,8 @@ class Sequential(TorchNNLayer):
             tuple(layer.init_code(only_right_value=True) for layer in self.layers),
         )
         package_name = f"{package}." if package and not package.endswith(".") else package
-        right_value = f"{package_name}{self._api_name}({', '.join(sub_layer_rvalues)})"
+        right_value = (f"{package_name}{self._api_name}"
+                       f"([{', '.join(sub_layer_rvalues)}])")
         if only_right_value:
             return right_value,
 

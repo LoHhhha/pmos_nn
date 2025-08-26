@@ -323,8 +323,8 @@ operatorBarNamespace.argsType = {
             )}`;
         },
     },
-    pytorchSequential: {
-        id: "pytorch sequential",
+    sequential: {
+        id: "sequential",
         typeCls: Array,
         input: operatorBarNamespace.argsInputType.button,
         getValue: (value) => {
@@ -814,7 +814,7 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "modules",
-                type: operatorBarNamespace.argsType.pytorchSequential,
+                type: operatorBarNamespace.argsType.sequential,
                 default: [],
             },
         ],
@@ -3679,6 +3679,29 @@ operatorBarNamespace.operators = [
     },
     // end, framework: PyTorch
     // begin, framework: MindSpore
+    {
+        apiName: "SequentialCell",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.block,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [
+            {
+                name: "modules",
+                short: "M",
+                getter: operatorBarNamespace.outlinesGetter.length,
+            },
+        ],
+        args: [
+            {
+                name: "modules",
+                type: operatorBarNamespace.argsType.sequential,
+                default: [],
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/zh-CN/master/api_python/nn/mindspore.nn.SequentialCell.html",
+    },
     {
         apiName: "Identity",
         extendCssClass: [],
