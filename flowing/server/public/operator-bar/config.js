@@ -4627,6 +4627,74 @@ operatorBarNamespace.operators = [
         link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.Conv3dTranspose.html#mindspore.nn.Conv3dTranspose",
         canBeSequential: true,
     },
+    {
+        apiName: "Dense",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.linear,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "in_channels", short: "I" },
+            { name: "out_channels", short: "O" },
+        ],
+        args: [
+            {
+                name: "in_channels",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "64",
+            },
+            {
+                name: "out_channels",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "64",
+            },
+            {
+                name: "has_bias",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.Dense.html",
+        canBeSequential: true,
+    },
+    {
+        apiName: "BiDense",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.linear,
+        inputEnd: ["input1", "input2"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "in1_channels", short: "I1" },
+            { name: "in2_channels", short: "I2" },
+            { name: "out_channels", short: "O" },
+        ],
+        args: [
+            {
+                name: "in1_channels",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "64",
+            },
+            {
+                name: "in2_channels",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "64",
+            },
+            {
+                name: "out_channels",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "64",
+            },
+            {
+                name: "has_bias",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.BiDense.html",
+        canBeSequential: true,
+    },
     // end, framework: MindSpore
 ];
 
