@@ -17,6 +17,9 @@ class Device:
     def __str__(self):
         return self.__repr__()
 
+    def __eq__(self, other):
+        return repr(self) == repr(other)
+
 
 class Dtype:
     dtype: Optional[str]
@@ -31,3 +34,6 @@ class Dtype:
 
     def __str__(self):
         return self.__repr__()
+
+    def __eq__(self, other):
+        return repr(self) == repr(other)

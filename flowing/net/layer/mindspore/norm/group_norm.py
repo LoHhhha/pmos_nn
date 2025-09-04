@@ -1,17 +1,17 @@
-# Copyright © 2024-2025 PMoS. All rights reserved.
+# Copyright © 2025 PMoS. All rights reserved.
 
 from typing import Tuple, List, Annotated
 
 from flowing.net.layer import Layer
 from flowing.net.layer.shape_helper import OutputShapeCalculator
-from flowing.net.layer.torch.common import TorchNNLayer
+from flowing.net.layer.mindspore.common import MindSporeNNLayer
 
 __all__ = [
     "GroupNorm",
 ]
 
 
-class GroupNorm(TorchNNLayer):
+class GroupNorm(MindSporeNNLayer):
     _api_name = "GroupNorm"
 
     num_groups: Annotated[int, Layer.LayerContent]

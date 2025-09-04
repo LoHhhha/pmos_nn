@@ -48,6 +48,13 @@ class _LazyBatchNorm(TorchNNLayer):
         self.affine = affine
         self.track_running_stats = track_running_stats
 
+    def content_check(self):
+        if (self.momentum is not None) and (self.momentum < 0 or self.momentum > 1):
+            raise ValueError(
+                f"detected an unexpected momentum as {self.momentum}, "
+                f"expecting 0<=momentum<=1 or None"
+            )
+
     @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         # need allowed_dims, num_features as args.
@@ -68,6 +75,13 @@ class _BatchNorm(_LazyBatchNorm):
         super().__init__(**kwargs)
 
         self.num_features = num_features
+
+    def content_check(self):
+        if self.num_features < 1:
+            raise ValueError(
+                f"detected an unexpected num_features as {self.num_features}, "
+                f"expecting num_features>=1"
+            )
 
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         return super().output_shape(

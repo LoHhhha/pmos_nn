@@ -235,6 +235,22 @@ operatorBarNamespace.argsType = {
             )}`;
         },
     },
+    boolOrNone: {
+        id: "boolean or None",
+        input: operatorBarNamespace.argsInputType.select,
+        getValue: (value) => {
+            if (value === "None") {
+                return null;
+            }
+            return value === "True";
+        },
+        values: ["False", "True", "None"],
+        get prompt() {
+            return `one of ${operatorBarNamespace.argsType.boolOrNone.values.join(
+                ", "
+            )}`;
+        },
+    },
     pytorchPadding: {
         id: "pytorch padding for convolution",
         reg: /^((\(\s*\d+\s*(,\s*\d+\s*)*\))|(\s*\d+\s*))|valid|same$/,
@@ -323,6 +339,49 @@ operatorBarNamespace.argsType = {
             )}`;
         },
     },
+    mindsporeDataType: {
+        id: "mindspore data type",
+        input: operatorBarNamespace.argsInputType.select,
+        getValue: (value) => {
+            if (value === "default") return null;
+            return value;
+        },
+        values: [
+            "default",
+            "bfloat16",
+            "float16",
+            "float32",
+            "float64",
+            "uint8",
+            "uint16",
+            "uint32",
+            "uint64",
+            "int8",
+            "int16",
+            "int32",
+            "int64",
+            "complex64",
+            "complex128",
+        ],
+        get prompt() {
+            return `one of ${operatorBarNamespace.argsType.mindsporeDataType.values.join(
+                ", "
+            )}`;
+        },
+    },
+    mindsporePadMode: {
+        id: "mindspore pad mode",
+        input: operatorBarNamespace.argsInputType.select,
+        getValue: (value) => {
+            return value;
+        },
+        values: ["same", "valid", "pad"],
+        get prompt() {
+            return `one of ${operatorBarNamespace.argsType.mindsporePadMode.values.join(
+                ", "
+            )}`;
+        },
+    },
     sequential: {
         id: "sequential",
         typeCls: Array,
@@ -374,20 +433,6 @@ operatorBarNamespace.argsType = {
             });
         },
         prompt: "using JSON format like '[{apiName:node_api_name,content:{param:value,...}},...]' to describe a series of nodes",
-    },
-
-    mindsporePadMode: {
-        id: "mindspore pad mode",
-        input: operatorBarNamespace.argsInputType.select,
-        getValue: (value) => {
-            return value;
-        },
-        values: ["same", "valid", "pad"],
-        get prompt() {
-            return `one of ${operatorBarNamespace.argsType.mindsporePadMode.values.join(
-                ", "
-            )}`;
-        },
     },
 };
 
@@ -3680,6 +3725,177 @@ operatorBarNamespace.operators = [
     // end, framework: PyTorch
     // begin, framework: MindSpore
     {
+        apiName: "Rand",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.data,
+        inputEnd: [],
+        outputEnd: ["data"],
+        outlines: [],
+        args: [
+            {
+                name: "size",
+                type: operatorBarNamespace.argsType.strNotNegTuple,
+                default: "(16,16)",
+            },
+            {
+                name: "seed",
+                type: operatorBarNamespace.argsType.strIntOrNone,
+                default: "None",
+            },
+            {
+                name: "dtype",
+                type: operatorBarNamespace.argsType.mindsporeDataType,
+                default: "default",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/ops/mindspore.ops.rand.html",
+        outputShapeComeFromArg: "size",
+    },
+    {
+        apiName: "RandNormal",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.data,
+        inputEnd: [],
+        outputEnd: ["data"],
+        outlines: [],
+        args: [
+            {
+                name: "size",
+                type: operatorBarNamespace.argsType.strNotNegTuple,
+                default: "(16,16)",
+            },
+            {
+                name: "seed",
+                type: operatorBarNamespace.argsType.strIntOrNone,
+                default: "None",
+            },
+            {
+                name: "dtype",
+                type: operatorBarNamespace.argsType.mindsporeDataType,
+                default: "default",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/ops/mindspore.ops.randn.html",
+        outputShapeComeFromArg: "size",
+    },
+    {
+        apiName: "RandInt",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.data,
+        inputEnd: [],
+        outputEnd: ["data"],
+        outlines: [
+            { name: "low", short: "L" },
+            { name: "high", short: "H" },
+        ],
+        args: [
+            {
+                name: "size",
+                type: operatorBarNamespace.argsType.strNotNegTuple,
+                default: "(16,16)",
+            },
+            {
+                name: "low",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "0",
+            },
+            {
+                name: "high",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "16",
+            },
+            {
+                name: "seed",
+                type: operatorBarNamespace.argsType.strIntOrNone,
+                default: "None",
+            },
+            {
+                name: "dtype",
+                type: operatorBarNamespace.argsType.mindsporeDataType,
+                default: "default",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/ops/mindspore.ops.randint.html",
+        outputShapeComeFromArg: "size",
+    },
+    {
+        apiName: "Zeros",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.data,
+        inputEnd: [],
+        outputEnd: ["data"],
+        outlines: [],
+        args: [
+            {
+                name: "size",
+                type: operatorBarNamespace.argsType.strNotNegTuple,
+                default: "(16,16)",
+            },
+            {
+                name: "dtype",
+                type: operatorBarNamespace.argsType.mindsporeDataType,
+                default: "default",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/ops/mindspore.ops.zeros.html",
+        outputShapeComeFromArg: "size",
+    },
+    {
+        apiName: "Ones",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.data,
+        inputEnd: [],
+        outputEnd: ["data"],
+        outlines: [],
+        args: [
+            {
+                name: "size",
+                type: operatorBarNamespace.argsType.strNotNegTuple,
+                default: "(16,16)",
+            },
+            {
+                name: "dtype",
+                type: operatorBarNamespace.argsType.mindsporeDataType,
+                default: "default",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/ops/mindspore.ops.ones.html",
+        outputShapeComeFromArg: "size",
+    },
+    {
+        apiName: "Full",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.data,
+        inputEnd: [],
+        outputEnd: ["data"],
+        outlines: [{ name: "fill_value", short: "V" }],
+        args: [
+            {
+                name: "size",
+                type: operatorBarNamespace.argsType.strNotNegTuple,
+                default: "(16,16)",
+            },
+            {
+                name: "fill_value",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "0.0",
+            },
+            {
+                name: "dtype",
+                type: operatorBarNamespace.argsType.mindsporeDataType,
+                default: "default",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/ops/mindspore.ops.full.html",
+        outputShapeComeFromArg: "size",
+    },
+    {
         apiName: "SequentialCell",
         extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.block,
@@ -3701,6 +3917,141 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.mindspore,
         link: "https://www.mindspore.cn/docs/zh-CN/master/api_python/nn/mindspore.nn.SequentialCell.html",
+    },
+    {
+        apiName: "RandLike",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input"],
+        outputEnd: ["data"],
+        outlines: [],
+        args: [
+            {
+                name: "seed",
+                type: operatorBarNamespace.argsType.strIntOrNone,
+                default: "None",
+            },
+            {
+                name: "dtype",
+                type: operatorBarNamespace.argsType.mindsporeDataType,
+                default: "default",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/ops/mindspore.ops.rand_like.html",
+    },
+    {
+        apiName: "RandNormalLike",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input"],
+        outputEnd: ["data"],
+        outlines: [],
+        args: [
+            {
+                name: "seed",
+                type: operatorBarNamespace.argsType.strIntOrNone,
+                default: "None",
+            },
+            {
+                name: "dtype",
+                type: operatorBarNamespace.argsType.mindsporeDataType,
+                default: "default",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/ops/mindspore.ops.randn_like.html",
+    },
+    {
+        apiName: "RandIntLike",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input"],
+        outputEnd: ["data"],
+        outlines: [
+            { name: "low", short: "L" },
+            { name: "high", short: "H" },
+        ],
+        args: [
+            {
+                name: "low",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "0",
+            },
+            {
+                name: "high",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "16",
+            },
+            {
+                name: "seed",
+                type: operatorBarNamespace.argsType.strIntOrNone,
+                default: "None",
+            },
+            {
+                name: "dtype",
+                type: operatorBarNamespace.argsType.mindsporeDataType,
+                default: "default",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/ops/mindspore.ops.randint_like.html",
+    },
+    {
+        apiName: "OnesLike",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input"],
+        outputEnd: ["data"],
+        outlines: [],
+        args: [
+            {
+                name: "dtype",
+                type: operatorBarNamespace.argsType.mindsporeDataType,
+                default: "default",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/ops/mindspore.ops.ones_like.html",
+    },
+    {
+        apiName: "ZerosLike",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input"],
+        outputEnd: ["data"],
+        outlines: [],
+        args: [
+            {
+                name: "dtype",
+                type: operatorBarNamespace.argsType.mindsporeDataType,
+                default: "default",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/ops/mindspore.ops.zeros_like.html",
+    },
+    {
+        apiName: "FullLike",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input"],
+        outputEnd: ["data"],
+        outlines: [{ name: "fill_value", short: "V" }],
+        args: [
+            {
+                name: "fill_value",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "0.0",
+            },
+            {
+                name: "dtype",
+                type: operatorBarNamespace.argsType.mindsporeDataType,
+                default: "default",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/ops/mindspore.ops.full_like.html",
     },
     {
         apiName: "Identity",
@@ -4765,6 +5116,288 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.mindspore,
         link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.BiDense.html",
+        canBeSequential: true,
+    },
+    {
+        apiName: "BatchNorm1d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.normalization,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "num_features", short: "NF" }],
+        args: [
+            {
+                name: "num_features",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "64",
+            },
+            {
+                name: "eps",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1e-5",
+            },
+            {
+                name: "momentum",
+                type: operatorBarNamespace.argsType.strFloatOrNone,
+                default: "0.1",
+            },
+            {
+                name: "affine",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+            {
+                name: "use_batch_statistics",
+                type: operatorBarNamespace.argsType.boolOrNone,
+                default: "None",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.BatchNorm1d.html",
+        canBeSequential: true,
+    },
+    {
+        apiName: "BatchNorm2d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.normalization,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "num_features", short: "NF" }],
+        args: [
+            {
+                name: "num_features",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "64",
+            },
+            {
+                name: "eps",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1e-5",
+            },
+            {
+                name: "momentum",
+                type: operatorBarNamespace.argsType.strFloatOrNone,
+                default: "0.1",
+            },
+            {
+                name: "affine",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+            {
+                name: "use_batch_statistics",
+                type: operatorBarNamespace.argsType.boolOrNone,
+                default: "None",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.BatchNorm2d.html",
+        canBeSequential: true,
+    },
+    {
+        apiName: "BatchNorm3d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.normalization,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "num_features", short: "NF" }],
+        args: [
+            {
+                name: "num_features",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "64",
+            },
+            {
+                name: "eps",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1e-5",
+            },
+            {
+                name: "momentum",
+                type: operatorBarNamespace.argsType.strFloatOrNone,
+                default: "0.1",
+            },
+            {
+                name: "affine",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+            {
+                name: "use_batch_statistics",
+                type: operatorBarNamespace.argsType.boolOrNone,
+                default: "None",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.BatchNorm3d.html",
+        canBeSequential: true,
+    },
+    {
+        apiName: "InstanceNorm1d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.normalization,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "num_features", short: "NF" }],
+        args: [
+            {
+                name: "num_features",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "64",
+            },
+            {
+                name: "eps",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1e-5",
+            },
+            {
+                name: "momentum",
+                type: operatorBarNamespace.argsType.strFloatOrNone,
+                default: "0.1",
+            },
+            {
+                name: "affine",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.InstanceNorm1d.html",
+        canBeSequential: true,
+    },
+    {
+        apiName: "InstanceNorm2d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.normalization,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "num_features", short: "NF" }],
+        args: [
+            {
+                name: "num_features",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "64",
+            },
+            {
+                name: "eps",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1e-5",
+            },
+            {
+                name: "momentum",
+                type: operatorBarNamespace.argsType.strFloatOrNone,
+                default: "0.1",
+            },
+            {
+                name: "affine",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.InstanceNorm2d.html",
+        canBeSequential: true,
+    },
+    {
+        apiName: "InstanceNorm3d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.normalization,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "num_features", short: "NF" }],
+        args: [
+            {
+                name: "num_features",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "64",
+            },
+            {
+                name: "eps",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1e-5",
+            },
+            {
+                name: "momentum",
+                type: operatorBarNamespace.argsType.strFloatOrNone,
+                default: "0.1",
+            },
+            {
+                name: "affine",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.InstanceNorm3d.html",
+        canBeSequential: true,
+    },
+    {
+        apiName: "LayerNorm",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.normalization,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "normalized_shape", short: "NS" }],
+        args: [
+            {
+                name: "normalized_shape",
+                type: operatorBarNamespace.argsType.strNotNegTuple,
+                default: "(64,64)",
+            },
+            {
+                name: "begin_norm_axis",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "-1",
+            },
+            {
+                name: "begin_params_axis",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "-1",
+            },
+            {
+                name: "epsilon",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1e-7",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.LayerNorm.html",
+        canBeSequential: true,
+    },
+    {
+        apiName: "GroupNorm",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.normalization,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "num_groups", short: "NG" },
+            { name: "num_channels", short: "NC" },
+        ],
+        args: [
+            {
+                name: "num_groups",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "3",
+            },
+            {
+                name: "num_channels",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "3",
+            },
+            {
+                name: "eps",
+                type: operatorBarNamespace.argsType.strFloat,
+                default: "1e-5",
+            },
+            {
+                name: "affine",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.GroupNorm.html",
         canBeSequential: true,
     },
     // end, framework: MindSpore

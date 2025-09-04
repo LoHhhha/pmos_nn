@@ -23,10 +23,24 @@ class Layer(ABC):
         def forward/xxx(self):
             <forward_code>
     """
-    # using Annotated[type, Layer.LayerContent] to mark attr (class init args)
+
+    # Net(LayerContent(key-value))
+    # using Annotated[type, Layer.LayerContent] to mark attr (class init args, key-value)
     LayerContent: str = "LayerContentMark"
-    # using Annotated[type, Layer.LayerForwardContent] to mark other forward args
+
+    # net(LayerForwardBeforeDataArg, data_names, LayerForwardAfterDataArg, LayerForwardContent(key-value))
+    # using Annotated[type, Layer.LayerForwardContent] to mark other forward args (key-value)
     LayerForwardContent: str = "LayerForwardContentMark"
+    # using Annotated[type, Layer.LayerForwardBeforeDataArg/LayerForwardAfterDataArg, LayerForwardArgPriority(X)]
+    # to mark other forward args (only value)
+    LayerForwardBeforeDataArg: str = "LayerForwardBeforeDataArgMark"
+    LayerForwardAfterDataArg: str = "LayerForwardAfterDataArgMark"
+
+    class LayerForwardArgPriority:
+        priority: int
+
+        def __init__(self, priority: int):
+            self.priority = priority
 
     _api_name: str = ...
     _api_init_func: Optional[Callable] = None
@@ -185,6 +199,22 @@ class Layer(ABC):
 
         return list((key, value) for key, value in params if (key not in key2default) or (key2default[key] != value))
 
+    def get_contents(self, content_type) -> List[Tuple[str, Any]]:
+        bags = []  # key, value, priority
+        for cls in self.__class__.__mro__:
+            if not issubclass(cls, Layer):
+                continue
+            for key, value_cls in cls.__annotations__.items():
+                if value_cls.__name__ == Annotated.__name__ and content_type in value_cls.__metadata__:
+                    priority = 0
+                    for metadata in value_cls.__metadata__:
+                        if isinstance(metadata, Layer.LayerForwardArgPriority):
+                            priority = metadata.priority
+                    bags.append((key, getattr(self, key), priority))
+
+        bags.sort(key=lambda item: item[2])
+        return [(item[0], item[1]) for item in bags]
+
     @injected_check_wrap
     def get_forward_args(
             self,
@@ -198,7 +228,14 @@ class Layer(ABC):
             extend_params = []
         extend_params = self._trim_params(extend_params, self._api_forward_func)
 
-        args = self.data_names if not data_names_as_tuple else (f"({', '.join(self.data_names)})",)
+        args = []
+        args.extend(repr(item[1]) for item in self.get_contents(Layer.LayerForwardBeforeDataArg))
+        if data_names_as_tuple:
+            args.append(f"({', '.join(self.data_names)})")
+        else:
+            args.extend(self.data_names)
+        args.extend(repr(item[1]) for item in self.get_contents(Layer.LayerForwardAfterDataArg))
+
         if data_names_identifiers is not None:
             if len(args) != len(data_names_identifiers):
                 raise ValueError(
@@ -210,17 +247,6 @@ class Layer(ABC):
             *args,
             *(f"{key}={repr(value)}" for key, value in extend_params),
         ))
-
-    def get_contents(self, content_type) -> List[Tuple[str, Any]]:
-        contents = []
-        for cls in self.__class__.__mro__:
-            if not issubclass(cls, Layer):
-                continue
-            for key, value_cls in cls.__annotations__.items():
-                if value_cls.__name__ == Annotated.__name__ and content_type in value_cls.__metadata__:
-                    contents.append((key, getattr(self, key)))
-
-        return contents
 
     # planning
     # def extra_class_code(self) -> Tuple[Tuple[str, str], ...]:

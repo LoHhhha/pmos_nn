@@ -54,17 +54,11 @@ class _Dropout(TorchNNLayer):
 class Dropout(_Dropout):
     _api_name = 'Dropout'
 
-    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        return super().output_shape(*input_shape, **kwargs)
-
 
 class Dropout1d(_Dropout):
     _api_name = 'Dropout1d'
 
     _dim = 1
-
-    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        return super().output_shape(*input_shape, dim=1, **kwargs)
 
 
 class Dropout2d(_Dropout):
@@ -72,24 +66,15 @@ class Dropout2d(_Dropout):
 
     _dim = 2
 
-    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        return super().output_shape(*input_shape, dim=2, **kwargs)
-
 
 class Dropout3d(_Dropout):
     _api_name = 'Dropout3d'
 
     _dim = 3
 
-    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        return super().output_shape(*input_shape, dim=3, **kwargs)
-
 
 class AlphaDropout(_Dropout):
     _api_name = 'AlphaDropout'
-
-    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        return super().output_shape(*input_shape, **kwargs)
 
 
 class FeatureAlphaDropout(_Dropout):
