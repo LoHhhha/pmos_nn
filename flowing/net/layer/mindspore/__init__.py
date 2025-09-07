@@ -7,3 +7,4 @@ from flowing.net.layer.mindspore.data import *
 from flowing.net.layer.mindspore.dropout import *
 from flowing.net.layer.mindspore.linear import *
 from flowing.net.layer.mindspore.norm import *
+from flowing.net.layer.mindspore.pool import *

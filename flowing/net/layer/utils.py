@@ -124,3 +124,11 @@ def get_layers_from_modules(
             )
 
     return layers
+
+
+def type_check(data: Any, cls: Any, data_name: str, api_name: str):
+    if not isinstance(data, cls):
+        raise ValueError(
+            f"detected an unexpected {data_name} as {data}({type(data)}), "
+            f"expecting {data_name} must be {cls.__name__} in {api_name}"
+        )

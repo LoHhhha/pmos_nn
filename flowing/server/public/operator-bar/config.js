@@ -1835,12 +1835,12 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "in_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
                 name: "out_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
@@ -1899,12 +1899,12 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "in_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
                 name: "out_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
@@ -1963,12 +1963,12 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "in_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
                 name: "out_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
@@ -2026,7 +2026,7 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "out_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
@@ -2084,7 +2084,7 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "out_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
@@ -2142,7 +2142,7 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "out_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
@@ -2201,12 +2201,12 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "in_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
                 name: "out_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
@@ -2265,12 +2265,12 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "in_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
                 name: "out_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
@@ -2329,12 +2329,12 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "in_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
                 name: "out_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
@@ -2392,7 +2392,7 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "out_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
@@ -2450,7 +2450,7 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "out_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
@@ -2508,7 +2508,7 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "out_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
@@ -2921,7 +2921,6 @@ operatorBarNamespace.operators = [
             { name: "kernel_size", short: "K" },
             { name: "stride", short: "S" },
             { name: "padding", short: "P" },
-            { name: "padding", short: "P" },
         ],
         args: [
             {
@@ -2954,7 +2953,6 @@ operatorBarNamespace.operators = [
             { name: "kernel_size", short: "K" },
             { name: "stride", short: "S" },
             { name: "padding", short: "P" },
-            { name: "padding", short: "P" },
         ],
         args: [
             {
@@ -2986,7 +2984,6 @@ operatorBarNamespace.operators = [
         outlines: [
             { name: "kernel_size", short: "K" },
             { name: "stride", short: "S" },
-            { name: "padding", short: "P" },
             { name: "padding", short: "P" },
         ],
         args: [
@@ -4528,22 +4525,22 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "in_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
                 name: "out_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
                 name: "kernel_size",
-                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
                 name: "stride",
-                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "1",
             },
             {
@@ -4593,12 +4590,12 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "in_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
                 name: "out_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
@@ -4658,12 +4655,12 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "in_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
                 name: "out_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
@@ -4723,77 +4720,12 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "in_channels",
-                type: operatorBarNamespace.argsType.strInt,
-                default: "3",
-            },
-            {
-                name: "out_channels",
-                type: operatorBarNamespace.argsType.strInt,
-                default: "3",
-            },
-            {
-                name: "kernel_size",
-                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
-                default: "3",
-            },
-            {
-                name: "stride",
-                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
-                default: "1",
-            },
-            {
-                name: "pad_mode",
-                type: operatorBarNamespace.argsType.mindsporePadMode,
-                default: "same",
-            },
-            {
-                name: "padding",
-                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
-                default: "0",
-            },
-            {
-                name: "dilation",
-                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
-                default: "1",
-            },
-            {
-                name: "group",
                 type: operatorBarNamespace.argsType.strNotNegInt,
-                default: "1",
-            },
-            {
-                name: "has_bias",
-                type: operatorBarNamespace.argsType.bool,
-                default: "False",
-            },
-        ],
-        framework: operatorBarNamespace.framework.mindspore,
-        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.Conv1dTranspose.html#mindspore.nn.Conv1dTranspose",
-        canBeSequential: true,
-    },
-    {
-        apiName: "Conv1dTranspose",
-        extendCssClass: [],
-        typeCode: operatorBarNamespace.typeCode.convolution,
-        inputEnd: ["input"],
-        outputEnd: ["output"],
-        outlines: [
-            { name: "in_channels", short: "I" },
-            { name: "out_channels", short: "O" },
-            { name: "kernel_size", short: "K" },
-            { name: "stride", short: "S" },
-            { name: "padding", short: "P" },
-            { name: "pad_mode", short: "PM" },
-        ],
-        args: [
-            {
-                name: "in_channels",
-                type: operatorBarNamespace.argsType.strInt,
                 default: "3",
             },
             {
                 name: "out_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
@@ -4854,12 +4786,12 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "in_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
                 name: "out_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
@@ -4925,12 +4857,12 @@ operatorBarNamespace.operators = [
         args: [
             {
                 name: "in_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
                 name: "out_channels",
-                type: operatorBarNamespace.argsType.strInt,
+                type: operatorBarNamespace.argsType.strNotNegInt,
                 default: "3",
             },
             {
@@ -5048,6 +4980,646 @@ operatorBarNamespace.operators = [
         ],
         framework: operatorBarNamespace.framework.mindspore,
         link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.Dropout3d.html",
+        canBeSequential: true,
+    },
+    {
+        apiName: "MaxPool1d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.pool,
+        inputEnd: ["input"],
+        outputEnd: ["output", "indices"],
+        outlines: [
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
+            { name: "return_indices", short: "I" },
+            { name: "pad_mode", short: "PM" },
+            { name: "padding", short: "P" },
+        ],
+        args: [
+            {
+                name: "kernel_size",
+                type: operatorBarNamespace.argsType.strNotNegInt,
+                default: "1",
+            },
+            {
+                name: "stride",
+                type: operatorBarNamespace.argsType.strNotNegInt,
+                default: "1",
+            },
+            {
+                name: "pad_mode",
+                type: operatorBarNamespace.argsType.mindsporePadMode,
+                default: "valid",
+            },
+            {
+                name: "padding",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "0",
+            },
+            {
+                name: "dilation",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "1",
+            },
+            {
+                name: "return_indices",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+            {
+                name: "ceil_mode",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.MaxPool1d.html",
+        canBeSequential: true,
+        changeCallBack: (node) => {
+            if (
+                !operatorBarNamespace.argsType.bool.getValue(
+                    node.content["return_indices"]
+                )
+            ) {
+                const indicesEndpoint = node.outputEndpoint[1];
+                const connections = indicesEndpoint.connections;
+                for (let ptr = connections.length - 1; ptr >= 0; ptr--) {
+                    Node.jsPlumbInstance.deleteConnection(connections[ptr]);
+                }
+            }
+        },
+    },
+    {
+        apiName: "MaxPool2d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.pool,
+        inputEnd: ["input"],
+        outputEnd: ["output", "indices"],
+        outlines: [
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
+            { name: "return_indices", short: "I" },
+            { name: "pad_mode", short: "PM" },
+            { name: "padding", short: "P" },
+        ],
+        args: [
+            {
+                name: "kernel_size",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "1",
+            },
+            {
+                name: "stride",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "1",
+            },
+            {
+                name: "pad_mode",
+                type: operatorBarNamespace.argsType.mindsporePadMode,
+                default: "valid",
+            },
+            {
+                name: "padding",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "0",
+            },
+            {
+                name: "dilation",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "1",
+            },
+            {
+                name: "return_indices",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+            {
+                name: "ceil_mode",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.MaxPool2d.html",
+        canBeSequential: true,
+        changeCallBack: (node) => {
+            if (
+                !operatorBarNamespace.argsType.bool.getValue(
+                    node.content["return_indices"]
+                )
+            ) {
+                const indicesEndpoint = node.outputEndpoint[1];
+                const connections = indicesEndpoint.connections;
+                for (let ptr = connections.length - 1; ptr >= 0; ptr--) {
+                    Node.jsPlumbInstance.deleteConnection(connections[ptr]);
+                }
+            }
+        },
+    },
+    {
+        apiName: "MaxPool3d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.pool,
+        inputEnd: ["input"],
+        outputEnd: ["output", "indices"],
+        outlines: [
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
+            { name: "return_indices", short: "I" },
+            { name: "pad_mode", short: "PM" },
+            { name: "padding", short: "P" },
+        ],
+        args: [
+            {
+                name: "kernel_size",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "1",
+            },
+            {
+                name: "stride",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "1",
+            },
+            {
+                name: "pad_mode",
+                type: operatorBarNamespace.argsType.mindsporePadMode,
+                default: "valid",
+            },
+            {
+                name: "padding",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "0",
+            },
+            {
+                name: "dilation",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "1",
+            },
+            {
+                name: "return_indices",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+            {
+                name: "ceil_mode",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.MaxPool3d.html",
+        canBeSequential: true,
+        changeCallBack: (node) => {
+            if (
+                !operatorBarNamespace.argsType.bool.getValue(
+                    node.content["return_indices"]
+                )
+            ) {
+                const indicesEndpoint = node.outputEndpoint[1];
+                const connections = indicesEndpoint.connections;
+                for (let ptr = connections.length - 1; ptr >= 0; ptr--) {
+                    Node.jsPlumbInstance.deleteConnection(connections[ptr]);
+                }
+            }
+        },
+    },
+    {
+        apiName: "AvgPool1d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.pool,
+        inputEnd: ["input"],
+        outputEnd: ["output", "indices"],
+        outlines: [
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
+            { name: "pad_mode", short: "PM" },
+            { name: "padding", short: "P" },
+        ],
+        args: [
+            {
+                name: "kernel_size",
+                type: operatorBarNamespace.argsType.strNotNegInt,
+                default: "1",
+            },
+            {
+                name: "stride",
+                type: operatorBarNamespace.argsType.strNotNegInt,
+                default: "1",
+            },
+            {
+                name: "pad_mode",
+                type: operatorBarNamespace.argsType.mindsporePadMode,
+                default: "valid",
+            },
+            {
+                name: "padding",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "0",
+            },
+            {
+                name: "ceil_mode",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+            {
+                name: "count_include_pad",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.AvgPool1d.html",
+        canBeSequential: true,
+        changeCallBack: (node) => {
+            if (
+                !operatorBarNamespace.argsType.bool.getValue(
+                    node.content["return_indices"]
+                )
+            ) {
+                const indicesEndpoint = node.outputEndpoint[1];
+                const connections = indicesEndpoint.connections;
+                for (let ptr = connections.length - 1; ptr >= 0; ptr--) {
+                    Node.jsPlumbInstance.deleteConnection(connections[ptr]);
+                }
+            }
+        },
+    },
+    {
+        apiName: "AvgPool2d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.pool,
+        inputEnd: ["input"],
+        outputEnd: ["output", "indices"],
+        outlines: [
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
+            { name: "pad_mode", short: "PM" },
+            { name: "padding", short: "P" },
+        ],
+        args: [
+            {
+                name: "kernel_size",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "1",
+            },
+            {
+                name: "stride",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "1",
+            },
+            {
+                name: "pad_mode",
+                type: operatorBarNamespace.argsType.mindsporePadMode,
+                default: "valid",
+            },
+            {
+                name: "padding",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "0",
+            },
+            {
+                name: "ceil_mode",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+            {
+                name: "count_include_pad",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+            {
+                name: "divisor_override",
+                type: operatorBarNamespace.argsType.strIntOrNone,
+                default: "None",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.AvgPool2d.html",
+        canBeSequential: true,
+        changeCallBack: (node) => {
+            if (
+                !operatorBarNamespace.argsType.bool.getValue(
+                    node.content["return_indices"]
+                )
+            ) {
+                const indicesEndpoint = node.outputEndpoint[1];
+                const connections = indicesEndpoint.connections;
+                for (let ptr = connections.length - 1; ptr >= 0; ptr--) {
+                    Node.jsPlumbInstance.deleteConnection(connections[ptr]);
+                }
+            }
+        },
+    },
+    {
+        apiName: "AvgPool3d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.pool,
+        inputEnd: ["input"],
+        outputEnd: ["output", "indices"],
+        outlines: [
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
+            { name: "pad_mode", short: "PM" },
+            { name: "padding", short: "P" },
+        ],
+        args: [
+            {
+                name: "kernel_size",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "1",
+            },
+            {
+                name: "stride",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "1",
+            },
+            {
+                name: "pad_mode",
+                type: operatorBarNamespace.argsType.mindsporePadMode,
+                default: "valid",
+            },
+            {
+                name: "padding",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "0",
+            },
+            {
+                name: "ceil_mode",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+            {
+                name: "count_include_pad",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+            {
+                name: "divisor_override",
+                type: operatorBarNamespace.argsType.strIntOrNone,
+                default: "None",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.AvgPool3d.html",
+        canBeSequential: true,
+        changeCallBack: (node) => {
+            if (
+                !operatorBarNamespace.argsType.bool.getValue(
+                    node.content["return_indices"]
+                )
+            ) {
+                const indicesEndpoint = node.outputEndpoint[1];
+                const connections = indicesEndpoint.connections;
+                for (let ptr = connections.length - 1; ptr >= 0; ptr--) {
+                    Node.jsPlumbInstance.deleteConnection(connections[ptr]);
+                }
+            }
+        },
+    },
+    {
+        apiName: "AdaptiveAvgPool1d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.pool,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "output_size", short: "O" }],
+        args: [
+            {
+                name: "output_size",
+                type: operatorBarNamespace.argsType.strNotNegInt,
+                default: "32",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.AdaptiveAvgPool1d.html",
+        canBeSequential: true,
+    },
+    {
+        apiName: "AdaptiveAvgPool2d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.pool,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "output_size", short: "O" }],
+        args: [
+            {
+                name: "output_size",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "32",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.AdaptiveAvgPool2d.html",
+        canBeSequential: true,
+    },
+    {
+        apiName: "AdaptiveAvgPool3d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.pool,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "output_size", short: "O" }],
+        args: [
+            {
+                name: "output_size",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "32",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.AdaptiveAvgPool3d.html",
+        canBeSequential: true,
+    },
+    {
+        apiName: "AdaptiveMaxPool1d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.pool,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "output_size", short: "O" }],
+        args: [
+            {
+                name: "output_size",
+                type: operatorBarNamespace.argsType.strNotNegInt,
+                default: "32",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.AdaptiveMaxPool1d.html",
+        canBeSequential: true,
+    },
+    {
+        apiName: "AdaptiveMaxPool2d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.pool,
+        inputEnd: ["input"],
+        outputEnd: ["output", "indices"],
+        outlines: [
+            { name: "output_size", short: "O" },
+            { name: "return_indices", short: "I" },
+        ],
+        args: [
+            {
+                name: "output_size",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "32",
+            },
+            {
+                name: "return_indices",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.AdaptiveMaxPool2d.html",
+        canBeSequential: true,
+        changeCallBack: (node) => {
+            if (
+                !operatorBarNamespace.argsType.bool.getValue(
+                    node.content["return_indices"]
+                )
+            ) {
+                const indicesEndpoint = node.outputEndpoint[1];
+                const connections = indicesEndpoint.connections;
+                for (let ptr = connections.length - 1; ptr >= 0; ptr--) {
+                    Node.jsPlumbInstance.deleteConnection(connections[ptr]);
+                }
+            }
+        },
+    },
+    {
+        apiName: "AdaptiveMaxPool3d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.pool,
+        inputEnd: ["input"],
+        outputEnd: ["output", "indices"],
+        outlines: [
+            { name: "output_size", short: "O" },
+            { name: "return_indices", short: "I" },
+        ],
+        args: [
+            {
+                name: "output_size",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "32",
+            },
+            {
+                name: "return_indices",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.AdaptiveMaxPool3d.html",
+        canBeSequential: true,
+        changeCallBack: (node) => {
+            if (
+                !operatorBarNamespace.argsType.bool.getValue(
+                    node.content["return_indices"]
+                )
+            ) {
+                const indicesEndpoint = node.outputEndpoint[1];
+                const connections = indicesEndpoint.connections;
+                for (let ptr = connections.length - 1; ptr >= 0; ptr--) {
+                    Node.jsPlumbInstance.deleteConnection(connections[ptr]);
+                }
+            }
+        },
+    },
+    {
+        apiName: "MaxUnpool1d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.pool,
+        inputEnd: ["input", "indices"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
+            { name: "padding", short: "P" },
+        ],
+        args: [
+            {
+                name: "kernel_size",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "2",
+            },
+            {
+                name: "stride",
+                type: operatorBarNamespace.argsType.strIntOrTupleOrNone,
+                default: "None",
+            },
+            {
+                name: "padding",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "0",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.MaxUnpool1d.html",
+        canBeSequential: true,
+    },
+    {
+        apiName: "MaxUnpool2d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.pool,
+        inputEnd: ["input", "indices"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
+            { name: "padding", short: "P" },
+        ],
+        args: [
+            {
+                name: "kernel_size",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "2",
+            },
+            {
+                name: "stride",
+                type: operatorBarNamespace.argsType.strIntOrTupleOrNone,
+                default: "None",
+            },
+            {
+                name: "padding",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "0",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.MaxUnpool2d.html",
+        canBeSequential: true,
+    },
+    {
+        apiName: "MaxUnpool3d",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.pool,
+        inputEnd: ["input", "indices"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "kernel_size", short: "K" },
+            { name: "stride", short: "S" },
+            { name: "padding", short: "P" },
+        ],
+        args: [
+            {
+                name: "kernel_size",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "2",
+            },
+            {
+                name: "stride",
+                type: operatorBarNamespace.argsType.strIntOrTupleOrNone,
+                default: "None",
+            },
+            {
+                name: "padding",
+                type: operatorBarNamespace.argsType.strNotNegIntOrNotNegTuple,
+                default: "0",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.MaxUnpool3d.html",
         canBeSequential: true,
     },
     {

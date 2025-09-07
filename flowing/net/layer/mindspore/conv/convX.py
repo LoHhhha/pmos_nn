@@ -3,9 +3,10 @@
 from typing import Tuple, List, Annotated
 
 from flowing.net.layer import Layer
+from flowing.net.layer.mindspore.utils import mindspore_padding_check, mindspore_data_check
 from flowing.net.layer.shape_helper import OutputShapeCalculator
 from flowing.net.layer.mindspore.common import MindSporeNNLayer
-from flowing.net.layer.utils import get_and_check_target_dim_param
+from flowing.net.layer.utils import get_and_check_target_dim_param, type_check
 
 __all__ = [
     'Conv1d',
@@ -18,8 +19,6 @@ __all__ = [
 
 
 class _Conv(MindSporeNNLayer):
-    _api_name = ...
-
     _dim: int
 
     in_channels: Annotated[int, Layer.LayerContent]
@@ -49,6 +48,7 @@ class _Conv(MindSporeNNLayer):
             **kwargs
     ):
         super().__init__(**kwargs)
+
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.kernel_size = kernel_size
@@ -64,26 +64,13 @@ class _Conv(MindSporeNNLayer):
         _ = get_and_check_target_dim_param(self.stride, self._dim, 1, "stride")
         _ = get_and_check_target_dim_param(self.dilation, self._dim, 0, "dilation")
 
-        if self.pad_mode == "same":
-            if self.padding != 0:
-                raise ValueError(
-                    f"detected an unexpected padding as {self.padding} or pad_mode as {self.pad_mode}, "
-                    f"expecting padding should be 0 when pad_mode is 'same'"
-                )
-        elif self.pad_mode == "valid":
-            if self.padding != 0:
-                raise ValueError(
-                    f"detected an unexpected padding as {self.padding} or pad_mode as {self.pad_mode}, "
-                    f"expecting padding should be 0 when pad_mode is 'valid'"
-                )
-        elif self.pad_mode == "pad":
-            # each dim has 2 directions to padding
-            _ = get_and_check_target_dim_param(self.padding, 2 * self._dim, 0, "padding")
-        else:
-            raise ValueError(
-                f"detected an unexpected pad_mode as {self.pad_mode}, "
-                f"expecting pad_mode should be one of 'pad', 'valid' or 'same'"
-            )
+        mindspore_padding_check(self.pad_mode, self.padding, self._dim)
+
+        if self._dim == 1:
+            type_check(self.kernel_size, int, "kernel_size", self._api_name)
+            type_check(self.stride, int, "stride", self._api_name)
+            type_check(self.padding, int, "padding", self._api_name)
+            type_check(self.dilation, int, "dilation", self._api_name)
 
         if self.in_channels % self.group != 0:
             raise ValueError(
@@ -102,13 +89,7 @@ class _Conv(MindSporeNNLayer):
         # need output_padding as args.
         output_padding = kwargs.get('output_padding', None)
 
-        # mindspore only support (N, C, ...)
-        data_shape = input_shape[0]
-        if len(data_shape) != (self._dim + 2):
-            raise ValueError(
-                f"detected an unexpected data_shape as {data_shape}, "
-                f"expecting data_shape has {self._dim + 2} dimension"
-            )
+        mindspore_data_check(input_shape[0], self._dim)
 
         return OutputShapeCalculator.convolution(
             self._dim,

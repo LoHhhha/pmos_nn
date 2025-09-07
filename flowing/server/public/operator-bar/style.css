@@ -235,6 +235,7 @@
     font-weight: bold;
     user-select: none;
     cursor: pointer;
+    white-space: pre-line;
 }
 
 .overview-title:hover * {

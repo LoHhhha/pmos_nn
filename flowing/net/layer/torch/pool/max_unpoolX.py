@@ -61,23 +61,14 @@ class MaxUnpool1d(_MaxUnpool):
 
     _dim = 1
 
-    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        return super().output_shape(*input_shape)
-
 
 class MaxUnpool2d(_MaxUnpool):
     _api_name = "MaxUnpool2d"
 
     _dim = 2
 
-    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        return super().output_shape(*input_shape)
-
 
 class MaxUnpool3d(_MaxUnpool):
     _api_name = "MaxUnpool3d"
 
     _dim = 3
-
-    def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
-        return super().output_shape(*input_shape)

@@ -152,7 +152,7 @@ class Overview {
         }
         link.textContent = node.config.apiName;
         if (node.config.framework !== operatorBarNamespace.framework.all) {
-            link.textContent += "(" + node.config.framework + ")";
+            link.textContent += "\n(" + node.config.framework + ")";
         }
         title.appendChild(link);
         this.element.appendChild(title);

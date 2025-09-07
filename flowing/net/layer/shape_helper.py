@@ -370,7 +370,7 @@ class OutputShapeCalculator:
     def pool(
             dim: int,
             kernel_size: int | Tuple[int, ...],
-            padding: int | Tuple[int, ...],
+            padding: int | Tuple[int, ...] | str,
             stride: int | Tuple[int, ...] | None,
             dilation: int | Tuple[int, ...],
             ceil_mode: bool,
@@ -386,16 +386,28 @@ class OutputShapeCalculator:
             )
 
         kernel_size = get_and_check_target_dim_param(kernel_size, dim, 1, "kernel_size")
-        padding = get_and_check_target_dim_param(padding, dim, 0, "padding")
         stride = get_and_check_target_dim_param(
             kernel_size if stride is None else stride, dim, 1, "stride"
         )
         dilation = get_and_check_target_dim_param(dilation, dim, 0, "dilation")
 
-        pool_padding_and_kernel_size_check(padding=padding, kernel_size=kernel_size)
+        truncate_func = math.ceil if ceil_mode else math.floor
 
         output_shape = list(data_shape)
-        truncate_func = math.ceil if ceil_mode else math.floor
+
+        if padding == "same":
+            for i in range(dim):
+                output_shape[-dim + i] = truncate_func(data_shape[-dim + i] / stride[i])
+            return tuple(output_shape),
+        elif padding == "valid":
+            # as same as padding = 0
+            padding = 0
+            truncate_func = math.floor
+
+        padding = get_and_check_target_dim_param(padding, dim, 0, "padding")
+
+        pool_padding_and_kernel_size_check(padding=padding, kernel_size=kernel_size)
+
         for idx in range(dim):
             output_shape[-dim + idx] = truncate_func(
                 (output_shape[-dim + idx] + 2 * padding[idx] - dilation[idx] * (kernel_size[idx] - 1) - 1) \
