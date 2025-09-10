@@ -602,6 +602,38 @@ operatorBarNamespace.operators = [
         framework: operatorBarNamespace.framework.all,
         link: null,
     },
+    {
+        apiName: "Slice",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [],
+        args: [
+            {
+                name: "dim",
+                type: operatorBarNamespace.argsType.strNotNegInt,
+                default: "1",
+            },
+            {
+                name: "start",
+                type: operatorBarNamespace.argsType.strNotNegInt,
+                default: "0",
+            },
+            {
+                name: "end",
+                type: operatorBarNamespace.argsType.strNotNegInt,
+                default: "3",
+            },
+            {
+                name: "stride",
+                type: operatorBarNamespace.argsType.strNotNegInt,
+                default: "1",
+            },
+        ],
+        framework: operatorBarNamespace.framework.all,
+        link: null,
+    },
     // end, framework: all
     // begin, framework: PyTorch
     {
@@ -5977,6 +6009,9 @@ operatorBarNamespace.operators = [
 
 operatorBarNamespace.operators.sort(function (a, b) {
     if (a.typeCode !== b.typeCode) return a.typeCode < b.typeCode ? -1 : 1;
+    // framework:all will be the first
+    if (a.framework !== b.framework)
+        return a.framework.toLowerCase() < b.framework.toLowerCase() ? -1 : 1;
     if (a.apiName !== b.apiName) return a.apiName < b.apiName ? -1 : 1;
     return 0;
 });
@@ -5985,6 +6020,7 @@ operatorBarNamespace.operators.sort(function (a, b) {
 {
     let colors = {};
     let preTypeCode = -1;
+    let preFramework = "";
     let r, g, b;
     let diffR, diffG, diffB;
     for (const operator of operatorBarNamespace.operators) {
@@ -6002,6 +6038,11 @@ operatorBarNamespace.operators.sort(function (a, b) {
             preTypeCode = operator.typeCode;
         }
         const framework = operator.framework;
+        if (framework !== preFramework) {
+            [r, g, b] = colors[operatorBarNamespace.framework.all];
+            colors[framework] = [r, g, b];
+            preFramework = framework;
+        }
         operator.backgroundColor = `rgb(${colors[framework][0]}, ${colors[framework][1]}, ${colors[framework][2]})`;
         colors[framework][0] += diffR;
         colors[framework][1] += diffG;

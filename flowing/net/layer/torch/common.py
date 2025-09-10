@@ -64,15 +64,4 @@ class TorchNNLayer(_TorchLayer, ABC):
 class TorchLayer(_TorchLayer, ABC):
     _api_package = torch if torch is not None else None
 
-    def init_code(
-            self,
-            package: str = "",
-            add_self: bool = True,
-            extend_params: Dict[str, Any] = None,
-            only_right_value: bool = False,
-    ) -> Tuple[str, ...]:
-        if only_right_value:
-            raise ValueError(
-                "this Layer haven't initial code"
-            )
-        return ()
+    _enable_init = False

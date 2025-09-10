@@ -115,7 +115,7 @@ class OutputShapeCalculator:
     @staticmethod
     def arithmetic_input_shape(
             *input_shape: Tuple[int, ...] | List[int],
-    ):
+    ) -> Tuple[Tuple[int, ...], ...]:
         input_shape = sorted(input_shape, key=lambda item: len(item), reverse=True)
 
         prev = list(input_shape[0])
@@ -135,6 +135,49 @@ class OutputShapeCalculator:
         return tuple(prev),
 
     @staticmethod
+    def slice(
+            dim: int,
+            start: int,
+            end: int,
+            stride: int,
+            *input_shape: Tuple[int, ...] | List[int],
+    ) -> Tuple[Tuple[int, ...], ...]:
+        data_shape = list(input_shape[0])
+
+        DataShapeChecker.exist_dim(data_shape, dim)
+
+        amount = data_shape[dim]
+        start = start if start >= 0 else amount + start
+        end = end if end >= 0 else amount + end
+
+        if amount < start:
+            raise ValueError(
+                f"detected an unexpected start as {start}, "
+                f"expecting start<=data_shape[dim({dim})]({data_shape[dim]})"
+            )
+
+        if amount < end:
+            raise ValueError(
+                f"detected an unexpected end as {end}, "
+                f"expecting end<=data_shape[dim({dim})]({data_shape[dim]})"
+            )
+
+        if stride > 0 and start >= end:
+            raise ValueError(
+                f"detected an unexpected start as {start} or end as {end}, "
+                f"expecting start is in front of end when stride>0"
+            )
+
+        if stride < 0 and start <= end:
+            raise ValueError(
+                f"detected an unexpected start as {start} or end as {end}, "
+                f"expecting end is in front of start when stride<0"
+            )
+
+        data_shape[dim] = abs(math.ceil((end - start) / stride))
+        return tuple(data_shape),
+
+    @staticmethod
     def convolution(
             dim: int,
             c_in: Optional[int],
@@ -147,7 +190,7 @@ class OutputShapeCalculator:
             groups: int,
             all_bound_padding: bool,
             *input_shape: Tuple[int, ...] | List[int],
-    ):
+    ) -> Tuple[Tuple[int, ...], ...]:
         """
         padding: int | Tuple[int, ...] | str
             - int
@@ -231,7 +274,7 @@ class OutputShapeCalculator:
             dim: Optional[int],
             at_least_dim: Optional[int],
             *input_shape: Tuple[int, ...] | List[int],
-    ):
+    ) -> Tuple[Tuple[int, ...], ...]:
         data_shape = input_shape[0]
 
         DataShapeChecker.shape_dim(data_shape, dim)
@@ -246,7 +289,7 @@ class OutputShapeCalculator:
             in_features: Optional[int],
             out_features: int,
             *input_shape: Tuple[int, ...] | List[int],
-    ):
+    ) -> Tuple[Tuple[int, ...], ...]:
         data_shape = input_shape[0]
 
         if in_features is not None:
@@ -270,7 +313,7 @@ class OutputShapeCalculator:
             in2_features: int,
             out_features: int,
             *input_shape: Tuple[int, ...] | List[int],
-    ):
+    ) -> Tuple[Tuple[int, ...], ...]:
         data1_shape = list(input_shape[0])
         data2_shape = list(input_shape[1])
 
@@ -293,7 +336,7 @@ class OutputShapeCalculator:
     def group_norm(
             num_channels: int,
             *input_shape: Tuple[int, ...] | List[int],
-    ):
+    ) -> Tuple[Tuple[int, ...], ...]:
         data_shape = input_shape[0]
 
         # (N,C,*)
@@ -309,7 +352,7 @@ class OutputShapeCalculator:
             normalized_shape: Tuple[int, ...] | List[int],
             begin_norm_axis: int,
             *input_shape: Tuple[int, ...] | List[int],
-    ):
+    ) -> Tuple[Tuple[int, ...], ...]:
         data_shape = input_shape[0]
 
         DataShapeChecker.exist_dim(data_shape, begin_norm_axis)
@@ -327,7 +370,7 @@ class OutputShapeCalculator:
             allowed_dims: Tuple[int, ...],  # (unbatched, batched) / (batched)
             num_features: Optional[int],
             *input_shape: Tuple[int, ...] | List[int],
-    ):
+    ) -> Tuple[Tuple[int, ...], ...]:
         data_shape = input_shape[0]
 
         if len(data_shape) not in allowed_dims:
@@ -350,7 +393,7 @@ class OutputShapeCalculator:
             output_size: int | Tuple[int, ...],
             return_indices: bool,
             *input_shape: Tuple[int, ...] | List[int],
-    ):
+    ) -> Tuple[Tuple[int, ...], ...]:
         data_shape = input_shape[0]
 
         DataShapeChecker.shape_dim(data_shape, dim)
@@ -376,7 +419,7 @@ class OutputShapeCalculator:
             ceil_mode: bool,
             return_indices: bool,
             *input_shape: Tuple[int, ...] | List[int],
-    ):
+    ) -> Tuple[Tuple[int, ...], ...]:
         data_shape = input_shape[0]
 
         if len(data_shape) not in (dim + 1, dim + 2):
@@ -425,7 +468,7 @@ class OutputShapeCalculator:
             padding: int | Tuple[int, ...],
             stride: int | Tuple[int, ...] | None,
             *input_shape: Tuple[int, ...] | List[int],
-    ):
+    ) -> Tuple[Tuple[int, ...], ...]:
         result_shape, info_shape = input_shape
 
         if tuple(result_shape) != tuple(info_shape):
@@ -452,7 +495,7 @@ class OutputShapeCalculator:
     def concat(
             dim: int,
             *input_shape: Tuple[int, ...] | List[int],
-    ):
+    ) -> Tuple[Tuple[int, ...], ...]:
         prev_shape = None
         dim_sum = 0
         for shape in input_shape:
@@ -484,7 +527,7 @@ class OutputShapeCalculator:
     def stack(
             dim: int,
             *input_shape: Tuple[int, ...] | List[int],
-    ):
+    ) -> Tuple[Tuple[int, ...], ...]:
         prev_shape = None
         for shape in input_shape:
             shape = list(shape)
@@ -517,7 +560,7 @@ class OutputShapeCalculator:
             start_dim: int,
             end_dim: int,
             *input_shape: Tuple[int, ...] | List[int],
-    ):
+    ) -> Tuple[Tuple[int, ...], ...]:
         data_shape = input_shape[0]
 
         output_shape = []
@@ -555,7 +598,7 @@ class OutputShapeCalculator:
             dim: int,
             unflattened_size: Tuple[int, ...],
             *input_shape: Tuple[int, ...] | List[int],
-    ):
+    ) -> Tuple[Tuple[int, ...], ...]:
         data_shape = input_shape[0]
 
         dim = dim if dim >= 0 else len(data_shape) + dim
@@ -599,7 +642,7 @@ class OutputShapeCalculator:
     def permute(
             dims: Tuple[int, ...],
             *input_shape: Tuple[int, ...] | List[int],
-    ):
+    ) -> Tuple[Tuple[int, ...], ...]:
         data_shape = input_shape[0]
 
         length = len(dims)
@@ -625,7 +668,7 @@ class OutputShapeCalculator:
     def reshape(
             shape: Tuple[int, ...],
             *input_shape: Tuple[int, ...] | List[int],
-    ):
+    ) -> Tuple[Tuple[int, ...], ...]:
 
         data_shape = input_shape[0]
 
@@ -660,7 +703,7 @@ class OutputShapeCalculator:
     def squeeze(
             dim: Optional[int | Tuple[int, ...]],
             *input_shape: Tuple[int, ...] | List[int],
-    ):
+    ) -> Tuple[Tuple[int, ...], ...]:
         data_shape = input_shape[0]
 
         output_shape = list(data_shape)
@@ -687,7 +730,7 @@ class OutputShapeCalculator:
     def unsqueeze(
             dim: int,
             *input_shape: Tuple[int, ...] | List[int],
-    ):
+    ) -> Tuple[Tuple[int, ...], ...]:
         data_shape = list(input_shape[0])
 
         padding_num = -1
@@ -710,7 +753,7 @@ class OutputShapeCalculator:
             dim0: int,
             dim1: int,
             *input_shape: Tuple[int, ...] | List[int],
-    ):
+    ) -> Tuple[Tuple[int, ...], ...]:
         data_shape = input_shape[0]
 
         output_shape = list(data_shape)

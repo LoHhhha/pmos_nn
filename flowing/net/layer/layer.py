@@ -42,6 +42,9 @@ class Layer(ABC):
         def __init__(self, priority: int):
             self.priority = priority
 
+    _enable_init: bool = True
+    _enable_forward: bool = True
+
     _api_name: str = ...
     _api_init_func: Optional[Callable] = None
     _api_forward_func: Optional[Callable] = None
@@ -262,6 +265,13 @@ class Layer(ABC):
             extend_params: Dict[str, Any] = None,
             only_right_value: bool = False,
     ) -> Tuple[str, ...]:
+        if not self._enable_init:
+            if only_right_value:
+                raise ValueError(
+                    "this Layer haven't init code"
+                )
+            return ()
+
         init_params = self.get_contents(Layer.LayerContent)
         if extend_params is not None:
             init_params.extend((key, value) for key, value in extend_params.items())
@@ -284,6 +294,14 @@ class Layer(ABC):
             only_right_value: bool = False,
     ) -> Tuple[str, ...]:
         # using "self.<layer_name>" when identifier is None
+
+        if not self._enable_forward:
+            if only_right_value:
+                raise ValueError(
+                    "this Layer haven't forward code"
+                )
+            return ()
+
         forward_params = self.get_contents(Layer.LayerForwardContent)
         if extend_params is not None:
             forward_params.extend((key, value) for key, value in extend_params.items())
