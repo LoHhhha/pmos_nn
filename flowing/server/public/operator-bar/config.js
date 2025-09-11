@@ -3948,6 +3948,40 @@ operatorBarNamespace.operators = [
         link: "https://www.mindspore.cn/docs/zh-CN/master/api_python/nn/mindspore.nn.SequentialCell.html",
     },
     {
+        apiName: "Cat",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input_0", "input_1"],
+        outputEnd: ["output"],
+        outlines: [{ name: "axis", short: "A" }],
+        args: [
+            {
+                name: "axis",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "0",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/ops/mindspore.ops.cat.html",
+    },
+    {
+        apiName: "Stack",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input_0", "input_1"],
+        outputEnd: ["output"],
+        outlines: [{ name: "axis", short: "A" }],
+        args: [
+            {
+                name: "axis",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "0",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/ops/mindspore.ops.stack.html",
+    },
+    {
         apiName: "RandLike",
         extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.transform,
