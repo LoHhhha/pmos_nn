@@ -1,1 +1,2 @@
 from flowing.net.layer.mindspore.transform.concat import *
+from flowing.net.layer.mindspore.transform.flatten import *

@@ -1,10 +1,10 @@
-# Copyright © 2024-2025 PMoS. All rights reserved.
+# Copyright © 2025 PMoS. All rights reserved.
 
 from typing import Tuple, List, Annotated
 
 from flowing.net.layer import Layer
 from flowing.net.layer.shape_helper import OutputShapeCalculator
-from flowing.net.layer.torch.common import TorchNNLayer
+from flowing.net.layer.mindspore.common import MindSporeNNLayer
 
 __all__ = [
     'Flatten',
@@ -12,7 +12,7 @@ __all__ = [
 ]
 
 
-class Flatten(TorchNNLayer):
+class Flatten(MindSporeNNLayer):
     _api_name = "Flatten"
 
     start_dim: Annotated[int, Layer.LayerContent]
@@ -43,18 +43,18 @@ class Flatten(TorchNNLayer):
         )
 
 
-class Unflatten(TorchNNLayer):
+class Unflatten(MindSporeNNLayer):
     _api_name = "Unflatten"
 
-    dim: Annotated[int, Layer.LayerContent]
+    axis: Annotated[int, Layer.LayerContent]
     unflattened_size: Annotated[Tuple[int, ...], Layer.LayerContent]
 
     data_amount = 1
     output_amount = 1
 
-    def __init__(self, dim: int, unflattened_size: Tuple[int, ...], **kwargs):
+    def __init__(self, axis: int, unflattened_size: Tuple[int, ...], **kwargs):
         super().__init__(**kwargs)
-        self.dim = dim
+        self.axis = axis
         self.unflattened_size = unflattened_size
 
     def content_check(self):
@@ -75,7 +75,7 @@ class Unflatten(TorchNNLayer):
     @Layer.input_shape_check_wrap
     def output_shape(self, *input_shape: Tuple[int, ...] | List[int], **kwargs) -> Tuple[Tuple[int, ...], ...]:
         return OutputShapeCalculator.unflatten(
-            self.dim,
+            self.axis,
             self.unflattened_size,
             *input_shape,
         )

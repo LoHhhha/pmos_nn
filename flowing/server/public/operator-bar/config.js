@@ -3982,6 +3982,58 @@ operatorBarNamespace.operators = [
         link: "https://www.mindspore.cn/docs/en/master/api_python/ops/mindspore.ops.stack.html",
     },
     {
+        apiName: "Flatten",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "start_dim", short: "S" },
+            { name: "end_dim", short: "E" },
+        ],
+        args: [
+            {
+                name: "start_dim",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "1",
+            },
+            {
+                name: "end_dim",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "-1",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.Flatten.html",
+        canBeSequential: true,
+    },
+    {
+        apiName: "Unflatten",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [
+            { name: "axis", short: "A" },
+            { name: "unflattened_size", short: "T" },
+        ],
+        args: [
+            {
+                name: "axis",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "1",
+            },
+            {
+                name: "unflattened_size",
+                type: operatorBarNamespace.argsType.strTuple,
+                default: "(16,16)",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/nn/mindspore.nn.Unflatten.html",
+        canBeSequential: true,
+    },
+    {
         apiName: "RandLike",
         extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.transform,
