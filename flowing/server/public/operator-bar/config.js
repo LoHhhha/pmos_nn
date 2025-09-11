@@ -4083,6 +4083,39 @@ operatorBarNamespace.operators = [
         link: "https://www.mindspore.cn/docs/en/master/api_python/ops/mindspore.ops.full_like.html",
     },
     {
+        apiName: "Parameter",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.data,
+        inputEnd: [],
+        outputEnd: ["data"],
+        outlines: [],
+        args: [
+            {
+                name: "data_size",
+                type: operatorBarNamespace.argsType.strNotNegTuple,
+                default: "(16,16)",
+            },
+            {
+                name: "requires_grad",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+            {
+                name: "layerwise_parallel",
+                type: operatorBarNamespace.argsType.bool,
+                default: "False",
+            },
+            {
+                name: "parallel_optimizer",
+                type: operatorBarNamespace.argsType.bool,
+                default: "True",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/mindspore/mindspore.Parameter.html",
+        outputShapeComeFromArg: "data_size",
+    },
+    {
         apiName: "Identity",
         extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.activation,

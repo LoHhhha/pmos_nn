@@ -33,6 +33,9 @@ class _MindSporeLayer(Layer, ABC):
             self._api_forward_func = api.construct
         elif inspect.isfunction(api) or inspect.ismethod(api) or inspect.isbuiltin(api):
             self._api_forward_func = api
+        elif inspect.isclass(api):
+            # for mindspore.Parameter
+            self._api_init_func = api.__init__
         else:
             Logger.warning(
                 f"unexpected object get from {self._api_package}.{self._api_name}, got {api}"
@@ -42,6 +45,10 @@ class _MindSporeLayer(Layer, ABC):
         super().__init__(*args, **kwargs)
 
         self._set_api()
+
+
+class MindSporeLayer(_MindSporeLayer, ABC):
+    _api_package = mindspore if mindspore is not None else None
 
 
 class MindSporeNNLayer(_MindSporeLayer, ABC):
@@ -65,15 +72,4 @@ class MindSporeNNLayer(_MindSporeLayer, ABC):
 class MindSporeOpsLayer(_MindSporeLayer, ABC):
     _api_package = mindspore.ops if mindspore is not None else None
 
-    def init_code(
-            self,
-            package: str = "",
-            add_self: bool = True,
-            extend_params: Dict[str, Any] = None,
-            only_right_value: bool = False,
-    ) -> Tuple[str, ...]:
-        if only_right_value:
-            raise ValueError(
-                "this Layer haven't initial code"
-            )
-        return ()
+    _enable_init = False
