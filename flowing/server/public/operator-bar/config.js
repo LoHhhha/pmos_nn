@@ -4034,6 +4034,23 @@ operatorBarNamespace.operators = [
         canBeSequential: true,
     },
     {
+        apiName: "Permute",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "axis", short: "A" }],
+        args: [
+            {
+                name: "axis",
+                type: operatorBarNamespace.argsType.strTuple,
+                default: "(2,1,0)",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/ops/mindspore.ops.permute.html",
+    },
+    {
         apiName: "RandLike",
         extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.transform,
