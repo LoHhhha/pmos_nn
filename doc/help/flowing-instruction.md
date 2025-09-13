@@ -161,122 +161,225 @@ nodes. Or, drag it to another input endpoint (at the upper end) and release the 
 > Note: The function called from shortcut key may have a different effect from the corresponding function called from
 > the right-click menu.
 
-| 功能名称Name                        | 快捷键Shortcut key         | 响应区域Response Area            | 描述Description                                                                                                                                                                                                                |
-|---------------------------------|-------------------------|------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 全选<br>Select All                | `Ctrl`+`A`              | 设计视图<br>Design View          | 框选画布上的所有算子。<br>Select all operators in the canvas.                                                                                                                                                                           |
-| 撤消<br>Undo                      | `Ctrl`+`Z`              | 设计视图<br>Design View          | 取消上一次操作带来的修改。<br>Undo the modifications brought about by the previous operation.                                                                                                                                             |
-| 恢复<br>Redo                      | `Ctrl`+`Y`              | 设计视图<br>Design View          | 取消上一次撤消带来的修改。<br>Undo the modifications brought about by the previous Undo.                                                                                                                                                  |
-| 复制<br>Copy                      | `Ctrl`+`C`              | 设计视图<br>Design View          | 复制被框选的算子到`PMoS`系统缓冲区，该操作不会改变系统剪贴板内容。<br>Copy the selected operators to the `PMoS` buffer which will not change the system clipboard.                                                                                         |
-| 粘贴<br>Paste                     | `Ctrl`+`V`              | 设计视图<br>Design View          | 将`PMoS`系统缓冲区中的算子复制到原有位置附近。与此不同的是，右键菜单粘贴时算子会被粘贴在右键菜单附近。<br>Copy operators in the `PMoS` buffer near its original location. Unlike this, operators is pasted near the right-click menu when pasting from the right-click menu. |
-| 删除<br>Delete                    | `Backspace`             | 设计视图<br>Design View          | 删除被框选的算子。<br>Delete the selected operators.                                                                                                                                                                                  |
-| 保存<br>Save                      | `Ctrl`+`S`              | 设计视图<br>Design View          | 保存当前画布上的所有算子。<br>Save all operators in the canvas.                                                                                                                                                                           |
-| 放大画布<br>Zoom In                 | `+`, `Ctrl`+`WheelUp`   | 设计视图<br>Design View          | -                                                                                                                                                                                                                            |
-| 缩小画布<br>Zoom Out                | `-`, `Ctrl`+`WheelDown` | 设计视图<br>Design View          | -                                                                                                                                                                                                                            |
-| 上移画布<br>Canvas Up               | `↑`, `WheelUp`          | 设计视图<br>Design View          | -                                                                                                                                                                                                                            |
-| 下移画布<br>Canvas Down             | `↓`, `WheelDown`        | 设计视图<br>Design View          | -                                                                                                                                                                                                                            |
-| 左移画布<br>Canvas Left             | `←`                     | 设计视图<br>Design View          | -                                                                                                                                                                                                                            |
-| 右移画布<br>Canvas Right            | `→`                     | 设计视图<br>Design View          | -                                                                                                                                                                                                                            |
-| 返回画布原点<br>Back to Canvas Origin | `Home`                  | 设计视图<br>Design View          | -                                                                                                                                                                                                                            |
-| 退出<br>Exit                      | `Esc`                   | 覆盖视图<br>Covering View        | 如果当前覆盖视图可退出，则退出当前覆盖视图。<br>Exits the current covering view if permissible.                                                                                                                                                    |
-| 全选<br>Select All                | `Ctrl`+`A`              | 算子栈视图<br>Operator Stack View | 框选栈上的所有算子。<br>Select all operators in the stack.                                                                                                                                                                             |
-| 复制<br>Copy                      | `Ctrl`+`C`              | 算子栈视图<br>Operator Stack View | 复制被框选的算子到`PMoS`系统缓冲区，该操作不会改变系统剪贴板内容。<br>Copy the selected operators to the `PMoS` buffer which will not change the system clipboard.                                                                                         |
-| 粘贴<br>Paste                     | `Ctrl`+`V`              | 算子栈视图<br>Operator Stack View | 将`PMoS`系统缓冲区中的算子复制到栈末尾。<br>Copy operators in the `PMoS` buffer to tail of stack.                                                                                                                                             |
-| 删除<br>Delete                    | `Backspace`             | 算子栈视图<br>Operator Stack View | 删除被框选的算子。<br>Delete the selected operators.                                                                                                                                                                                  |
+| 功能名称Name                          | 快捷键Shortcut key      | 响应区域Response Area             | 描述Description                                                                                                                                                                                                                                                              |
+| ------------------------------------- | ----------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 全选<br>Select All                    | `Ctrl`+`A`              | 设计视图<br>Design View           | 框选画布上的所有算子。<br>Select all operators in the canvas.                                                                                                                                                                                                                |
+| 撤消<br>Undo                          | `Ctrl`+`Z`              | 设计视图<br>Design View           | 取消上一次操作带来的修改。<br>Undo the modifications brought about by the previous operation.                                                                                                                                                                                |
+| 恢复<br>Redo                          | `Ctrl`+`Y`              | 设计视图<br>Design View           | 取消上一次撤消带来的修改。<br>Undo the modifications brought about by the previous Undo.                                                                                                                                                                                     |
+| 复制<br>Copy                          | `Ctrl`+`C`              | 设计视图<br>Design View           | 复制被框选的算子到`PMoS`系统缓冲区，该操作不会改变系统剪贴板内容。<br>Copy the selected operators to the `PMoS` buffer which will not change the system clipboard.                                                                                                           |
+| 粘贴<br>Paste                         | `Ctrl`+`V`              | 设计视图<br>Design View           | 将`PMoS`系统缓冲区中的算子复制到原有位置附近。与此不同的是，右键菜单粘贴时算子会被粘贴在右键菜单附近。<br>Copy operators in the `PMoS` buffer near its original location. Unlike this, operators is pasted near the right-click menu when pasting from the right-click menu. |
+| 删除<br>Delete                        | `Backspace`             | 设计视图<br>Design View           | 删除被框选的算子。<br>Delete the selected operators.                                                                                                                                                                                                                         |
+| 保存<br>Save                          | `Ctrl`+`S`              | 设计视图<br>Design View           | 保存当前画布上的所有算子。<br>Save all operators in the canvas.                                                                                                                                                                                                              |
+| 放大画布<br>Zoom In                   | `+`, `Ctrl`+`WheelUp`   | 设计视图<br>Design View           | -                                                                                                                                                                                                                                                                            |
+| 缩小画布<br>Zoom Out                  | `-`, `Ctrl`+`WheelDown` | 设计视图<br>Design View           | -                                                                                                                                                                                                                                                                            |
+| 上移画布<br>Canvas Up                 | `↑`, `WheelUp`          | 设计视图<br>Design View           | -                                                                                                                                                                                                                                                                            |
+| 下移画布<br>Canvas Down               | `↓`, `WheelDown`        | 设计视图<br>Design View           | -                                                                                                                                                                                                                                                                            |
+| 左移画布<br>Canvas Left               | `←`                     | 设计视图<br>Design View           | -                                                                                                                                                                                                                                                                            |
+| 右移画布<br>Canvas Right              | `→`                     | 设计视图<br>Design View           | -                                                                                                                                                                                                                                                                            |
+| 返回画布原点<br>Back to Canvas Origin | `Home`                  | 设计视图<br>Design View           | -                                                                                                                                                                                                                                                                            |
+| 退出<br>Exit                          | `Esc`                   | 覆盖视图<br>Covering View         | 如果当前覆盖视图可退出，则退出当前覆盖视图。<br>Exits the current covering view if permissible.                                                                                                                                                                              |
+| 全选<br>Select All                    | `Ctrl`+`A`              | 算子栈视图<br>Operator Stack View | 框选栈上的所有算子。<br>Select all operators in the stack.                                                                                                                                                                                                                   |
+| 复制<br>Copy                          | `Ctrl`+`C`              | 算子栈视图<br>Operator Stack View | 复制被框选的算子到`PMoS`系统缓冲区，该操作不会改变系统剪贴板内容。<br>Copy the selected operators to the `PMoS` buffer which will not change the system clipboard.                                                                                                           |
+| 粘贴<br>Paste                         | `Ctrl`+`V`              | 算子栈视图<br>Operator Stack View | 将`PMoS`系统缓冲区中的算子复制到栈末尾。<br>Copy operators in the `PMoS` buffer to tail of stack.                                                                                                                                                                            |
+| 删除<br>Delete                        | `Backspace`             | 算子栈视图<br>Operator Stack View | 删除被框选的算子。<br>Delete the selected operators.                                                                                                                                                                                                                         |
 
 ## 支持的算子<br>Supported Operators
 
-| 算子名称Name                     | 算子平台名称PMoS Name     | 支持版本Supported Version |
-|------------------------------|---------------------|-----------------------|
-| torch.cat/torch.concat       | Cat                 | >=0.1.a202501         |
-| torch.full                   | Full                | >=0.1.a202501         |
-| torch.full_like              | FullLike            | >=0.1.a202501         |
-| torch.AdaptiveAvgPool1d      | AdaptiveAvgPool1d   | >=0.1.a202503         |
-| torch.AdaptiveAvgPool2d      | AdaptiveAvgPool2d   | >=0.1.a202503         |
-| torch.AdaptiveAvgPool3d      | AdaptiveAvgPool3d   | >=0.1.a202503         |
-| torch.AdaptiveMaxPool1d      | AdaptiveMaxPool1d   | >=0.1.a202503         |
-| torch.AdaptiveMaxPool2d      | AdaptiveMaxPool2d   | >=0.1.a202503         |
-| torch.AdaptiveMaxPool3d      | AdaptiveMaxPool3d   | >=0.1.a202503         |
-| torch.nn.AlphaDropout        | AlphaDropout        | >=0.1.a202503         |
-| torch.nn.AvgPool1d           | AvgPool1d           | >=0.1.a202503         |
-| torch.nn.AvgPool2d           | AvgPool2d           | >=0.1.a202503         |
-| torch.nn.AvgPool3d           | AvgPool3d           | >=0.1.a202503         |
-| torch.nn.BatchNorm1d         | BatchNorm1d         | >=0.1.a202501         |
-| torch.nn.BatchNorm2d         | BatchNorm2d         | >=0.1.a202501         |
-| torch.nn.BatchNorm3d         | BatchNorm3d         | >=0.1.a202501         |
-| torch.nn.Bilinear            | Bilinear            | >=0.1.a202503         |
-| torch.nn.CELU                | CELU                | >=0.1.a202501         |
-| torch.nn.Conv1d              | Conv1d              | >=0.1.a202501         |
-| torch.nn.Conv2d              | Conv2d              | >=0.1.a202501         |
-| torch.nn.Conv3d              | Conv3d              | >=0.1.a202501         |
-| torch.nn.ConvTranspose1d     | ConvTranspose1d     | >=0.1.a202501         |
-| torch.nn.ConvTranspose2d     | ConvTranspose2d     | >=0.1.a202501         |
-| torch.nn.ConvTranspose3d     | ConvTranspose3d     | >=0.1.a202501         |
-| torch.nn.Dropout             | Dropout             | >=0.1.a202501         |
-| torch.nn.Dropout1d           | Dropout1d           | >=0.1.a202501         |
-| torch.nn.Dropout2d           | Dropout2d           | >=0.1.a202501         |
-| torch.nn.Dropout3d           | Dropout3d           | >=0.1.a202501         |
-| torch.nn.ELU                 | ELU                 | >=0.1.a202503         |
-| torch.nn.GELU                | GELU                | >=0.1.a202503         |
-| torch.nn.GroupNorm           | GroupNorm           | >=0.1.a202501         |
-| torch.nn.Hardshrink          | Hardshrink          | >=0.1.a202503         |
-| torch.nn.Hardsigmoid         | Hardsigmoid         | >=0.1.a202503         |
-| torch.nn.Hardtanh            | Hardtanh            | >=0.1.a202503         |
-| torch.nn.Identity            | Identity            | >=0.1.a202503         |
-| torch.nn.LayerNorm           | LayerNorm           | >=0.1.a202501         |
-| torch.nn.LazyBatchNorm1d     | LazyBatchNorm1d     | >=0.1.a202503         |
-| torch.nn.LazyBatchNorm2d     | LazyBatchNorm2d     | >=0.1.a202503         |
-| torch.nn.LazyBatchNorm3d     | LazyBatchNorm3d     | >=0.1.a202503         |
-| torch.nn.LazyConv1d          | LazyConv1d          | >=0.1.a202501         |
-| torch.nn.LazyConv2d          | LazyConv2d          | >=0.1.a202501         |
-| torch.nn.LazyConv3d          | LazyConv3d          | >=0.1.a202501         |
-| torch.nn.LazyConvTranspose1d | LazyConvTranspose1d | >=0.1.a202501         |
-| torch.nn.LazyConvTranspose2d | LazyConvTranspose2d | >=0.1.a202501         |
-| torch.nn.LazyConvTranspose3d | LazyConvTranspose3d | >=0.1.a202501         |
-| torch.nn.LazyLinear          | LazyLinear          | >=0.1.a202501         |
-| torch.nn.LeakyReLU           | LeakyReLU           | >=0.1.a202501         |
-| torch.nn.Linear              | Linear              | >=0.1.a202501         |
-| torch.nn.LogSigmoid          | LogSigmoid          | >=0.1.a202503         |
-| torch.nn.LogSoftmax          | LogSoftmax          | >=0.1.a202503         |
-| torch.nn.MaxPool1d           | MaxPool1d           | >=0.1.a202501         |
-| torch.nn.MaxPool2d           | MaxPool2d           | >=0.1.a202501         |
-| torch.nn.MaxPool3d           | MaxPool3d           | >=0.1.a202501         |
-| torch.nn.MaxUnpool1d         | MaxUnpool1d         | >=0.1.a202501         |
-| torch.nn.MaxUnpool2d         | MaxUnpool2d         | >=0.1.a202501         |
-| torch.nn.MaxUnpool3d         | MaxUnpool3d         | >=0.1.a202501         |
-| torch.nn.Mish                | Mish                | >=0.1.a202503         |
-| torch.nn.Parameter           | Parameter           | >=0.2.a202508         |
-| torch.nn.PReLU               | PReLU               | >=0.1.a202503         |
-| torch.nn.ReLU                | ReLU                | >=0.1.a202501         |
-| torch.nn.ReLU6               | ReLU6               | >=0.1.a202503         |
-| torch.nn.Sequential          | Sequential          | >=0.2.a202507         |
-| torch.nn.SELU                | SELU                | >=0.1.a202501         |
-| torch.nn.SiLU                | SiLU                | >=0.1.a202503         |
-| torch.nn.Sigmoid             | Sigmoid             | >=0.1.a202501         |
-| torch.nn.Softmax             | Softmax             | >=0.1.a202501         |
-| torch.nn.Softmax2d           | Softmax2d           | >=0.1.a202503         |
-| torch.nn.Softmin             | Softmin             | >=0.1.a202503         |
-| torch.nn.Softplus            | Softplus            | >=0.1.a202503         |
-| torch.nn.Softshrink          | Softshrink          | >=0.1.a202503         |
-| torch.nn.Softsign            | Softsign            | >=0.1.a202503         |
-| torch.nn.Tanh                | Tanh                | >=0.1.a202503         |
-| torch.nn.Tanhshrink          | Tanhshrink          | >=0.1.a202503         |
-| torch.nn.Threshold           | Threshold           | >=0.1.a202503         |
-| torch.nn.FeatureAlphaDropout | FeatureAlphaDropout | >=0.1.a202503         |
-| torch.nn.Flatten             | Flatten             | >=0.1.a202501         |
-| torch.nn.Unflatten           | Unflatten           | >=0.1.a202501         |
-| torch.ones                   | Ones                | >=0.1.a202501         |
-| torch.ones_like              | OnesLike            | >=0.1.a202501         |
-| torch.permute                | Permute             | >=0.1.a202501         |
-| torch.rand                   | Rand                | >=0.1.a202501         |
-| torch.rand_like              | RandLike            | >=0.1.a202501         |
-| torch.randint                | RandInt             | >=0.1.a202501         |
-| torch.randint_like           | RandIntLike         | >=0.1.a202501         |
-| torch.randn                  | RandNormal          | >=0.1.a202501         |
-| torch.randn_like             | RandNormalLike      | >=0.1.a202501         |
-| torch.reshape                | Reshape             | >=0.1.a202501         |
-| torch.squeeze                | Squeeze             | >=0.1.a202501         |
-| torch.stack                  | Stack               | >=0.1.a202501         |
-| torch.transpose              | Transpose           | >=0.1.a202501         |
-| torch.unsqueeze              | Unsqueeze           | >=0.1.a202501         |
-| torch.zero_like              | ZeroLike            | >=0.1.a202501         |
-| torch.zeros                  | Zeros               | >=0.1.a202501         |
+### 通用算子<br>General Operators
+
+| 算子名称Name       | 算子平台名称PMoS Name | 支持版本Supported Version |
+| ------------------ | --------------------- | ------------------------- |
+| +                  | Add                   | \>=0.1.a202501            |
+| -                  | Subtract              | \>=0.1.a202501            |
+| *                  | Multiply              | \>=0.1.a202501            |
+| /                  | Divide                | \>=0.1.a202501            |
+| \[start:end:step\] | Slice                 | \>=0.2.a202508            |
+
+### Torch算子<br>Torch Operators
+
+| 算子名称Name                 | 算子平台名称PMoS Name | 支持版本Supported Version |
+| ---------------------------- | --------------------- | ------------------------- |
+| torch.cat/torch.concat       | Cat                   | \>=0.1.a202501            |
+| torch.full                   | Full                  | \>=0.1.a202501            |
+| torch.full_like              | FullLike              | \>=0.1.a202501            |
+| torch.nn.AdaptiveAvgPool1d   | AdaptiveAvgPool1d     | \>=0.1.a202503            |
+| torch.nn.AdaptiveAvgPool2d   | AdaptiveAvgPool2d     | \>=0.1.a202503            |
+| torch.nn.AdaptiveAvgPool3d   | AdaptiveAvgPool3d     | \>=0.1.a202503            |
+| torch.nn.AdaptiveMaxPool1d   | AdaptiveMaxPool1d     | \>=0.1.a202503            |
+| torch.nn.AdaptiveMaxPool2d   | AdaptiveMaxPool2d     | \>=0.1.a202503            |
+| torch.nn.AdaptiveMaxPool3d   | AdaptiveMaxPool3d     | \>=0.1.a202503            |
+| torch.nn.AlphaDropout        | AlphaDropout          | \>=0.1.a202503            |
+| torch.nn.AvgPool1d           | AvgPool1d             | \>=0.1.a202503            |
+| torch.nn.AvgPool2d           | AvgPool2d             | \>=0.1.a202503            |
+| torch.nn.AvgPool3d           | AvgPool3d             | \>=0.1.a202503            |
+| torch.nn.BatchNorm1d         | BatchNorm1d           | \>=0.1.a202501            |
+| torch.nn.BatchNorm2d         | BatchNorm2d           | \>=0.1.a202501            |
+| torch.nn.BatchNorm3d         | BatchNorm3d           | \>=0.1.a202501            |
+| torch.nn.Bilinear            | Bilinear              | \>=0.1.a202503            |
+| torch.nn.CELU                | CELU                  | \>=0.1.a202501            |
+| torch.nn.Conv1d              | Conv1d                | \>=0.1.a202501            |
+| torch.nn.Conv2d              | Conv2d                | \>=0.1.a202501            |
+| torch.nn.Conv3d              | Conv3d                | \>=0.1.a202501            |
+| torch.nn.ConvTranspose1d     | ConvTranspose1d       | \>=0.1.a202501            |
+| torch.nn.ConvTranspose2d     | ConvTranspose2d       | \>=0.1.a202501            |
+| torch.nn.ConvTranspose3d     | ConvTranspose3d       | \>=0.1.a202501            |
+| torch.nn.Dropout             | Dropout               | \>=0.1.a202501            |
+| torch.nn.Dropout1d           | Dropout1d             | \>=0.1.a202501            |
+| torch.nn.Dropout2d           | Dropout2d             | \>=0.1.a202501            |
+| torch.nn.Dropout3d           | Dropout3d             | \>=0.1.a202501            |
+| torch.nn.ELU                 | ELU                   | \>=0.1.a202503            |
+| torch.nn.FeatureAlphaDropout | FeatureAlphaDropout   | \>=0.1.a202503            |
+| torch.nn.Flatten             | Flatten               | \>=0.1.a202501            |
+| torch.nn.GELU                | GELU                  | \>=0.1.a202503            |
+| torch.nn.GroupNorm           | GroupNorm             | \>=0.1.a202501            |
+| torch.nn.Hardshrink          | Hardshrink            | \>=0.1.a202503            |
+| torch.nn.Hardsigmoid         | Hardsigmoid           | \>=0.1.a202503            |
+| torch.nn.Hardtanh            | Hardtanh              | \>=0.1.a202503            |
+| torch.nn.Identity            | Identity              | \>=0.1.a202503            |
+| torch.nn.LayerNorm           | LayerNorm             | \>=0.1.a202501            |
+| torch.nn.LazyBatchNorm1d     | LazyBatchNorm1d       | \>=0.1.a202503            |
+| torch.nn.LazyBatchNorm2d     | LazyBatchNorm2d       | \>=0.1.a202503            |
+| torch.nn.LazyBatchNorm3d     | LazyBatchNorm3d       | \>=0.1.a202503            |
+| torch.nn.LazyConv1d          | LazyConv1d            | \>=0.1.a202501            |
+| torch.nn.LazyConv2d          | LazyConv2d            | \>=0.1.a202501            |
+| torch.nn.LazyConv3d          | LazyConv3d            | \>=0.1.a202501            |
+| torch.nn.LazyConvTranspose1d | LazyConvTranspose1d   | \>=0.1.a202501            |
+| torch.nn.LazyConvTranspose2d | LazyConvTranspose2d   | \>=0.1.a202501            |
+| torch.nn.LazyConvTranspose3d | LazyConvTranspose3d   | \>=0.1.a202501            |
+| torch.nn.LazyLinear          | LazyLinear            | \>=0.1.a202501            |
+| torch.nn.LeakyReLU           | LeakyReLU             | \>=0.1.a202501            |
+| torch.nn.Linear              | Linear                | \>=0.1.a202501            |
+| torch.nn.LogSigmoid          | LogSigmoid            | \>=0.1.a202503            |
+| torch.nn.LogSoftmax          | LogSoftmax            | \>=0.1.a202503            |
+| torch.nn.MaxPool1d           | MaxPool1d             | \>=0.1.a202501            |
+| torch.nn.MaxPool2d           | MaxPool2d             | \>=0.1.a202501            |
+| torch.nn.MaxPool3d           | MaxPool3d             | \>=0.1.a202501            |
+| torch.nn.MaxUnpool1d         | MaxUnpool1d           | \>=0.1.a202501            |
+| torch.nn.MaxUnpool2d         | MaxUnpool2d           | \>=0.1.a202501            |
+| torch.nn.MaxUnpool3d         | MaxUnpool3d           | \>=0.1.a202501            |
+| torch.nn.Mish                | Mish                  | \>=0.1.a202503            |
+| torch.nn.PReLU               | PReLU                 | \>=0.1.a202503            |
+| torch.nn.Parameter           | Parameter             | \>=0.2.a202508            |
+| torch.nn.ReLU                | ReLU                  | \>=0.1.a202501            |
+| torch.nn.ReLU6               | ReLU6                 | \>=0.1.a202503            |
+| torch.nn.SELU                | SELU                  | \>=0.1.a202501            |
+| torch.nn.Sequential          | Sequential            | \>=0.2.a202507            |
+| torch.nn.SiLU                | SiLU                  | \>=0.1.a202503            |
+| torch.nn.Sigmoid             | Sigmoid               | \>=0.1.a202501            |
+| torch.nn.Softmax             | Softmax               | \>=0.1.a202501            |
+| torch.nn.Softmax2d           | Softmax2d             | \>=0.1.a202503            |
+| torch.nn.Softmin             | Softmin               | \>=0.1.a202503            |
+| torch.nn.Softplus            | Softplus              | \>=0.1.a202503            |
+| torch.nn.Softshrink          | Softshrink            | \>=0.1.a202503            |
+| torch.nn.Softsign            | Softsign              | \>=0.1.a202503            |
+| torch.nn.Tanh                | Tanh                  | \>=0.1.a202503            |
+| torch.nn.Tanhshrink          | Tanhshrink            | \>=0.1.a202503            |
+| torch.nn.Threshold           | Threshold             | \>=0.1.a202503            |
+| torch.nn.Unflatten           | Unflatten             | \>=0.1.a202501            |
+| torch.ones                   | Ones                  | \>=0.1.a202501            |
+| torch.ones_like              | OnesLike              | \>=0.1.a202501            |
+| torch.permute                | Permute               | \>=0.1.a202501            |
+| torch.rand                   | Rand                  | \>=0.1.a202501            |
+| torch.rand_like              | RandLike              | \>=0.1.a202501            |
+| torch.randint                | RandInt               | \>=0.1.a202501            |
+| torch.randint_like           | RandIntLike           | \>=0.1.a202501            |
+| torch.randn                  | RandNormal            | \>=0.1.a202501            |
+| torch.randn_like             | RandNormalLike        | \>=0.1.a202501            |
+| torch.reshape                | Reshape               | \>=0.1.a202501            |
+| torch.squeeze                | Squeeze               | \>=0.1.a202501            |
+| torch.stack                  | Stack                 | \>=0.1.a202501            |
+| torch.transpose              | Transpose             | \>=0.1.a202501            |
+| torch.unsqueeze              | Unsqueeze             | \>=0.1.a202501            |
+| torch.zero_like              | ZeroLike              | \>=0.1.a202501            |
+| torch.zeros                  | Zeros                 | \>=0.1.a202501            |
+
+### MindSpore算子<br>MindSpore Operators
+
+| 算子名称Name                   | 算子平台名称PMoS Name | 支持版本Supported Version |
+| ------------------------------ | --------------------- | ------------------------- |
+| mindspore.Parameter            | Parameter             | \>=0.2.a202508            |
+| mindspore.nn.AdaptiveAvgPool1d | AdaptiveAvgPool1d     | \>=0.2.a202508            |
+| mindspore.nn.AdaptiveAvgPool2d | AdaptiveAvgPool2d     | \>=0.2.a202508            |
+| mindspore.nn.AdaptiveAvgPool3d | AdaptiveAvgPool3d     | \>=0.2.a202508            |
+| mindspore.nn.AdaptiveMaxPool1d | AdaptiveMaxPool1d     | \>=0.2.a202508            |
+| mindspore.nn.AdaptiveMaxPool2d | AdaptiveMaxPool2d     | \>=0.2.a202508            |
+| mindspore.nn.AdaptiveMaxPool3d | AdaptiveMaxPool3d     | \>=0.2.a202508            |
+| mindspore.nn.AvgPool1d         | AvgPool1d             | \>=0.2.a202508            |
+| mindspore.nn.AvgPool2d         | AvgPool2d             | \>=0.2.a202508            |
+| mindspore.nn.AvgPool3d         | AvgPool3d             | \>=0.2.a202508            |
+| mindspore.nn.BatchNorm1d       | BatchNorm1d           | \>=0.2.a202508            |
+| mindspore.nn.BatchNorm2d       | BatchNorm2d           | \>=0.2.a202508            |
+| mindspore.nn.BatchNorm3d       | BatchNorm3d           | \>=0.2.a202508            |
+| mindspore.nn.BiDense           | BiDense               | \>=0.2.a202508            |
+| mindspore.nn.CELU              | CELU                  | \>=0.2.a202508            |
+| mindspore.nn.Conv1d            | Conv1d                | \>=0.2.a202508            |
+| mindspore.nn.Conv1dTranspose   | Conv1dTranspose       | \>=0.2.a202508            |
+| mindspore.nn.Conv2d            | Conv2d                | \>=0.2.a202508            |
+| mindspore.nn.Conv2dTranspose   | Conv2dTranspose       | \>=0.2.a202508            |
+| mindspore.nn.Conv3d            | Conv3d                | \>=0.2.a202508            |
+| mindspore.nn.Conv3dTranspose   | Conv3dTranspose       | \>=0.2.a202508            |
+| mindspore.nn.Dense             | Dense                 | \>=0.2.a202508            |
+| mindspore.nn.Dropout           | Dropout               | \>=0.2.a202508            |
+| mindspore.nn.Dropout1d         | Dropout1d             | \>=0.2.a202508            |
+| mindspore.nn.Dropout2d         | Dropout2d             | \>=0.2.a202508            |
+| mindspore.nn.Dropout3d         | Dropout3d             | \>=0.2.a202508            |
+| mindspore.nn.ELU               | ELU                   | \>=0.2.a202508            |
+| mindspore.nn.FastGelu          | FastGelu              | \>=0.2.a202508            |
+| mindspore.nn.Flatten           | Flatten               | \>=0.2.a202508            |
+| mindspore.nn.GELU              | GELU                  | \>=0.2.a202508            |
+| mindspore.nn.GLU               | GLU                   | \>=0.2.a202508            |
+| mindspore.nn.GroupNorm         | GroupNorm             | \>=0.2.a202508            |
+| mindspore.nn.HShrink           | HShrink               | \>=0.2.a202508            |
+| mindspore.nn.HSigmoid          | HSigmoid              | \>=0.2.a202508            |
+| mindspore.nn.HSwish            | HSwish                | \>=0.2.a202508            |
+| mindspore.nn.Hardtanh          | Hardtanh              | \>=0.2.a202508            |
+| mindspore.nn.Identity          | Identity              | \>=0.2.a202508            |
+| mindspore.nn.InstanceNorm1d    | InstanceNorm1d        | \>=0.2.a202508            |
+| mindspore.nn.InstanceNorm2d    | InstanceNorm2d        | \>=0.2.a202508            |
+| mindspore.nn.InstanceNorm3d    | InstanceNorm3d        | \>=0.2.a202508            |
+| mindspore.nn.LayerNorm         | LayerNorm             | \>=0.2.a202508            |
+| mindspore.nn.LeakyReLU         | LeakyReLU             | \>=0.2.a202508            |
+| mindspore.nn.LogSigmoid        | LogSigmoid            | \>=0.2.a202508            |
+| mindspore.nn.LogSoftmax        | LogSoftmax            | \>=0.2.a202508            |
+| mindspore.nn.MaxPool1d         | MaxPool1d             | \>=0.2.a202508            |
+| mindspore.nn.MaxPool2d         | MaxPool2d             | \>=0.2.a202508            |
+| mindspore.nn.MaxPool3d         | MaxPool3d             | \>=0.2.a202508            |
+| mindspore.nn.MaxUnpool1d       | MaxUnpool1d           | \>=0.2.a202508            |
+| mindspore.nn.MaxUnpool2d       | MaxUnpool2d           | \>=0.2.a202508            |
+| mindspore.nn.MaxUnpool3d       | MaxUnpool3d           | \>=0.2.a202508            |
+| mindspore.nn.Mish              | Mish                  | \>=0.2.a202508            |
+| mindspore.nn.PReLU             | PReLU                 | \>=0.2.a202508            |
+| mindspore.nn.RReLU             | RReLU                 | \>=0.2.a202508            |
+| mindspore.nn.ReLU              | ReLU                  | \>=0.2.a202508            |
+| mindspore.nn.ReLU6             | ReLU6                 | \>=0.2.a202508            |
+| mindspore.nn.SeLU              | SeLU                  | \>=0.2.a202508            |
+| mindspore.nn.SequentialCell    | SequentialCell        | \>=0.2.a202508            |
+| mindspore.nn.SiLU              | SiLU                  | \>=0.2.a202508            |
+| mindspore.nn.Sigmoid           | Sigmoid               | \>=0.2.a202508            |
+| mindspore.nn.SoftShrink        | SoftShrink            | \>=0.2.a202508            |
+| mindspore.nn.Softmax           | Softmax               | \>=0.2.a202508            |
+| mindspore.nn.Softmax2d         | Softmax2d             | \>=0.2.a202508            |
+| mindspore.nn.Softmin           | Softmin               | \>=0.2.a202508            |
+| mindspore.nn.Softsign          | Softsign              | \>=0.2.a202508            |
+| mindspore.nn.Tanh              | Tanh                  | \>=0.2.a202508            |
+| mindspore.nn.Tanhshrink        | Tanhshrink            | \>=0.2.a202508            |
+| mindspore.nn.Threshold         | Threshold             | \>=0.2.a202508            |
+| mindspore.nn.Unflatten         | Unflatten             | \>=0.2.a202508            |
+| mindspore.nn.permute           | Permute               | \>=0.2.a202508            |
+| mindspore.ops.cat              | Cat                   | \>=0.2.a202508            |
+| mindspore.ops.full             | Full                  | \>=0.2.a202508            |
+| mindspore.ops.full_like        | FullLike              | \>=0.2.a202508            |
+| mindspore.ops.ones             | Ones                  | \>=0.2.a202508            |
+| mindspore.ops.ones_like        | OnesLike              | \>=0.2.a202508            |
+| mindspore.ops.permute          | Permute               | \>=0.2.a202508            |
+| mindspore.ops.rand             | Rand                  | \>=0.2.a202508            |
+| mindspore.ops.rand_like        | RandLike              | \>=0.2.a202508            |
+| mindspore.ops.randint          | RandInt               | \>=0.2.a202508            |
+| mindspore.ops.randint_like     | RandIntLike           | \>=0.2.a202508            |
+| mindspore.ops.randn            | RandNormal            | \>=0.2.a202508            |
+| mindspore.ops.randn_like       | RandNormalLike        | \>=0.2.a202508            |
+| mindspore.ops.reshape          | Reshape               | \>=0.2.a202508            |
+| mindspore.ops.squeeze          | Squeeze               | \>=0.2.a202508            |
+| mindspore.ops.unsqueeze        | Unsqueeze             | \>=0.2.a202508            |
+| mindspore.ops.zeros            | Zeros                 | \>=0.2.a202508            |
+| mindspore.ops.zeros_like       | ZerosLike             | \>=0.2.a202508            |
