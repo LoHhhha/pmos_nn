@@ -4051,6 +4051,23 @@ operatorBarNamespace.operators = [
         link: "https://www.mindspore.cn/docs/en/master/api_python/ops/mindspore.ops.permute.html",
     },
     {
+        apiName: "Reshape",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "output_shape", short: "O" }],
+        args: [
+            {
+                name: "output_shape",
+                type: operatorBarNamespace.argsType.strTuple,
+                default: "(-1,3,64,64)",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/ops/mindspore.ops.reshape.html",
+    },
+    {
         apiName: "RandLike",
         extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.transform,
