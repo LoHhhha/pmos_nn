@@ -4068,6 +4068,40 @@ operatorBarNamespace.operators = [
         link: "https://www.mindspore.cn/docs/en/master/api_python/ops/mindspore.ops.reshape.html",
     },
     {
+        apiName: "Squeeze",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "axis", short: "A" }],
+        args: [
+            {
+                name: "axis",
+                type: operatorBarNamespace.argsType.strIntOrTupleOrNone,
+                default: "None",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/ops/mindspore.ops.squeeze.html",
+    },
+    {
+        apiName: "Unsqueeze",
+        extendCssClass: [],
+        typeCode: operatorBarNamespace.typeCode.transform,
+        inputEnd: ["input"],
+        outputEnd: ["output"],
+        outlines: [{ name: "dim", short: "D" }],
+        args: [
+            {
+                name: "dim",
+                type: operatorBarNamespace.argsType.strInt,
+                default: "0",
+            },
+        ],
+        framework: operatorBarNamespace.framework.mindspore,
+        link: "https://www.mindspore.cn/docs/en/master/api_python/ops/mindspore.ops.unsqueeze.html",
+    },
+    {
         apiName: "RandLike",
         extendCssClass: [],
         typeCode: operatorBarNamespace.typeCode.transform,
